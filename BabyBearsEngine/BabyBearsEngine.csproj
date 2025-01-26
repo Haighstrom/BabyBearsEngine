@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenTK" Version="4.8.2" />
+    <PackageReference Include="OpenTK" Version="4.9.3" />
+    <PackageReference Include="StbiSharp" Version="1.2.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -15,6 +16,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="shader.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="wall.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

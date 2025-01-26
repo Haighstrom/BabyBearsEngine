@@ -6,7 +6,7 @@ namespace BabyBearsEngine.Source.Graphics;
 [StructLayout(LayoutKind.Sequential)]
 internal readonly struct Vertex(float x, float y, Color4 colour, float u, float v)
 {
-    public const int STRIDE = (2 + 4 + 2) * sizeof(float);
+    public const int Stride = (2 + 4 + 2) * sizeof(float);
 
     public float X { get; } = x;
 

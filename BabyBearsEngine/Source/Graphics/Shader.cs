@@ -5,15 +5,12 @@ namespace BabyBearsEngine.Source.Graphics;
 
 public class Shader : IDisposable
 {
-    private readonly int _handle;
-
     public Shader(string vertexPath, string fragmentPath)
     {
         int vertexShader;
         int fragmentShader;
 
         string vertexShaderSource = File.ReadAllText(vertexPath);
-
         string fragmentShaderSource = File.ReadAllText(fragmentPath);
 
         vertexShader = GL.CreateShader(ShaderType.VertexShader);
@@ -40,28 +37,30 @@ public class Shader : IDisposable
             Console.WriteLine(infoLog);
         }
 
-        _handle = GL.CreateProgram();
+        Handle = GL.CreateProgram();
 
-        GL.AttachShader(_handle, vertexShader);
-        GL.AttachShader(_handle, fragmentShader);
+        GL.AttachShader(Handle, vertexShader);
+        GL.AttachShader(Handle, fragmentShader);
 
-        GL.LinkProgram(_handle);
+        GL.LinkProgram(Handle);
 
-        GL.GetProgram(_handle, GetProgramParameterName.LinkStatus, out int success3);
+        GL.GetProgram(Handle, GetProgramParameterName.LinkStatus, out int success3);
         if (success3 == 0)
         {
-            string infoLog = GL.GetProgramInfoLog(_handle);
+            string infoLog = GL.GetProgramInfoLog(Handle);
             Console.WriteLine(infoLog);
         }
-        GL.DetachShader(_handle, vertexShader);
-        GL.DetachShader(_handle, fragmentShader);
+        GL.DetachShader(Handle, vertexShader);
+        GL.DetachShader(Handle, fragmentShader);
         GL.DeleteShader(fragmentShader);
         GL.DeleteShader(vertexShader);
     }
 
-    public void Use()
+    public int Handle { get; }
+
+    public void Bind()
     {
-        GL.UseProgram(_handle);
+        GL.UseProgram(Handle);
     }
 
     #region IDisposable
@@ -71,7 +70,7 @@ public class Shader : IDisposable
     {
         if (!disposedValue)
         {
-            GL.DeleteProgram(_handle);
+            GL.DeleteProgram(Handle);
 
             disposedValue = true;
         }
