@@ -2,17 +2,32 @@
 
 namespace BabyBearsEngine.Source.Graphics;
 
-internal class VBO
+internal class VBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
 {
-    public VBO()
+    private static int s_lastBoundHandle = 0;
+
+    public int Handle { get; } = GL.GenBuffer();
+
+    public void BufferData<TVertex>(TVertex[] vertices) where TVertex : struct, IVertex 
     {
-        Handle = GL.GenBuffer();
+        GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * TVertex.Stride, vertices, bufferUsageHint);
     }
 
-    public int Handle { get; }
-
-    public void Bind()
+    public void Use()
     {
-        GL.BindBuffer(BufferTarget.ArrayBuffer, Handle);
+        if (s_lastBoundHandle != Handle)
+        {
+            GL.BindBuffer(BufferTarget.ArrayBuffer, Handle);
+            s_lastBoundHandle = Handle;
+        }
+    }
+
+    public void Unbind()
+    {
+        if (s_lastBoundHandle != 0)
+        {
+            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            s_lastBoundHandle = 0;
+        }
     }
 }

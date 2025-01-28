@@ -15,7 +15,7 @@ internal class Texture
         // stb_image loads from the top-left pixel, whereas OpenGL loads from the bottom-left, causing the texture to be flipped vertically.
         // This will correct that, making the texture display properly.
 
-        Stbi.SetFlipVerticallyOnLoad(true);
+        //Stbi.SetFlipVerticallyOnLoad(true);
         
         using var stream = File.OpenRead(path);
 
@@ -51,9 +51,9 @@ internal class Texture
 
     public int Handle { get; }
 
-    public void Bind(TextureUnit unit)
+    public void Use()
     {
-        GL.ActiveTexture(unit);
+        GL.ActiveTexture(TextureUnit.Texture0);
         GL.BindTexture(TextureTarget.Texture2D, Handle);
     }
 }

@@ -1,29 +1,28 @@
 ﻿using BabyBearsEngine.Source.Graphics;
+using BabyBearsEngine.Source.Worlds;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 
-namespace BabyBearsEngine;
+namespace BabyBearsEngine.Source;
 
-public class HaighWindow(int width, int height, string title) 
+public class HaighWindow(int width, int height, string title)
     : GameWindow(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), Title = title })
 {
-    Image _image;
+    public World World { get; set; } = null!;
 
     protected override void OnLoad()
     {
         base.OnLoad();
 
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-
-        _image = new Image("wall.jpg");
     }
 
     protected override void OnUnload()
     {
         base.OnUnload();
 
-        _image.Dispose();
+        World.Unload();
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
@@ -32,7 +31,7 @@ public class HaighWindow(int width, int height, string title)
 
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
-        _image.Draw();
+        World.DrawGraphics(ClientSize.X, ClientSize.Y);
 
         SwapBuffers();
     }

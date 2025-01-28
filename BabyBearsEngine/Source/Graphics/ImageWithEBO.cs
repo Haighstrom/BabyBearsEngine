@@ -4,16 +4,23 @@ using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.Graphics;
 
-public class ImageWithEBO : IGraphic, IDisposable
+public class Image : IGraphic, IDisposable
 {
     private readonly Vertex[] _vertices;
 
+    private readonly uint[] _indices =
+    [
+        0, 1, 3,   // first triangle
+        0, 2, 3    // second triangle
+    ];
+
     private readonly VBO _vBO;
     private readonly VAO _vAO;
+    private readonly EBO _eBO;
     private readonly Shader _shader;
     private readonly Texture _texture;
 
-    public ImageWithEBO(string texturePath, float x, float y, float width, float height)
+    public Image(string texturePath, float x, float y, float width, float height)
     {
         _vertices =
         [
@@ -32,6 +39,11 @@ public class ImageWithEBO : IGraphic, IDisposable
         VAO.DefineStandardVertexFormats();
         _vBO.BufferData(_vertices);
 
+        _eBO = new EBO(BufferUsageHint.StaticDraw);
+
+        _eBO.Use();
+        _eBO.BufferData(_indices);
+
         _shader = new Shader("shader.vert", "shader.frag");
 
         _texture = new Texture(texturePath);
@@ -48,6 +60,7 @@ public class ImageWithEBO : IGraphic, IDisposable
         GL.Uniform2(windowSizeLocation, new Vector2(windowWidth, windowHeight));
 
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
+        //GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
     }
 
     #region IDisposable

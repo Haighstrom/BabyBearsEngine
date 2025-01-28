@@ -58,7 +58,7 @@ public class Shader : IDisposable
 
     public int Handle { get; }
 
-    public void Bind()
+    public void Use()
     {
         GL.UseProgram(Handle);
     }

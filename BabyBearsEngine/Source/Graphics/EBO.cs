@@ -2,17 +2,32 @@
 
 namespace BabyBearsEngine.Source.Graphics;
 
-internal class EBO
+internal class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
 {
-    public EBO()
+    private static int s_lastBoundHandle = 0;
+
+    public int Handle { get; } = GL.GenBuffer();
+
+    public void Use()
     {
-        Handle = GL.GenBuffer();
+        if (s_lastBoundHandle != Handle)
+        {
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handle);
+            s_lastBoundHandle = Handle;
+        }
     }
 
-    public int Handle { get; }
-
-    public void Bind()
+    public void Unbind()
     {
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handle);
+        if (s_lastBoundHandle != 0)
+        {
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+            s_lastBoundHandle = 0;
+        }
+    }
+
+    public void BufferData(uint[] indices)
+    {
+        GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, bufferUsageHint);
     }
 }
