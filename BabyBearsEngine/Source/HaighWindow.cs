@@ -31,7 +31,7 @@ public class HaighWindow(int width, int height, string title)
 
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
-        World.DrawGraphics(ClientSize.X, ClientSize.Y);
+        World.DrawGraphics();
 
         SwapBuffers();
     }

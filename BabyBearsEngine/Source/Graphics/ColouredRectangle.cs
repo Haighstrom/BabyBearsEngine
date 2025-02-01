@@ -1,36 +1,33 @@
-﻿using System.IO;
-using System.Reflection.Metadata;
-using BabyBearsEngine.Source.Graphics.Components;
+﻿using BabyBearsEngine.Source.Graphics.Components;
 using BabyBearsEngine.Source.Graphics.Shaders;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
-using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 
 namespace BabyBearsEngine.Source.Graphics;
 
-public class Image : IGraphic, IDisposable
+public class ColouredRectangle : IGraphic, IDisposable
 {
-    private readonly DefaultShaderProgram _shaderProgram;
-    private readonly VAO _vAO;
+    private readonly SolidColourShaderProgram _shaderProgram;
+    private readonly NoTextureVAO _vAO;
     private readonly VBO _vBO;
-    private readonly Texture _texture;
 
     private float _x, _y, _width, _height;
-    private Color4 _colour = Color4.White;
+    private Color4 _colour;
     private bool _verticesChanged = true;
 
-    public Image(GameWindow window, string texturePath, float x, float y, float width, float height)
+    public ColouredRectangle(GameWindow window, Color4 colour, float x, float y, float width, float height)
     {
         _x = x;
         _y = y;
         _width = width;
         _height = height;
+        _colour = colour;
 
-        _shaderProgram = new DefaultShaderProgram(window);
+        _shaderProgram = new SolidColourShaderProgram(window);
 
         //Create and bind the VAO (which will store the VBO binding)
-        _vAO = new VAO();
+        _vAO = new NoTextureVAO();
         _vAO.Bind();
 
         //Create and bind the VBO (which contains the objects vertices)
@@ -41,8 +38,7 @@ public class Image : IGraphic, IDisposable
         _vAO.SetVertexFormats();
 
         _vAO.Unbind();
-
-        _texture = new Texture(texturePath);
+        _vBO.Unbind();
     }
 
     public float X
@@ -114,7 +110,6 @@ public class Image : IGraphic, IDisposable
     {
         _shaderProgram.Bind();
         _vAO.Bind();
-        _texture.Bind();
 
         if (_verticesChanged)
         {

@@ -1,7 +1,8 @@
 ﻿using System.Runtime.InteropServices;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace BabyBearsEngine.Source.Graphics;
+namespace BabyBearsEngine.Source.Graphics.Components;
 
 [StructLayout(LayoutKind.Sequential)]
 internal readonly struct Vertex(float x, float y, Color4 colour, float u, float v) : IVertex

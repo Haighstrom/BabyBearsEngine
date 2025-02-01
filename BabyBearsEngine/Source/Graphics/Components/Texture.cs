@@ -1,12 +1,13 @@
 ﻿using System.IO;
-using System.Reflection.Metadata;
 using OpenTK.Graphics.OpenGL4;
 using StbiSharp;
 
-namespace BabyBearsEngine.Source.Graphics;
+namespace BabyBearsEngine.Source.Graphics.Components;
 
-internal class Texture
+internal class Texture : ITexture
 {
+    private bool _disposed;
+
     public Texture(string path)
     {
         Handle = GL.GenTexture();
@@ -16,7 +17,7 @@ internal class Texture
         // This will correct that, making the texture display properly.
 
         //Stbi.SetFlipVerticallyOnLoad(true);
-        
+
         using var stream = File.OpenRead(path);
 
         using var memoryStream = new MemoryStream();
@@ -24,7 +25,7 @@ internal class Texture
         stream.CopyTo(memoryStream);
 
         var image = Stbi.LoadFromMemory(memoryStream, 4);
-        
+
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, image.Width, image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, image.Data.ToArray());
         // First, we set the min and mag filter. These are used for when the texture is scaled down and up, respectively.
         // Here, we use Linear for both. This means that OpenGL will try to blend pixels, meaning that textures scaled too far will look blurred.
@@ -51,9 +52,49 @@ internal class Texture
 
     public int Handle { get; }
 
-    public void Use()
+    public int Width => throw new NotImplementedException();
+
+    public int Height => throw new NotImplementedException();
+
+    public void Unbind()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Bind()
     {
         GL.ActiveTexture(TextureUnit.Texture0);
         GL.BindTexture(TextureTarget.Texture2D, Handle);
     }
+
+    #region IDisposable
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                // TODO: dispose managed state (managed objects)
+            }
+
+            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+            // TODO: set large fields to null
+            _disposed = true;
+        }
+    }
+
+    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+    // ~Texture()
+    // {
+    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+    //     Dispose(disposing: false);
+    // }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+    #endregion
 }

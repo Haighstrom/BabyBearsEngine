@@ -17,11 +17,11 @@ public class World()
         _graphics.Remove(graphic);
     }
 
-    public void DrawGraphics(int windowWidth, int windowHeight)
+    public void DrawGraphics()
     {
         foreach (var graphic in _graphics)
         {
-            graphic.Draw(windowWidth, windowHeight);
+            graphic.Draw();
         }
     }
 

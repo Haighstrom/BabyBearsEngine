@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35004.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BabyBearsEngine", "BabyBearsEngine\BabyBearsEngine.csproj", "{8E5CC6CC-6875-48A8-8820-42A3274BEA29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine", "BabyBearsEngine\BabyBearsEngine.csproj", "{E6320F4E-6F4C-45F8-B23C-8E7FBCD432D8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BabyBearsEngine.Tests.System", "SystemTests\BabyBearsEngine.Tests.System.csproj", "{C25924D7-15B3-48E0-88F3-8398DEA50A5D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine.Tests.System", "Tests\System\BabyBearsEngine.Tests.System.csproj", "{B45E41D2-DE23-4A65-AF62-A913578C694C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine.Tests.Unit", "UnitTests\BabyBearsEngine.Tests.Unit.csproj", "{E0F1E7DE-D082-4E49-9932-BDB84A497407}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine.Tests.Unit", "Tests\Unit\BabyBearsEngine.Tests.Unit.csproj", "{65C6C13E-EC50-4C47-B197-AA8ECD41A5FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,18 +15,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8E5CC6CC-6875-48A8-8820-42A3274BEA29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8E5CC6CC-6875-48A8-8820-42A3274BEA29}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8E5CC6CC-6875-48A8-8820-42A3274BEA29}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8E5CC6CC-6875-48A8-8820-42A3274BEA29}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C25924D7-15B3-48E0-88F3-8398DEA50A5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C25924D7-15B3-48E0-88F3-8398DEA50A5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C25924D7-15B3-48E0-88F3-8398DEA50A5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C25924D7-15B3-48E0-88F3-8398DEA50A5D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E0F1E7DE-D082-4E49-9932-BDB84A497407}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E0F1E7DE-D082-4E49-9932-BDB84A497407}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E0F1E7DE-D082-4E49-9932-BDB84A497407}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E0F1E7DE-D082-4E49-9932-BDB84A497407}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6320F4E-6F4C-45F8-B23C-8E7FBCD432D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6320F4E-6F4C-45F8-B23C-8E7FBCD432D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6320F4E-6F4C-45F8-B23C-8E7FBCD432D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6320F4E-6F4C-45F8-B23C-8E7FBCD432D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B45E41D2-DE23-4A65-AF62-A913578C694C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B45E41D2-DE23-4A65-AF62-A913578C694C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B45E41D2-DE23-4A65-AF62-A913578C694C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B45E41D2-DE23-4A65-AF62-A913578C694C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65C6C13E-EC50-4C47-B197-AA8ECD41A5FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65C6C13E-EC50-4C47-B197-AA8ECD41A5FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65C6C13E-EC50-4C47-B197-AA8ECD41A5FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65C6C13E-EC50-4C47-B197-AA8ECD41A5FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

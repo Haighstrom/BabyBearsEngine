@@ -2,5 +2,5 @@
 
 public interface IGraphic : IDisposable
 {
-    void Draw(int windowWidth, int windowHeight);
+    void Draw();
 }

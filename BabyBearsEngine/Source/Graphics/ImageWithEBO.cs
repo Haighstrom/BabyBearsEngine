@@ -1,13 +1,13 @@
 ﻿using System.Security.Cryptography;
+using BabyBearsEngine.Source.Graphics.Components;
+using BabyBearsEngine.Source.Graphics.Shaders;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.Graphics;
 
-public class Image : IGraphic, IDisposable
+public class ImageWithEBO : IGraphic, IDisposable
 {
-    private readonly Vertex[] _vertices;
-
     private readonly uint[] _indices =
     [
         0, 1, 3,   // first triangle
@@ -17,48 +17,35 @@ public class Image : IGraphic, IDisposable
     private readonly VBO _vBO;
     private readonly VAO _vAO;
     private readonly EBO _eBO;
-    private readonly Shader _shader;
     private readonly Texture _texture;
+    private readonly float _x;
+    private readonly float _y;
+    private readonly float _width;
+    private readonly float _height;
 
-    public Image(string texturePath, float x, float y, float width, float height)
+    public ImageWithEBO(string texturePath, float x, float y, float width, float height)
     {
-        _vertices =
-        [
-            new(x + width, y + height, Color4.White, 1, 1), // top right
-            new(x + width, y, Color4.White, 1, 0), // bottom right
-            new(x, y + height, Color4.White, 0, 1), // top left
-            new(x, y, Color4.White, 0, 0), // bottom left
-        ];
+        _x = x;
+        _y = y;
+        _width = width;
+        _height = height;
 
         _vAO = new VAO();
         _vBO = new VBO(BufferUsageHint.StaticDraw);
 
-        _vAO.Use();
-        _vBO.Use();
-
-        VAO.DefineStandardVertexFormats();
-        _vBO.BufferData(_vertices);
+        _vAO.Bind();
+        _vBO.Bind();
 
         _eBO = new EBO(BufferUsageHint.StaticDraw);
 
-        _eBO.Use();
+        _eBO.Bind();
         _eBO.BufferData(_indices);
-
-        _shader = new Shader("shader.vert", "shader.frag");
 
         _texture = new Texture(texturePath);
     }
 
-    public void Draw(int windowWidth, int windowHeight)
+    public void Draw()
     {
-        _vAO.Use();
-        _vBO.Use();
-        _texture.Use();
-        _shader.Use();
-
-        var windowSizeLocation = GL.GetUniformLocation(_shader.Handle, "WindowSize");
-        GL.Uniform2(windowSizeLocation, new Vector2(windowWidth, windowHeight));
-
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
         //GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
     }
@@ -73,7 +60,6 @@ public class Image : IGraphic, IDisposable
             if (disposing)
             {
                 // TODO: dispose managed state (managed objects)
-                _shader.Dispose();
             }
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer

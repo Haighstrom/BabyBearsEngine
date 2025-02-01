@@ -1,4 +1,4 @@
-﻿namespace BabyBearsEngine.Source.Graphics;
+﻿namespace BabyBearsEngine.Source.Graphics.Components;
 
 internal interface IVertex
 {
