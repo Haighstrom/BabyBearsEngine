@@ -11,7 +11,7 @@ namespace BabyBearsEngine.Source.Graphics;
 
 public class Image : IGraphic, IDisposable
 {
-    private readonly DefaultShaderProgram _shaderProgram;
+    private readonly StandardMatrixShaderProgram _shaderProgram;
     private readonly VAO _vAO;
     private readonly VBO _vBO;
     private readonly Texture _texture;
@@ -27,7 +27,7 @@ public class Image : IGraphic, IDisposable
         _width = width;
         _height = height;
 
-        _shaderProgram = new DefaultShaderProgram(window);
+        _shaderProgram = new StandardMatrixShaderProgram(window);
 
         //Create and bind the VAO (which will store the VBO binding)
         _vAO = new VAO();

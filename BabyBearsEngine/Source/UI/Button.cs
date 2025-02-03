@@ -30,6 +30,7 @@ public class Button : IEntity
 
     public void Update()
     {
-        throw new NotImplementedException();
+        throw new NotImplementedException(
+);
     }
 }

@@ -19,7 +19,7 @@ internal static class OpenGLHelper
         {
             var infoLog = GL.GetShaderInfoLog(handle);
 
-            Console.WriteLine(infoLog);
+            System.Console.WriteLine(infoLog);
         }
 
         return handle;
