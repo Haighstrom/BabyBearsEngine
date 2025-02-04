@@ -9,9 +9,18 @@ internal static class OpenGLHelper
     private static int s_lastBoundShader = -1;
     private static int s_lastBoundVAO = -1;
     private static int s_lastBoundVBO = -1;
+    private static int s_lastBoundEBO = -1;
     private static int s_lastBoundTexture = -1;
     private static TextureUnit s_lastActiveTextureUnit = TextureUnit.Texture0;
 
+    public static void BindEBO(EBO eBO)
+    {
+        if (s_lastBoundEBO != eBO.Handle)
+        {
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, eBO.Handle);
+            s_lastBoundEBO = eBO.Handle;
+        }
+    }
 
     public static void BindShader(ShaderProgramBase shader)
     {
@@ -120,6 +129,15 @@ internal static class OpenGLHelper
         }
 
         return handle;
+    }
+    
+    public static void UnbindEBO()
+    {
+        if (s_lastBoundEBO != 0)
+        {
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+            s_lastBoundEBO = 0;
+        }
     }
 
     public static void UnbindShader()

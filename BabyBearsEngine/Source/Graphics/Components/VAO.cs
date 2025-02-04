@@ -6,6 +6,8 @@ public class VAO() : IDisposable
 
     public int Handle { get; } = GL.GenVertexArray();
 
+    public void Bind() => OpenGLHelper.BindVAO(this);
+
     #region IDisposable
     protected virtual void Dispose(bool disposing)
     {

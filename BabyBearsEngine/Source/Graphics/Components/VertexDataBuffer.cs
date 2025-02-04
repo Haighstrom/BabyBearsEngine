@@ -20,7 +20,7 @@ internal class VertexDataBuffer<TVertex> : IDisposable where TVertex : struct, I
 
     public void SetNewVertices(TVertex[] vertices)
     {
-        OpenGLHelper.BindVBO(VBO);
+        VBO.Bind();
         GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * TVertex.Stride, vertices, _bufferUsageHint);
     }
 

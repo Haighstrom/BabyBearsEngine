@@ -6,7 +6,7 @@ public abstract class ShaderProgramBase : IDisposable
 
     public abstract int Handle { get; }
 
-    protected void Bind() => OpenGLHelper.BindShader(this);
+    public void Bind() => OpenGLHelper.BindShader(this);
 
     #region IDisposable
     protected virtual void Dispose(bool disposing)

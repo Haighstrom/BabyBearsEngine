@@ -79,9 +79,9 @@ public class Image(ShaderProgramLibrary shaderLibrary, string texturePath, float
 
     public void Draw()
     {
-        OpenGLHelper.BindShader(_shader);
-        OpenGLHelper.BindVAO(_vertexDataBuffer.VAO);
-        OpenGLHelper.BindTexture(_texture);
+        _shader.Bind();
+        _vertexDataBuffer.VAO.Bind();
+        _texture.Bind();
 
         if (_verticesChanged)
         {

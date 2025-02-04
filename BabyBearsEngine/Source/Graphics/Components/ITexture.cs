@@ -13,4 +13,6 @@ public interface ITexture : IDisposable
     /// The original image's height, in px
     /// </summary>
     int Height { get; }
+
+    void Bind();
 }

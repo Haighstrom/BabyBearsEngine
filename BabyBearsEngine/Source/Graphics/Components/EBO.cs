@@ -2,29 +2,11 @@
 
 internal class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
 {
-    private static int s_lastBoundHandle = 0;
-
     private bool _disposed;
 
     public int Handle { get; } = GL.GenBuffer();
 
-    public void Bind()
-    {
-        if (s_lastBoundHandle != Handle)
-        {
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handle);
-            s_lastBoundHandle = Handle;
-        }
-    }
-
-    public void Unbind()
-    {
-        if (s_lastBoundHandle != 0)
-        {
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-            s_lastBoundHandle = 0;
-        }
-    }
+    public void Bind() => OpenGLHelper.BindEBO(this);
 
     public void BufferData(uint[] indices)
     {
@@ -43,16 +25,20 @@ internal class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
+
+            OpenGLHelper.UnbindEBO();
+            GL.DeleteBuffer(Handle);
+
             _disposed = true;
         }
     }
 
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~EBO()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
+    // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+    ~EBO()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: false);
+    }
 
     public void Dispose()
     {

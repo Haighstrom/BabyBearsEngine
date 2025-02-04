@@ -25,8 +25,8 @@ public class PointGraphic : IGraphic
 
     public void Draw()
     {
-        OpenGLHelper.BindShader(_shader);
-        OpenGLHelper.BindVAO(_vertexDataBuffer.VAO);
+        _shader.Bind();
+        _vertexDataBuffer.VAO.Bind();
 
         GL.DrawArrays(PrimitiveType.Points, 0, 1);
     }

@@ -79,8 +79,8 @@ public class ColouredRectangle(ShaderProgramLibrary shaderLibrary, Color4 colour
 
     public void Draw()
     {
-        OpenGLHelper.BindShader(_shader);
-        OpenGLHelper.BindVAO(_vertexDataBuffer.VAO);
+        _shader.Bind();
+        _vertexDataBuffer.VAO.Bind();
 
         if (_verticesChanged)
         {
