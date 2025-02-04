@@ -1,6 +1,4 @@
-﻿using OpenTK.Graphics.OpenGL4;
-
-namespace BabyBearsEngine.Source.Graphics.Components;
+﻿namespace BabyBearsEngine.Source.Graphics.Components;
 
 internal class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
 {

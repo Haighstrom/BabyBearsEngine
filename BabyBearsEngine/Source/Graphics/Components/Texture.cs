@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using OpenTK.Graphics.OpenGL4;
 using StbiSharp;
 
 namespace BabyBearsEngine.Source.Graphics.Components;

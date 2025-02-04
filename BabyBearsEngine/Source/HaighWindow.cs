@@ -1,6 +1,4 @@
-﻿using BabyBearsEngine.Source.Graphics;
-using BabyBearsEngine.Source.Worlds;
-using OpenTK.Graphics.OpenGL4;
+﻿using BabyBearsEngine.Source.Worlds;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 

@@ -1,5 +1,4 @@
-﻿using BabyBearsEngine.Source.Graphics;
-using BabyBearsEngine.Source.Worlds;
+﻿using BabyBearsEngine.Source.Worlds;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.UI;

@@ -1,5 +1,4 @@
-﻿using System.Reflection.Metadata;
-using BabyBearsEngine.Source.Graphics.Components;
+﻿using BabyBearsEngine.Source.Graphics.Components;
 using BabyBearsEngine.Source.Graphics.Shaders;
 using OpenTK.Mathematics;
 
