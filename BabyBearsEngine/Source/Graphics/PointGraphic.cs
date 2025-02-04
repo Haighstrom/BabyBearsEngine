@@ -8,26 +8,26 @@ namespace BabyBearsEngine.Source.Graphics;
 public class PointGraphic : IGraphic
 {
     private bool _disposed;
-    private readonly PointShaderProgram _shaderProgram;
-    private readonly VertexDataBuffer<VertexNoTexture> _shaderConnector = new();
+    private readonly PointShaderProgram _shader;
+    private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
 
     public PointGraphic(ShaderProgramLibrary shaderLibrary, int x, int y, float size, Color4 colour)
     {
-        _shaderProgram = shaderLibrary.PointShaderProgram;
-        _shaderProgram.SetPointSize(size);
+        _shader = shaderLibrary.PointShaderProgram;
+        _shader.SetPointSize(size);
 
         VertexNoTexture[] vertices =
         [
             new(x, y, colour),
         ];
 
-        _shaderConnector.SetNewVertices(vertices);
+        _vertexDataBuffer.SetNewVertices(vertices);
     }
 
     public void Draw()
     {
-        _shaderProgram.Bind();
-        _shaderConnector.Bind();
+        OpenGLHelper.BindShader(_shader);
+        OpenGLHelper.BindVAO(_vertexDataBuffer.VAO);
 
         GL.DrawArrays(PrimitiveType.Points, 0, 1);
     }
@@ -40,7 +40,7 @@ public class PointGraphic : IGraphic
             if (disposing)
             {
                 // TODO: dispose managed state (managed objects)
-                _shaderConnector.Dispose();
+                _vertexDataBuffer.Dispose();
             }
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer

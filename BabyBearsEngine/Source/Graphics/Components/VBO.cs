@@ -1,20 +1,10 @@
 ﻿namespace BabyBearsEngine.Source.Graphics.Components;
 
-internal class VBO()
+internal class VBO() : IDisposable
 {
     private bool _disposed;
 
     public int Handle { get; } = GL.GenBuffer();
-
-    public void Bind()
-    {
-        GL.BindBuffer(BufferTarget.ArrayBuffer, Handle);
-    }
-
-    public void Unbind()
-    {
-        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-    }
 
     #region IDisposable
     protected virtual void Dispose(bool disposing)
@@ -28,7 +18,7 @@ internal class VBO()
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
-            Unbind();
+            OpenGLHelper.UnbindVBO();
             GL.DeleteBuffer(Handle);
 
             _disposed = true;

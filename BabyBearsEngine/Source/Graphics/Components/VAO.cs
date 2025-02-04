@@ -1,20 +1,10 @@
 ﻿namespace BabyBearsEngine.Source.Graphics.Components;
 
-public class VAO()
+public class VAO() : IDisposable
 {
     private bool _disposed;
 
     public int Handle { get; } = GL.GenVertexArray();
-
-    public void Bind()
-    {
-        GL.BindVertexArray(Handle);
-    }
-
-    public void Unbind()
-    {
-        GL.BindVertexArray(0);
-    }
 
     #region IDisposable
     protected virtual void Dispose(bool disposing)
@@ -29,7 +19,7 @@ public class VAO()
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
 
-            Unbind();
+            OpenGLHelper.UnbindVAO();
             GL.DeleteVertexArray(Handle);
 
             _disposed = true;

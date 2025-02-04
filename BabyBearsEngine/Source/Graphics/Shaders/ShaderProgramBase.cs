@@ -1,22 +1,12 @@
-﻿using BabyBearsEngine.Source.Graphics.Components;
+﻿namespace BabyBearsEngine.Source.Graphics.Shaders;
 
-namespace BabyBearsEngine.Source.Graphics.Shaders;
-
-public abstract class ShaderProgramBase
+public abstract class ShaderProgramBase : IDisposable
 {
     private bool _disposed;
 
     public abstract int Handle { get; }
 
-    public void Bind()
-    {
-        GL.UseProgram(Handle);
-    }
-
-    public void Unbind()
-    {
-        GL.UseProgram(0);
-    }
+    protected void Bind() => OpenGLHelper.BindShader(this);
 
     #region IDisposable
     protected virtual void Dispose(bool disposing)
@@ -30,7 +20,7 @@ public abstract class ShaderProgramBase
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
-            Unbind();
+            OpenGLHelper.UnbindShader();
             GL.DeleteProgram(Handle);
 
             _disposed = true;

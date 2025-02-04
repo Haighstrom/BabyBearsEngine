@@ -9,8 +9,8 @@ public class ColouredRectangle(ShaderProgramLibrary shaderLibrary, Color4 colour
 {
     private bool _disposed;
 
-    private readonly SolidColourShaderProgram _shaderProgram = shaderLibrary.SolidColourShaderProgram;
-    private readonly VertexDataBuffer<VertexNoTexture> _shaderConnector = new();
+    private readonly SolidColourShaderProgram _shader = shaderLibrary.SolidColourShaderProgram;
+    private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
     private bool _verticesChanged = true;
 
     public float X
@@ -63,28 +63,29 @@ public class ColouredRectangle(ShaderProgramLibrary shaderLibrary, Color4 colour
         }
     }
 
-    private void UpdateVertices()
+    private VertexNoTexture[] Vertices
     {
-        VertexNoTexture[] vertices =
-        [
-            new(x + width, y + height, Colour), // top right
-            new(x + width, y, Colour), // bottom right
-            new(x, y + height, Colour), // top left
-            new(x, y, Colour), // bottom left
-        ];
+        get
+        {
+            return
+            [
+                new(x + width, y + height, Colour), // top right
+                new(x + width, y, Colour), // bottom right
+                new(x, y + height, Colour), // top left
+                new(x, y, Colour), // bottom left
+            ];
 
-        _shaderConnector.SetNewVertices(vertices);
+        }
     }
 
     public void Draw()
     {
-        _shaderProgram.Bind();
-        _shaderConnector.Bind();
+        OpenGLHelper.BindShader(_shader);
+        OpenGLHelper.BindVAO(_vertexDataBuffer.VAO);
 
         if (_verticesChanged)
         {
-            UpdateVertices();
-
+            _vertexDataBuffer.SetNewVertices(Vertices);
             _verticesChanged = false;
         }
 
@@ -99,7 +100,7 @@ public class ColouredRectangle(ShaderProgramLibrary shaderLibrary, Color4 colour
             if (disposing)
             {
                 // TODO: dispose managed state (managed objects)
-                _shaderConnector.Dispose();
+                _vertexDataBuffer.Dispose();
             }
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer

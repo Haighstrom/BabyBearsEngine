@@ -26,6 +26,9 @@ internal class Texture : ITexture
 
         var image = Stbi.LoadFromMemory(memoryStream, 4);
 
+        Width = image.Width;
+        Height = image.Height;
+
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, image.Width, image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, image.Data.ToArray());
         // First, we set the min and mag filter. These are used for when the texture is scaled down and up, respectively.
         // Here, we use Linear for both. This means that OpenGL will try to blend pixels, meaning that textures scaled too far will look blurred.
@@ -52,20 +55,9 @@ internal class Texture : ITexture
 
     public int Handle { get; }
 
-    public int Width => throw new NotImplementedException();
+    public int Width { get; }
 
-    public int Height => throw new NotImplementedException();
-
-    public void Unbind()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Bind()
-    {
-        GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, Handle);
-    }
+    public int Height { get; }
 
     #region IDisposable
     protected virtual void Dispose(bool disposing)
@@ -79,6 +71,10 @@ internal class Texture : ITexture
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
+            
+            OpenGLHelper.UnbindTexture();
+            GL.DeleteTexture(Handle);
+            
             _disposed = true;
         }
     }

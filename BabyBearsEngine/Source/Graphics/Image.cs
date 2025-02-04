@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Source.Graphics.Components;
+﻿using System.Reflection.Metadata;
+using BabyBearsEngine.Source.Graphics.Components;
 using BabyBearsEngine.Source.Graphics.Shaders;
 using OpenTK.Mathematics;
 
@@ -6,7 +7,7 @@ namespace BabyBearsEngine.Source.Graphics;
 
 public class Image(ShaderProgramLibrary shaderLibrary, string texturePath, float x, float y, float width, float height) : IGraphic, IDisposable
 {
-    private readonly StandardMatrixShaderProgram _shaderProgram = shaderLibrary.StandardMatrixShaderProgram;
+    private readonly StandardMatrixShaderProgram _shader = shaderLibrary.StandardMatrixShaderProgram;
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
     private readonly Texture _texture = new(texturePath);
 
@@ -63,28 +64,29 @@ public class Image(ShaderProgramLibrary shaderLibrary, string texturePath, float
         }
     }
 
-    private void UpdateVertices()
+    private Vertex[] Vertices
     {
-        Vertex[] vertices =
-        [
-            new(x + width, y + height, Colour, 1, 1), // top right
-            new(x + width, y, Colour, 1, 0), // bottom right
-            new(x, y + height, Colour, 0, 1), // top left
-            new(x, y, Colour, 0, 0), // bottom left
-        ];
-
-        _vertexDataBuffer.SetNewVertices(vertices);
+        get
+        {
+            return
+            [
+                new(x + width, y + height, Colour, 1, 1), // top right
+                new(x + width, y, Colour, 1, 0), // bottom right
+                new(x, y + height, Colour, 0, 1), // top left
+                new(x, y, Colour, 0, 0), // bottom left
+            ];
+        }
     }
 
     public void Draw()
     {
-        _shaderProgram.Bind();
-        _vertexDataBuffer.Bind();
-        _texture.Bind();
+        OpenGLHelper.BindShader(_shader);
+        OpenGLHelper.BindVAO(_vertexDataBuffer.VAO);
+        OpenGLHelper.BindTexture(_texture);
 
         if (_verticesChanged)
         {
-            UpdateVertices();
+            _vertexDataBuffer.SetNewVertices(Vertices);
 
             _verticesChanged = false;
         }

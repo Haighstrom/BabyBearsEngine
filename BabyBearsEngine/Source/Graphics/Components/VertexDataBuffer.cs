@@ -3,33 +3,25 @@
 internal class VertexDataBuffer<TVertex> : IDisposable where TVertex : struct, IVertex
 {
     private bool _disposed;
-    private readonly VAO _vAO = new();
-    private readonly VBO _vBO = new();
     private readonly BufferUsageHint _bufferUsageHint;
 
     public VertexDataBuffer(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
     {
         _bufferUsageHint = bufferUsageHint;
 
-        _vAO.Bind();
-        _vBO.Bind();
+        OpenGLHelper.BindVAO(VAO);
+        OpenGLHelper.BindVBO(VBO);
         TVertex.SetVertexAttributes();
     }
 
+    public VAO VAO { get; } = new();
+
+    public VBO VBO { get; } = new();
+
     public void SetNewVertices(TVertex[] vertices)
     {
-        _vBO.Bind();
+        OpenGLHelper.BindVBO(VBO);
         GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * TVertex.Stride, vertices, _bufferUsageHint);
-    }
-
-    public void Bind()
-    {
-        _vAO.Bind();
-    }
-
-    public void Unbind()
-    {
-        _vAO.Unbind();
     }
 
     #region IDisposable
@@ -40,8 +32,8 @@ internal class VertexDataBuffer<TVertex> : IDisposable where TVertex : struct, I
             if (disposing)
             {
                 // TODO: dispose managed state (managed objects)
-                _vAO.Dispose();
-                _vBO.Dispose();
+                VAO.Dispose();
+                VBO.Dispose();
             }
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
