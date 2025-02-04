@@ -1,32 +1,29 @@
 ﻿using System.IO;
 using OpenTK.Mathematics;
-using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.Common;
 
 namespace BabyBearsEngine.Source.Graphics.Shaders;
 
-public class StandardMatrixShaderProgram : ShaderProgramBase
+public class PointShaderProgram : ShaderProgramBase
 {
-    private readonly int _mvMatrixLocation;
     private readonly int _pMatrixLocation;
 
-    public StandardMatrixShaderProgram(GameWindow window)
+    public PointShaderProgram(GameWindow window)
     {
-        string vsSource = File.ReadAllText("Assets/Shaders/vs_default.vert");
+        string vsSource = File.ReadAllText("Assets/Shaders/point.vert");
         int vertexShader = OpenGLHelper.CreateShader(vsSource, ShaderType.VertexShader);
 
-        string fsSource = File.ReadAllText("Assets/Shaders/fs_default.frag");
+        string fsSource = File.ReadAllText("Assets/Shaders/point.frag");
         int fragmentShader = OpenGLHelper.CreateShader(fsSource, ShaderType.FragmentShader);
 
         Handle = OpenGLHelper.CreateShaderProgram(vertexShader, fragmentShader);
 
-        _mvMatrixLocation = GL.GetUniformLocation(Handle, "MVMatrix");
         _pMatrixLocation = GL.GetUniformLocation(Handle, "PMatrix");
 
-        var matrix = Matrix3.Identity;
-        SetModelViewMatrix(ref matrix);
-
         window.Resize += Window_Resize;
+
+        GL.Enable(EnableCap.ProgramPointSize);
     }
 
     public override int Handle { get; }
@@ -38,15 +35,16 @@ public class StandardMatrixShaderProgram : ShaderProgramBase
         SetProjectionMatrix(ref ortho);
     }
 
-    public void SetModelViewMatrix(ref Matrix3 modelViewMatrix)
-    {
-        Bind();
-        GL.UniformMatrix3(_mvMatrixLocation, true, ref modelViewMatrix);
-    }
-
-    public void SetProjectionMatrix(ref Matrix3 projectionMatrix)
+    private void SetProjectionMatrix(ref Matrix3 projectionMatrix)
     {
         Bind();
         GL.UniformMatrix3(_pMatrixLocation, true, ref projectionMatrix);
+    }
+
+    public void SetPointSize(float size)
+    {
+        Bind();
+        var location = GL.GetUniformLocation(Handle, "PointSize");
+        GL.Uniform1(location, size);
     }
 }

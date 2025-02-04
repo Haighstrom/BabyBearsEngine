@@ -1,19 +1,21 @@
-﻿namespace BabyBearsEngine.Source.Graphics.Components;
+﻿using BabyBearsEngine.Source.Graphics.Components;
 
-public class VAO()
+namespace BabyBearsEngine.Source.Graphics.Shaders;
+
+public abstract class ShaderProgramBase
 {
     private bool _disposed;
 
-    public int Handle { get; } = GL.GenVertexArray();
+    public abstract int Handle { get; }
 
     public void Bind()
     {
-        GL.BindVertexArray(Handle);
+        GL.UseProgram(Handle);
     }
 
     public void Unbind()
     {
-        GL.BindVertexArray(0);
+        GL.UseProgram(0);
     }
 
     #region IDisposable
@@ -28,16 +30,15 @@ public class VAO()
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
-
             Unbind();
-            GL.DeleteVertexArray(Handle);
+            GL.DeleteProgram(Handle);
 
             _disposed = true;
         }
     }
 
     // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    ~VAO()
+    ~ShaderProgramBase()
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: false);

@@ -1,36 +1,19 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿namespace BabyBearsEngine.Source.Graphics.Components;
 
-namespace BabyBearsEngine.Source.Graphics.Components;
-
-internal class VBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw) : IVBO
+internal class VBO()
 {
-    private static int s_lastBoundHandle = 0;
-
     private bool _disposed;
 
     public int Handle { get; } = GL.GenBuffer();
 
-    public void BufferData<TVertex>(TVertex[] vertices) where TVertex : struct, IVertex
-    {
-        GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * TVertex.Stride, vertices, bufferUsageHint);
-    }
-
     public void Bind()
     {
-        if (s_lastBoundHandle != Handle)
-        {
-            GL.BindBuffer(BufferTarget.ArrayBuffer, Handle);
-            s_lastBoundHandle = Handle;
-        }
+        GL.BindBuffer(BufferTarget.ArrayBuffer, Handle);
     }
 
     public void Unbind()
     {
-        if (s_lastBoundHandle != 0)
-        {
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            s_lastBoundHandle = 0;
-        }
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
     }
 
     #region IDisposable
@@ -45,16 +28,20 @@ internal class VBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
+            Unbind();
+            GL.DeleteBuffer(Handle);
+
             _disposed = true;
         }
     }
 
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~VBO()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
+    // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+    ~VBO()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: false);
+        //todo: logging of the bad dispose
+    }
 
     public void Dispose()
     {

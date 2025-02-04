@@ -1,30 +1,35 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿namespace BabyBearsEngine.Source.Graphics.Components;
 
-namespace BabyBearsEngine.Source.Graphics.Components;
-
-public class NoTextureVAO() : IVAO
+internal class VertexDataBuffer<TVertex> : IDisposable where TVertex : struct, IVertex
 {
     private bool _disposed;
+    private readonly VAO _vAO = new();
+    private readonly VBO _vBO = new();
+    private readonly BufferUsageHint _bufferUsageHint;
 
-    public int Handle { get; } = GL.GenVertexArray();
-
-    public void SetVertexFormats()
+    public VertexDataBuffer(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
     {
-        GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, Vertex.Stride, 0);
+        _bufferUsageHint = bufferUsageHint;
 
-        GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, Vertex.Stride, 2 * sizeof(float));
+        _vAO.Bind();
+        _vBO.Bind();
+        TVertex.SetVertexAttributes();
+    }
+
+    public void SetNewVertices(TVertex[] vertices)
+    {
+        _vBO.Bind();
+        GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * TVertex.Stride, vertices, _bufferUsageHint);
     }
 
     public void Bind()
     {
-        GL.BindVertexArray(Handle);
+        _vAO.Bind();
     }
 
     public void Unbind()
     {
-        GL.BindVertexArray(0);
+        _vAO.Unbind();
     }
 
     #region IDisposable
@@ -35,6 +40,8 @@ public class NoTextureVAO() : IVAO
             if (disposing)
             {
                 // TODO: dispose managed state (managed objects)
+                _vAO.Dispose();
+                _vBO.Dispose();
             }
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
@@ -44,7 +51,7 @@ public class NoTextureVAO() : IVAO
     }
 
     // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~VAO()
+    // ~ShaderConnector()
     // {
     //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
     //     Dispose(disposing: false);

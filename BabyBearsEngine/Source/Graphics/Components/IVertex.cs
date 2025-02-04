@@ -1,6 +1,8 @@
 ﻿namespace BabyBearsEngine.Source.Graphics.Components;
 
-internal interface IVertex
+public interface IVertex
 {
     static abstract int Stride { get; }
+
+    static abstract void SetVertexAttributes();
 }

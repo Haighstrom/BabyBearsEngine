@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Source\Graphics\c5ktwi1a.2yx~" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
     <PackageReference Include="OpenTK" Version="4.9.3" />
     <PackageReference Include="StbiSharp" Version="1.2.1" />

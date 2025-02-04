@@ -1,115 +1,85 @@
 ﻿using BabyBearsEngine.Source.Graphics.Components;
 using BabyBearsEngine.Source.Graphics.Shaders;
-using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Desktop;
 
 namespace BabyBearsEngine.Source.Graphics;
 
-public class ColouredRectangle : IGraphic, IDisposable
+public class ColouredRectangle(ShaderProgramLibrary shaderLibrary, Color4 colour, float x, float y, float width, float height) : IGraphic, IDisposable
 {
-    private readonly SolidColourShaderProgram _shaderProgram;
-    private readonly NoTextureVAO _vAO;
-    private readonly VBO _vBO;
+    private bool _disposed;
 
-    private float _x, _y, _width, _height;
-    private Color4 _colour;
+    private readonly SolidColourShaderProgram _shaderProgram = shaderLibrary.SolidColourShaderProgram;
+    private readonly VertexDataBuffer<VertexNoTexture> _shaderConnector = new();
     private bool _verticesChanged = true;
-
-    public ColouredRectangle(GameWindow window, Color4 colour, float x, float y, float width, float height)
-    {
-        _x = x;
-        _y = y;
-        _width = width;
-        _height = height;
-        _colour = colour;
-
-        _shaderProgram = new SolidColourShaderProgram(window);
-
-        //Create and bind the VAO (which will store the VBO binding)
-        _vAO = new NoTextureVAO();
-        _vAO.Bind();
-
-        //Create and bind the VBO (which contains the objects vertices)
-        _vBO = new VBO(BufferUsageHint.StaticDraw);
-        _vBO.Bind();
-
-        // Define attributes (this links the VBO to the VAO)
-        _vAO.SetVertexFormats();
-
-        _vAO.Unbind();
-        _vBO.Unbind();
-    }
 
     public float X
     {
-        get => _x;
+        get => x;
         set
         {
-            _x = value;
+            x = value;
             _verticesChanged = true;
         }
     }
 
     public float Y
     {
-        get => _y;
+        get => y;
         set
         {
-            _y = value;
+            y = value;
             _verticesChanged = true;
         }
     }
 
     public float Width
     {
-        get => _width;
+        get => width;
         set
         {
-            _width = value;
+            width = value;
             _verticesChanged = true;
         }
     }
 
     public float Height
     {
-        get => _height;
+        get => height;
         set
         {
-            _height = value; 
+            height = value; 
             _verticesChanged = true;
         }
     }
 
     public Color4 Colour
     {
-        get => _colour;
+        get => colour;
         set
         {
-            _colour = value;
+            colour = value;
             _verticesChanged = true;
         }
     }
 
     private void UpdateVertices()
     {
-        _vBO.Bind();
-
-        Vertex[] vertices =
+        VertexNoTexture[] vertices =
         [
-            new(_x + _width, _y + _height, Colour, 1, 1), // top right
-            new(_x + _width, _y, Colour, 1, 0), // bottom right
-            new(_x, _y + _height, Colour, 0, 1), // top left
-            new(_x, _y, Colour, 0, 0), // bottom left
+            new(x + width, y + height, Colour), // top right
+            new(x + width, y, Colour), // bottom right
+            new(x, y + height, Colour), // top left
+            new(x, y, Colour), // bottom left
         ];
 
-        _vBO.BufferData(vertices);
+        _shaderConnector.SetNewVertices(vertices);
     }
 
     public void Draw()
     {
         _shaderProgram.Bind();
-        _vAO.Bind();
+        _shaderConnector.Bind();
 
         if (_verticesChanged)
         {
@@ -122,23 +92,19 @@ public class ColouredRectangle : IGraphic, IDisposable
     }
 
     #region IDisposable
-    private bool _disposedValue;
-
     protected virtual void Dispose(bool disposing)
     {
-        if (!_disposedValue)
+        if (!_disposed)
         {
             if (disposing)
             {
                 // TODO: dispose managed state (managed objects)
-                _shaderProgram.Dispose(); //todo: don't dispose shader here - it's a shared resource
-                _vAO.Dispose();
-                _vBO.Dispose();
+                _shaderConnector.Dispose();
             }
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
-            _disposedValue = true;
+            _disposed = true;
         }
     }
 

@@ -1,6 +1,6 @@
 ﻿namespace BabyBearsEngine.Source.Graphics.Components;
 
-public interface ITexture : IOpenGLObject
+public interface ITexture
 {
     /// <summary>
     /// The original image's width, in px

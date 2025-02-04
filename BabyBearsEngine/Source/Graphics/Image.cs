@@ -1,86 +1,54 @@
-﻿using System.IO;
-using System.Reflection.Metadata;
-using BabyBearsEngine.Source.Graphics.Components;
+﻿using BabyBearsEngine.Source.Graphics.Components;
 using BabyBearsEngine.Source.Graphics.Shaders;
-using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
-using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
 
 namespace BabyBearsEngine.Source.Graphics;
 
-public class Image : IGraphic, IDisposable
+public class Image(ShaderProgramLibrary shaderLibrary, string texturePath, float x, float y, float width, float height) : IGraphic, IDisposable
 {
-    private readonly StandardMatrixShaderProgram _shaderProgram;
-    private readonly VAO _vAO;
-    private readonly VBO _vBO;
-    private readonly Texture _texture;
+    private readonly StandardMatrixShaderProgram _shaderProgram = shaderLibrary.StandardMatrixShaderProgram;
+    private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
+    private readonly Texture _texture = new(texturePath);
 
-    private float _x, _y, _width, _height;
     private Color4 _colour = Color4.White;
     private bool _verticesChanged = true;
 
-    public Image(GameWindow window, string texturePath, float x, float y, float width, float height)
-    {
-        _x = x;
-        _y = y;
-        _width = width;
-        _height = height;
-
-        _shaderProgram = new StandardMatrixShaderProgram(window);
-
-        //Create and bind the VAO (which will store the VBO binding)
-        _vAO = new VAO();
-        _vAO.Bind();
-
-        //Create and bind the VBO (which contains the objects vertices)
-        _vBO = new VBO(BufferUsageHint.StaticDraw);
-        _vBO.Bind();
-
-        // Define attributes (this links the VBO to the VAO)
-        _vAO.SetVertexFormats();
-
-        _vAO.Unbind();
-
-        _texture = new Texture(texturePath);
-    }
-
     public float X
     {
-        get => _x;
+        get => x;
         set
         {
-            _x = value;
+            x = value;
             _verticesChanged = true;
         }
     }
 
     public float Y
     {
-        get => _y;
+        get => y;
         set
         {
-            _y = value;
+            y = value;
             _verticesChanged = true;
         }
     }
 
     public float Width
     {
-        get => _width;
+        get => width;
         set
         {
-            _width = value;
+            width = value;
             _verticesChanged = true;
         }
     }
 
     public float Height
     {
-        get => _height;
+        get => height;
         set
         {
-            _height = value; 
+            height = value; 
             _verticesChanged = true;
         }
     }
@@ -97,23 +65,21 @@ public class Image : IGraphic, IDisposable
 
     private void UpdateVertices()
     {
-        _vBO.Bind();
-
         Vertex[] vertices =
         [
-            new(_x + _width, _y + _height, Colour, 1, 1), // top right
-            new(_x + _width, _y, Colour, 1, 0), // bottom right
-            new(_x, _y + _height, Colour, 0, 1), // top left
-            new(_x, _y, Colour, 0, 0), // bottom left
+            new(x + width, y + height, Colour, 1, 1), // top right
+            new(x + width, y, Colour, 1, 0), // bottom right
+            new(x, y + height, Colour, 0, 1), // top left
+            new(x, y, Colour, 0, 0), // bottom left
         ];
 
-        _vBO.BufferData(vertices);
+        _vertexDataBuffer.SetNewVertices(vertices);
     }
 
     public void Draw()
     {
         _shaderProgram.Bind();
-        _vAO.Bind();
+        _vertexDataBuffer.Bind();
         _texture.Bind();
 
         if (_verticesChanged)
@@ -136,9 +102,7 @@ public class Image : IGraphic, IDisposable
             if (disposing)
             {
                 // TODO: dispose managed state (managed objects)
-                _shaderProgram.Dispose(); //todo: don't dispose shader here - it's a shared resource
-                _vAO.Dispose();
-                _vBO.Dispose();
+                _vertexDataBuffer.Dispose();
             }
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer

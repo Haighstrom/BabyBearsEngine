@@ -1,15 +1,12 @@
 ﻿using System.IO;
-using BabyBearsEngine.Source.Graphics.Components;
-using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 
 namespace BabyBearsEngine.Source.Graphics.Shaders;
 
-public class DefaultShaderProgram : IShaderProgram
+public class DefaultShaderProgram : ShaderProgramBase
 {
-    private bool _disposed = false;
     private readonly int _windowSizeLocation;
 
     public DefaultShaderProgram(GameWindow window)
@@ -27,47 +24,11 @@ public class DefaultShaderProgram : IShaderProgram
         window.Resize += Window_Resize;
     }
 
-    public int Handle { get; }
+    public override int Handle { get; }
 
     private void Window_Resize(ResizeEventArgs args)
     {
         Bind();
         GL.Uniform2(_windowSizeLocation, new Vector2(args.Width, args.Height));
     }
-
-    public void Bind()
-    {
-        GL.UseProgram(Handle);
-    }
-
-    public void Unbind()
-    {
-        GL.UseProgram(0);
-    }
-
-    #region IDisposable
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            GL.DeleteProgram(Handle);
-
-            _disposed = true;
-        }
-    }
-
-    ~DefaultShaderProgram()
-    {
-        if (_disposed == false)
-        {
-            Console.WriteLine("GPU Resource leak! Did you forget to call Dispose()?");
-        }
-    }
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-    #endregion
 }

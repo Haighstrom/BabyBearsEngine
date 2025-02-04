@@ -2,7 +2,7 @@
 
 namespace BabyBearsEngine.Source.Graphics.Components;
 
-internal class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw) : IEBO
+internal class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
 {
     private static int s_lastBoundHandle = 0;
 
