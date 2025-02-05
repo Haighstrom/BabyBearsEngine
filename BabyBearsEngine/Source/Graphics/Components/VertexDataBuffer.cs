@@ -1,5 +1,9 @@
 ﻿namespace BabyBearsEngine.Source.Graphics.Components;
 
+/// <summary>
+/// Wraps a VAO and VBO, and sets up the vertex attributes for a given vertex type.
+/// </summary>
+/// <typeparam name="TVertex"></typeparam>
 internal class VertexDataBuffer<TVertex> : IDisposable where TVertex : struct, IVertex
 {
     private bool _disposed;
@@ -17,6 +21,8 @@ internal class VertexDataBuffer<TVertex> : IDisposable where TVertex : struct, I
     public VAO VAO { get; } = new();
 
     public VBO VBO { get; } = new();
+
+    public void Bind() => VAO.Bind();
 
     public void SetNewVertices(TVertex[] vertices)
     {

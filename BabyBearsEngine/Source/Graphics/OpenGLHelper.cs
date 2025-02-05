@@ -4,7 +4,7 @@ using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.Graphics;
 
-internal static class OpenGLHelper
+public static class OpenGLHelper
 {
     private static int s_lastBoundShader = -1;
     private static int s_lastBoundVAO = -1;

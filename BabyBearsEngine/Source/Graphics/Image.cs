@@ -80,7 +80,7 @@ public class Image(ShaderProgramLibrary shaderLibrary, string texturePath, float
     public void Draw()
     {
         _shader.Bind();
-        _vertexDataBuffer.VAO.Bind();
+        _vertexDataBuffer.Bind();
         _texture.Bind();
 
         if (_verticesChanged)

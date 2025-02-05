@@ -1,6 +1,6 @@
 ﻿namespace BabyBearsEngine.Source.Graphics.Components;
 
-internal class VBO() : IDisposable
+public class VBO() : IDisposable
 {
     private bool _disposed;
 

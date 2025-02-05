@@ -1,6 +1,6 @@
 ﻿namespace BabyBearsEngine.Source.Graphics.Components;
 
-internal class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
+public class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
 {
     private bool _disposed;
 

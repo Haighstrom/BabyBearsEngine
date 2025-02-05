@@ -80,7 +80,7 @@ public class ColouredRectangle(ShaderProgramLibrary shaderLibrary, Color4 colour
     public void Draw()
     {
         _shader.Bind();
-        _vertexDataBuffer.VAO.Bind();
+        _vertexDataBuffer.Bind();
 
         if (_verticesChanged)
         {
