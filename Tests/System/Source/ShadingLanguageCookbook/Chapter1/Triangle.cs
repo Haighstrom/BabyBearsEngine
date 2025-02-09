@@ -7,7 +7,7 @@ using BabyBearsEngine.Source.Graphics;
 using BabyBearsEngine.Source.Graphics.Components;
 
 namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
-internal class Triangle : IGraphic
+internal class Triangle : IRenderable
 {
     private bool _disposed;
     private int _vao;

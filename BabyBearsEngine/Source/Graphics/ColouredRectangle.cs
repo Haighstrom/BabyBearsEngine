@@ -4,7 +4,7 @@ using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.Graphics;
 
-public class ColouredRectangle(ShaderProgramLibrary shaderLibrary, Color4 colour, float x, float y, float width, float height) : IGraphic, IDisposable
+public class ColouredRectangle(ShaderProgramLibrary shaderLibrary, Color4 colour, float x, float y, float width, float height) : IRenderable, IDisposable
 {
     private bool _disposed;
 

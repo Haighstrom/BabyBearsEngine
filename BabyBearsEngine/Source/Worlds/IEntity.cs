@@ -1,7 +1,7 @@
-﻿namespace BabyBearsEngine.Source.Worlds;
+﻿using BabyBearsEngine.Source.Graphics;
 
-public interface IEntity
+namespace BabyBearsEngine.Source.Worlds;
+
+public interface IEntity : IUpdateable, IRenderable
 {
-    void Update();
-    void Render();
 }

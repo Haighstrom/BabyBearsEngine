@@ -4,7 +4,7 @@ using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.Graphics;
 
-public class PointGraphic : IGraphic
+public class PointGraphic : IRenderable
 {
     private bool _disposed;
     private readonly PointShaderProgram _shader;

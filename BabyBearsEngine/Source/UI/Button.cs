@@ -1,35 +1,63 @@
-﻿using BabyBearsEngine.Source.Worlds;
+﻿using BabyBearsEngine.Source.Graphics;
+using BabyBearsEngine.Source.Graphics.Shaders;
+using BabyBearsEngine.Source.Input;
+using BabyBearsEngine.Source.Worlds;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.UI;
 
-public class Button : IEntity
+public class Button(ShaderProgramLibrary shaderLibrary, int x, int y, int width, int height, Color4 colour) : IEntity
 {
-    private readonly int _x;
-    private readonly int _y;
-    private readonly int _width;
-    private readonly int _height;
-    private readonly Color4 _colour;
-
-    public Button(int x, int y, int width, int height, Color4 colour)
-    {
-        _x = x;
-        _y = y;
-        _width = width;
-        _height = height;
-        _colour = colour;
-
-       // var image = new Image()
-    }
-
-    public void Render()
-    {
-        throw new NotImplementedException();
-    }
+    private bool _disposed;
+    private readonly ColouredRectangle _graphic = new(shaderLibrary, colour, x, y, width, height);
 
     public void Update()
     {
-        throw new NotImplementedException(
-);
+        if (Mouse.LeftPressed)// && Mouse.ClientX >= x && Mouse.ClientX < x + width && Mouse.ClientY >= y && Mouse.ClientY < y + height)
+        {
+            OnClicked();
+        }
     }
+
+    public virtual void OnClicked()
+    {
+        Console.WriteLine("Button clicked!");
+    }
+
+    public void Draw()
+    {
+        _graphic.Draw();
+    }
+
+    #region IDisposable
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                // TODO: dispose managed state (managed objects)
+                _graphic.Dispose();
+            }
+
+            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+            // TODO: set large fields to null
+            _disposed = true;
+        }
+    }
+
+    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+    // ~Button()
+    // {
+    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+    //     Dispose(disposing: false);
+    // }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+    #endregion
 }

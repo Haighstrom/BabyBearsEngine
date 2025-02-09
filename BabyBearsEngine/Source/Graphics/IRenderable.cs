@@ -1,6 +1,6 @@
 ﻿namespace BabyBearsEngine.Source.Graphics;
 
-public interface IGraphic : IDisposable
+public interface IRenderable : IDisposable
 {
     void Draw();
 }

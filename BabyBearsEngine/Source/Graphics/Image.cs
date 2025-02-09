@@ -4,7 +4,7 @@ using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.Graphics;
 
-public class Image(ShaderProgramLibrary shaderLibrary, string texturePath, float x, float y, float width, float height) : IGraphic, IDisposable
+public class Image(ShaderProgramLibrary shaderLibrary, string texturePath, float x, float y, float width, float height) : IRenderable, IDisposable
 {
     private readonly StandardMatrixShaderProgram _shader = shaderLibrary.StandardMatrixShaderProgram;
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
