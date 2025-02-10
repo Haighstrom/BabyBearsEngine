@@ -7,55 +7,32 @@ namespace BabyBearsEngine.Source.Input;
 
 public static class Keyboard
 {
-    private static GameWindow? s_window;
-    private static KeyboardState? s_currentState;
-    private static KeyboardState? s_previousState;
+    private static KeyboardState? s_keyboardState;
 
-    internal static void Initialise(GameWindow window)
+    internal static void Initialise(KeyboardState keyboardState)
     {
-        s_window = window;
-        s_currentState = s_previousState = window.KeyboardState;
-    }
-
-    internal static void Update()
-    {
-        if (s_window is null)
-        {
-            throw new InvalidOperationException("Keyboard has not been initialised.");
-        }
-
-        s_previousState = s_currentState;
-        s_currentState = s_window.KeyboardState;
+        s_keyboardState = keyboardState;
     }
 
     public static bool KeyDown(Keys key)
     {
-        if (s_currentState is null)
-        {
-            throw new InvalidOperationException("Keyboard has not been initialised.");
-        }
+        Ensure.NotNull(s_keyboardState);
 
-        return s_currentState.IsKeyDown(key);
+        return s_keyboardState.IsKeyDown(key);
     }
 
     public static bool KeyPressed(Keys key)
     {
-        if (s_currentState is null || s_previousState is null)
-        {
-            throw new InvalidOperationException("Keyboard has not been initialised.");
-        }
+        Ensure.NotNull(s_keyboardState);
 
-        return s_currentState.IsKeyDown(key) && !s_previousState.IsKeyDown(key);
+        return s_keyboardState.IsKeyPressed(key);
     }
 
     public static bool KeyReleased(Keys key)
     {
-        if (s_currentState is null || s_previousState is null)
-        {
-            throw new InvalidOperationException("Keyboard has not been initialised.");
-        }
+        Ensure.NotNull(s_keyboardState);
 
-        return !s_currentState.IsKeyDown(key) && s_previousState.IsKeyDown(key);
+        return s_keyboardState.IsKeyReleased(key);
     }
 
     public static bool AnyKeyDown(IEnumerable<Keys> keys) => keys.Any(KeyDown);

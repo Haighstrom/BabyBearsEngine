@@ -10,12 +10,13 @@ namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
 internal class Triangle : IRenderable
 {
     private bool _disposed;
-    private int _vao;
+    private readonly int _vao;
+    private readonly BasicShaderProgram _shader;
 
     public Triangle()
     {
-        BasicShaderProgram shader = new();
-        GL.UseProgram(shader.Handle);
+        _shader = new();
+        _shader.Bind();
 
         float[] positionData =
         [
@@ -33,29 +34,30 @@ internal class Triangle : IRenderable
         var positionVBO = GL.GenBuffer();
         var colourVBO = GL.GenBuffer();
 
-        GL.BindBuffer(BufferTarget.ArrayBuffer, positionVBO);
+        OpenGLHelper.BindVBO(positionVBO);
         GL.BufferData(BufferTarget.ArrayBuffer, 9 * sizeof(float), positionData, BufferUsageHint.StaticDraw);
 
-        GL.BindBuffer(BufferTarget.ArrayBuffer, colourVBO);
+        OpenGLHelper.BindVBO(colourVBO);
         GL.BufferData(BufferTarget.ArrayBuffer, 9 * sizeof(float), colourData, BufferUsageHint.StaticDraw);
 
         _vao = GL.GenVertexArray();
 
-        GL.BindVertexArray(_vao);
+        OpenGLHelper.BindVAO(_vao);
 
         GL.EnableVertexAttribArray(0);
         GL.EnableVertexAttribArray(1);
 
-        GL.BindBuffer(BufferTarget.ArrayBuffer, positionVBO);
+        OpenGLHelper.BindVBO(positionVBO);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
 
-        GL.BindBuffer(BufferTarget.ArrayBuffer, colourVBO);
+        OpenGLHelper.BindVBO(colourVBO);
         GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 0, 0);
     }
 
     public void Draw()
     {
-        GL.BindVertexArray(_vao);
+        _shader.Bind();
+        OpenGLHelper.BindVAO(_vao);
         GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
     }
 

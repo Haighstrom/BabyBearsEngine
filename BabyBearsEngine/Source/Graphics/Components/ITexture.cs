@@ -14,5 +14,5 @@ public interface ITexture : IDisposable
     /// </summary>
     int Height { get; }
 
-    void Bind();
+    void Bind(TextureTarget textureTarget = TextureTarget.Texture2D, TextureUnit textureUnit = TextureUnit.Texture0);
 }

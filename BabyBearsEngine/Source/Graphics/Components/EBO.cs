@@ -6,7 +6,7 @@ public class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
 
     public int Handle { get; } = GL.GenBuffer();
 
-    public void Bind() => OpenGLHelper.BindEBO(this);
+    public void Bind() => OpenGLHelper.BindEBO(Handle);
 
     public void BufferData(uint[] indices)
     {

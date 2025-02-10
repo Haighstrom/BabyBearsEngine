@@ -1,28 +1,19 @@
 ﻿using BabyBearsEngine.Source;
 using BabyBearsEngine.Source.Debugging;
-using BabyBearsEngine.Source.Graphics;
 using BabyBearsEngine.Source.Graphics.Shaders;
-using BabyBearsEngine.Source.UI;
 using BabyBearsEngine.Source.Worlds;
-using OpenTK.Mathematics;
+using BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
+using BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;
 
-using (HaighWindow game = new(800, 600, "Bears"))
+using (HaighWindow window = new(800, 600, "Bears"))
 {
     ConsoleWindow.Open();
 
-    World world = new();
+    var shaderLibrary = new ShaderProgramLibrary(window);
 
-    var shaderLibrary = new ShaderProgramLibrary(game);
+    World world = new Chapter1World(window, shaderLibrary);
 
-    world.AddGraphic(new Image(shaderLibrary, "Assets/bear.jpg", 0, 0, 400, 300));
-    world.AddGraphic(new PointGraphic(shaderLibrary, 600, 100, 30, Color4.Red));
+    window.World = world;
 
-    world.AddEntity(new Button(shaderLibrary, 20, 320, 60, 40, Color4.Orange));
-
-    //World world = new Chapter1World();
-
-
-    game.World = world;
-
-    game.Run();
+    window.Run();
 }

@@ -58,7 +58,7 @@ internal class Texture : ITexture, IDisposable
 
     public int Height { get; }
 
-    public void Bind() => OpenGLHelper.BindTexture(this);
+    public void Bind(TextureTarget textureTarget = TextureTarget.Texture2D, TextureUnit textureUnit = TextureUnit.Texture0) => OpenGLHelper.BindTexture(Handle, textureTarget, textureUnit);
 
     #region IDisposable
     protected virtual void Dispose(bool disposing)

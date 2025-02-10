@@ -13,7 +13,7 @@ public class Button(ShaderProgramLibrary shaderLibrary, int x, int y, int width,
 
     public void Update()
     {
-        if (Mouse.LeftPressed)// && Mouse.ClientX >= x && Mouse.ClientX < x + width && Mouse.ClientY >= y && Mouse.ClientY < y + height)
+        if (Mouse.LeftPressed && Mouse.ClientX >= x && Mouse.ClientX < x + width && Mouse.ClientY >= y && Mouse.ClientY < y + height)
         {
             OnClicked();
         }

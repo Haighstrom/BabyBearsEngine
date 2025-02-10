@@ -7,55 +7,42 @@ namespace BabyBearsEngine.Source.Input;
 
 public static class Mouse
 {
-    private static GameWindow? s_window;
-    private static MouseState? s_currentState;
-    private static MouseState? s_previousState;
+    private static MouseState? s_mouseState;
 
-    internal static void Initialise(GameWindow window)
+    internal static void Initialise(MouseState mouseState)
     {
-        s_window = window;
-        s_currentState = s_previousState = window.MouseState;
+        s_mouseState = mouseState;
     }
 
     internal static void Update()
     {
-        if (s_window is null)
-        {
-            throw new InvalidOperationException("Mouse has not been initialised.");
-        }
+        Ensure.NotNull(s_mouseState);
 
-        s_previousState = s_currentState;
-        s_currentState = s_window.MouseState;
+        if (s_mouseState.IsButtonPressed(MouseButton.Button1))
+        {
+            Console.WriteLine("Mouse.cs: Mouse Button 1 is down");
+        }
     }
 
     public static bool ButtonDown(MouseButton button)
     {
-        if (s_currentState is null)
-        {
-            throw new InvalidOperationException("Mouse has not been initialised.");
-        }
+        Ensure.NotNull(s_mouseState);
 
-        return s_currentState.IsButtonDown(button);
+        return s_mouseState.IsButtonDown(button);
     }
 
     public static bool ButtonPressed(MouseButton button)
     {
-        if (s_currentState is null || s_previousState is null)
-        {
-            throw new InvalidOperationException("Mouse has not been initialised.");
-        }
+        Ensure.NotNull(s_mouseState);
 
-        return s_currentState.IsButtonDown(button) && !s_previousState.IsButtonDown(button);
+        return s_mouseState.IsButtonPressed(button);
     }
 
     public static bool ButtonReleased(MouseButton button)
     {
-        if (s_currentState is null || s_previousState is null)
-        {
-            throw new InvalidOperationException("Mouse has not been initialised.");
-        }
+        Ensure.NotNull(s_mouseState);
 
-        return !s_currentState.IsButtonDown(button) && s_previousState.IsButtonDown(button);
+        return s_mouseState.IsButtonReleased(button);
     }
 
     public static bool AnyButtonDown(IEnumerable<MouseButton> buttons) => buttons.Any(ButtonDown);
@@ -95,9 +82,9 @@ public static class Mouse
     public static bool MiddleReleased => ButtonReleased(MouseButton.Middle);
     public static bool RightReleased => ButtonReleased(MouseButton.Right);
 
-    public static int ClientX => (int)(s_currentState?.X ?? throw new InvalidOperationException("Mouse has not been initialised."));
-    public static int ClientY => (int)(s_currentState?.Y ?? throw new InvalidOperationException("Mouse has not been initialised."));
-    public static float WheelDelta => s_currentState?.ScrollDelta.Y ?? throw new InvalidOperationException("Mouse has not been initialised.");
-    public static int XDelta => (int)(s_currentState?.Delta.X ?? throw new InvalidOperationException("Mouse has not been initialised."));
-    public static int YDelta => (int)(s_currentState?.Delta.Y ?? throw new InvalidOperationException("Mouse has not been initialised."));
+    public static int ClientX => (int)(s_mouseState?.X ?? throw new InvalidOperationException("Mouse has not been initialised."));
+    public static int ClientY => (int)(s_mouseState?.Y ?? throw new InvalidOperationException("Mouse has not been initialised."));
+    public static float WheelDelta => s_mouseState?.ScrollDelta.Y ?? throw new InvalidOperationException("Mouse has not been initialised.");
+    public static int XDelta => (int)(s_mouseState?.Delta.X ?? throw new InvalidOperationException("Mouse has not been initialised."));
+    public static int YDelta => (int)(s_mouseState?.Delta.Y ?? throw new InvalidOperationException("Mouse has not been initialised."));
 }

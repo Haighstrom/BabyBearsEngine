@@ -13,8 +13,8 @@ internal class VertexDataBuffer<TVertex> : IDisposable where TVertex : struct, I
     {
         _bufferUsageHint = bufferUsageHint;
 
-        OpenGLHelper.BindVAO(VAO);
-        OpenGLHelper.BindVBO(VBO);
+        VAO.Bind();
+        VBO.Bind();
         TVertex.SetVertexAttributes();
     }
 

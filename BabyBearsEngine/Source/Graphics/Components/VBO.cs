@@ -6,7 +6,7 @@ public class VBO() : IDisposable
 
     public int Handle { get; } = GL.GenBuffer();
 
-    public void Bind() => OpenGLHelper.BindVBO(this);
+    public void Bind() => OpenGLHelper.BindVBO(Handle);
 
     #region IDisposable
     protected virtual void Dispose(bool disposing)

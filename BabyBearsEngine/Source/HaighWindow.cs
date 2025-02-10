@@ -2,6 +2,7 @@
 using BabyBearsEngine.Source.Worlds;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace BabyBearsEngine.Source;
 
@@ -16,8 +17,8 @@ public class HaighWindow(int width, int height, string title)
 
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-        Keyboard.Initialise(this);
-        Mouse.Initialise(this);
+        Keyboard.Initialise(KeyboardState);
+        Mouse.Initialise(MouseState);
     }
 
     protected override void OnUnload()
@@ -29,10 +30,7 @@ public class HaighWindow(int width, int height, string title)
 
     protected override void OnUpdateFrame(FrameEventArgs args)
     {
-        base.OnUpdateFrame(args);
-
-        Keyboard.Update();
-        Mouse.Update();
+        base.OnUpdateFrame(args);           
 
         World.UpdateThings();
     }
