@@ -1,6 +1,4 @@
-﻿using BabyBearsEngine.Source.Graphics.Components;
-using BabyBearsEngine.Source.Graphics.Shaders;
-using OpenTK.Mathematics;
+﻿using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.Graphics;
 
@@ -70,7 +68,7 @@ public static class OpenGLHelper
 
         if (error != ErrorCode.NoError)
         {
-            Console.WriteLine($"OpenGL Error: {error}");
+            System.Console.WriteLine($"OpenGL Error: {error}");
         }
     }
 

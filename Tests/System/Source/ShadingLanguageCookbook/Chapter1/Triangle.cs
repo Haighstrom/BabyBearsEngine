@@ -10,7 +10,7 @@ namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
 internal class Triangle : IRenderable
 {
     private bool _disposed;
-    private readonly int _vao;
+    private readonly VAO _vao;
     private readonly BasicShaderProgram _shader;
 
     public Triangle()
@@ -40,9 +40,9 @@ internal class Triangle : IRenderable
         OpenGLHelper.BindVBO(colourVBO);
         GL.BufferData(BufferTarget.ArrayBuffer, 9 * sizeof(float), colourData, BufferUsageHint.StaticDraw);
 
-        _vao = GL.GenVertexArray();
+        _vao = new();
 
-        OpenGLHelper.BindVAO(_vao);
+        _vao.Bind();
 
         GL.EnableVertexAttribArray(0);
         GL.EnableVertexAttribArray(1);
@@ -54,10 +54,10 @@ internal class Triangle : IRenderable
         GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 0, 0);
     }
 
-    public void Draw()
+    public void Render()
     {
         _shader.Bind();
-        OpenGLHelper.BindVAO(_vao);
+        _vao.Bind();
         GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
     }
 
@@ -68,13 +68,11 @@ internal class Triangle : IRenderable
             if (disposing)
             {
                 // TODO: dispose managed state (managed objects)
+                _vao.Dispose();
             }
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
-
-            GL.BindVertexArray(0);
-            GL.DeleteVertexArray(_vao);
 
             _disposed = true;
         }

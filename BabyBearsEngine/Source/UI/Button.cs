@@ -1,15 +1,15 @@
-﻿using BabyBearsEngine.Source.Graphics;
+﻿using BabyBearsEngine.Source.Core;
+using BabyBearsEngine.Source.Graphics;
 using BabyBearsEngine.Source.Graphics.Shaders;
-using BabyBearsEngine.Source.Input;
 using BabyBearsEngine.Source.Worlds;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.UI;
 
-public class Button(ShaderProgramLibrary shaderLibrary, int x, int y, int width, int height, Color4 colour) : IEntity
+public class Button(int x, int y, int width, int height, Color4 colour) : IEntity
 {
     private bool _disposed;
-    private readonly ColouredRectangle _graphic = new(shaderLibrary, colour, x, y, width, height);
+    private readonly ColouredRectangle _graphic = new(colour, x, y, width, height);
 
     public void Update()
     {
@@ -21,12 +21,12 @@ public class Button(ShaderProgramLibrary shaderLibrary, int x, int y, int width,
 
     public virtual void OnClicked()
     {
-        Console.WriteLine("Button clicked!");
+        System.Console.WriteLine("Button clicked!");
     }
 
-    public void Draw()
+    public void Render()
     {
-        _graphic.Draw();
+        _graphic.Render();
     }
 
     #region IDisposable

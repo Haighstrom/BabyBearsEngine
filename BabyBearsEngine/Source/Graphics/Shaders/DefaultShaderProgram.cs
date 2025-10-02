@@ -1,7 +1,7 @@
 ﻿using System.IO;
+using BabyBearsEngine.Source.Core;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
 
 namespace BabyBearsEngine.Source.Graphics.Shaders;
 
@@ -9,7 +9,7 @@ public class DefaultShaderProgram : ShaderProgramBase
 {
     private readonly int _windowSizeLocation;
 
-    public DefaultShaderProgram(GameWindow window)
+    public DefaultShaderProgram()
     {
         string vsSource = File.ReadAllText("Assets/Shaders/shader.vert");
         int vertexShader = OpenGLHelper.CreateShader(vsSource, ShaderType.VertexShader);
@@ -21,7 +21,7 @@ public class DefaultShaderProgram : ShaderProgramBase
 
         _windowSizeLocation = GL.GetUniformLocation(Handle, "WindowSize");
 
-        window.Resize += Window_Resize;
+        Window.Resize += Window_Resize;
     }
 
     public override int Handle { get; }
@@ -29,6 +29,7 @@ public class DefaultShaderProgram : ShaderProgramBase
     private void Window_Resize(ResizeEventArgs args)
     {
         Bind();
+
         GL.Uniform2(_windowSizeLocation, new Vector2(args.Width, args.Height));
     }
 }

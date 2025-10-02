@@ -3,13 +3,13 @@ using BabyBearsEngine.Source.Graphics.Shaders;
 using BabyBearsEngine.Source.Graphics.Textures;
 using OpenTK.Mathematics;
 
-namespace BabyBearsEngine.Source.Graphics;
+namespace BabyBearsEngine.Source.Graphics.Text;
 
-public class Image(string texturePath, float x, float y, float width, float height) : IRenderable, IDisposable
+public class LetterImage(float x, float y, float width, float height) : IRenderable, IDisposable
 {
-    public IShaderProgram Shader { get; set; } = new StandardMatrixShaderProgram();
+    private readonly StandardMatrixShaderProgram _shader = new StandardMatrixShaderProgram();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
-    private readonly ITexture _texture = TextureFactory.CreateTextureFromImageFile(texturePath);
+    private readonly Texture _texture = FontTexture.GetFontTexture("Assets/Fonts/Times.ttf");
 
     private Color4 _colour = Color4.White;
     private bool _verticesChanged = true;
@@ -49,7 +49,7 @@ public class Image(string texturePath, float x, float y, float width, float heig
         get => height;
         set
         {
-            height = value; 
+            height = value;
             _verticesChanged = true;
         }
     }
@@ -80,7 +80,7 @@ public class Image(string texturePath, float x, float y, float width, float heig
 
     public void Render()
     {
-        Shader.Bind();
+        _shader.Bind();
         _vertexDataBuffer.Bind();
         _texture.Bind();
 

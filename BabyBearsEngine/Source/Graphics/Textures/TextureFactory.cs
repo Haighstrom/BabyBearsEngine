@@ -1,34 +1,34 @@
 ﻿using System.IO;
-using StbiSharp;
+using System.Reflection.Metadata;
+using BabyBearsEngine.Source.Graphics.Components;
+using StbImageSharp;
 
-namespace BabyBearsEngine.Source.Graphics.Components;
+namespace BabyBearsEngine.Source.Graphics.Textures;
 
-internal class Texture : ITexture, IDisposable
+internal static class TextureFactory
 {
-    private bool _disposed;
-
-    public Texture(string path)
+    public static ITexture CreateTextureFromImageFile(string filePath)
     {
-        Handle = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, Handle);
+        var handle = GL.GenTexture();
+        GL.BindTexture(TextureTarget.Texture2D, handle);
 
         // stb_image loads from the top-left pixel, whereas OpenGL loads from the bottom-left, causing the texture to be flipped vertically.
         // This will correct that, making the texture display properly.
 
         //Stbi.SetFlipVerticallyOnLoad(true);
 
-        using var stream = File.OpenRead(path);
+        using var stream = File.OpenRead(filePath);
 
         using var memoryStream = new MemoryStream();
 
         stream.CopyTo(memoryStream);
 
-        var image = Stbi.LoadFromMemory(memoryStream, 4);
+        var image = ImageResult.FromStream(memoryStream, ColorComponents.RedGreenBlueAlpha);
 
-        Width = image.Width;
-        Height = image.Height;
+        var width = image.Width;
+        var height = image.Height;
 
-        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, image.Width, image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, image.Data.ToArray());
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, image.Width, image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, image.Data);
         // First, we set the min and mag filter. These are used for when the texture is scaled down and up, respectively.
         // Here, we use Linear for both. This means that OpenGL will try to blend pixels, meaning that textures scaled too far will look blurred.
         // You could also use (amongst other options) Nearest, which just grabs the nearest pixel, which makes the texture look pixelated if scaled too far.
@@ -50,48 +50,7 @@ internal class Texture : ITexture, IDisposable
         // Here you can see and read about the morié effect https://en.wikipedia.org/wiki/Moir%C3%A9_pattern
         // Here is an example of mips in action https://en.wikipedia.org/wiki/File:Mipmap_Aliasing_Comparison.png
         GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+
+        return new Texture(handle, width, height);
     }
-
-    public int Handle { get; }
-
-    public int Width { get; }
-
-    public int Height { get; }
-
-    public void Bind(TextureTarget textureTarget = TextureTarget.Texture2D, TextureUnit textureUnit = TextureUnit.Texture0) => OpenGLHelper.BindTexture(Handle, textureTarget, textureUnit);
-
-    #region IDisposable
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            
-            OpenGLHelper.UnbindTexture();
-            GL.DeleteTexture(Handle);
-            
-            _disposed = true;
-        }
-    }
-
-    // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    ~Texture()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: false);
-    }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-    #endregion
 }

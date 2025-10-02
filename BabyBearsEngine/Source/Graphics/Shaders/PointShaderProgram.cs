@@ -2,6 +2,7 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.Common;
+using BabyBearsEngine.Source.Core;
 
 namespace BabyBearsEngine.Source.Graphics.Shaders;
 
@@ -9,7 +10,7 @@ public class PointShaderProgram : ShaderProgramBase
 {
     private readonly int _pMatrixLocation;
 
-    public PointShaderProgram(GameWindow window)
+    public PointShaderProgram()
     {
         string vsSource = File.ReadAllText("Assets/Shaders/point.vert");
         int vertexShader = OpenGLHelper.CreateShader(vsSource, ShaderType.VertexShader);
@@ -21,7 +22,7 @@ public class PointShaderProgram : ShaderProgramBase
 
         _pMatrixLocation = GL.GetUniformLocation(Handle, "PMatrix");
 
-        window.Resize += Window_Resize;
+        Window.Resize += Window_Resize;
 
         GL.Enable(EnableCap.ProgramPointSize);
     }

@@ -6,8 +6,8 @@ namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;
 
 internal class MenuWorld : World
 {
-    public MenuWorld(HaighWindow haighWindow, ShaderProgramLibrary shaderLibrary)
+    public MenuWorld()
     {
-        AddEntity(new OpenChapter1Button(haighWindow, shaderLibrary));
+        AddEntity(new OpenChapter1Button());
     }
 }

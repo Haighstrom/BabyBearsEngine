@@ -1,19 +1,16 @@
-﻿using BabyBearsEngine.Source;
-using BabyBearsEngine.Source.Debugging;
-using BabyBearsEngine.Source.Graphics.Shaders;
-using BabyBearsEngine.Source.Worlds;
-using BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
+﻿using BabyBearsEngine.Source.Boot;
+using BabyBearsEngine.Source.Config;
+using BabyBearsEngine.Source.Core;
 using BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;
 
-using (HaighWindow window = new(800, 600, "Bears"))
+var appSettings = new ApplicationSettings()
 {
-    ConsoleWindow.Open();
+    WindowSettings = new WindowSettings()
+    {
+        Width = 800,
+        Height = 600,
+        Title = "Bears"
+    }
+};
 
-    var shaderLibrary = new ShaderProgramLibrary(window);
-
-    World world = new Chapter1World(window, shaderLibrary);
-
-    window.World = world;
-
-    window.Run();
-}
+GameLauncher.Run(appSettings, () => new MenuWorld());

@@ -1,4 +1,4 @@
-﻿namespace BabyBearsEngine.Source.Graphics.Components;
+﻿namespace BabyBearsEngine.Source.Graphics.Textures;
 
 public interface ITexture : IDisposable
 {

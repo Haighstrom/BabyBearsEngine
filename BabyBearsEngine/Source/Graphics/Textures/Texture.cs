@@ -1,12 +1,25 @@
-﻿namespace BabyBearsEngine.Source.Graphics.Shaders;
+﻿using System.IO;
 
-public abstract class ShaderProgramBase : IShaderProgram
+namespace BabyBearsEngine.Source.Graphics.Textures;
+
+internal class Texture : ITexture, IDisposable
 {
     private bool _disposed;
 
-    public abstract int Handle { get; }
+    public Texture(int handle, int width, int height)
+    {
+        Handle = handle;
+        Width = width;
+        Height = height;
+    }
 
-    public void Bind() => OpenGLHelper.BindShader(Handle);
+    public int Handle { get; }
+
+    public int Width { get; }
+
+    public int Height { get; }
+
+    public void Bind(TextureTarget textureTarget = TextureTarget.Texture2D, TextureUnit textureUnit = TextureUnit.Texture0) => OpenGLHelper.BindTexture(Handle, textureTarget, textureUnit);
 
     #region IDisposable
     protected virtual void Dispose(bool disposing)
@@ -20,19 +33,19 @@ public abstract class ShaderProgramBase : IShaderProgram
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
-            OpenGLHelper.UnbindShader();
-            GL.DeleteProgram(Handle);
-
+            
+            OpenGLHelper.UnbindTexture();
+            GL.DeleteTexture(Handle);
+            
             _disposed = true;
         }
     }
 
     // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    ~ShaderProgramBase()
+    ~Texture()
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: false);
-        //todo: logging of the bad dispose
     }
 
     public void Dispose()

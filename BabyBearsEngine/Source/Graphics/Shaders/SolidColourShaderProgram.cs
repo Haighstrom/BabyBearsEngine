@@ -1,13 +1,13 @@
 ﻿using System.IO;
+using BabyBearsEngine.Source.Core;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
 
 namespace BabyBearsEngine.Source.Graphics.Shaders;
 
 public class SolidColourShaderProgram : ShaderProgramBase
 {
-    public SolidColourShaderProgram(GameWindow window)
+    public SolidColourShaderProgram()
     {
         string vsSource = File.ReadAllText("Assets/Shaders/vs_nomatrixsolidcolour.vert");
         int vertexShader = OpenGLHelper.CreateShader(vsSource, ShaderType.VertexShader);
@@ -17,7 +17,7 @@ public class SolidColourShaderProgram : ShaderProgramBase
 
         Handle = OpenGLHelper.CreateShaderProgram(vertexShader, fragmentShader);
 
-        window.Resize += Window_Resize;
+        Window.Resize += Window_Resize;
     }
 
     public override int Handle { get; }

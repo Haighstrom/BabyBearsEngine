@@ -3,7 +3,7 @@ using BabyBearsEngine.Source.Graphics;
 
 namespace BabyBearsEngine.Source.Worlds;
 
-public class World()
+public class World() : IWorld
 {
     private readonly List<IRenderable> _graphics = [];
     private readonly List<IUpdateable> _updateables = [];
@@ -12,6 +12,11 @@ public class World()
     {
         _graphics.Add(graphic);
     }
+
+    //public void AddUpdateable(IUpdateable updateable)
+    //{
+    //    _updateables.Add(updateable);
+    //}
 
     public void RemoveGraphic(IRenderable graphic)
     {
@@ -36,7 +41,7 @@ public class World()
     {
         foreach (var graphic in _graphics)
         {
-            graphic.Draw();
+            graphic.Render();
         }
     }
 

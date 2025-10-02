@@ -4,11 +4,11 @@ using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.Graphics;
 
-public class ColouredRectangle(ShaderProgramLibrary shaderLibrary, Color4 colour, float x, float y, float width, float height) : IRenderable, IDisposable
+public class ColouredRectangle(Color4 colour, float x, float y, float width, float height) : IRenderable, IDisposable
 {
     private bool _disposed;
 
-    private readonly SolidColourShaderProgram _shader = shaderLibrary.SolidColourShaderProgram;
+    private readonly SolidColourShaderProgram _shader = new();
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
     private bool _verticesChanged = true;
 
@@ -77,7 +77,7 @@ public class ColouredRectangle(ShaderProgramLibrary shaderLibrary, Color4 colour
         }
     }
 
-    public void Draw()
+    public void Render()
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();

@@ -1,24 +1,21 @@
-﻿using BabyBearsEngine.Source.Input;
-using BabyBearsEngine.Source.Worlds;
+﻿using BabyBearsEngine.Source.Worlds;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 
-namespace BabyBearsEngine.Source;
+namespace BabyBearsEngine.Source.Platform.OpenTK;
 
-public class HaighWindow(int width, int height, string title)
-    : GameWindow(GameWindowSettings.Default, new NativeWindowSettings() { ClientSize = (width, height), Title = title })
+public class BabyBearsWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, Func<IWorld>? createWorld = null)
+    : GameWindow(gameWindowSettings, nativeWindowSettings)
 {
-    public World World { get; set; } = null!;
+    public IWorld World { get; set; } = null!;
 
     protected override void OnLoad()
     {
         base.OnLoad();
 
-        GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        World = createWorld?.Invoke() ?? new World();
 
-        Keyboard.Initialise(KeyboardState);
-        Mouse.Initialise(MouseState);
+        GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     }
 
     protected override void OnUnload()

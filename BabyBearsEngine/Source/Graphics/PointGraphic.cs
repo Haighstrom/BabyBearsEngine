@@ -10,9 +10,9 @@ public class PointGraphic : IRenderable
     private readonly PointShaderProgram _shader;
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
 
-    public PointGraphic(ShaderProgramLibrary shaderLibrary, int x, int y, float size, Color4 colour)
+    public PointGraphic(int x, int y, float size, Color4 colour)
     {
-        _shader = shaderLibrary.PointShaderProgram;
+        _shader = new PointShaderProgram();
         _shader.SetPointSize(size);
 
         VertexNoTexture[] vertices =
@@ -23,7 +23,7 @@ public class PointGraphic : IRenderable
         _vertexDataBuffer.SetNewVertices(vertices);
     }
 
-    public void Draw()
+    public void Render()
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();

@@ -2,5 +2,5 @@
 
 public interface IRenderable : IDisposable
 {
-    void Draw();
+    void Render();
 }

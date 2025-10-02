@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using BabyBearsEngine.Source.Core;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -10,7 +11,7 @@ public class StandardMatrixShaderProgram : ShaderProgramBase
     private readonly int _mvMatrixLocation;
     private readonly int _pMatrixLocation;
 
-    public StandardMatrixShaderProgram(GameWindow window)
+    public StandardMatrixShaderProgram()
     {
         string vsSource = File.ReadAllText("Assets/Shaders/vs_default.vert");
         int vertexShader = OpenGLHelper.CreateShader(vsSource, ShaderType.VertexShader);
@@ -26,7 +27,7 @@ public class StandardMatrixShaderProgram : ShaderProgramBase
         var matrix = Matrix3.Identity;
         SetModelViewMatrix(ref matrix);
 
-        window.Resize += Window_Resize;
+        Window.Resize += Window_Resize;
     }
 
     public override int Handle { get; }
