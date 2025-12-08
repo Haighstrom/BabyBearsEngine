@@ -1,23 +1,14 @@
-﻿using System.IO;
+﻿namespace BabyBearsEngine.Source.Graphics.Textures;
 
-namespace BabyBearsEngine.Source.Graphics.Textures;
-
-internal class Texture : ITexture, IDisposable
+internal class Texture(int handle, int width, int height) : ITexture, IDisposable
 {
     private bool _disposed;
 
-    public Texture(int handle, int width, int height)
-    {
-        Handle = handle;
-        Width = width;
-        Height = height;
-    }
+    public int Handle { get; } = handle;
 
-    public int Handle { get; }
+    public int Width { get; } = width;
 
-    public int Width { get; }
-
-    public int Height { get; }
+    public int Height { get; } = height;
 
     public void Bind(TextureTarget textureTarget = TextureTarget.Texture2D, TextureUnit textureUnit = TextureUnit.Texture0) => OpenGLHelper.BindTexture(Handle, textureTarget, textureUnit);
 
