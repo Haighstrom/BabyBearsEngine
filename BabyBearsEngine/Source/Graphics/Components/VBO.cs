@@ -8,7 +8,6 @@ public class VBO() : IDisposable
 
     public void Bind() => OpenGLHelper.BindVBO(Handle);
 
-    #region IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -41,5 +40,4 @@ public class VBO() : IDisposable
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-    #endregion
 }

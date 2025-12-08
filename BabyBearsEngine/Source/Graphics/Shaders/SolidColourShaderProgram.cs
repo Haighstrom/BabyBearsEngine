@@ -5,9 +5,13 @@ using OpenTK.Windowing.Common;
 
 namespace BabyBearsEngine.Source.Graphics.Shaders;
 
-public class SolidColourShaderProgram : ShaderProgramBase
+public sealed class SolidColourShaderProgram : ShaderProgramBase
 {
-    public SolidColourShaderProgram()
+    private static readonly Lazy<SolidColourShaderProgram> s_instance = new(() => new SolidColourShaderProgram());
+
+    public static SolidColourShaderProgram Instance => s_instance.Value;
+
+    private SolidColourShaderProgram()
     {
         string vsSource = File.ReadAllText("Assets/Shaders/vs_nomatrixsolidcolour.vert");
         int vertexShader = OpenGLHelper.CreateShader(vsSource, ShaderType.VertexShader);
@@ -25,7 +29,7 @@ public class SolidColourShaderProgram : ShaderProgramBase
     private void Window_Resize(ResizeEventArgs args)
     {
         Bind();
-        var windowSizeLocation = GL.GetUniformLocation(Handle, "WindowSize");
+        int windowSizeLocation = GL.GetUniformLocation(Handle, "WindowSize");
         GL.Uniform2(windowSizeLocation, new Vector2(args.Width, args.Height));
     }
 }

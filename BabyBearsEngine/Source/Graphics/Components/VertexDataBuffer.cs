@@ -30,7 +30,6 @@ internal class VertexDataBuffer<TVertex> : IDisposable where TVertex : struct, I
         GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * TVertex.Stride, vertices, _bufferUsageHint);
     }
 
-    #region IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -61,5 +60,4 @@ internal class VertexDataBuffer<TVertex> : IDisposable where TVertex : struct, I
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-    #endregion
 }

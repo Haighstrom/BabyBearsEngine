@@ -2,7 +2,6 @@
 using BabyBearsEngine.Source.Core;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
 
 namespace BabyBearsEngine.Source.Graphics.Shaders;
 

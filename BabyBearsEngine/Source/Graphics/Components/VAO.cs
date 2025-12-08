@@ -8,7 +8,6 @@ public class VAO() : IDisposable
 
     public void Bind() => OpenGLHelper.BindVAO(Handle);
 
-    #region IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -42,5 +41,4 @@ public class VAO() : IDisposable
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-    #endregion
 }

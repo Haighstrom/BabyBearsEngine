@@ -94,7 +94,6 @@ public class Image(string texturePath, float x, float y, float width, float heig
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
     }
 
-    #region IDisposable
     private bool _disposedValue;
 
     protected virtual void Dispose(bool disposing)
@@ -126,5 +125,4 @@ public class Image(string texturePath, float x, float y, float width, float heig
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-    #endregion
 }

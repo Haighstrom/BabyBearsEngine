@@ -31,7 +31,6 @@ public class PointGraphic : IRenderable
         GL.DrawArrays(PrimitiveType.Points, 0, 1);
     }
 
-    #region IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -61,5 +60,4 @@ public class PointGraphic : IRenderable
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-    #endregion
 }

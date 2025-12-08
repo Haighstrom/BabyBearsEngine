@@ -7,7 +7,7 @@ namespace BabyBearsEngine.Source.Graphics.Text;
 
 public class LetterImage(float x, float y, float width, float height) : IRenderable, IDisposable
 {
-    private readonly StandardMatrixShaderProgram _shader = new StandardMatrixShaderProgram();
+    private readonly StandardMatrixShaderProgram _shader = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
     private readonly Texture _texture = FontTexture.GetFontTexture("Assets/Fonts/Times.ttf");
 
@@ -94,7 +94,6 @@ public class LetterImage(float x, float y, float width, float height) : IRendera
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
     }
 
-    #region IDisposable
     private bool _disposedValue;
 
     protected virtual void Dispose(bool disposing)
@@ -126,5 +125,4 @@ public class LetterImage(float x, float y, float width, float height) : IRendera
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-    #endregion
 }

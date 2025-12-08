@@ -8,7 +8,6 @@ public abstract class ShaderProgramBase : IShaderProgram
 
     public void Bind() => OpenGLHelper.BindShader(Handle);
 
-    #region IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -41,5 +40,4 @@ public abstract class ShaderProgramBase : IShaderProgram
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-    #endregion
 }

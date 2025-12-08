@@ -1,6 +1,6 @@
 ﻿namespace BabyBearsEngine.Source.Graphics.Components;
 
-public class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
+public class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw) : IDisposable
 {
     private bool _disposed;
 
@@ -13,7 +13,6 @@ public class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
         GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, bufferUsageHint);
     }
 
-    #region IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -46,5 +45,4 @@ public class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-    #endregion
 }

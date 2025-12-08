@@ -1,7 +1,4 @@
-﻿using System;
-using BabyBearsEngine.Source;
-using BabyBearsEngine.Source.Core;
-using BabyBearsEngine.Source.Graphics.Shaders;
+﻿using BabyBearsEngine.Source.Core;
 using BabyBearsEngine.Source.UI;
 using OpenTK.Mathematics;
 

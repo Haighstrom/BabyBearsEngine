@@ -29,7 +29,6 @@ public class Button(int x, int y, int width, int height, Color4 colour) : IEntit
         _graphic.Render();
     }
 
-    #region IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -59,5 +58,4 @@ public class Button(int x, int y, int width, int height, Color4 colour) : IEntit
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-    #endregion
 }

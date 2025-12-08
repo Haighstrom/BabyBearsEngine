@@ -21,7 +21,6 @@ internal class Texture : ITexture, IDisposable
 
     public void Bind(TextureTarget textureTarget = TextureTarget.Texture2D, TextureUnit textureUnit = TextureUnit.Texture0) => OpenGLHelper.BindTexture(Handle, textureTarget, textureUnit);
 
-    #region IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -54,5 +53,4 @@ internal class Texture : ITexture, IDisposable
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-    #endregion
 }

@@ -8,7 +8,7 @@ public class ColouredRectangle(Color4 colour, float x, float y, float width, flo
 {
     private bool _disposed;
 
-    private readonly SolidColourShaderProgram _shader = new();
+    private readonly SolidColourShaderProgram _shader = SolidColourShaderProgram.Instance;
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
     private bool _verticesChanged = true;
 
@@ -91,7 +91,6 @@ public class ColouredRectangle(Color4 colour, float x, float y, float width, flo
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
     }
 
-    #region IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -121,5 +120,4 @@ public class ColouredRectangle(Color4 colour, float x, float y, float width, flo
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-    #endregion
 }
