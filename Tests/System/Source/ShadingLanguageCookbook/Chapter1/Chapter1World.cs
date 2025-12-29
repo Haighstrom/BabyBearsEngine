@@ -9,7 +9,6 @@ internal class Chapter1World : World
     public Chapter1World()
     {
         AddGraphic(new Triangle());
-        AddGraphic(new LetterImage(200, 200, 64, 64));
         AddEntity(new ReturnToMainMenuButton());
     }
 }

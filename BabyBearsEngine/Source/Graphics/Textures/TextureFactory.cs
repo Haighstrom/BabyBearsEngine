@@ -1,34 +1,19 @@
-﻿using System.IO;
-using System.Reflection.Metadata;
-using BabyBearsEngine.Source.Graphics.Components;
-using StbImageSharp;
+﻿using BabyBearsEngine.Source.Graphics.ImageLoading;
+using BabyBearsEngine.Source.Tools;
 
 namespace BabyBearsEngine.Source.Graphics.Textures;
 
-internal static class TextureFactory
+internal class TextureFactory() : ITextureFactory
 {
-    public static ITexture CreateTextureFromImageFile(string filePath)
+    public ITexture CreateTextureFromImageFile(string filePath)
     {
         var handle = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, handle);
 
-        // stb_image loads from the top-left pixel, whereas OpenGL loads from the bottom-left, causing the texture to be flipped vertically.
-        // This will correct that, making the texture display properly.
+        var imageData = ImageLoader.LoadAsRgba8(filePath);
 
-        //Stbi.SetFlipVerticallyOnLoad(true);
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, imageData.Width, imageData.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, imageData.Data);
 
-        using var stream = File.OpenRead(filePath);
-
-        using var memoryStream = new MemoryStream();
-
-        stream.CopyTo(memoryStream);
-
-        var image = ImageResult.FromStream(memoryStream, ColorComponents.RedGreenBlueAlpha);
-
-        var width = image.Width;
-        var height = image.Height;
-
-        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, image.Width, image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, image.Data);
         // First, we set the min and mag filter. These are used for when the texture is scaled down and up, respectively.
         // Here, we use Linear for both. This means that OpenGL will try to blend pixels, meaning that textures scaled too far will look blurred.
         // You could also use (amongst other options) Nearest, which just grabs the nearest pixel, which makes the texture look pixelated if scaled too far.
@@ -51,6 +36,30 @@ internal static class TextureFactory
         // Here is an example of mips in action https://en.wikipedia.org/wiki/File:Mipmap_Aliasing_Comparison.png
         GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
-        return new Texture(handle, width, height);
+        return new Texture(handle, imageData.Width, imageData.Height);
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
+    public ITexture GenTexture(System.Drawing.Bitmap bmp)//, TEXPARAMETER_VALUE minMagFilter = TEXPARAMETER_VALUE.GL_NEAREST)
+    {
+        bmp = BitmapTools.PremultiplyAlpha(bmp);
+
+        Texture t = new(
+            handle: GL.GenTexture(), 
+            width: bmp.Width, 
+            height: bmp.Height);
+
+        GL.BindTexture(TextureTarget.Texture2D, t.Handle);
+
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+
+        var bmpd = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmpd.Width, bmpd.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, bmpd.Scan0);
+
+        bmp.UnlockBits(bmpd);
+
+        return t;
     }
 }

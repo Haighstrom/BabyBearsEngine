@@ -1,55 +1,56 @@
-﻿using BabyBearsEngine.Source.Graphics.Components;
+﻿using System.Threading.Tasks.Dataflow;
+using BabyBearsEngine.Source.Graphics.Components;
 using BabyBearsEngine.Source.Graphics.Shaders;
 using BabyBearsEngine.Source.Graphics.Textures;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.Graphics;
 
-public class Image(string texturePath, float x, float y, float width, float height) : IRenderable, IDisposable
+public class Image : IRenderable, IDisposable
 {
     public IShaderProgram Shader { get; set; } = new StandardMatrixShaderProgram();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
-    private readonly ITexture _texture = TextureFactory.CreateTextureFromImageFile(texturePath);
+    private readonly ITexture _texture;
 
     private Color4 _colour = Color4.White;
     private bool _verticesChanged = true;
 
     public float X
     {
-        get => x;
+        get => _x;
         set
         {
-            x = value;
+            _x = value;
             _verticesChanged = true;
         }
     }
 
     public float Y
     {
-        get => y;
+        get => _y;
         set
         {
-            y = value;
+            _y = value;
             _verticesChanged = true;
         }
     }
 
     public float Width
     {
-        get => width;
+        get => _width;
         set
         {
-            width = value;
+            _width = value;
             _verticesChanged = true;
         }
     }
 
     public float Height
     {
-        get => height;
+        get => _height;
         set
         {
-            height = value; 
+            _height = value; 
             _verticesChanged = true;
         }
     }
@@ -70,10 +71,10 @@ public class Image(string texturePath, float x, float y, float width, float heig
         {
             return
             [
-                new(x + width, y + height, Colour, 1, 1), // top right
-                new(x + width, y, Colour, 1, 0), // bottom right
-                new(x, y + height, Colour, 0, 1), // top left
-                new(x, y, Colour, 0, 0), // bottom left
+                new(_x, _y, Colour, 0, 0), // bottom left
+                new(_x + _width, _y, Colour, 1, 0), // bottom right
+                new(_x, _y + _height, Colour, 0, 1), // top left
+                new(_x + _width, _y + _height, Colour, 1, 1), // top right
             ];
         }
     }
@@ -95,6 +96,28 @@ public class Image(string texturePath, float x, float y, float width, float heig
     }
 
     private bool _disposedValue;
+    private float _x;
+    private float _y;
+    private float _width;
+    private float _height;
+
+    public Image(string texturePath, float x, float y, float width, float height)
+    {
+        _x = x;
+        _y = y;
+        _width = width;
+        _height = height;
+        _texture = new TextureFactory().CreateTextureFromImageFile(texturePath);
+    }
+
+    public Image(ITexture texture, float x, float y, float width, float height)
+    {
+        _x = x;
+        _y = y;
+        _width = width;
+        _height = height;
+        _texture = texture;
+    }
 
     protected virtual void Dispose(bool disposing)
     {

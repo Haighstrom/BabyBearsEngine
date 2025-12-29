@@ -13,7 +13,7 @@ public static class OpenGLHelper
 
     public static void BindEBO(int eBOHandle)
     {
-        if (s_lastBoundEBO != eBOHandle)
+        //if (s_lastBoundEBO != eBOHandle)
         {
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, eBOHandle);
             s_lastBoundEBO = eBOHandle;
@@ -22,7 +22,7 @@ public static class OpenGLHelper
 
     public static void BindShader(int shaderHandle)
     {
-        if (s_lastBoundShader != shaderHandle)
+        //if (s_lastBoundShader != shaderHandle)
         {
             GL.UseProgram(shaderHandle);
             s_lastBoundShader = shaderHandle;
@@ -31,13 +31,13 @@ public static class OpenGLHelper
 
     public static void BindTexture(int textureHandle, TextureTarget textureTarget = TextureTarget.Texture2D, TextureUnit textureUnit = TextureUnit.Texture0)
     {
-        if (s_lastActiveTextureUnit != textureUnit)
+        //if (s_lastActiveTextureUnit != textureUnit)
         {
             GL.ActiveTexture(textureUnit);
             s_lastActiveTextureUnit = textureUnit;
         }
 
-        if (s_lastBoundTexture != textureHandle)
+        //if (s_lastBoundTexture != textureHandle)
         {
             GL.BindTexture(textureTarget, textureHandle);
             s_lastBoundTexture = textureHandle;
@@ -46,7 +46,7 @@ public static class OpenGLHelper
 
     public static void BindVAO(int vAOHandle)
     {
-        if (s_lastBoundVAO != vAOHandle)
+        //if (s_lastBoundVAO != vAOHandle)
         {
             GL.BindVertexArray(vAOHandle);
             s_lastBoundVAO = vAOHandle;
@@ -55,7 +55,7 @@ public static class OpenGLHelper
 
     public static void BindVBO(int vBOHandle)
     {
-        if (s_lastBoundVBO != vBOHandle)
+        //if (s_lastBoundVBO != vBOHandle)
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, vBOHandle);
             s_lastBoundVBO = vBOHandle;
@@ -131,7 +131,7 @@ public static class OpenGLHelper
     
     public static void UnbindEBO()
     {
-        if (s_lastBoundEBO != 0)
+        //if (s_lastBoundEBO != 0)
         {
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
             s_lastBoundEBO = 0;
@@ -140,7 +140,7 @@ public static class OpenGLHelper
 
     public static void UnbindShader()
     {
-        if (s_lastBoundShader != 0)
+        //if (s_lastBoundShader != 0)
         {
             GL.UseProgram(0);
             s_lastBoundShader = 0;
@@ -149,7 +149,7 @@ public static class OpenGLHelper
 
     public static void UnbindTexture()
     {
-        if (s_lastBoundTexture != 0)
+        //if (s_lastBoundTexture != 0)
         {
             GL.BindTexture(TextureTarget.Texture2D, 0);
             s_lastBoundTexture = 0;
@@ -158,7 +158,7 @@ public static class OpenGLHelper
 
     public static void UnbindVAO()
     {
-        if (s_lastBoundVAO != 0)
+        //if (s_lastBoundVAO != 0)
         {
             GL.BindVertexArray(0);
             s_lastBoundVAO = 0;
@@ -167,7 +167,7 @@ public static class OpenGLHelper
 
     public static void UnbindVBO()
     {
-        if (s_lastBoundVBO != 0)
+        //if (s_lastBoundVBO != 0)
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             s_lastBoundVBO = 0;

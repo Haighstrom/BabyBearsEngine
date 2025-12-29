@@ -9,6 +9,8 @@ public class BabyBearsWindow(GameWindowSettings gameWindowSettings, NativeWindow
 {
     public IWorld World { get; set; } = null!;
 
+    private bool _first = true;
+
     protected override void OnLoad()
     {
         base.OnLoad();
