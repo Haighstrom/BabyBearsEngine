@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using BabyBearsEngine.Source.Graphics.Components;
 using BabyBearsEngine.Source.Graphics.Textures;
 using BabyBearsEngine.Source.Tools;

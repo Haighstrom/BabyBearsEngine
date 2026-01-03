@@ -12,5 +12,8 @@ public static class Window
         remove => GameServices.WindowService.Resize -= value;
     }
 
+    public static int Width => GameServices.WindowService.Width;
+    public static int Height => GameServices.WindowService.Height;
+
     public static void ChangeWorld(IWorld world) => GameServices.WindowService.ChangeWorld(world);
 }

@@ -1,6 +1,4 @@
-﻿using OpenTK.Windowing.Desktop;
-
-namespace BabyBearsEngine.Source.Config;
+﻿namespace BabyBearsEngine.Source.Config;
 
 public sealed record GameLoopSettings()
 {

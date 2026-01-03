@@ -1,5 +1,4 @@
 ﻿using BabyBearsEngine.Source.Services;
-using OpenTK.Windowing.Desktop;
 
 namespace BabyBearsEngine.Source.Platform.OpenTK;
 

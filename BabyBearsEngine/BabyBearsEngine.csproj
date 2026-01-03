@@ -25,61 +25,61 @@
     <None Update="Assets\Fonts\Times.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\fs_cameraMSAA.frag">
+    <None Update="Assets\Shaders\Frag\camera_msaa.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\fs_darken.frag">
+    <None Update="Assets\Shaders\Frag\darken.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\fs_r8texture.frag">
+    <None Update="Assets\Shaders\Frag\r8_texture.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\point.frag">
+    <None Update="Assets\Shaders\Frag\point.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\fs_default.frag">
+    <None Update="Assets\Shaders\Frag\default.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\fs_greyscale.frag">
+    <None Update="Assets\Shaders\Frag\greyscale.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\fs_invisibility.frag">
+    <None Update="Assets\Shaders\Frag\invisibility.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\fs_lighting.frag">
+    <None Update="Assets\Shaders\Frag\lighting.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\fs_solidcolour.frag">
+    <None Update="Assets\Shaders\Frag\solid_colour.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\gs_default.geom">
+    <None Update="Assets\Shaders\Geom\default.geom">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\gs_smoothlines.geom">
+    <None Update="Assets\Shaders\Geom\smooth_lines.geom">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\shader.frag">
+    <None Update="Assets\Shaders\Frag\shader.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\shader.vert">
+    <None Update="Assets\Shaders\Vert\shader.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\vs_camera_msaa.vert">
+    <None Update="Assets\Shaders\Vert\camera_msaa.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\point.vert">
+    <None Update="Assets\Shaders\Vert\point.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\vs_default.vert">
+    <None Update="Assets\Shaders\Vert\default.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\vs_nomatrixsolidcolour.vert">
+    <None Update="Assets\Shaders\Vert\no_matrix_solid_colour.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\vs_solidcolour.vert">
+    <None Update="Assets\Shaders\Vert\solid_colour.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Shaders\vs_spritesheet.vert">
+    <None Update="Assets\Shaders\Vert\spritesheet.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

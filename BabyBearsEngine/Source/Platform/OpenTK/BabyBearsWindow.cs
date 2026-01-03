@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Source.Worlds;
+﻿using BabyBearsEngine.Source.Graphics;
+using BabyBearsEngine.Source.Worlds;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 
@@ -9,13 +10,15 @@ public class BabyBearsWindow(GameWindowSettings gameWindowSettings, NativeWindow
 {
     public IWorld World { get; set; } = null!;
 
-    private bool _first = true;
+    private Image? _image;
 
     protected override void OnLoad()
     {
         base.OnLoad();
 
         World = createWorld?.Invoke() ?? new World();
+
+        //_image = new Image("Assets/bear.png", 50, 50, 200, 200);
 
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     }
@@ -24,14 +27,19 @@ public class BabyBearsWindow(GameWindowSettings gameWindowSettings, NativeWindow
     {
         base.OnUnload();
 
-        World.Unload();
+        //World.Unload();
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
     {
-        base.OnUpdateFrame(args);           
+        base.OnUpdateFrame(args);      
+        
+        if (_image is null)
+        {
+            _image = new Image("Assets/bear.png", 50, 50, 200, 200);
+        }
 
-        World.UpdateThings();
+        //World.UpdateThings();
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
@@ -40,7 +48,9 @@ public class BabyBearsWindow(GameWindowSettings gameWindowSettings, NativeWindow
 
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
-        World.DrawGraphics();
+        _image?.Render();
+
+        //World.DrawGraphics();
 
         SwapBuffers();
     }

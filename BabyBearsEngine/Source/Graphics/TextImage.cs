@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 using BabyBearsEngine.Source.Graphics.Components;
-using BabyBearsEngine.Source.Graphics.Shaders;
+using BabyBearsEngine.Source.Graphics.Shaders.ShaderPrograms;
 using BabyBearsEngine.Source.Graphics.Text;
 using BabyBearsEngine.Source.Graphics.Textures;
 using BabyBearsEngine.Source.Tools;
 using OpenTK.Mathematics;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace BabyBearsEngine.Source.Graphics;
 

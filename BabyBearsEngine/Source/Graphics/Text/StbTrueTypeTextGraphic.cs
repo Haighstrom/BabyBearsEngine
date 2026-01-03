@@ -1,5 +1,5 @@
 ﻿using BabyBearsEngine.Source.Graphics.Components;
-using BabyBearsEngine.Source.Graphics.Shaders;
+using BabyBearsEngine.Source.Graphics.Shaders.ShaderPrograms;
 using BabyBearsEngine.Source.Graphics.Textures;
 using OpenTK.Mathematics;
 

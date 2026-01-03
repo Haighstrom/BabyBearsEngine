@@ -1,7 +1,4 @@
-﻿using BabyBearsEngine.Source.Graphics;
-using BabyBearsEngine.Source.Graphics.Text;
-using BabyBearsEngine.Source.Worlds;
-using OpenTK.Mathematics;
+﻿using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;
 

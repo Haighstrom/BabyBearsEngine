@@ -1,6 +1,5 @@
 ﻿using BabyBearsEngine.Source.Core;
 using BabyBearsEngine.Source.Graphics;
-using BabyBearsEngine.Source.Graphics.Shaders;
 using BabyBearsEngine.Source.Worlds;
 using OpenTK.Mathematics;
 

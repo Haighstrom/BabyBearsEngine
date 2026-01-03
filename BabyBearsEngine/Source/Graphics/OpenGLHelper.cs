@@ -105,30 +105,49 @@ public static class OpenGLHelper
 
     public static int CreateShaderProgram(int vertexShader, int fragmentShader, bool deleteShaders = true)
     {
-        var handle = GL.CreateProgram();
-        GL.AttachShader(handle, vertexShader);
-        GL.AttachShader(handle, fragmentShader);
-        GL.LinkProgram(handle);
+        var programHandle = GL.CreateProgram();
 
-        GL.GetProgram(handle, GetProgramParameterName.LinkStatus, out var success);
-        if (success == 0)
+        var programBuiltSuccessfully = false;
+        var shadersAttached = false;
+
+        try
         {
-            var infoLog = GL.GetProgramInfoLog(handle);
-            GL.DeleteProgram(handle);
-            throw new Exception($"Shader linking failed: {infoLog}");
-        }
+            GL.AttachShader(programHandle, vertexShader);
+            GL.AttachShader(programHandle, fragmentShader);
+            GL.LinkProgram(programHandle);
+            GL.GetProgram(programHandle, GetProgramParameterName.LinkStatus, out var linkStatus);
 
-        if (deleteShaders)
+            if (linkStatus == 0)
+            {
+                var infoLog = GL.GetProgramInfoLog(programHandle);
+                throw new Exception($"Shader linking failed: {infoLog}");
+            }
+
+            programBuiltSuccessfully = true;
+
+            return programHandle;
+        }
+        finally
         {
-            GL.DetachShader(handle, vertexShader);
-            GL.DetachShader(handle, fragmentShader);
-            GL.DeleteShader(vertexShader);
-            GL.DeleteShader(fragmentShader);
-        }
+            if (deleteShaders)
+            {
+                if (shadersAttached)
+                {
+                    GL.DetachShader(programHandle, vertexShader);
+                    GL.DetachShader(programHandle, fragmentShader);
+                }
 
-        return handle;
+                GL.DeleteShader(vertexShader);
+                GL.DeleteShader(fragmentShader);
+            }
+
+            if (!programBuiltSuccessfully)
+            {
+                GL.DeleteProgram(programHandle);
+            }
+        }
     }
-    
+
     public static void UnbindEBO()
     {
         //if (s_lastBoundEBO != 0)
