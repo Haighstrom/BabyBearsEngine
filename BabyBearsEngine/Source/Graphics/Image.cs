@@ -7,7 +7,7 @@ namespace BabyBearsEngine.Source.Graphics;
 
 public class Image : IRenderable, IDisposable
 {
-    public IShaderProgram Shader { get; set; } = new StandardMatrixShaderProgram();
+    public StandardMatrixShaderProgram Shader { get; set; } = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
     private readonly ITexture _texture;
 
@@ -64,6 +64,8 @@ public class Image : IRenderable, IDisposable
         }
     }
 
+    public float Angle { get; set; }
+
     private Vertex[] Vertices
     {
         get
@@ -89,6 +91,16 @@ public class Image : IRenderable, IDisposable
             _vertexDataBuffer.SetNewVertices(Vertices);
 
             _verticesChanged = false;
+        }
+
+        if (Angle != 0)
+        {
+            var mv = Matrix3.Identity;
+            //var translate1 = new Matrix3(1, 0, 0, 0, 1, 0, X, Y, 1);
+            var rotation = Matrix3.CreateRotationZ(MathHelper.DegreesToRadians(Angle));
+            //var translate2 = new Matrix3(1, 0, 0, 0, 1, 0, -X, -Y, 1);
+            //mv = Matrix3.RotateAroundPoint(ref mv, Angle, R.Centre.X, R.Centre.Y)
+            Shader.SetModelViewMatrix(ref rotation);
         }
 
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);

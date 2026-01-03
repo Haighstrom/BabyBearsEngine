@@ -6,7 +6,7 @@ using OpenTK.Mathematics;
 namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;
 
 internal class OpenChapter1Button() 
-    : Button(10, 10, 80, 40, Color4.Blue)
+    : Button(10, 10, 80, 40, Color4.Blue, "Chapter 1")
 {
     public override void OnClicked()
     {

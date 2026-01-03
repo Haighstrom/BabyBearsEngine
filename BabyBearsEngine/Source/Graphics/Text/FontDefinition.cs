@@ -3,16 +3,17 @@ using System.Text;
 
 namespace BabyBearsEngine.Source.Graphics.Text;
 
-public record class FontDefinition(string FontName, float FontSize, FontStyle FontStyle, bool AntiAliased, string ExtraCharactersToLoad = "", bool IncludeDefaultCharacters = true)
+public record class FontDefinition(string FontName, float FontSize, FontStyle FontStyle = FontStyle.Regular, bool AntiAliased = FontDefinition.AntiAliasedDefault, string ExtraCharactersToLoad = "", bool IncludeDefaultCharacters = true)
 {
-    private const string DEFAULT_CHARS_TO_LOAD = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 !£$%^&*()-=_+[]{};'#:@~,./<>?|`¬¦€\"\\";
+    private const bool AntiAliasedDefault = false;
+    private const string DefaultCharsToLoad = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 !£$%^&*()-=_+[]{};'#:@~,./<>?|`¬¦€\"\\";
 
     private static string BuildCharactersToLoad(bool includeDefaultCharacters, string extraCharactersToLoad)
     {
         extraCharactersToLoad ??= string.Empty;
 
         string combinedCharactersToLoad = includeDefaultCharacters 
-            ? DEFAULT_CHARS_TO_LOAD + extraCharactersToLoad 
+            ? DefaultCharsToLoad + extraCharactersToLoad 
             : extraCharactersToLoad;
 
         return RemoveDuplicateCharacters(combinedCharactersToLoad);

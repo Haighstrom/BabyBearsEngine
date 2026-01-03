@@ -1,14 +1,16 @@
 ﻿using BabyBearsEngine.Source.Core;
 using BabyBearsEngine.Source.Graphics;
+using BabyBearsEngine.Source.Graphics.Text;
 using BabyBearsEngine.Source.Worlds;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.UI;
 
-public class Button(int x, int y, int width, int height, Color4 colour) : IEntity
+public class Button(int x, int y, int width, int height, Color4 colour, string textToDisplay) : IEntity
 {
     private bool _disposed;
     private readonly ColouredRectangle _graphic = new(colour, x, y, width, height);
+    private readonly TextImage _textImage = new(new FontDefinition("Times New Roman", 16), textToDisplay, Color4.Black, x, y, width, height);
 
     public void Update()
     {
@@ -26,6 +28,7 @@ public class Button(int x, int y, int width, int height, Color4 colour) : IEntit
     public void Render()
     {
         _graphic.Render();
+        _textImage.Render();
     }
 
     protected virtual void Dispose(bool disposing)

@@ -92,8 +92,8 @@ public class TextImage : IRenderable, IDisposable
 
     float ScaleX = 1;
     float ScaleY = 1;
-    HAlignment HAlignment = HAlignment.Left;
-    VAlignment VAlignment = VAlignment.Top;
+    HAlignment HAlignment = HAlignment.Centred;
+    VAlignment VAlignment = VAlignment.Centred;
     private float _extraSpaceWidth = 0;
     private float _extraLineSpacing = 0;
 
@@ -130,7 +130,7 @@ public class TextImage : IRenderable, IDisposable
         //    _linesToDraw.Add(new Line(Colour, UnderlineThickness, true, dest.BottomLeft.Shift(0, UnderlineOffset), dest.BottomLeft.Shift(len, UnderlineOffset)));
         //if (Strikethrough)
         //    _linesToDraw.Add(new Line(Colour, StrikethroughThickness, true, dest.CentreLeft.Shift(0, StrikethroughOffset), dest.CentreLeft.Shift(len, StrikethroughOffset)));
-        bool first = true;
+        
         foreach (char c in _textToDisplay)
         {
             Box2 source = _fontStruct.CharPositionsNormalised[c];
