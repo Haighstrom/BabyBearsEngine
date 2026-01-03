@@ -178,7 +178,7 @@ public class TextImage : IRenderable, IDisposable
             _verticesChanged = false;
         }
 
-        GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
+        GL.DrawArrays(PrimitiveType.TriangleStrip, 0, Vertices.Length);
     }
 
     protected virtual void Dispose(bool disposing)

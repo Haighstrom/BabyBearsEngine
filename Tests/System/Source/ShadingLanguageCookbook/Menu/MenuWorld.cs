@@ -14,7 +14,7 @@ internal class MenuWorld : World
         //AddGraphic(new Image("Assets/bear.png", 200, 200, 100, 100));
 
         FontDefinition fontDef = new("Times New Roman", 20, FontStyle.Regular, false);
-        AddGraphic(new TextImage(fontDef, "Hello", Color4.White, 200, 200, 512, 128));
+        AddGraphic(new TextImage(fontDef, "Haigh!", Color4.White, 200, 200, 512, 128));
         //AddGraphic(new TextImage(fontDef, "Hi pretty girl", Color4.White, 150, 60, 512, 512));
     }
 }
