@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using BabyBearsEngine.Source.Graphics.Components;
 using BabyBearsEngine.Source.Graphics.Shaders.ShaderPrograms;
-using BabyBearsEngine.Source.Graphics.Text;
 using BabyBearsEngine.Source.Graphics.Textures;
 using BabyBearsEngine.Source.Tools;
 using OpenTK.Mathematics;
 
-namespace BabyBearsEngine.Source.Graphics;
+namespace BabyBearsEngine.Source.Graphics.Text;
 
 public class TextImage : IRenderable, IDisposable
 {
@@ -91,34 +90,15 @@ public class TextImage : IRenderable, IDisposable
 
     private Vertex[] Vertices { get; set; } = [];
 
+    float ScaleX = 1;
+    float ScaleY = 1;
+    HAlignment HAlignment = HAlignment.Left;
+    VAlignment VAlignment = VAlignment.Top;
+    private float _extraSpaceWidth = 0;
+    private float _extraLineSpacing = 0;
+
     private void SetVerticesSimple()
     {
-        //Vertices =
-        //[
-        //    new(_x + _width, _y + _height, Colour, 0.5f, 0.5f), // top right
-        //    new(_x + _width, _y, Colour, 0.5f, 0), // bottom right
-        //    new(_x, _y + _height, Colour, 0, 0.5f), // top left
-        //    new(_x, _y, Colour, 0, 0), // bottom left
-        //];
-
-        List<Vertex> vertices = new();
-
-        foreach (char c in _textToDisplay)
-        {
-            Box2 source = _fontStruct.CharPositionsNormalised[c];
-
-            vertices.Add(Geometry.QuadToTris(
-                new Vertex(_x + _width, _y + _height, Colour, source.Max.X, source.Max.Y), // top right
-                new Vertex(_x + _width, _y, Colour, source.Max.X, source.Min.Y), // bottom right
-                new Vertex(_x, _y + _height, Colour, source.Min.X, source.Max.Y), // top left
-                new Vertex(_x, _y, Colour, source.Min.X, source.Min.Y) // bottom left
-                ));
-        }
-
-        Vertices = vertices.ToArray();
-
-
-
         //foreach (var sg in _vertGroups)
         //{
         //    sg.Dispose();
@@ -126,79 +106,61 @@ public class TextImage : IRenderable, IDisposable
 
         //_vertGroups.Clear();
 
-        //var vertices = new List<Vertex>();
+        List<Vertex> vertices = [];
 
-        //var len = ScaleX * _fontStruct.MeasureString(text).X;
+        var len = ScaleX * _fontStruct.MeasureString(_textToDisplay).X;
 
-        //float h = ScaleY * _fontStruct.HighestChar;
+        float h = ScaleY * _fontStruct.HighestChar;
 
-        //float x = HAlignment switch //todo: was 'int'ed before to avoid looking shit with no AA - but buggers up text in cameras - complex if statement?
-        //{
-        //    HAlignment.Left or HAlignment.Full => 0,
-        //    HAlignment.Centred => (Width - len) / 2,
-        //    HAlignment.Right => Width - len,
-        //    _ => throw new Exception($"HText/SetVertices: alignment {HAlignment} was not catered for."),
-        //};
-        //float y = VAlignment switch //todo: was 'int'ed before to avoid looking shit with no AA - but buggers up text in cameras - complex if statement?
-        //{
-        //    VAlignment.Top or VAlignment.Full => 0,
-        //    VAlignment.Centred => (Height - h) / 2,
-        //    VAlignment.Bottom => Height - h,
-        //    _ => throw new Exception($"HText/SetVertices: alignment {VAlignment} was not catered for."),
-        //};
+        float x = HAlignment switch //todo: was 'int'ed before to avoid looking shit with no AA - but buggers up text in cameras - complex if statement?
+        {
+            HAlignment.Left or HAlignment.Full => 0,
+            HAlignment.Centred => (Width - len) / 2,
+            HAlignment.Right => Width - len,
+            _ => throw new Exception($"HText/SetVertices: alignment {HAlignment} was not catered for."),
+        };
+        float y = VAlignment switch //todo: was 'int'ed before to avoid looking shit with no AA - but buggers up text in cameras - complex if statement?
+        {
+            VAlignment.Top or VAlignment.Full => 0,
+            VAlignment.Centred => (Height - h) / 2,
+            VAlignment.Bottom => Height - h,
+            _ => throw new Exception($"HText/SetVertices: alignment {VAlignment} was not catered for."),
+        };
         //if (Underline)
         //    _linesToDraw.Add(new Line(Colour, UnderlineThickness, true, dest.BottomLeft.Shift(0, UnderlineOffset), dest.BottomLeft.Shift(len, UnderlineOffset)));
         //if (Strikethrough)
         //    _linesToDraw.Add(new Line(Colour, StrikethroughThickness, true, dest.CentreLeft.Shift(0, StrikethroughOffset), dest.CentreLeft.Shift(len, StrikethroughOffset)));
+        bool first = true;
+        foreach (char c in _textToDisplay)
+        {
+            Box2 source = _fontStruct.CharPositionsNormalised[c];
+            var w = _fontStruct.CharPositions[c].Size.X * ScaleX;
 
+            vertices.Add(
+                Geometry.QuadToTris(
+            //new Vertex(_x, _y, Colour, source.Min.X, source.Min.Y), // bottom left
+            //new Vertex(_x + _width, _y, Colour, source.Max.X, source.Min.Y), // bottom right
+            //new Vertex(_x, _y + _height, Colour, source.Min.X, source.Max.Y), // top left
+            //new Vertex(_x + _width, _y + _height, Colour, source.Max.X, source.Max.Y) // top right
+            new Vertex(X + x, Y + y, Colour, source.Min.X, source.Min.Y),
+            new Vertex(X + x + w, Y + y, Colour, source.Max.X, source.Min.Y),
+            new Vertex(X + x, Y + y + h, Colour, source.Min.X, source.Max.Y),
+            new Vertex(X + x + w, Y + y + h, Colour, source.Max.X, source.Max.Y)
+            ));
 
+            x += w;
 
-        //foreach (char c in text)
-        //{
-        //    Box2 source = _fontStruct.CharPositionsNormalised[c];
-        //    var w = _fontStruct.CharPositions[c].Size.X * ScaleX;
+            if (c == ' ')
+            {
+                x += _extraSpaceWidth;
+            }
+            else
+            {
+                x += _extraLineSpacing;
+            }
+        }
 
-        //    //vertices.Add(Geometry.QuadToTris(
-        //    //    new Vertex(X + x, Y + y, Colour, source.Min.X, source.Min.Y),
-        //    //    new Vertex(X + x + w, Y + y, Colour, source.Max.X , source.Min.Y),
-        //    //    new Vertex(X + x, Y + y + h, Colour, source.Min.X, source.Max.Y),
-        //    //    new Vertex(X + x + w, Y + y + h, Colour, source.Max.X, source.Max.Y)
-        //    //    ));
-
-        //    vertices.Add(Geometry.QuadToTris(
-        //        new Vertex(0, 0, Colour, 0, 0),
-        //        new Vertex(200, 0, Colour, 1, 0),
-        //        new Vertex(0, 200, Colour, 0, 1),
-        //        new Vertex(200, 200, Colour, 1, 1)
-        //        ));
-        //    break;
-
-        //    x += w;
-
-        //    if (c == ' ')
-        //    {
-        //        x += _extraSpaceWidth;
-        //    }
-        //    else
-        //    {
-        //        x += _extraLineSpacing;
-        //    }
-        //}
-
-        //if (vertices.Count > 0)
-        //{
-        //    _vertGroups.Add(new SimpleGraphic(new TextureFactory().GenTexture(_fontStruct.CharacterSS), vertices.ToArray()));
-        //}
-
-        //if (_fontStruct.HighestChar > Height)
-        //{
-        //    //Log.Warning($"HText/SetVerticesSimple: line height ({_fontStruct.HighestChar}) is bigger than text box height ({Height})");
-        //}
-
-        //if (len > Width)
-        //{
-        //    //Log.Warning($"HText/SetVerticesSimple: line is longer ({len}) than text box width ({Width})");
-        //}
+        Vertices = vertices.ToArray();
     }
 
     public void Render()

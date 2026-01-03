@@ -53,7 +53,7 @@ internal sealed class FontBitmapGenerator() : IFontBitmapGenerator
             var charRect = new Box2i(posX, posY, posX + characterBMPs[j].Width, posY + highestChar);
             charPositions.Add(c, charRect);
             //charRect = charRect.ScaleAround(spriteSheetWidth, spriteSheetHeight, 0, 0);
-            var charRectNormalised = new Box2(charRect.Min.X / (float)spriteSheetWidth, charRect.Min.Y / (float)spriteSheetHeight, charRect.Size.X / (float)spriteSheetWidth, charRect.Size.Y / (float)spriteSheetHeight);
+            var charRectNormalised = new Box2(charRect.Min.X / (float)spriteSheetWidth, charRect.Min.Y / (float)spriteSheetHeight, charRect.Min.X / (float)spriteSheetWidth + charRect.Size.X / (float)spriteSheetWidth, charRect.Min.Y / (float)spriteSheetHeight + charRect.Size.Y / (float)spriteSheetHeight);
             charPositionsNormalised.Add(c, charRectNormalised);
 
             using (var ia = new ImageAttributes())

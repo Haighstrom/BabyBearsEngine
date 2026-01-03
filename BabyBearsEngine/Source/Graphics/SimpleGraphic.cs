@@ -15,13 +15,14 @@ internal class SimpleGraphic : IRenderable, IDisposable
     public Vertex[] Vertices { get; }
     public bool Visible { get; set; } = true;
 
-
+    //private ITexture temp;
     public SimpleGraphic(ITexture texture, Vertex[] vertices)
     {
+        //temp = texture;
         if (vertices.Length < 3)
             throw new ArgumentException("Cannot make a SimpleGraphic with fewer than 3 vertices", nameof(vertices));
 
-        Texture = texture;
+        Texture = texture;// new TextureFactory().CreateTextureFromImageFile("Assets/bear.png");//texture;
         Vertices = vertices;
 
         Shader.Bind();

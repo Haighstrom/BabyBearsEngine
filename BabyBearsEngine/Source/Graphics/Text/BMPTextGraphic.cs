@@ -14,8 +14,6 @@ public class BMPTextGraphic : ITextGraphic
     private readonly List<SimpleGraphic> _vertGroups = [];
     private readonly GeneratedFontStruct _fontStruct;
 
-
-
     private bool _disposed;
     private float _x;
     private float _y;
@@ -35,17 +33,16 @@ public class BMPTextGraphic : ITextGraphic
         _fontStruct = new FontBitmapGenerator().GenerateCharSpritesheetAndPositions(FontLoader.LoadFont(fontDef), fontDef.CharactersToLoad, fontDef.AntiAliased, 13);
 
         _tempTexture = new TextureFactory().GenTexture(_fontStruct.CharacterSS);
-        _image = new Image(_tempTexture, 200, 200, 100, 100);
 
-        _anotherTempGraphic = new(_tempTexture,
-            [
-                new(0, 0, Color4.White, 0, 0), // bottom left
-                new(200, 0, Color4.White, 1, 0), // bottom right
-                new(0, 200, Color4.White, 0, 1), // top left
-                new(200, 200, Color4.White, 1, 1), // top right
-            ]);
+        //_anotherTempGraphic = new(_tempTexture,
+        //    [
+        //        new(0, 0, Color4.White, 0, 0), // bottom left
+        //        new(200, 0, Color4.White, 1, 0), // bottom right
+        //        new(0, 200, Color4.White, 0, 1), // top left
+        //        new(200, 200, Color4.White, 1, 1), // top right
+        //    ]);
 
-        //SetVerticesSimple();
+        SetVerticesSimple();
     }
 
     public float X
@@ -132,7 +129,7 @@ public class BMPTextGraphic : ITextGraphic
         {
             SetVerticesSimple();
 
-            _image = new("Assets/bear2.png", 200, 200, 100, 100);
+            //_image = new("Assets/bear2.png", 200, 200, 100, 100);
 
             _verticesChanged = false;
         }
@@ -147,11 +144,13 @@ public class BMPTextGraphic : ITextGraphic
 
     private void SetVerticesSimple()
     {
+
+        _image = new Image(_tempTexture, 200, 200, 100, 100);
+
         //foreach (var sg in _vertGroups)
         //{
         //    sg.Dispose();
         //}
-
 
         _vertGroups.Clear();
 
@@ -220,7 +219,7 @@ public class BMPTextGraphic : ITextGraphic
 
         //if (vertices.Count > 0)
         {
-            _vertGroups.Add(new SimpleGraphic(_tempTexture, otherVertices));
+            _vertGroups.Add(new SimpleGraphic(new TextureFactory().CreateTextureFromImageFile("assets/bear.png"), otherVertices));
         }
 
         if (_fontStruct.HighestChar > Height)

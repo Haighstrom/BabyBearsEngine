@@ -188,7 +188,7 @@ public static class OpenGLHelper
     {
         //if (s_lastBoundVBO != 0)
         {
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            //GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             s_lastBoundVBO = 0;
         }
     }

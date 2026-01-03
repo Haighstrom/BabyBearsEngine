@@ -4,7 +4,7 @@ using BabyBearsEngine.Source.Graphics;
 
 namespace BabyBearsEngine.Source.Worlds;
 
-public class World : IWorld
+public class World() : IWorld
 {
     private readonly List<IRenderable> _graphics = [];
     private readonly List<IUpdateable> _updateables = [];
@@ -36,15 +36,6 @@ public class World : IWorld
         {
             updateable.Update();
         }
-
-        if (_image == null)
-            _image = new("Assets/bear2.png", 200, 200, 100, 100);
-    }
-
-    Image _image;
-
-    public World()
-    {
     }
 
     public void DrawGraphics()
@@ -53,8 +44,6 @@ public class World : IWorld
         {
             graphic.Render();
         }
-
-        _image.Render();
     }
 
     public void Unload()
