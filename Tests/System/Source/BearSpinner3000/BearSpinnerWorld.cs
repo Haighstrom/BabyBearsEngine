@@ -9,8 +9,19 @@ internal class BearSpinnerWorld : World
 {
     public BearSpinnerWorld()
     {
-        //Repeat.CallMethod(() => _camera.Add(new Bear(Randomisation.Rand((int)window.ClientSize.X), Randomisation.Rand((int)window.ClientSize.Y))), window.WindowWidth * window.WindowHeight / 3000);
-        
+        Window.Resize += Window_Resize;
+        AddBears();
+    }
+
+    private void Window_Resize(OpenTK.Windowing.Common.ResizeEventArgs obj)
+    {
+        Clear();
+        AddBears();
+    }
+
+    private void AddBears()
+    {
+
         Random random = new();
 
         Repeat.CallMethod(() => AddEntity(new BearEntity(random.Next(Window.Width), random.Next(Window.Height))), Window.Width * Window.Height / 3000);

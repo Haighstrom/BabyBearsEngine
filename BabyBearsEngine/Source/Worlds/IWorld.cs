@@ -5,6 +5,7 @@ public interface IWorld
 {
     void AddEntity(IEntity entity);
     void AddGraphic(IRenderable graphic);
+    void Clear();
     void DrawGraphics();
     void RemoveGraphic(IRenderable graphic);
     void Unload();

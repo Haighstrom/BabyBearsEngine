@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BabyBearsEngine.Source.Graphics;
 using BabyBearsEngine.Source.Tools;
 using BabyBearsEngine.Source.Worlds;
@@ -11,19 +7,12 @@ namespace BabyBearsEngine.Tests.System.Source.BearSpinner3000;
 
 internal class BearEntity(int startX, int startY) : IEntity
 {
-
-    //public Bear(int x, int y)
-    //    : base(100, new Rect(x, y, 60, 80))
-    //{
-    //    Add(_image = new(GA.GFX.WhiteBear, 60, 80)
-    //    {
-    //        Angle = Randomisation.Rand(360),
-    //        Colour = Randomisation.RandSystemColour(),
-    //    });
-    //}
-
     private bool _disposed;
-    private readonly Image _graphic = new("Assets/SpinnableBear.png", startX, startY, 60, 80) { Colour = ColourTools.RandSystemColour() };
+    private readonly Image _graphic = new("Assets/SpinnableBear.png", startX, startY, 60, 80) 
+    { 
+        Colour = ColourTools.RandSystemColour(), 
+        Angle = Randomisation.Rand(360) 
+    };
     private readonly float _rotateSpeed = 10 * Randomisation.RandF(-10, 10);
     private readonly float _swaySpeed = Randomisation.RandF(-4, 4);
     private readonly float _alphaShift = Randomisation.RandF(0, 100);
@@ -41,8 +30,8 @@ internal class BearEntity(int startX, int startY) : IEntity
     {
         var elapsed = 1 / 60f;
 
-        _totalElapsed += elapsed; //elapsed;
-        //_graphic.Alpha = (byte)((1 + Math.Sin(alphaShift + alphaSpeed * totalElapsed)) * 128);
+        _totalElapsed += elapsed;
+        _graphic.Alpha = (1 + (float)Math.Sin(_alphaShift + _alphaSpeed * _totalElapsed)) / 2;
         _graphic.Angle += _rotateSpeed * (float)elapsed;
 
         _graphic.X = startX + _xSway * (float)Math.Sin(_swaySpeed * _totalElapsed);

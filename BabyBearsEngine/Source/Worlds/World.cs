@@ -9,6 +9,12 @@ public class World() : IWorld
     private readonly List<IRenderable> _graphics = [];
     private readonly List<IUpdateable> _updateables = [];
 
+    public void Clear()
+    {
+        _graphics.Clear();
+        _updateables.Clear();
+    }
+
     public void AddGraphic(IRenderable graphic)
     {
         _graphics.Add(graphic);

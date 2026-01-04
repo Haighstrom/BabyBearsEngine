@@ -7,12 +7,13 @@ namespace BabyBearsEngine.Source.Graphics;
 
 public class Image : IRenderable, IDisposable
 {
-    public StandardMatrixShaderProgram Shader { get; set; } = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
     private readonly ITexture _texture;
 
     private Color4 _colour = Color4.White;
     private bool _verticesChanged = true;
+
+    public StandardMatrixShaderProgram Shader { get; set; } = new();
 
     public float X
     {
@@ -63,22 +64,21 @@ public class Image : IRenderable, IDisposable
             _verticesChanged = true;
         }
     }
+    public virtual float Alpha
+    {
+        get => Colour.A;
+        set => Colour = new(Colour.R, Colour.G, Colour.B, value);
+    }
 
     public float Angle { get; set; }
 
-    private Vertex[] Vertices
-    {
-        get
-        {
-            return
-            [
-                new(_x, _y, Colour, 0, 0), // bottom left
-                new(_x + _width, _y, Colour, 1, 0), // bottom right
-                new(_x, _y + _height, Colour, 0, 1), // top left
-                new(_x + _width, _y + _height, Colour, 1, 1), // top right
-            ];
-        }
-    }
+    private Vertex[] Vertices => 
+    [
+        new(_x, _y, Colour, 0, 0), // bottom left
+        new(_x + _width, _y, Colour, 1, 0), // bottom right
+        new(_x, _y + _height, Colour, 0, 1), // top left
+        new(_x + _width, _y + _height, Colour, 1, 1), // top right
+    ];
 
     public void Render()
     {
@@ -96,11 +96,18 @@ public class Image : IRenderable, IDisposable
         if (Angle != 0)
         {
             var mv = Matrix3.Identity;
-            //var translate1 = new Matrix3(1, 0, 0, 0, 1, 0, X, Y, 1);
-            var rotation = Matrix3.CreateRotationZ(MathHelper.DegreesToRadians(Angle));
-            //var translate2 = new Matrix3(1, 0, 0, 0, 1, 0, -X, -Y, 1);
-            //mv = Matrix3.RotateAroundPoint(ref mv, Angle, R.Centre.X, R.Centre.Y)
-            Shader.SetModelViewMatrix(ref rotation);
+
+            var translateBack = new Matrix3(1, 0, 0, 0, 1, 0, _x + Width / 2, _y + Height / 2, 1);
+            translateBack.Transpose();
+
+            var rotationAroundOrigin = Matrix3.CreateRotationZ(MathHelper.DegreesToRadians(-Angle));
+            
+            var translateToOrigin = new Matrix3(1, 0, 0, 0, 1, 0, -(_x + Width / 2), -(_y + Height / 2), 1);
+            translateToOrigin.Transpose();
+
+            mv = translateBack * rotationAroundOrigin * translateToOrigin * mv;
+
+            Shader.SetModelViewMatrix(ref mv);
         }
 
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
