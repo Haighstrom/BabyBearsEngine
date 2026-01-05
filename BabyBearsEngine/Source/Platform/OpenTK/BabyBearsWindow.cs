@@ -17,6 +17,7 @@ public class BabyBearsWindow(GameWindowSettings gameWindowSettings, NativeWindow
         World = createWorld?.Invoke() ?? new World();
 
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        GL.Enable(EnableCap.Blend);
     }
 
     protected override void OnUnload()
@@ -38,6 +39,8 @@ public class BabyBearsWindow(GameWindowSettings gameWindowSettings, NativeWindow
         base.OnRenderFrame(args);
 
         GL.Clear(ClearBufferMask.ColorBufferBit);
+
+        GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
 
         World.DrawGraphics();
 
