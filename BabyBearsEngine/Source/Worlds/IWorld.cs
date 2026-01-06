@@ -9,5 +9,5 @@ public interface IWorld
     void DrawGraphics();
     void RemoveGraphic(IRenderable graphic);
     void Unload();
-    void UpdateThings();
+    void UpdateThings(double elapsed);
 }

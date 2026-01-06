@@ -12,7 +12,7 @@ public class Button(int x, int y, int width, int height, Color4 colour, string t
     private readonly ColouredRectangle _graphic = new(colour, x, y, width, height);
     private readonly TextImage _textImage = new(new FontDefinition("Times New Roman", 16), textToDisplay, Color4.Black, x, y, width, height);
 
-    public void Update()
+    public void Update(double elapsed)
     {
         if (Mouse.LeftPressed && Mouse.ClientX >= x && Mouse.ClientX < x + width && Mouse.ClientY >= y && Mouse.ClientY < y + height)
         {

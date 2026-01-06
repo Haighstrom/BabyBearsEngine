@@ -26,10 +26,8 @@ internal class BearEntity(int startX, int startY) : IEntity
         _graphic.Render();
     }
 
-    public void Update()
+    public void Update(double elapsed)
     {
-        var elapsed = 1 / 60f;
-
         _totalElapsed += elapsed;
         _graphic.Alpha = (1 + (float)Math.Sin(_alphaShift + _alphaSpeed * _totalElapsed)) / 2;
         _graphic.Angle += _rotateSpeed * (float)elapsed;

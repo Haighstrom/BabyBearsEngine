@@ -36,11 +36,11 @@ public class World() : IWorld
         _updateables.Add(entity);
     }
 
-    public void UpdateThings()
+    public void UpdateThings(double elapsed)
     {
         foreach (var updateable in _updateables.ToList())
         {
-            updateable.Update();
+            updateable.Update(elapsed);
         }
     }
 

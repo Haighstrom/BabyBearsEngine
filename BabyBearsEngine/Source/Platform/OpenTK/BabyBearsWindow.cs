@@ -31,7 +31,7 @@ public class BabyBearsWindow(GameWindowSettings gameWindowSettings, NativeWindow
     {
         base.OnUpdateFrame(args);
 
-        World.UpdateThings();
+        World.UpdateThings(args.Time);
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)

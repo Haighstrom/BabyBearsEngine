@@ -2,5 +2,5 @@
 
 public interface IUpdateable
 {
-    void Update();
+    void Update(double elapsed);
 }
