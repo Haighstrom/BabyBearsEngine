@@ -21,6 +21,8 @@ public class TextImage : IRenderable, IDisposable
     private readonly string _textToDisplay;
     private Color4 _colour;
     private bool _verticesChanged = true;
+    private float _extraSpaceWidth = 0;
+    private float _extraLineSpacing = 0;
 
     public TextImage(FontDefinition fontDef, string textToDisplay, Color4 colour, float x, float y, float width, float height)
     {
@@ -90,12 +92,10 @@ public class TextImage : IRenderable, IDisposable
 
     private Vertex[] Vertices { get; set; } = [];
 
-    float ScaleX = 1;
-    float ScaleY = 1;
-    HAlignment HAlignment = HAlignment.Centred;
-    VAlignment VAlignment = VAlignment.Centred;
-    private float _extraSpaceWidth = 0;
-    private float _extraLineSpacing = 0;
+    public float ScaleX { get; set; } = 1;
+    public float ScaleY { get; set; } = 1;
+    public HAlignment HAlignment { get; set; } = HAlignment.Centred;
+    public VAlignment VAlignment { get; set; } = VAlignment.Centred;
 
     private void SetVerticesSimple()
     {
@@ -138,10 +138,6 @@ public class TextImage : IRenderable, IDisposable
 
             vertices.Add(
                 Geometry.QuadToTris(
-            //new Vertex(_x, _y, Colour, source.Min.X, source.Min.Y), // bottom left
-            //new Vertex(_x + _width, _y, Colour, source.Max.X, source.Min.Y), // bottom right
-            //new Vertex(_x, _y + _height, Colour, source.Min.X, source.Max.Y), // top left
-            //new Vertex(_x + _width, _y + _height, Colour, source.Max.X, source.Max.Y) // top right
             new Vertex(X + x, Y + y, Colour, source.Min.X, source.Min.Y),
             new Vertex(X + x + w, Y + y, Colour, source.Max.X, source.Min.Y),
             new Vertex(X + x, Y + y + h, Colour, source.Min.X, source.Max.Y),
