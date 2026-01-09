@@ -8,7 +8,7 @@ internal class MenuWorld : World
 {
     public MenuWorld()
     {
-        AddEntity(new BearSpinnerButton(20, 20));
+        //AddEntity(new BearSpinnerButton(20, 20));
 
         //AddGraphic(new Image("Assets/bear.png", 20, 20, 300, 300) { Angle = 45f });
     }

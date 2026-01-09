@@ -144,6 +144,7 @@ public class Image : IRenderable, IDisposable
             if (disposing)
             {
                 // TODO: dispose managed state (managed objects)
+                //_texture.Dispose();
                 _vertexDataBuffer.Dispose();
             }
 

@@ -23,10 +23,9 @@ internal class Texture(int handle, int width, int height) : ITexture, IDisposabl
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
-            
-            OpenGLHelper.UnbindTexture();
-            GL.DeleteTexture(Handle);
-            
+
+            TextureDeleter.RequestDelete(this);
+
             _disposed = true;
         }
     }
