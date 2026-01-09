@@ -1,6 +1,4 @@
-﻿using BabyBearsEngine.Source.Graphics;
-using BabyBearsEngine.Source.Graphics.Components;
-using BabyBearsEngine.Source.Graphics.Textures;
+﻿using BabyBearsEngine.Source.Graphics.Textures;
 using BabyBearsEngine.Source.Worlds;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -20,11 +18,6 @@ public class BabyBearsWindow(GameWindowSettings gameWindowSettings, NativeWindow
 
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         GL.Enable(EnableCap.Blend);
-
-        //VertexDataBuffer<Vertex> vdb = new();
-        //vdb.Bind();
-        //vdb.Dispose();
-
     }
 
     protected override void OnUnload()

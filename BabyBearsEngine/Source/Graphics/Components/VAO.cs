@@ -1,4 +1,6 @@
-﻿namespace BabyBearsEngine.Source.Graphics.Components;
+﻿using BabyBearsEngine.Source.Graphics.Textures;
+
+namespace BabyBearsEngine.Source.Graphics.Components;
 
 public class VAO() : IDisposable
 {
@@ -20,8 +22,7 @@ public class VAO() : IDisposable
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
 
-            OpenGLHelper.UnbindVAO();
-            GL.DeleteVertexArray(Handle);
+            TextureDeleter.RequestDelete(this);
 
             _disposed = true;
         }

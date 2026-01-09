@@ -1,4 +1,6 @@
-﻿namespace BabyBearsEngine.Source.Graphics.Components;
+﻿using BabyBearsEngine.Source.Graphics.Textures;
+
+namespace BabyBearsEngine.Source.Graphics.Components;
 
 public class VBO() : IDisposable
 {
@@ -19,8 +21,8 @@ public class VBO() : IDisposable
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
-            OpenGLHelper.UnbindVBO();
-            GL.DeleteBuffer(Handle);
+
+            TextureDeleter.RequestDelete(this);
 
             _disposed = true;
         }
