@@ -1,4 +1,6 @@
-﻿namespace BabyBearsEngine.Source.Graphics.Components;
+﻿using BabyBearsEngine.Source.Graphics.MemoryManagement;
+
+namespace BabyBearsEngine.Source.Graphics.Components;
 
 public class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw) : IDisposable
 {
@@ -25,8 +27,7 @@ public class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw) 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
 
-            OpenGLHelper.UnbindEBO();
-            GL.DeleteBuffer(Handle);
+            GPUMemoryDisposer.RequestDeleteEBO(this);
 
             _disposed = true;
         }

@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Source.Graphics.Shaders.ShaderPrograms;
+﻿using BabyBearsEngine.Source.Graphics.MemoryManagement;
+using BabyBearsEngine.Source.Graphics.Shaders.ShaderPrograms;
 
 namespace BabyBearsEngine.Source.Graphics.Shaders;
 
@@ -34,8 +35,7 @@ public abstract class ShaderProgramBase : IShaderProgram
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
-            OpenGLHelper.UnbindShader();
-            GL.DeleteProgram(Handle);
+            GPUMemoryDisposer.RequestDeleteShader(this);
 
             _disposed = true;
         }

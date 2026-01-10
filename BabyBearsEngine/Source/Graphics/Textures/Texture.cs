@@ -1,4 +1,6 @@
-﻿namespace BabyBearsEngine.Source.Graphics.Textures;
+﻿using BabyBearsEngine.Source.Graphics.MemoryManagement;
+
+namespace BabyBearsEngine.Source.Graphics.Textures;
 
 internal class Texture(int handle, int width, int height) : ITexture, IDisposable
 {
@@ -24,7 +26,7 @@ internal class Texture(int handle, int width, int height) : ITexture, IDisposabl
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
 
-            TextureDeleter.RequestDelete(this);
+            GPUMemoryDisposer.RequestDeleteTexture(this);
 
             _disposed = true;
         }

@@ -1,4 +1,4 @@
-﻿using BabyBearsEngine.Source.Graphics.Textures;
+﻿using BabyBearsEngine.Source.Graphics.MemoryManagement;
 
 namespace BabyBearsEngine.Source.Graphics.Components;
 
@@ -22,7 +22,7 @@ public class VAO() : IDisposable
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
 
-            TextureDeleter.RequestDelete(this);
+            GPUMemoryDisposer.RequestDeleteVAO(this);
 
             _disposed = true;
         }

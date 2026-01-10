@@ -1,4 +1,4 @@
-﻿using BabyBearsEngine.Source.Graphics.Textures;
+﻿using BabyBearsEngine.Source.Graphics.MemoryManagement;
 using BabyBearsEngine.Source.Worlds;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -44,7 +44,7 @@ public class BabyBearsWindow(GameWindowSettings gameWindowSettings, NativeWindow
 
         World.DrawGraphics();
 
-        TextureDeleter.ProcessDeletes();
+        GPUMemoryDisposer.ProcessDeletes();
 
         SwapBuffers();
     }
