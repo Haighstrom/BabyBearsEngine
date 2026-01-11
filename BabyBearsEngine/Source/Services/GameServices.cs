@@ -1,4 +1,6 @@
-﻿namespace BabyBearsEngine.Source.Services;
+﻿using BabyBearsEngine.Source.Graphics.MemoryManagement;
+
+namespace BabyBearsEngine.Source.Services;
 
 internal static class GameServices
 {
@@ -19,4 +21,5 @@ internal static class GameServices
     public static IWindowService WindowService => Services.WindowService;
     public static IKeyboardService KeyboardService => Services.KeyboardService;
     public static IMouseService MouseService => Services.MouseService;
+    public static IGPUMemoryService GPUMemoryService => Services.GPUMemoryService;
 }

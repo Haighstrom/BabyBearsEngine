@@ -6,7 +6,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BabyBearsEngine.Source.Graphics.MemoryManagement;
 
-internal class DefaultGPUMemoryDisposer : IGPUMemoryDisposer
+internal class DefaultGPUMemoryService : IGPUMemoryService
 {
     private readonly object _gate = new();
 

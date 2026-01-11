@@ -4,7 +4,7 @@ using BabyBearsEngine.Source.Graphics.Textures;
 
 namespace BabyBearsEngine.Source.Graphics.MemoryManagement;
 
-internal interface IGPUMemoryDisposer
+internal interface IGPUMemoryService
 {
     void RequestDeleteShader(IShaderProgram shaderProgram);
     void RequestDeleteTexture(ITexture texture);

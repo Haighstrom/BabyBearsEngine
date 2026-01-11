@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Source.Services;
+﻿using BabyBearsEngine.Source.Graphics.MemoryManagement;
+using BabyBearsEngine.Source.Services;
 
 namespace BabyBearsEngine.Source.Platform.OpenTK;
 
@@ -9,4 +10,6 @@ internal class OpenTKGameServicesAdapter(BabyBearsWindow gameWindow) : IGameServ
     public IMouseService MouseService { get; } = new OpenTKMouseAdapter(gameWindow.MouseState);
 
     public IWindowService WindowService { get; } = new OpenTKWindowAdapter(gameWindow);
+
+    public IGPUMemoryService GPUMemoryService { get; } = new DefaultGPUMemoryService();
 }
