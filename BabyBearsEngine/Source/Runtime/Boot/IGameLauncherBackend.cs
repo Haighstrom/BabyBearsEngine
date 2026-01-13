@@ -1,7 +1,7 @@
-﻿using BabyBearsEngine.Source.Config;
+﻿using BabyBearsEngine.Source.Runtime.Config;
 using BabyBearsEngine.Source.Worlds;
 
-namespace BabyBearsEngine.Source.Boot;
+namespace BabyBearsEngine.Source.Runtime.Boot;
 
 public interface IGameLauncherBackend
 {

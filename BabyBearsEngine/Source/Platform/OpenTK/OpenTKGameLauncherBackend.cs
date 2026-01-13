@@ -1,5 +1,5 @@
-﻿using BabyBearsEngine.Source.Boot;
-using BabyBearsEngine.Source.Config;
+﻿using BabyBearsEngine.Source.Runtime.Boot;
+using BabyBearsEngine.Source.Runtime.Config;
 using BabyBearsEngine.Source.Services;
 using BabyBearsEngine.Source.Worlds;
 

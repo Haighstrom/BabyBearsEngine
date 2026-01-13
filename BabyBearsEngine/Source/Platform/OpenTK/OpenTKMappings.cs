@@ -1,5 +1,4 @@
-﻿using BabyBearsEngine.Source.Config;
-using BabyBearsEngine.Source.Core;
+﻿using BabyBearsEngine.Source.Runtime.Config;
 using OpenTK.Windowing.Desktop;
 
 namespace BabyBearsEngine.Source.Platform.OpenTK;

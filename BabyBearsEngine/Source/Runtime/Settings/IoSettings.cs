@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using BabyBearsEngine.Source.IO.Json;
 
-namespace BabyBearsEngine.Source.Config;
+namespace BabyBearsEngine.Source.Runtime.Config;
 
 /// <summary>
 /// A group of settings for instantiating an IoHelper

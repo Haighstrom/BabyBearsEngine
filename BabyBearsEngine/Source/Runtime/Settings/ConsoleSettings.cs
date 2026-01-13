@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace BabyBearsEngine.Source.Config;
+namespace BabyBearsEngine.Source.Runtime.Config;
 
 /// <summary>
 /// A group of settings for instantiating a ConsoleManager
