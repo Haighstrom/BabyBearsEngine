@@ -1,4 +1,4 @@
-﻿namespace BabyBearsEngine.Source.Worlds;
+﻿namespace BabyBearsEngine.Worlds;
 
 public interface IUpdateable
 {

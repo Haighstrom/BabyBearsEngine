@@ -1,7 +1,6 @@
-﻿using BabyBearsEngine.Source.Runtime.Config;
-using OpenTK.Windowing.Desktop;
+﻿using OpenTK.Windowing.Desktop;
 
-namespace BabyBearsEngine.Source.Platform.OpenTK;
+namespace BabyBearsEngine.Platform.OpenTK;
 
 internal static class OpenTkMappings
 {

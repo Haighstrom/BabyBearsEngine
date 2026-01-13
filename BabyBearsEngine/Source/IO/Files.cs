@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 
-namespace BabyBearsEngine.Source.IO;
+namespace BabyBearsEngine.IO;
 
 public static class Files
 {

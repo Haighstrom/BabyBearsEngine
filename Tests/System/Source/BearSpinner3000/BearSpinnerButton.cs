@@ -1,5 +1,4 @@
-﻿using BabyBearsEngine.Source.Core;
-using BabyBearsEngine.Source.UI;
+﻿using BabyBearsEngine.UI;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Tests.System.Source.BearSpinner3000;

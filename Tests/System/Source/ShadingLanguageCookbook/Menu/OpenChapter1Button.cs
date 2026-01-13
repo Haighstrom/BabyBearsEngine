@@ -1,6 +1,5 @@
-﻿using BabyBearsEngine.Source.Core;
-using BabyBearsEngine.Source.UI;
-using BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
+﻿using BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
+using BabyBearsEngine.UI;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;

@@ -1,4 +1,4 @@
-﻿namespace BabyBearsEngine.Source.Runtime.Config;
+﻿namespace BabyBearsEngine;
 
 public sealed record GameLoopSettings()
 {

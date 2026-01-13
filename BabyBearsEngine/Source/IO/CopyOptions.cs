@@ -1,4 +1,4 @@
-﻿namespace BabyBearsEngine.Source.IO;
+﻿namespace BabyBearsEngine.IO;
 
 [Flags]
 public enum CopyOptions : uint

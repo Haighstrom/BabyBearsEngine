@@ -1,4 +1,4 @@
-﻿using BabyBearsEngine.Source.Graphics.Shaders;
+﻿using BabyBearsEngine.OpenGL;
 
 namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
 

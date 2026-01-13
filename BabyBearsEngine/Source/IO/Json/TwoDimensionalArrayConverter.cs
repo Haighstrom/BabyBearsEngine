@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace BabyBearsEngine.Source.IO.Json;
+namespace BabyBearsEngine.IO;
 
 public class TwoDimensionalArrayConverter : JsonConverterFactory
 {

@@ -1,8 +1,7 @@
-﻿using BabyBearsEngine.Source.Services;
-using BabyBearsEngine.Source.Worlds;
+﻿using BabyBearsEngine.Worlds;
 using OpenTK.Windowing.Common;
 
-namespace BabyBearsEngine.Source.Platform.OpenTK;
+namespace BabyBearsEngine.Platform.OpenTK;
 
 public sealed class OpenTKWindowAdapter(BabyBearsWindow window) : IWindowService
 {

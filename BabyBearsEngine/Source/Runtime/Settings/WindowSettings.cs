@@ -4,7 +4,7 @@ using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-namespace BabyBearsEngine.Source.Runtime.Config;
+namespace BabyBearsEngine;
 
 public record class WindowSettings()
 {

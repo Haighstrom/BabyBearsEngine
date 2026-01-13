@@ -1,6 +1,7 @@
-﻿using BabyBearsEngine.Source.Graphics;
+﻿using BabyBearsEngine.Graphics;
 
-namespace BabyBearsEngine.Source.Worlds;
+namespace BabyBearsEngine.Worlds;
+
 public interface IWorld
 {
     void AddEntity(IEntity entity);

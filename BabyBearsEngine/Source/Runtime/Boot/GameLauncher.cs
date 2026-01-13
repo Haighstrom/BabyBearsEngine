@@ -1,6 +1,5 @@
-﻿using BabyBearsEngine.Source.Platform.OpenTK;
-using BabyBearsEngine.Source.Runtime.Config;
-using BabyBearsEngine.Source.Worlds;
+﻿using BabyBearsEngine.Platform.OpenTK;
+using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Source.Runtime.Boot;
 

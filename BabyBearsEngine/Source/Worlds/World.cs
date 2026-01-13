@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using BabyBearsEngine.Source.Graphics;
+using BabyBearsEngine.Graphics;
 
-namespace BabyBearsEngine.Source.Worlds;
+namespace BabyBearsEngine.Worlds;
 
 public class World() : IWorld
 {

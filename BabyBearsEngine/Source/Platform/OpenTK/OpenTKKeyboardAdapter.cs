@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using BabyBearsEngine.Source.Services;
+using BabyBearsEngine.Input;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-namespace BabyBearsEngine.Source.Platform.OpenTK;
+namespace BabyBearsEngine.Platform.OpenTK;
 
 internal class OpenTKKeyboardAdapter(KeyboardState keyboardState) : IKeyboardService
 {

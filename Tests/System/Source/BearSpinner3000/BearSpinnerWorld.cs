@@ -1,7 +1,5 @@
 ﻿using System;
-using BabyBearsEngine.Source.Core;
-using BabyBearsEngine.Source.Tools;
-using BabyBearsEngine.Source.Worlds;
+using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Tests.System.Source.BearSpinner3000;
 

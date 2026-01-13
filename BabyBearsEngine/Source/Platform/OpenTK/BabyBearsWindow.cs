@@ -1,9 +1,9 @@
-﻿using BabyBearsEngine.Source.Graphics.MemoryManagement;
-using BabyBearsEngine.Source.Worlds;
+﻿using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Worlds;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 
-namespace BabyBearsEngine.Source.Platform.OpenTK;
+namespace BabyBearsEngine.Platform.OpenTK;
 
 public class BabyBearsWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, Func<IWorld>? createWorld = null)
     : GameWindow(gameWindowSettings, nativeWindowSettings)

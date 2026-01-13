@@ -1,9 +1,8 @@
-﻿using BabyBearsEngine.Source.Services;
-
-namespace BabyBearsEngine.Source.Platform.OpenTK;
+﻿namespace BabyBearsEngine.Platform.OpenTK;
 
 using System.Collections.Generic;
 using System.Linq;
+using BabyBearsEngine.Input;
 using global::OpenTK.Windowing.GraphicsLibraryFramework;
 
 internal sealed class OpenTKMouseAdapter(MouseState mouseState) : IMouseService

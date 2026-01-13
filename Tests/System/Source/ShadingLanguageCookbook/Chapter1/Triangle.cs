@@ -1,6 +1,6 @@
 ﻿using System;
-using BabyBearsEngine.Source.Graphics;
-using BabyBearsEngine.Source.Graphics.Components;
+using BabyBearsEngine.Graphics;
+using BabyBearsEngine.OpenGL;
 
 namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
 internal class Triangle : IRenderable

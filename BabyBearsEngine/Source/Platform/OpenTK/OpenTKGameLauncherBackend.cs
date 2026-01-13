@@ -1,9 +1,9 @@
-﻿using BabyBearsEngine.Source.Runtime.Boot;
-using BabyBearsEngine.Source.Runtime.Config;
-using BabyBearsEngine.Source.Services;
-using BabyBearsEngine.Source.Worlds;
+﻿using BabyBearsEngine.Runtime;
+using BabyBearsEngine.Source.OpenTK;
+using BabyBearsEngine.Source.Runtime.Boot;
+using BabyBearsEngine.Worlds;
 
-namespace BabyBearsEngine.Source.Platform.OpenTK;
+namespace BabyBearsEngine.Platform.OpenTK;
 
 internal sealed class OpenTKGameLauncherBackend() : IGameLauncherBackend
 {
@@ -11,7 +11,7 @@ internal sealed class OpenTKGameLauncherBackend() : IGameLauncherBackend
     {
         using BabyBearsWindow window = new(applicationSettings.GameLoopSettings.ToOpenTK(), applicationSettings.WindowSettings.ToOpenTK(), createWorld);
 
-        GameServices.Initialise(new OpenTKGameServicesAdapter(window));
+        RuntimeServices.Initialise(new OpenTKGameServicesAdapter(window));
 
         window.Run();
     }

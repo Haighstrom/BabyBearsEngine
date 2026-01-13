@@ -1,6 +1,5 @@
-﻿using BabyBearsEngine.Source.Graphics;
-using BabyBearsEngine.Source.Worlds;
-using BabyBearsEngine.Tests.System.Source.BearSpinner3000;
+﻿using BabyBearsEngine.Tests.System.Source.BearSpinner3000;
+using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;
 
