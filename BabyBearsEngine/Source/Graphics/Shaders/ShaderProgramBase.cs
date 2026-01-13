@@ -35,7 +35,7 @@ public abstract class ShaderProgramBase : IShaderProgram
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
-            GPUMemory.RequestDeleteShader(this);
+            GPUResourceDeletion.TryRequestDeleteShader(this);
 
             _disposed = true;
         }

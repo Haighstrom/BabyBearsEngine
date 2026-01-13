@@ -148,15 +148,6 @@ public static class OpenGLHelper
         }
     }
 
-    public static void UnbindEBO()
-    {
-        //if (s_lastBoundEBO != 0)
-        {
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-            s_lastBoundEBO = 0;
-        }
-    }
-
     public static void UnbindShader()
     {
         //if (s_lastBoundShader != 0)
@@ -175,7 +166,7 @@ public static class OpenGLHelper
         }
     }
 
-    public static void UnbindVAO()
+    public static void UnbindVertexArray()
     {
         //if (s_lastBoundVAO != 0)
         {
@@ -188,8 +179,17 @@ public static class OpenGLHelper
     {
         //if (s_lastBoundVBO != 0)
         {
-            //GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             s_lastBoundVBO = 0;
+        }
+    }
+
+    public static void UnbindEBO()
+    {
+        //if (s_lastBoundEBO != 0)
+        {
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+            s_lastBoundEBO = 0;
         }
     }
 }

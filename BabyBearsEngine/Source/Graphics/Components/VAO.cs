@@ -22,7 +22,7 @@ public class VAO() : IDisposable
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
 
-            GPUMemory.RequestDeleteVAO(this);
+            GPUResourceDeletion.TryRequestDeleteVAO(this);
 
             _disposed = true;
         }

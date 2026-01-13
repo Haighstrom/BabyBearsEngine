@@ -44,7 +44,7 @@ public class BabyBearsWindow(GameWindowSettings gameWindowSettings, NativeWindow
 
         World.DrawGraphics();
 
-        GPUMemory.ProcessDeletes();
+        GPUResourceDeletion.ProcessDeletes();
 
         SwapBuffers();
     }

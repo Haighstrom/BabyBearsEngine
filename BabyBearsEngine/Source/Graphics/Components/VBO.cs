@@ -22,7 +22,7 @@ public class VBO() : IDisposable
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
 
-            GPUMemory.RequestDeleteVBO(this);
+            GPUResourceDeletion.TryRequestDeleteVBO(this);
 
             _disposed = true;
         }

@@ -27,7 +27,7 @@ public class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw) 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null
 
-            GPUMemory.RequestDeleteEBO(this);
+            GPUResourceDeletion.TryRequestDeleteEBO(this);
 
             _disposed = true;
         }

@@ -11,5 +11,5 @@ internal class OpenTKGameServicesAdapter(BabyBearsWindow gameWindow) : IGameServ
 
     public IWindowService WindowService { get; } = new OpenTKWindowAdapter(gameWindow);
 
-    public IGPUMemoryService GPUMemoryService { get; } = new DefaultGPUMemoryService();
+    public IGPUResourceDeletionService GPUResourceDeletionService { get; } = new DefaultGPUResourceDeletionService();
 }
