@@ -1,10 +1,9 @@
 ﻿using BabyBearsEngine.Graphics;
 using BabyBearsEngine.Input;
 using BabyBearsEngine.Source.Rendering.Graphics.Text;
-using BabyBearsEngine.Worlds;
 using OpenTK.Mathematics;
 
-namespace BabyBearsEngine.UI;
+namespace BabyBearsEngine.Worlds.UI;
 
 public class Button(int x, int y, int width, int height, Color4 colour, string textToDisplay) : IEntity
 {

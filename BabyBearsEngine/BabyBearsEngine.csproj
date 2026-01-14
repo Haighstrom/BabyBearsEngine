@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Source\Rendering\Graphics\c5ktwi1a.2yx~" />
+    <None Remove="Source\Worlds\Graphics\c5ktwi1a.2yx~" />
   </ItemGroup>
 
   <ItemGroup>
