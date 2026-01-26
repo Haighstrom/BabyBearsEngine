@@ -1,6 +1,6 @@
 ﻿using SixLabors.ImageSharp.PixelFormats;
 
-namespace BabyBearsEngine.Source.Rendering.ImageLoading;
+namespace BabyBearsEngine.Source.Platform.ImageLoading;
 
 public static class ImageLoader
 {

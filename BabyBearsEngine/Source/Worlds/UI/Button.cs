@@ -5,7 +5,7 @@ using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Worlds.UI;
 
-public class Button(int x, int y, int width, int height, Color4 colour, string textToDisplay) : IEntity
+public class Button(int x, int y, int width, int height, Color4 colour, string textToDisplay = "") : IEntity
 {
     private bool _disposed;
     private readonly ColouredRectangle _graphic = new(colour, x, y, width, height);

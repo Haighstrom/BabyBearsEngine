@@ -3,7 +3,7 @@ using BabyBearsEngine.OpenGL;
 
 namespace BabyBearsEngine.Runtime;
 
-internal interface IRuntimeServices
+public interface IRuntimeServices
 {
     IWindowService WindowService { get; }
     IKeyboardService KeyboardService { get; }

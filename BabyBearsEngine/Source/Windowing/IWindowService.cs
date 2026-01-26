@@ -9,7 +9,5 @@ public interface IWindowService
 
     int Width { get; }
     int Height { get; }
-
-    void ChangeWorld(IWorld world);
 }
 

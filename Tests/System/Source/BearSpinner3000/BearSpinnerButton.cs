@@ -1,5 +1,4 @@
-﻿using BabyBearsEngine.Source.Worlds.UI;
-using OpenTK.Mathematics;
+﻿using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Tests.System.Source.BearSpinner3000;
 
@@ -10,6 +9,6 @@ internal class BearSpinnerButton(int x, int y)
     {
         base.OnClicked();
 
-        Window.ChangeWorld(new BearSpinnerWorld());
+        Engine.ChangeWorld(new BearSpinnerWorld());
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using BabyBearsEngine.OpenGL;
 
-namespace BabyBearsEngine.OpenGL;
+namespace BabyBearsEngine.Source.Platform.OpenGL.Buffers;
 
 internal static class Geometry
 {

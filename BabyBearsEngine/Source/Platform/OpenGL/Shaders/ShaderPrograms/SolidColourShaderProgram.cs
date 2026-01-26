@@ -6,7 +6,7 @@ public sealed class SolidColourShaderProgram : ShaderProgramBase
 {
     private static readonly Lazy<SolidColourShaderProgram> s_instance = new(() => new SolidColourShaderProgram());
 
-    public static SolidColourShaderProgram Instance => s_instance.Value;
+    internal static SolidColourShaderProgram Instance => s_instance.Value;
 
     private readonly int _windowSizeLocation;
 

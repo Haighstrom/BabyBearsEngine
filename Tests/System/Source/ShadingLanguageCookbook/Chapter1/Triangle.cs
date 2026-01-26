@@ -1,6 +1,7 @@
 ﻿using System;
 using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
+using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
 internal class Triangle : IRenderable

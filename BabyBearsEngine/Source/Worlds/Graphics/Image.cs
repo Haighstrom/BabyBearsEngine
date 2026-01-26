@@ -1,54 +1,67 @@
 ﻿using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Source.Platform.OpenGL.Rendering;
+using BabyBearsEngine.Source.Platform.OpenGL.Shaders;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Graphics;
 
-public class Image : IRenderable, IDisposable
+public class Image(ITexture texture, float x, float y, float width, float height) : IRenderable, IDisposable
 {
-    private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
-    private readonly ITexture _texture;
-
+    private readonly GraphicRenderer _graphicRenderer = new(texture);
+    private float _angle = 0;
     private Color4 _colour = Color4.White;
     private bool _verticesChanged = true;
+    private bool _modelViewChanged = true;
 
-    public StandardMatrixShaderProgram Shader { get; set; } = new();
+    //public IShaderProgram Shader
+    //{
+
+    //}
+
+    /// <summary>
+    /// advanced users only
+    /// </summary>
+    /// <returns></returns>
+    public IShaderProgram GetShaderProgram() => _graphicRenderer.Shader;
+
+    //public void SetShadaer(ShaderReference shader) => Shader = ShaderMapping.GetShader(shader);
 
     public float X
     {
-        get => _x;
+        get => x;
         set
         {
-            _x = value;
+            x = value;
             _verticesChanged = true;
         }
     }
 
     public float Y
     {
-        get => _y;
+        get => y;
         set
         {
-            _y = value;
+            y = value;
             _verticesChanged = true;
         }
     }
 
     public float Width
     {
-        get => _width;
+        get => width;
         set
         {
-            _width = value;
+            width = value;
             _verticesChanged = true;
         }
     }
 
     public float Height
     {
-        get => _height;
+        get => height;
         set
         {
-            _height = value; 
+            height = value;
             _verticesChanged = true;
         }
     }
@@ -62,78 +75,42 @@ public class Image : IRenderable, IDisposable
             _verticesChanged = true;
         }
     }
+
     public virtual float Alpha
     {
         get => Colour.A;
         set => Colour = new(Colour.R, Colour.G, Colour.B, value);
     }
 
-    public float Angle { get; set; }
-
-    private Vertex[] Vertices => 
-    [
-        new(_x, _y, Colour, 0, 0), // bottom left
-        new(_x + _width, _y, Colour, 1, 0), // bottom right
-        new(_x, _y + _height, Colour, 0, 1), // top left
-        new(_x + _width, _y + _height, Colour, 1, 1), // top right
-    ];
+    public float Angle
+    {
+        get => _angle;
+        set
+        {
+            _angle = value;
+            _modelViewChanged = true;
+        }
+    }
 
     public void Render()
     {
-        Shader.Bind();
-        _vertexDataBuffer.Bind();
-        _texture.Bind();
-
         if (_verticesChanged)
         {
-            _vertexDataBuffer.SetNewVertices(Vertices);
-
+            _graphicRenderer.UpdateVertices(x, y, width, height, _colour);
             _verticesChanged = false;
         }
 
-        if (Angle != 0)
+        if (_modelViewChanged)
         {
-            var mv = Matrix3.Identity;
-
-            var translateBack = new Matrix3(1, 0, 0, 0, 1, 0, _x + Width / 2, _y + Height / 2, 1);
-            translateBack.Transpose();
-
-            var rotationAroundOrigin = Matrix3.CreateRotationZ(MathHelper.DegreesToRadians(-Angle));
-            
-            var translateToOrigin = new Matrix3(1, 0, 0, 0, 1, 0, -(_x + Width / 2), -(_y + Height / 2), 1);
-            translateToOrigin.Transpose();
-
-            mv = translateBack * rotationAroundOrigin * translateToOrigin * mv;
-
-            Shader.SetModelViewMatrix(ref mv);
+            _graphicRenderer.UpdateAngle(_angle, x, y, width, height);
+            _modelViewChanged = false;
         }
 
-        GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
+        _graphicRenderer.Render();
     }
 
+    #region Dispose
     private bool _disposedValue;
-    private float _x;
-    private float _y;
-    private float _width;
-    private float _height;
-
-    public Image(string texturePath, float x, float y, float width, float height)
-    {
-        _x = x;
-        _y = y;
-        _width = width;
-        _height = height;
-        _texture = new TextureFactory().CreateTextureFromImageFile(texturePath);
-    }
-
-    public Image(ITexture texture, float x, float y, float width, float height)
-    {
-        _x = x;
-        _y = y;
-        _width = width;
-        _height = height;
-        _texture = texture;
-    }
 
     protected virtual void Dispose(bool disposing)
     {
@@ -143,7 +120,7 @@ public class Image : IRenderable, IDisposable
             {
                 // TODO: dispose managed state (managed objects)
                 //_texture.Dispose();
-                _vertexDataBuffer.Dispose();
+                _graphicRenderer.Dispose();
             }
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
@@ -165,4 +142,5 @@ public class Image : IRenderable, IDisposable
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
+    #endregion
 }

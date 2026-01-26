@@ -2,10 +2,11 @@
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenTK;
 using BabyBearsEngine.Runtime;
+using OpenTK.Windowing.Desktop;
 
 namespace BabyBearsEngine.Source.OpenTK;
 
-internal class OpenTKGameServicesAdapter(BabyBearsWindow gameWindow) : IRuntimeServices
+internal class OpenTKGameServicesAdapter(GameWindow gameWindow) : IRuntimeServices
 {
     public IKeyboardService KeyboardService { get; } = new OpenTKKeyboardAdapter(gameWindow.KeyboardState);
 

@@ -1,9 +1,9 @@
-﻿using BabyBearsEngine.Worlds;
-using OpenTK.Windowing.Common;
+﻿using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
 
 namespace BabyBearsEngine.Platform.OpenTK;
 
-public sealed class OpenTKWindowAdapter(BabyBearsWindow window) : IWindowService
+public sealed class OpenTKWindowAdapter(GameWindow window) : IWindowService
 {
     public int Width => window.ClientSize.X;
 
@@ -14,10 +14,4 @@ public sealed class OpenTKWindowAdapter(BabyBearsWindow window) : IWindowService
         add { window.Resize += value; }
         remove { window.Resize -= value; }
     }
-
-    public void ChangeWorld(IWorld world)
-    {
-        window.World = world;
-    }
 }
-

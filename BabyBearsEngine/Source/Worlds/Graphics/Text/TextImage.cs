@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Source.Platform.OpenGL.Buffers;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.Rendering.Graphics.Text;

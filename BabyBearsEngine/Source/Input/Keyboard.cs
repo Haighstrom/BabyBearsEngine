@@ -4,7 +4,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace BabyBearsEngine.Input;
 
-internal static class Keyboard
+public static class Keyboard
 {
     private static IKeyboardService Service => RuntimeServices.KeyboardService;
 

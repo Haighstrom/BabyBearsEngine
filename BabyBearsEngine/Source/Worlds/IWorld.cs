@@ -4,6 +4,7 @@ namespace BabyBearsEngine.Worlds;
 
 public interface IWorld
 {
+    void Load();
     void AddEntity(IEntity entity);
     void AddGraphic(IRenderable graphic);
     void Clear();

@@ -4,7 +4,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace BabyBearsEngine.Input;
 
-internal static class Mouse
+public static class Mouse
 {
     private static IMouseService Service => RuntimeServices.MouseService;
 

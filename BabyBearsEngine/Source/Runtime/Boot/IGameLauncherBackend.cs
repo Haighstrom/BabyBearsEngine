@@ -1,8 +1,12 @@
-﻿using BabyBearsEngine.Worlds;
+﻿using BabyBearsEngine.Runtime;
+using BabyBearsEngine.Source.Runtime.Boot;
+using BabyBearsEngine.Worlds;
 
-namespace BabyBearsEngine.Source.Runtime.Boot;
+namespace BabyBearsEngine;
 
 public interface IGameLauncherBackend
 {
-    void Run(ApplicationSettings applicationSettings, Func<IWorld> createWorld);
+    IGameWindowContext CreateWindowContext(ApplicationSettings applicationSettings, Func<IWorld> createWorld);
+
+    void RunGameLoop(IGameWindowContext gameWindowContext);
 }

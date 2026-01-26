@@ -14,6 +14,4 @@ public static class Window
 
     public static int Width => RuntimeServices.WindowService.Width;
     public static int Height => RuntimeServices.WindowService.Height;
-
-    public static void ChangeWorld(IWorld world) => RuntimeServices.WindowService.ChangeWorld(world);
 }

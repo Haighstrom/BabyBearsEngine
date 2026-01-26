@@ -1,5 +1,4 @@
 ﻿using BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;
-using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
 

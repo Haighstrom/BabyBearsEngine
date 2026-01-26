@@ -1,6 +1,6 @@
 ﻿namespace BabyBearsEngine.OpenGL;
 
-internal interface IGPUResourceDeletionService
+public interface IGPUResourceDeletionService
 {
     void QueueShaderDelete(int handle);
     void QueueTextureDelete(int handle);

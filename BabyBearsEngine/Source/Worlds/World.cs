@@ -9,8 +9,13 @@ public class World() : IWorld
     private readonly List<IRenderable> _graphics = [];
     private readonly List<IUpdateable> _updateables = [];
 
+    public void Load()
+    {
+    }
+
     public void Clear()
     {
+        //dispose?
         _graphics.Clear();
         _updateables.Clear();
     }

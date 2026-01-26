@@ -1,8 +1,8 @@
-﻿using BabyBearsEngine.Source.Rendering.ImageLoading;
+﻿using BabyBearsEngine.Source.Platform.ImageLoading;
 
 namespace BabyBearsEngine.OpenGL;
 
-internal class TextureFactory() : ITextureFactory
+public class TextureFactory() : ITextureFactory
 {
     public ITexture CreateTextureFromImageFile(string filePath)
     {
