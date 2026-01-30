@@ -3,7 +3,7 @@ using OpenTK.Windowing.Desktop;
 
 namespace BabyBearsEngine.Platform.OpenTK;
 
-public sealed class OpenTKWindowAdapter(GameWindow window) : IWindowService
+internal sealed class OpenTKWindowAdapter(GameWindow window) : IWindow
 {
     public int Width => window.ClientSize.X;
 

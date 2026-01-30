@@ -1,4 +1,4 @@
-﻿namespace BabyBearsEngine.Source.GameEngine;
+﻿namespace BabyBearsEngine.PowerUsers;
 
 public interface IGameLoop
 {

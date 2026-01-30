@@ -5,16 +5,17 @@ using BabyBearsEngine.OpenGL;
 
 namespace BabyBearsEngine.Runtime;
 
+//Static Service Locator
 internal static class RuntimeServices
 {
     private const string NotInitialisedMessage = "Game services have not been initialised.";
     private const string AlreadyInitialisedMessage = "Game services already initialised.";
 
-    private static IRuntimeServices? s_backend;
+    private static IPlatformContext? s_backend;
 
-    private static IRuntimeServices Backend => Volatile.Read(ref s_backend) ?? throw new InvalidOperationException(NotInitialisedMessage);
+    private static IPlatformContext Backend => Volatile.Read(ref s_backend) ?? throw new InvalidOperationException(NotInitialisedMessage);
 
-    public static void Initialise(IRuntimeServices service)
+    public static void Initialise(IPlatformContext service)
     {
         ArgumentNullException.ThrowIfNull(service);
 
@@ -24,11 +25,11 @@ internal static class RuntimeServices
         }
     }
 
-    public static IWindowService WindowService => Backend.WindowService;
+    public static IWindow WindowService => Backend.Window;
 
-    public static IKeyboardService KeyboardService => Backend.KeyboardService;
+    public static IKeyboard KeyboardService => Backend.Keyboard;
 
-    public static IMouseService MouseService => Backend.MouseService;
+    public static IMouse MouseService => Backend.Mouse;
 
     public static bool TryGetGPUResourceDeletionService([NotNullWhen(true)] out IGPUResourceDeletionService? gpuResourceDeletionService)
     {

@@ -3,7 +3,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace BabyBearsEngine.Input;
 
-public interface IKeyboardService
+public interface IKeyboard
 {
     bool KeyDown(Keys key);
     bool KeyPressed(Keys key);

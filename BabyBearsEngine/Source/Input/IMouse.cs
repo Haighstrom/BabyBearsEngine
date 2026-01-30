@@ -3,7 +3,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace BabyBearsEngine.Input;
 
-public interface IMouseService
+public interface IMouse
 {
     bool ButtonDown(MouseButton button);
     bool ButtonPressed(MouseButton button);

@@ -1,5 +1,4 @@
-﻿using BabyBearsEngine.Source.Runtime.Boot;
-using BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;
+﻿using BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;
 
 var appSettings = new ApplicationSettings()
 {
@@ -11,4 +10,9 @@ var appSettings = new ApplicationSettings()
     }
 };
 
+//option 1
 GameLauncher.Run(appSettings, () => new MenuWorld());
+
+//option 2
+GameLauncher.Initialise(appSettings);
+GameLauncher.Run(new MenuWorld());

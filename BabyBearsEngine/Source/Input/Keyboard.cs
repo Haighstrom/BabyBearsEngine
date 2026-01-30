@@ -6,7 +6,7 @@ namespace BabyBearsEngine.Input;
 
 public static class Keyboard
 {
-    private static IKeyboardService Service => RuntimeServices.KeyboardService;
+    private static IKeyboard Service => RuntimeServices.KeyboardService;
 
     public static bool KeyDown(Keys key) => Service.KeyDown(key);
     public static bool KeyPressed(Keys key) => Service.KeyPressed(key);

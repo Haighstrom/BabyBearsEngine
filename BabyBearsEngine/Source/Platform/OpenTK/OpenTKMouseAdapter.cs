@@ -5,7 +5,7 @@ using System.Linq;
 using BabyBearsEngine.Input;
 using global::OpenTK.Windowing.GraphicsLibraryFramework;
 
-internal sealed class OpenTKMouseAdapter(MouseState mouseState) : IMouseService
+internal sealed class OpenTKMouseAdapter(MouseState mouseState) : IMouse
 {
     public bool ButtonDown(MouseButton button) => mouseState.IsButtonDown(button);
     public bool ButtonPressed(MouseButton button) => mouseState.IsButtonPressed(button);

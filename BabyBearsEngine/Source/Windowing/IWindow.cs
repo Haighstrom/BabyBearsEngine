@@ -3,7 +3,7 @@ using OpenTK.Windowing.Common;
 
 namespace BabyBearsEngine;
 
-public interface IWindowService
+public interface IWindow
 {
     event Action<ResizeEventArgs>? Resize;
 

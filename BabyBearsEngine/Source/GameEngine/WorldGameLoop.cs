@@ -2,18 +2,18 @@
 using BabyBearsEngine.Source.Platform;
 using BabyBearsEngine.Worlds;
 
-namespace BabyBearsEngine.Source.GameEngine;
+namespace BabyBearsEngine.PowerUsers;
 
-public sealed class WorldGameLoop(
-    Func<IWorld> createInitialWorld,
-    IRenderHost renderHost)
-    : IGameLoop
+public sealed class WorldGameLoop(IWorld firstWorld, IRenderHost renderHost)
+    : IGameLoop, IWorldGameLoop, IDisposable
 {
-    private readonly Func<IWorld> _createInitialWorld = createInitialWorld;
     private readonly IRenderHost _renderHost = renderHost;
 
     private IWorld? _world;
     private Func<IWorld>? _pendingWorldFactory;
+    private bool _disposedValue;
+
+    public void RequestWorldChange(IWorld world) => RequestWorldChange(() => world);
 
     public void RequestWorldChange(Func<IWorld> createWorld)
     {
@@ -25,7 +25,7 @@ public sealed class WorldGameLoop(
     {
         _renderHost.Initialise();
 
-        _world = _createInitialWorld();
+        _world = firstWorld;
         _world.Load();
     }
 
@@ -72,5 +72,34 @@ public sealed class WorldGameLoop(
         _world?.Unload();
         _world = pending();
         _world.Load();
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                // TODO: dispose managed state (managed objects)
+            }
+
+            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+            // TODO: set large fields to null
+            _disposedValue = true;
+        }
+    }
+
+    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+    // ~WorldGameLoop()
+    // {
+    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+    //     Dispose(disposing: false);
+    // }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

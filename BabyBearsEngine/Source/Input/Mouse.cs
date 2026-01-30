@@ -6,7 +6,7 @@ namespace BabyBearsEngine.Input;
 
 public static class Mouse
 {
-    private static IMouseService Service => RuntimeServices.MouseService;
+    private static IMouse Service => RuntimeServices.MouseService;
 
     public static bool ButtonDown(MouseButton button) => Service.ButtonDown(button);
     public static bool ButtonPressed(MouseButton button) => Service.ButtonPressed(button);

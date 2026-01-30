@@ -5,7 +5,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace BabyBearsEngine.Platform.OpenTK;
 
-internal class OpenTKKeyboardAdapter(KeyboardState keyboardState) : IKeyboardService
+internal class OpenTKKeyboardAdapter(KeyboardState keyboardState) : IKeyboard
 {
     public bool KeyDown(Keys key)
     {
