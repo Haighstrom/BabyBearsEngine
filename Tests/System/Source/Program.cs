@@ -11,7 +11,7 @@ var appSettings = new ApplicationSettings()
 };
 
 //option 1
-GameLauncher.Run(appSettings, () => new MenuWorld());
+//GameLauncher.Run(appSettings, () => new MenuWorld());
 
 //option 2
 GameLauncher.Initialise(appSettings);
