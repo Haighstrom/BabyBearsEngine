@@ -1,5 +1,4 @@
 ﻿using System;
-using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
 
 namespace BabyBearsEngine.Tests.System.Source.BearSpinner3000;

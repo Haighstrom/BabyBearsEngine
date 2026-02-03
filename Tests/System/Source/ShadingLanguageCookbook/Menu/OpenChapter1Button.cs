@@ -1,5 +1,4 @@
 ﻿using BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
-using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;
 

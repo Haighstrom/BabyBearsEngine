@@ -1,5 +1,4 @@
 ﻿using System;
-using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
 using OpenTK.Graphics.OpenGL4;
 

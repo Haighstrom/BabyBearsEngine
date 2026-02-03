@@ -1,22 +1,20 @@
 ﻿using BabyBearsEngine.Input;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenTK;
+using BabyBearsEngine.PowerUsers;
 using BabyBearsEngine.Runtime;
-using BabyBearsEngine.Source.Platform;
-using BabyBearsEngine.Source.Platform.OpenGL;
-using OpenTK.Windowing.Desktop;
 
 namespace BabyBearsEngine.Source.OpenTK;
 
-internal class OpenTKContext(GameWindow gameWindow) : IPlatformContext
+internal class OpenTKContext(OpenTKGameEngine gameEngine) : IPlatformContext
 {
-    public IKeyboard Keyboard { get; } = new OpenTKKeyboardAdapter(gameWindow.KeyboardState);
+    public IKeyboard Keyboard { get; } = new OpenTKKeyboardAdapter(gameEngine.KeyboardState);
 
-    public IMouse Mouse { get; } = new OpenTKMouseAdapter(gameWindow.MouseState);
+    public IMouse Mouse { get; } = new OpenTKMouseAdapter(gameEngine.MouseState);
 
-    public IWindow Window { get; } = new OpenTKWindowAdapter(gameWindow);
+    public IWindow Window { get; } = new OpenTKWindowAdapter(gameEngine);
 
     public IGPUResourceDeletionService GPUResourceDeletionService { get; } = new DefaultGPUResourceDeletionService();
 
-    public IRenderHost RenderHost { get; } = new OpenTKRenderHost(gameWindow);
+    public IWorldSwitcher WorldSwitcher { get; } = gameEngine;
 }

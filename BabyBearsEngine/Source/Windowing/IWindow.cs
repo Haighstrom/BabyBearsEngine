@@ -1,5 +1,4 @@
-﻿using BabyBearsEngine.Worlds;
-using OpenTK.Windowing.Common;
+﻿using OpenTK.Windowing.Common;
 
 namespace BabyBearsEngine;
 

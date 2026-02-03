@@ -2,6 +2,7 @@
 using System.Threading;
 using BabyBearsEngine.Input;
 using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.PowerUsers;
 
 namespace BabyBearsEngine.Runtime;
 
@@ -44,4 +45,6 @@ internal static class RuntimeServices
         gpuResourceDeletionService = backend.GPUResourceDeletionService;
         return true;
     }
+
+    public static IWorldSwitcher WorldSwitcher => Backend.WorldSwitcher;
 }

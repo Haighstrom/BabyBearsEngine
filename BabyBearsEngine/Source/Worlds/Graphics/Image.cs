@@ -1,6 +1,5 @@
 ﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Platform.OpenGL.Rendering;
-using BabyBearsEngine.Source.Platform.OpenGL.Shaders;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Graphics;

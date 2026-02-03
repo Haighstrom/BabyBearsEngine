@@ -2,7 +2,7 @@
 
 namespace BabyBearsEngine.PowerUsers;
 
-public interface IWorldGameLoop : IGameLoop
+public interface IWorldSwitcher
 {
     void RequestWorldChange(IWorld world);
 
