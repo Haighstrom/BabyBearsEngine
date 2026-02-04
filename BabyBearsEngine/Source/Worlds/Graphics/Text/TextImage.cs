@@ -17,13 +17,13 @@ public class TextImage : IRenderable, IDisposable
     private float _y;
     private float _width;
     private float _height;
-    private readonly string _textToDisplay;
-    private Color4 _colour;
+    private string _textToDisplay;
+    private Colour _colour;
     private bool _verticesChanged = true;
     private float _extraSpaceWidth = 0;
     private float _extraLineSpacing = 0;
 
-    public TextImage(FontDefinition fontDef, string textToDisplay, Color4 colour, float x, float y, float width, float height)
+    public TextImage(FontDefinition fontDef, string textToDisplay, Colour colour, float x, float y, float width, float height)
     {
         _x = x;
         _y = y;
@@ -79,7 +79,17 @@ public class TextImage : IRenderable, IDisposable
         }
     }
 
-    public Color4 Colour
+    public string Text
+    {
+        get => _textToDisplay;
+        set
+        {
+            _textToDisplay = value;
+            _verticesChanged = true;
+        }
+    }
+
+    public Colour Colour
     {
         get => _colour;
         set
@@ -106,6 +116,8 @@ public class TextImage : IRenderable, IDisposable
         //_vertGroups.Clear();
 
         List<Vertex> vertices = [];
+
+        var colorTK = Colour.ToOpenTK();
 
         var len = ScaleX * _fontStruct.MeasureString(_textToDisplay).X;
 
@@ -137,10 +149,10 @@ public class TextImage : IRenderable, IDisposable
 
             vertices.Add(
                 Geometry.QuadToTris(
-            new Vertex(X + x, Y + y, Colour, source.Min.X, source.Min.Y),
-            new Vertex(X + x + w, Y + y, Colour, source.Max.X, source.Min.Y),
-            new Vertex(X + x, Y + y + h, Colour, source.Min.X, source.Max.Y),
-            new Vertex(X + x + w, Y + y + h, Colour, source.Max.X, source.Max.Y)
+            new Vertex(X + x, Y + y, colorTK, source.Min.X, source.Min.Y),
+            new Vertex(X + x + w, Y + y, colorTK, source.Max.X, source.Min.Y),
+            new Vertex(X + x, Y + y + h, colorTK, source.Min.X, source.Max.Y),
+            new Vertex(X + x + w, Y + y + h, colorTK, source.Max.X, source.Max.Y)
             ));
 
             x += w;

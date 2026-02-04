@@ -67,7 +67,7 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
 
         ApplyPendingWorldChangeIfAny();
 
-        _world.UpdateThings(args.Time);
+        _world.Update(args.Time);
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
@@ -76,7 +76,7 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
 
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
-        _world.DrawGraphics();
+        _world.Draw();
 
         GPUResourceDeletion.ProcessDeletes();
 

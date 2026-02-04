@@ -1,15 +1,14 @@
 ﻿using BabyBearsEngine.Graphics;
 using BabyBearsEngine.Input;
 using BabyBearsEngine.Source.Rendering.Graphics.Text;
-using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Worlds.UI;
 
-public class Button(int x, int y, int width, int height, Color4 colour, string textToDisplay = "") : IEntity
+public class Button(int x, int y, int width, int height, Colour colour, string textToDisplay = "") : IEntity
 {
     private bool _disposed;
     private readonly ColouredRectangle _graphic = new(colour, x, y, width, height);
-    private readonly TextImage _textImage = new(new FontDefinition("Times New Roman", 16), textToDisplay, Color4.Black, x, y, width, height);
+    private readonly TextImage _textImage = new(new FontDefinition("Times New Roman", 16), textToDisplay, Colour.Black, x, y, width, height);
 
     public void Update(double elapsed)
     {
@@ -21,7 +20,6 @@ public class Button(int x, int y, int width, int height, Color4 colour, string t
 
     public virtual void OnClicked()
     {
-        System.Console.WriteLine("Button clicked!");
     }
 
     public void Render()

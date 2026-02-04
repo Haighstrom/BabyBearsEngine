@@ -13,6 +13,14 @@ public class World() : IWorld
     {
     }
 
+    public void Unload()
+    {
+        //foreach (var graphic in _graphics.ToList())
+        //{
+        //    graphic.Dispose();
+        //}
+    }
+
     public void Clear()
     {
         //dispose?
@@ -20,28 +28,39 @@ public class World() : IWorld
         _updateables.Clear();
     }
 
-    public void AddGraphic(IRenderable graphic)
+    public void Add(IRenderable graphic)
     {
         _graphics.Add(graphic);
     }
 
-    //public void AddUpdateable(IUpdateable updateable)
-    //{
-    //    _updateables.Add(updateable);
-    //}
-
-    public void RemoveGraphic(IRenderable graphic)
+    public void Add(IUpdateable updateable)
     {
-        _graphics.Remove(graphic);
+        _updateables.Add(updateable);
     }
 
-    public void AddEntity(IEntity entity)
+    public void Add(IEntity entity)
     {
         _graphics.Add(entity);
         _updateables.Add(entity);
     }
 
-    public void UpdateThings(double elapsed)
+    public void Remove(IRenderable graphic)
+    {
+        _graphics.Remove(graphic);
+    }
+
+    public void Remove(IUpdateable updateable)
+    {
+        _updateables.Remove(updateable);
+    }
+
+    public void Remove(IEntity entity)
+    {
+        _graphics.Remove(entity);
+        _updateables.Remove(entity);
+    }
+
+    public virtual void Update(double elapsed)
     {
         foreach (var updateable in _updateables.ToList())
         {
@@ -49,19 +68,11 @@ public class World() : IWorld
         }
     }
 
-    public void DrawGraphics()
+    public virtual void Draw()
     {
         foreach (var graphic in _graphics.ToList())
         {
             graphic.Render();
-        }
-    }
-
-    public void Unload()
-    {
-        foreach (var graphic in _graphics.ToList())
-        {
-            graphic.Dispose();
         }
     }
 }

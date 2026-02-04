@@ -1,9 +1,8 @@
 ﻿using BabyBearsEngine.OpenGL;
-using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Graphics;
 
-public class ColouredRectangle(Color4 colour, float x, float y, float width, float height) : IRenderable, IDisposable
+public class ColouredRectangle(Colour colour, float x, float y, float width, float height) : IRenderable, IDisposable
 {
     private bool _disposed;
 
@@ -51,7 +50,7 @@ public class ColouredRectangle(Color4 colour, float x, float y, float width, flo
         }
     }
 
-    public Color4 Colour
+    public Colour Colour
     {
         get => colour;
         set
@@ -65,14 +64,15 @@ public class ColouredRectangle(Color4 colour, float x, float y, float width, flo
     {
         get
         {
+            var colorTK = Colour.ToOpenTK();
+
             return
             [
-                new(x + width, y + height, Colour), // top right
-                new(x + width, y, Colour), // bottom right
-                new(x, y + height, Colour), // top left
-                new(x, y, Colour), // bottom left
+                new(x + width, y + height, colorTK), // top right
+                new(x + width, y, colorTK), // bottom right
+                new(x, y + height, colorTK), // top left
+                new(x, y, colorTK), // bottom left
             ];
-
         }
     }
 
