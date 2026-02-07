@@ -11,6 +11,14 @@ public static class OpenGLHelper
     private static int s_lastBoundTexture = -1;
     private static TextureUnit s_lastActiveTextureUnit = TextureUnit.Texture0;
 
+    public static int LastBoundFBO { get; set; }
+
+    public static void BindFBO(int fboHandle)
+    {
+        GL.BindBuffer(BufferTarget.ArrayBuffer, fboHandle);
+        LastBoundFBO = fboHandle;
+    }
+
     public static void BindEBO(int eBOHandle)
     {
         //if (s_lastBoundEBO != eBOHandle)
@@ -190,6 +198,22 @@ public static class OpenGLHelper
         {
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
             s_lastBoundEBO = 0;
+        }
+    }
+
+    public static float[] GetValues(this Matrix3 matrix)
+    {
+        return [matrix.M11, matrix.M12, matrix.M13, matrix.M21, matrix.M22, matrix.M23, matrix.M31, matrix.M32, matrix.M33];
+    }
+
+    public static void UniformMatrix3(int location, Matrix3 matrix)
+    {
+        unsafe
+        {
+            fixed (float* valuePointer = matrix.GetValues())
+            {
+                GL.UniformMatrix3(location, 1, false, valuePointer);
+            }
         }
     }
 }

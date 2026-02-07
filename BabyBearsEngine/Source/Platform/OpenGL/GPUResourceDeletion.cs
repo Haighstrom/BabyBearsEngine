@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Runtime;
+﻿using System.Reflection.Metadata.Ecma335;
+using BabyBearsEngine.Runtime;
 
 namespace BabyBearsEngine.OpenGL;
 
@@ -29,6 +30,8 @@ internal static class GPUResourceDeletion
     public static bool TryRequestDeleteVAO(int handle) => TryRequestDelete(static (service, h) => service.QueueVertexArrayDelete(h), handle);
 
     public static bool TryRequestDeleteVBO(int handle) => TryRequestDelete(static (service, h) => service.QueueVBODelete(h), handle);
+
+    public static bool TryRequestDeleteFBO(int handle) => false; //todo: invent this
 
     public static bool TryRequestDeleteEBO(int handle) => TryRequestDelete(static (service, h) => service.QueueEBODelete(h), handle);
 
