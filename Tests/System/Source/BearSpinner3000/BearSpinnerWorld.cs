@@ -21,6 +21,6 @@ internal class BearSpinnerWorld : World
 
         Random random = new();
 
-        Repeat.CallMethod(() => AddEntity(new BearEntity(random.Next(Window.Width), random.Next(Window.Height))), Window.Width * Window.Height / 3000);
+        Repeat.CallMethod(() => Add(new BearEntity(random.Next(Window.Width), random.Next(Window.Height))), Window.Width * Window.Height / 3000);
     }
 }

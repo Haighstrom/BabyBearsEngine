@@ -12,11 +12,6 @@ public class Image(ITexture texture, float x, float y, float width, float height
     private bool _verticesChanged = true;
     private bool _modelViewChanged = true;
 
-    //public IShaderProgram Shader
-    //{
-
-    //}
-
     /// <summary>
     /// advanced users only
     /// </summary>

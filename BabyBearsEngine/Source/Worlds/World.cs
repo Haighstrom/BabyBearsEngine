@@ -9,6 +9,8 @@ public class World() : IWorld
     private readonly List<IRenderable> _graphics = [];
     private readonly List<IUpdateable> _updateables = [];
 
+    public Colour BackgroundColour { get; set; } = Colour.CornflowerBlue;
+
     public void Load()
     {
     }
@@ -70,6 +72,9 @@ public class World() : IWorld
 
     public virtual void Draw()
     {
+        GL.ClearColor(BackgroundColour.R / 255f, BackgroundColour.G / 255f, BackgroundColour.B / 255f, BackgroundColour.A / 255f);
+        GL.Clear(ClearBufferMask.ColorBufferBit);
+
         foreach (var graphic in _graphics.ToList())
         {
             graphic.Render();

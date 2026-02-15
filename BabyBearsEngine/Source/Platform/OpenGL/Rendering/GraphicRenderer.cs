@@ -1,5 +1,8 @@
 ﻿using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Source.Geometry;
+using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
 using OpenTK.Mathematics;
+using Matrix3 = OpenTK.Mathematics.Matrix3;
 
 namespace BabyBearsEngine.Source.Platform.OpenGL.Rendering;
 
@@ -49,6 +52,12 @@ internal class GraphicRenderer(ITexture texture) : IDisposable
         Shader.Bind();
         _vertexDataBuffer.Bind();
         texture.Bind();
+
+        if (Shader is IWorldShader worldShader)
+        {
+            var ortho = Geometry.Matrix3.CreateOrtho(800, 600);
+            worldShader.SetProjectionMatrix(ortho);
+        }
 
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
     }

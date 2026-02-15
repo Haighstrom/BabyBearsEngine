@@ -3,7 +3,7 @@ using BabyBearsEngine.OpenGL;
 
 namespace BabyBearsEngine.Source.Platform.OpenGL.Buffers;
 
-internal static class Geometry
+internal static class GeometryHelper
 {
     public static List<Vertex> QuadToTris(Vertex topLeft, Vertex topRight, Vertex bottomLeft, Vertex bottomRight)
     {

@@ -1,8 +1,9 @@
-﻿using OpenTK.Mathematics;
+﻿using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
+using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.OpenGL;
 
-public class StandardMatrixShaderProgram : ShaderProgramBase
+public class StandardMatrixShaderProgram : ShaderProgramBase, IWorldShader
 {
     private readonly int _mvMatrixLocation;
     private readonly int _pMatrixLocation;
@@ -15,10 +16,6 @@ public class StandardMatrixShaderProgram : ShaderProgramBase
 
         var mvMatrix = Matrix3.Identity;
         SetModelViewMatrix(ref mvMatrix);
-
-        SetProjectionMatrix(Window.Width, Window.Height);
-
-        Window.Resize += args => SetProjectionMatrix(args.Width, args.Height);
     }
 
     public void SetModelViewMatrix(ref Matrix3 modelViewMatrix)
@@ -27,7 +24,20 @@ public class StandardMatrixShaderProgram : ShaderProgramBase
         GL.UniformMatrix3(_mvMatrixLocation, true, ref modelViewMatrix);
     }
 
-    private void SetProjectionMatrix(int width, int height)
+    public void SetModelViewMatrix(Source.Geometry.Matrix3 matrix)
+    {
+        Bind();
+
+        unsafe
+        {
+            fixed (float* valuePointer = matrix.Values)
+            {
+                GL.UniformMatrix3(_mvMatrixLocation, 1, false, valuePointer);
+            }
+        }
+    }
+
+    public void SetProjectionMatrix(int width, int height)
     {
         var pMatrix = OpenGLHelper.CreateOrthographicProjectionMatrix(width, height);
         SetProjectionMatrix(ref pMatrix);
@@ -39,13 +49,16 @@ public class StandardMatrixShaderProgram : ShaderProgramBase
         GL.UniformMatrix3(_pMatrixLocation, true, ref projectionMatrix);
     }
 
-    protected override void Dispose(bool disposing)
+    public void SetProjectionMatrix(Source.Geometry.Matrix3 matrix)
     {
-        if (disposing)
-        {
-            Window.Resize -= args => SetProjectionMatrix(args.Width, args.Height);
-        }
+        Bind();
 
-        base.Dispose(disposing);
+        unsafe
+        {
+            fixed (float* valuePointer = matrix.Values)
+            {
+                GL.UniformMatrix3(_pMatrixLocation, 1, false, valuePointer);
+            }
+        }
     }
 }

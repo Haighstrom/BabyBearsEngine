@@ -2,7 +2,6 @@
 using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Platform.OpenGL.Buffers;
-using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
 
@@ -144,15 +143,15 @@ public class TextImage : IRenderable, IDisposable
         
         foreach (char c in _textToDisplay)
         {
-            Box2 source = _fontStruct.CharPositionsNormalised[c];
+            var source = _fontStruct.CharPositionsNormalised[c];
             var w = _fontStruct.CharPositions[c].Size.X * ScaleX;
 
             vertices.Add(
-                Geometry.QuadToTris(
-            new Vertex(X + x, Y + y, colorTK, source.Min.X, source.Min.Y),
-            new Vertex(X + x + w, Y + y, colorTK, source.Max.X, source.Min.Y),
-            new Vertex(X + x, Y + y + h, colorTK, source.Min.X, source.Max.Y),
-            new Vertex(X + x + w, Y + y + h, colorTK, source.Max.X, source.Max.Y)
+                GeometryHelper.QuadToTris(
+                    new Vertex(X + x, Y + y, colorTK, source.Min.X, source.Min.Y),
+                    new Vertex(X + x + w, Y + y, colorTK, source.Max.X, source.Min.Y),
+                    new Vertex(X + x, Y + y + h, colorTK, source.Min.X, source.Max.Y),
+                    new Vertex(X + x + w, Y + y + h, colorTK, source.Max.X, source.Max.Y)
             ));
 
             x += w;

@@ -10,6 +10,8 @@ public class ColouredRectangle(Colour colour, float x, float y, float width, flo
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
     private bool _verticesChanged = true;
 
+    public void TempShaderResize(int width, int height) => _shader.SetWindowSize(width, height);
+
     public float X
     {
         get => x;

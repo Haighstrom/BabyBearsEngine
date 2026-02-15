@@ -20,7 +20,7 @@ public sealed class SolidColourShaderProgram : ShaderProgramBase
         Window.Resize += args => SetWindowSize(args.Width, args.Height);
     }
 
-    private void SetWindowSize(int width, int height)
+    public void SetWindowSize(int width, int height)
     {
         Bind();
         GL.Uniform2(_windowSizeLocation, new Vector2(width, height));

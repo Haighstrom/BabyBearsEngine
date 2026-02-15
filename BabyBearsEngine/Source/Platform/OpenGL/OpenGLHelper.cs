@@ -15,8 +15,15 @@ public static class OpenGLHelper
 
     public static void BindFBO(int fboHandle)
     {
-        GL.BindBuffer(BufferTarget.ArrayBuffer, fboHandle);
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, fboHandle);
         LastBoundFBO = fboHandle;
+    }
+
+    public static (int X, int Y, int Width, int Height) GetViewport()
+    {
+        int[] ints = new int[4];
+        GL.GetInteger(GetPName.Viewport, ints);
+        return (ints[0], ints[1], ints[2], ints[3]);
     }
 
     public static void BindEBO(int eBOHandle)
@@ -90,6 +97,20 @@ public static class OpenGLHelper
         Matrix3 translate = new(1, 0, -halfWidth, 0, 1, -halfHeight, 0, 0, 1);
 
         var ortho = scale * flipY * translate;
+
+        return ortho;
+    }
+
+    // Same as CreateOrtho but without the FlipY stage. Use for makign projection matrices when rendering to a framebuffer rather than screen.
+    public static Matrix3 CreateFBOOrthographicProjectionMatrix(int width, int height)
+    {
+        var halfWidth = width / 2f;
+        var halfHeight = height / 2f;
+
+        Matrix3 scale = new(1 / halfWidth, 0, 0, 0, 1 / halfHeight, 0, 0, 0, 1);
+        Matrix3 translate = new(1, 0, -halfWidth, 0, 1, -halfHeight, 0, 0, 1);
+
+        var ortho = scale * translate;
 
         return ortho;
     }

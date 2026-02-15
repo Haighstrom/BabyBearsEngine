@@ -8,44 +8,57 @@ namespace BabyBearsEngine.Source.Worlds.Cameras;
 /// </summary>
 public class CameraMSAAShader : ShaderProgramBase
 {
-    private readonly int _locationMVMatrix;
-    private readonly int _locationPMatrix;
-    private readonly int _locationPosition;
-    private readonly int _locationTexture;
+    private readonly int _mvMatrixLocation;
+    private readonly int _pMatrixLocation;
     private readonly int _locationSamplesUniform;
 
-    public CameraMSAAShader()
+    public CameraMSAAShader(int width, int height, MsaaSamples samples = MsaaSamples.Disabled)
         : base(VertexShaders.CameraMSAA, FragmentShaders.CameraMSAA)
     {
-        _locationMVMatrix = GL.GetUniformLocation(Handle, "MVMatrix");
-        _locationPMatrix = GL.GetUniformLocation(Handle, "PMatrix");
-        _locationPosition = GL.GetAttribLocation(Handle, "Position");
-        _locationTexture = GL.GetAttribLocation(Handle, "TexCoord");
+        _mvMatrixLocation = GL.GetUniformLocation(Handle, "MVMatrix");
+        _pMatrixLocation = GL.GetUniformLocation(Handle, "PMatrix");
         _locationSamplesUniform = GL.GetUniformLocation(Handle, "MSAASamples");
+
+        var mvMatrix = Matrix3.Identity;
+        SetModelViewMatrix(ref mvMatrix);
+
+        SetProjectionMatrix(width, height);
+
+        Samples = samples;
     }
 
+    private MsaaSamples _samples;
+    public MsaaSamples Samples
+    {
+        get => _samples;
+        set
+        {
+            _samples = value;
+            SetSamples((int)_samples);
+        }
+    }
 
-    public MsaaSamples Samples { get; set; }
-
-    public void Render(ref Matrix3 projection, ref Matrix3 modelView, int verticesLength, PrimitiveType drawType)
+    private void SetSamples(int samples) 
     {
         Bind();
+        GL.Uniform1(_locationSamplesUniform, samples);
+    }
 
-        GL.UniformMatrix3(_locationMVMatrix, true, ref modelView);
-        GL.UniformMatrix3(_locationPMatrix, true, ref projection);
+    public void SetModelViewMatrix(ref Matrix3 modelViewMatrix)
+    {
+        Bind();
+        GL.UniformMatrix3(_mvMatrixLocation, true, ref modelViewMatrix);
+    }
 
-        //Bind MSAA sample numbers uniform
-        GL.Uniform1(_locationSamplesUniform, (int)Samples);
+    public void SetProjectionMatrix(int width, int height)
+    {
+        var pMatrix = OpenGLHelper.CreateOrthographicProjectionMatrix(width, height);
+        SetProjectionMatrix(ref pMatrix);
+    }
 
-        GL.EnableVertexAttribArray(_locationPosition);
-        GL.VertexAttribPointer(_locationPosition, 2, VertexAttribPointerType.Float, false, Vertex.Stride, 0);
-
-        GL.EnableVertexAttribArray(_locationTexture);
-        GL.VertexAttribPointer(_locationTexture, 2, VertexAttribPointerType.Float, false, Vertex.Stride, 12);
-
-        GL.DrawArrays(drawType, 0, verticesLength);
-
-        GL.DisableVertexAttribArray(_locationPosition);
-        GL.DisableVertexAttribArray(_locationTexture);
+    public void SetProjectionMatrix(ref Matrix3 projectionMatrix)
+    {
+        Bind();
+        GL.UniformMatrix3(_pMatrixLocation, true, ref projectionMatrix);
     }
 }

@@ -6,7 +6,7 @@ internal class Chapter1World : World
 {
     public Chapter1World()
     {
-        AddGraphic(new Triangle());
-        AddEntity(new ReturnToMainMenuButton());
+        Add(new Triangle());
+        Add(new ReturnToMainMenuButton());
     }
 }
