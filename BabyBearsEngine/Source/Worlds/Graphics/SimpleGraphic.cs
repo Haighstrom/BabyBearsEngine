@@ -1,4 +1,5 @@
 ﻿using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Source.Geometry;
 
 namespace BabyBearsEngine.Graphics;
 
@@ -30,7 +31,7 @@ internal class SimpleGraphic : IRenderable, IDisposable
     }
 
 
-    public void Render()
+    public void Render(Matrix3 projection)
     {
         Shader.Bind();
         _vertexDataBuffer.Bind();

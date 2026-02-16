@@ -122,7 +122,7 @@ public class BMPTextGraphic : ITextGraphic
     private ITexture _tempTexture;
     private SimpleGraphic _anotherTempGraphic;
 
-    public void Render()
+    public void Render(Source.Geometry.Matrix3 projection)
     {
         if (_verticesChanged)
         {
@@ -133,11 +133,11 @@ public class BMPTextGraphic : ITextGraphic
             _verticesChanged = false;
         }
 
-        _image.Render();
+        _image.Render(projection);
         //_anotherTempGraphic.Render();
         foreach (var g in _vertGroups)
         {
-            g.Render();
+            g.Render(projection);
         }
     }
 

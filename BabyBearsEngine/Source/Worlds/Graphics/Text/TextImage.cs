@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Platform.OpenGL.Buffers;
+using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
 
 namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
 
@@ -169,11 +171,16 @@ public class TextImage : IRenderable, IDisposable
         Vertices = vertices.ToArray();
     }
 
-    public void Render()
+    public void Render(Matrix3 projection)
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();
         _texture.Bind();
+
+        if (_shader is IWorldShader worldShader)
+        {
+            worldShader.SetProjectionMatrix(projection);
+        }
 
         if (_verticesChanged)
         {

@@ -1,21 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
-using OpenTK.Mathematics;
 
 namespace BabyBearsEngine;
 
 public static class ColourTools
 {
-    public static Color4 RandSystemColour()
+    public static Colour RandSystemColour()
     {
-        List<Color4> colours = [];
+        List<Colour> colours = [];
 
-        foreach (var propertyInfo in typeof(Color4).GetProperties(
-            BindingFlags.Static | BindingFlags.Public))
+        foreach (var propertyInfo in typeof(Colour)
+            .GetProperties(BindingFlags.Static | BindingFlags.Public))
         {
             var v = propertyInfo.GetValue(null);
 
-            if (v is Color4 colour)
+            if (v is Colour colour)
             {
                 colours.Add(colour);
             }

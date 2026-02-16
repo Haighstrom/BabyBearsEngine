@@ -1,8 +1,9 @@
-﻿using OpenTK.Mathematics;
+﻿using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
+using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.OpenGL;
 
-public sealed class SolidColourShaderProgram : ShaderProgramBase
+public sealed class SolidColourShaderProgram : ShaderProgramBase, IWorldShader
 {
     private static readonly Lazy<SolidColourShaderProgram> s_instance = new(() => new SolidColourShaderProgram());
 
@@ -14,10 +15,6 @@ public sealed class SolidColourShaderProgram : ShaderProgramBase
         :base(VertexShaders.NoMatrixSolidColour, FragmentShaders.SolidColour)
     {
         _windowSizeLocation = GL.GetUniformLocation(Handle, "WindowSize");
-
-        SetWindowSize(Window.Width, Window.Height);
-
-        Window.Resize += args => SetWindowSize(args.Width, args.Height);
     }
 
     public void SetWindowSize(int width, int height)
@@ -26,13 +23,13 @@ public sealed class SolidColourShaderProgram : ShaderProgramBase
         GL.Uniform2(_windowSizeLocation, new Vector2(width, height));
     }
 
-    protected override void Dispose(bool disposing)
+    public void SetProjectionMatrix(Source.Geometry.Matrix3 matrix)
     {
-        if (disposing)
-        {
-            Window.Resize -= args => SetWindowSize(args.Width, args.Height);
-        }
+        throw new NotImplementedException();
+    }
 
-        base.Dispose(disposing);
+    public void SetModelViewMatrix(Source.Geometry.Matrix3 matrix)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -21,7 +21,7 @@ internal class MenuWorld : World
 
     public override void Draw()
     {
-        rect.TempShaderResize(100,100);
+        //rect.TempShaderResize(100,100);
         base.Draw();
     }
 }

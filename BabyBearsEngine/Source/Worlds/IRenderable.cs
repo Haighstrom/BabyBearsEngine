@@ -1,6 +1,8 @@
-﻿namespace BabyBearsEngine.Graphics;
+﻿using BabyBearsEngine.Source.Geometry;
+
+namespace BabyBearsEngine.Graphics;
 
 public interface IRenderable : IDisposable
 {
-    void Render();
+    void Render(Matrix3 projection);
 }

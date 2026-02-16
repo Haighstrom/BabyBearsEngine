@@ -1,5 +1,6 @@
 ﻿using System;
 using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Source.Geometry;
 
 namespace BabyBearsEngine.Tests.System.Source.BearSpinner3000;
 
@@ -19,9 +20,9 @@ internal class BearEntity(int startX, int startY) : IEntity
     private readonly float _ySway = Randomisation.Rand(0, 500);
     private double _totalElapsed = 0;
 
-    public void Render()
+    public void Render(Matrix3 projection)
     {
-        _graphic.Render();
+        _graphic.Render(projection);
     }
 
     public void Update(double elapsed)

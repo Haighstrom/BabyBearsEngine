@@ -1,4 +1,5 @@
 ﻿using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Source.Geometry;
 
 namespace BabyBearsEngine.Graphics;
 
@@ -6,11 +7,9 @@ public class ColouredRectangle(Colour colour, float x, float y, float width, flo
 {
     private bool _disposed;
 
-    private readonly SolidColourShaderProgram _shader = SolidColourShaderProgram.Instance;
+    private readonly SolidColourShaderProgramMatrix _shader = SolidColourShaderProgramMatrix.Instance;
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
     private bool _verticesChanged = true;
-
-    public void TempShaderResize(int width, int height) => _shader.SetWindowSize(width, height);
 
     public float X
     {
@@ -78,7 +77,7 @@ public class ColouredRectangle(Colour colour, float x, float y, float width, flo
         }
     }
 
-    public void Render()
+    public void Render(Matrix3 projection)
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();
@@ -88,6 +87,8 @@ public class ColouredRectangle(Colour colour, float x, float y, float width, flo
             _vertexDataBuffer.SetNewVertices(Vertices);
             _verticesChanged = false;
         }
+
+        _shader.SetProjectionMatrix(projection);
 
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
     }

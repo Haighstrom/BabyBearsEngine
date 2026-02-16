@@ -21,9 +21,9 @@ internal class GraphicRenderer(ITexture texture) : IDisposable
 
     public StandardMatrixShaderProgram Shader { get; set; } = new();
 
-    public void UpdateVertices(float x, float y, float w, float h, Color4 colour)
+    public void UpdateVertices(float x, float y, float w, float h, Colour colour)
     {
-        _vertexDataBuffer.SetNewVertices(GetVertices(x, y, w, h, colour));
+        _vertexDataBuffer.SetNewVertices(GetVertices(x, y, w, h, colour.ToOpenTK()));
     }
 
     public void UpdateAngle(float angle, float x, float y, float width, float height)
@@ -47,7 +47,7 @@ internal class GraphicRenderer(ITexture texture) : IDisposable
         Shader.SetModelViewMatrix(ref mv);
     }
 
-    public void Render()
+    public void Render(Geometry.Matrix3 projection)
     {
         Shader.Bind();
         _vertexDataBuffer.Bind();
@@ -55,8 +55,7 @@ internal class GraphicRenderer(ITexture texture) : IDisposable
 
         if (Shader is IWorldShader worldShader)
         {
-            var ortho = Geometry.Matrix3.CreateOrtho(800, 600);
-            worldShader.SetProjectionMatrix(ortho);
+            worldShader.SetProjectionMatrix(projection);
         }
 
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);

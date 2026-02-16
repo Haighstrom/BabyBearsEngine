@@ -77,7 +77,7 @@ public class StbTrueTypeTextGraphic(float x, float y, float width, float height,
         }
     }
 
-    public void Render()
+    public void Render(Source.Geometry.Matrix3 projection)
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();

@@ -1,6 +1,6 @@
 ﻿using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Platform.OpenGL.Rendering;
-using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Graphics;
 
@@ -8,7 +8,7 @@ public class Image(ITexture texture, float x, float y, float width, float height
 {
     private readonly GraphicRenderer _graphicRenderer = new(texture);
     private float _angle = 0;
-    private Color4 _colour = Color4.White;
+    private Colour _colour = Colour.White;
     private bool _verticesChanged = true;
     private bool _modelViewChanged = true;
 
@@ -60,7 +60,7 @@ public class Image(ITexture texture, float x, float y, float width, float height
         }
     }
 
-    public Color4 Colour
+    public Colour Colour
     {
         get => _colour;
         set
@@ -86,7 +86,7 @@ public class Image(ITexture texture, float x, float y, float width, float height
         }
     }
 
-    public void Render()
+    public void Render(Matrix3 projection)
     {
         if (_verticesChanged)
         {
@@ -100,7 +100,7 @@ public class Image(ITexture texture, float x, float y, float width, float height
             _modelViewChanged = false;
         }
 
-        _graphicRenderer.Render();
+        _graphicRenderer.Render(projection);
     }
 
     #region Dispose

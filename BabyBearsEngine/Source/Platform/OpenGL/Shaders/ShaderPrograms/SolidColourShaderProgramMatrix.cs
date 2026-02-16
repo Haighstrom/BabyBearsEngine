@@ -1,48 +1,25 @@
-﻿using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
+﻿using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
 using OpenTK.Mathematics;
 
-namespace BabyBearsEngine.Source.Worlds.Cameras;
+namespace BabyBearsEngine.OpenGL;
 
-/// <summary>
-/// Shader used with the multisample FBO for the MSAA antialiasing pass only
-/// </summary>
-public class CameraMSAAShader : ShaderProgramBase, IWorldShader
+public sealed class SolidColourShaderProgramMatrix : ShaderProgramBase, IWorldShader
 {
+    private static readonly Lazy<SolidColourShaderProgramMatrix> s_instance = new(() => new SolidColourShaderProgramMatrix());
+
+    internal static SolidColourShaderProgramMatrix Instance => s_instance.Value;
+
     private readonly int _mvMatrixLocation;
     private readonly int _pMatrixLocation;
-    private readonly int _locationSamplesUniform;
 
-    public CameraMSAAShader(int width, int height, MsaaSamples samples = MsaaSamples.Disabled)
-        : base(VertexShaders.CameraMSAA, FragmentShaders.CameraMSAA)
+    private SolidColourShaderProgramMatrix()
+        :base(VertexShaders.SolidColour, FragmentShaders.SolidColour)
     {
         _mvMatrixLocation = GL.GetUniformLocation(Handle, "MVMatrix");
         _pMatrixLocation = GL.GetUniformLocation(Handle, "PMatrix");
-        _locationSamplesUniform = GL.GetUniformLocation(Handle, "MSAASamples");
 
         var mvMatrix = Matrix3.Identity;
         SetModelViewMatrix(ref mvMatrix);
-
-        SetProjectionMatrix(width, height);
-
-        Samples = samples;
-    }
-
-    private MsaaSamples _samples;
-    public MsaaSamples Samples
-    {
-        get => _samples;
-        set
-        {
-            _samples = value;
-            SetSamples((int)_samples);
-        }
-    }
-
-    private void SetSamples(int samples) 
-    {
-        Bind();
-        GL.Uniform1(_locationSamplesUniform, samples);
     }
 
     public void SetModelViewMatrix(ref Matrix3 modelViewMatrix)
@@ -50,6 +27,7 @@ public class CameraMSAAShader : ShaderProgramBase, IWorldShader
         Bind();
         GL.UniformMatrix3(_mvMatrixLocation, true, ref modelViewMatrix);
     }
+
     public void SetModelViewMatrix(Source.Geometry.Matrix3 matrix)
     {
         Bind();
@@ -74,6 +52,7 @@ public class CameraMSAAShader : ShaderProgramBase, IWorldShader
         Bind();
         GL.UniformMatrix3(_pMatrixLocation, true, ref projectionMatrix);
     }
+
     public void SetProjectionMatrix(Source.Geometry.Matrix3 matrix)
     {
         Bind();

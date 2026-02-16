@@ -1,5 +1,6 @@
 ﻿using BabyBearsEngine.Graphics;
 using BabyBearsEngine.Input;
+using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Rendering.Graphics.Text;
 
 namespace BabyBearsEngine.Worlds.UI;
@@ -22,10 +23,10 @@ public class Button(int x, int y, int width, int height, Colour colour, string t
     {
     }
 
-    public void Render()
+    public void Render(Matrix3 projection)
     {
-        _graphic.Render();
-        _textImage.Render();
+        _graphic.Render(projection);
+        _textImage.Render(projection);
     }
 
     protected virtual void Dispose(bool disposing)

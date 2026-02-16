@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using BabyBearsEngine.Graphics;
+using BabyBearsEngine.Source.Geometry;
 
 namespace BabyBearsEngine.Worlds;
 
@@ -75,9 +76,11 @@ public class World() : IWorld
         GL.ClearColor(BackgroundColour.R / 255f, BackgroundColour.G / 255f, BackgroundColour.B / 255f, BackgroundColour.A / 255f);
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
+        var ortho = Matrix3.CreateOrtho(Window.Width, Window.Height);
+
         foreach (var graphic in _graphics.ToList())
         {
-            graphic.Render();
+            graphic.Render(ortho);
         }
     }
 }

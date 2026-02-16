@@ -22,7 +22,7 @@ public class PointGraphic : IRenderable
         _vertexDataBuffer.SetNewVertices(vertices);
     }
 
-    public void Render()
+    public void Render(Source.Geometry.Matrix3 projection)
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();

@@ -3,7 +3,10 @@ using System.Linq;
 using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Diagnostics;
+using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Platform.OpenGL.Buffers;
+using BabyBearsEngine.Source.Platform.OpenGL.Shaders;
+using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
 using BabyBearsEngine.Source.Worlds;
 using BabyBearsEngine.Source.Worlds.Cameras;
 
@@ -14,7 +17,7 @@ public class Camera : IEntity, IContainer
     private readonly VertexDataBuffer<Vertex> _vertexBuffer = new();
     private readonly FBO _shaderPassFBO;
     private readonly MsaaFBO? _msaaFBO;
-    private readonly FBOShaderProgram _shader;
+    private readonly StandardMatrixShaderProgram _shader;
     private readonly CameraMSAAShader _mSAAShader;
     private float _tileWidth, _tileHeight;
     private float _viewX, _viewY, _viewW, _viewH;
@@ -169,7 +172,7 @@ public class Camera : IEntity, IContainer
         }
     }
 
-    public void Render()
+    public void Render(Matrix3 projection)
     {
         _vertexBuffer.Bind();
 
@@ -199,10 +202,12 @@ public class Camera : IEntity, IContainer
         GL.Viewport(0, 0, (int)Width, (int)Height);
         OpenGLHelper.LastBoundFBO = MSAAEnabled ? _msaaFBO!.Handle : _shaderPassFBO.Handle;
 
+        var ortho = Matrix3.CreateFBOOrtho(Width, Height);
+
         //draw stuff here 
         foreach (var graphic in _graphics.ToList())
         {
-            graphic.Render();
+            graphic.Render(ortho);
         }
 
         _vertexBuffer.Bind();
@@ -246,6 +251,8 @@ public class Camera : IEntity, IContainer
         {
             _shader.Bind();
         }
+
+        _shader.SetProjectionMatrix(projection);
 
         //Render with assigned shader
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, Vertices.Length);

@@ -1,5 +1,6 @@
 ﻿using System;
 using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Source.Geometry;
 using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
@@ -50,7 +51,7 @@ internal class Triangle : IRenderable
         GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 0, 0);
     }
 
-    public void Render()
+    public void Render(Matrix3 projection)
     {
         _shader.Bind();
         _vao.Bind();
