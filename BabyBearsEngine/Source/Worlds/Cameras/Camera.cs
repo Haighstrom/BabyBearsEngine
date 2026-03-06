@@ -5,8 +5,6 @@ using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Diagnostics;
 using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Platform.OpenGL.Buffers;
-using BabyBearsEngine.Source.Platform.OpenGL.Shaders;
-using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
 using BabyBearsEngine.Source.Worlds;
 using BabyBearsEngine.Source.Worlds.Cameras;
 
@@ -24,12 +22,13 @@ public class Camera : IEntity, IContainer
     private readonly List<IRenderable> _graphics = [];
     private readonly List<IUpdateable> _updateables = [];
 
-    private Camera(float layer, float x, float y, float width, float height)
+    private Camera(float layer, float x, float y, float width, float height, MsaaSamples samples = MsaaSamples.Disabled)
     {
         X = x;
         Y = y;
         Width = width;
         Height = height;
+        MSAASamples = samples;
 
         _shader = new();
         _mSAAShader = new CameraMSAAShader((int)width, (int)height, MSAASamples);
@@ -65,19 +64,18 @@ public class Camera : IEntity, IContainer
         }
     }
 
-    public Camera(float layer, float x, float y, float width, float height, float tileW, float tileH)
-        : this(layer, x, y, width, height)
+    public Camera(float layer, float x, float y, float width, float height, float tileW, float tileH, MsaaSamples samples = MsaaSamples.Disabled)
+        : this(layer, x, y, width, height, samples)
     {
         FixedTileSize = true;
 
         //View set automatically - except it isnt?
         TileWidth = tileW;
         TileHeight = tileH;
-
     }
 
-    public Camera(float layer, float x, float y, float width, float height, float viewX, float viewY, float viewW, float viewH)
-        : this(layer, x, y, width, height)
+    public Camera(float layer, float x, float y, float width, float height, float viewX, float viewY, float viewW, float viewH, MsaaSamples samples = MsaaSamples.Disabled)
+        : this(layer, x, y, width, height, samples)
     {
         FixedTileSize = false;
 
@@ -92,8 +90,6 @@ public class Camera : IEntity, IContainer
     private float Y { get; set; }
     private float Width { get; set; }
     private float Height { get; set; }
-
-    private bool MSAAEnabled => MSAASamples != MsaaSamples.Disabled;
 
     private Vertex[] Vertices { get; set; }
 
@@ -174,12 +170,14 @@ public class Camera : IEntity, IContainer
 
     public void Render(Matrix3 projection)
     {
+        bool msaaEnabled = MSAASamples != MsaaSamples.Disabled;
+
         _vertexBuffer.Bind();
 
         //Locally save the current render target, we will then set this camera as the current render target for child cameras, then put it back
         int tempFBID = OpenGLHelper.LastBoundFBO;
 
-        if (MSAAEnabled)
+        if (msaaEnabled)
         {
             //Bind MSAA FBO to be the draw destination and clear it
             _msaaFBO!.Bind();
@@ -200,24 +198,24 @@ public class Camera : IEntity, IContainer
         //Save the previous viewport and set the viewport to match the size of the texture we are now drawing to - the FBO
         var prevVP = OpenGLHelper.GetViewport();
         GL.Viewport(0, 0, (int)Width, (int)Height);
-        OpenGLHelper.LastBoundFBO = MSAAEnabled ? _msaaFBO!.Handle : _shaderPassFBO.Handle;
+
+        //OpenGLHelper.LastBoundFBO = MSAAEnabled ? _msaaFBO!.Handle : _shaderPassFBO.Handle;
 
         var ortho = Matrix3.CreateFBOOrtho(Width, Height);
+        var identity = Matrix3.Identity;
+        var mv = Matrix3.ScaleAroundOrigin(ref identity, TileWidth, TileHeight);
+        mv = Matrix3.Translate(ref mv, -View.X, -View.Y);
+        var orthoMV = Matrix3.Multiply(ref ortho, ref mv);
 
         //draw stuff here 
         foreach (var graphic in _graphics.ToList())
         {
-            graphic.Render(ortho);
+            graphic.Render(orthoMV);
         }
 
         _vertexBuffer.Bind();
 
-        //Revert the render target 
-        OpenGLHelper.LastBoundFBO = tempFBID;
-        //Bind the render target back to either the screen, or a camera higher up the heirachy, depending on what called this
-        GL.BindFramebuffer(FramebufferTarget.Framebuffer, OpenGLHelper.LastBoundFBO);
-
-        if (MSAAEnabled)
+        if (msaaEnabled)
         {
             //Bind the 2nd pass FBO and draw from the first to do MSAA sampling
             _shaderPassFBO.Bind();
@@ -228,11 +226,18 @@ public class Camera : IEntity, IContainer
             _msaaFBO!.BindTexture();
 
             //Do the MSAA render pass, drawing to the MSAATexture FBO
+            _mSAAShader.Bind();
+            _mSAAShader.SetProjectionMatrix(ortho);
             GL.DrawArrays(PrimitiveType.TriangleStrip, 0, Vertices.Length);
 
             //Unbind the FBO 
             GL.BindTexture(TextureTarget.Texture2DMultisample, 0);
         }
+
+        //Revert the render target 
+        OpenGLHelper.LastBoundFBO = tempFBID;
+        //Bind the render target back to either the screen, or a camera higher up the heirachy, depending on what called this
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, OpenGLHelper.LastBoundFBO);
 
         //Bind the FBO to be drawn
         _shaderPassFBO.Texture.Bind();
@@ -243,15 +248,7 @@ public class Camera : IEntity, IContainer
         //reset viewport
         GL.Viewport(prevVP.X, prevVP.Y, prevVP.Width, prevVP.Height);
 
-        if (MSAAEnabled)
-        {
-            _mSAAShader.Bind();
-        }
-        else
-        {
-            _shader.Bind();
-        }
-
+        _shader.Bind();
         _shader.SetProjectionMatrix(projection);
 
         //Render with assigned shader

@@ -34,7 +34,7 @@ public class MsaaFBO(int width, int height, int samples) : IDisposable
         OpenGLHelper.BindFBO(Handle);
 
         //does this need doing every time?
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, Texture.Handle, 0);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2DMultisample, Texture.Handle, 0);
     }
 
     public void BindTexture()
