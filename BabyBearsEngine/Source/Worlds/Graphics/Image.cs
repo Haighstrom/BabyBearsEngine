@@ -11,12 +11,6 @@ public class Image(ITexture texture, float x, float y, float width, float height
     private Colour _colour = Colour.White;
     private bool _verticesChanged = true;
 
-    /// <summary>
-    /// advanced users only
-    /// </summary>
-    /// <returns></returns>
-    public IShaderProgram GetShaderProgram() => _graphicRenderer.Shader;
-
     public float X
     {
         get => x;

@@ -25,8 +25,6 @@ public class CameraMSAAShader : ShaderProgramBase, IMVPShader
         var mvMatrix = Matrix3.Identity;
         SetModelViewMatrix(ref mvMatrix);
 
-        SetProjectionMatrix(width, height);
-
         Samples = samples;
     }
 

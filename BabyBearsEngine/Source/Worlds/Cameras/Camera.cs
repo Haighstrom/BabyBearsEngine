@@ -13,16 +13,16 @@ namespace BabyBearsEngine.Worlds;
 public class Camera : IEntity, IContainer
 {
     private readonly VertexDataBuffer<Vertex> _vertexBuffer = new();
+    private readonly CameraMSAAShader _mSAAShader;
     private readonly FBO _shaderPassFBO;
     private readonly MsaaFBO? _msaaFBO;
     private readonly StandardMatrixShaderProgram _shader;
-    private readonly CameraMSAAShader _mSAAShader;
     private float _tileWidth, _tileHeight;
     private float _viewX, _viewY, _viewW, _viewH;
     private readonly List<IRenderable> _graphics = [];
     private readonly List<IUpdateable> _updateables = [];
 
-    private Camera(float layer, float x, float y, float width, float height, MsaaSamples samples = MsaaSamples.Disabled)
+    private Camera(float x, float y, float width, float height, MsaaSamples samples = MsaaSamples.Disabled)
     {
         X = x;
         Y = y;
@@ -31,7 +31,7 @@ public class Camera : IEntity, IContainer
         MSAASamples = samples;
 
         _shader = new();
-        _mSAAShader = new CameraMSAAShader((int)width, (int)height, MSAASamples);
+        _mSAAShader = new CameraMSAAShader((int)width, (int)height, samples);
 
         var colour = Colour.White.ToOpenTK();
 
@@ -49,9 +49,9 @@ public class Camera : IEntity, IContainer
             throw new Exception();
         }
 
-        if (MSAASamples != MsaaSamples.Disabled)
+        if (samples != MsaaSamples.Disabled)
         {
-            _msaaFBO = new((int)width, (int)height, (int)MSAASamples);
+            _msaaFBO = new((int)width, (int)height, (int)samples);
         }
 
         _shaderPassFBO = new((int)width, (int)height);
@@ -64,8 +64,8 @@ public class Camera : IEntity, IContainer
         }
     }
 
-    public Camera(float layer, float x, float y, float width, float height, float tileW, float tileH, MsaaSamples samples = MsaaSamples.Disabled)
-        : this(layer, x, y, width, height, samples)
+    public Camera(float x, float y, float width, float height, float tileW, float tileH, MsaaSamples samples = MsaaSamples.Disabled)
+        : this(x, y, width, height, samples)
     {
         FixedTileSize = true;
 
@@ -74,12 +74,12 @@ public class Camera : IEntity, IContainer
         TileHeight = tileH;
     }
 
-    public Camera(float layer, float x, float y, float width, float height, float viewX, float viewY, float viewW, float viewH, MsaaSamples samples = MsaaSamples.Disabled)
-        : this(layer, x, y, width, height, samples)
+    public Camera(float x, float y, float width, float height, float viewX, float viewY, float viewW, float viewH, MsaaSamples samples = MsaaSamples.Disabled)
+        : this(x, y, width, height, samples)
     {
         FixedTileSize = false;
 
-        //TileWidth/TileHeight set automatically
+        //TileWidth/TileHeight set automatically (are they?)
         _viewX = viewX;
         _viewY = viewY;
         _viewW = viewW;
@@ -95,22 +95,9 @@ public class Camera : IEntity, IContainer
 
     public float GameSpeed { get; set; } = 1;
 
-    /// <summary>
-    /// Angle in Degrees
-    /// </summary>
-    public float Angle { get; set; }
-
     public Colour BackgroundColour { get; set; } = Colour.White;
 
     public bool FixedTileSize { get; set; }
-
-    public float MaxX { get; set; }
-
-    public float MaxY { get; set; }
-
-    public float MinX { get; set; }
-
-    public float MinY { get; set; }
 
     public MsaaSamples MSAASamples { get; set; } = MsaaSamples.Disabled; //todo: trigger resize if this changes?
 
@@ -175,7 +162,7 @@ public class Camera : IEntity, IContainer
         _vertexBuffer.Bind();
 
         //Locally save the current render target, we will then set this camera as the current render target for child cameras, then put it back
-        int tempFBID = OpenGLHelper.LastBoundFBO;
+        int previousFBO = OpenGLHelper.LastBoundFBO;
 
         if (msaaEnabled)
         {
@@ -219,7 +206,7 @@ public class Camera : IEntity, IContainer
             GL.ClearColor(0, 0, 0, 0);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            //Bind the FBO to be drawn
+            ////Bind the FBO to be drawn
             _msaaFBO!.BindTexture();
 
             //Do the MSAA render pass, drawing to the MSAATexture FBO
@@ -229,7 +216,7 @@ public class Camera : IEntity, IContainer
         }
 
         //Revert the render target 
-        OpenGLHelper.BindFBO(tempFBID);
+        OpenGLHelper.BindFBO(previousFBO);
 
         //Bind the FBO to be drawn
         _shaderPassFBO.Texture.Bind();
@@ -245,42 +232,6 @@ public class Camera : IEntity, IContainer
 
         //Render with assigned shader
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, Vertices.Length);
-    }
-
-    public void Resize(float newW, float newH)
-    {
-        throw new NotImplementedException();
-        //W = newW;
-        //H = newH;
-
-        ////if (MSAASamples != MSAA_Samples.Disabled)
-        ////    HF.Graphics.ResizeMSAAFramebuffer(_frameBufferMSAAID, ref _frameBufferMSAATexture, W, H, MSAASamples);
-
-        ////HF.Graphics.ResizeFramebuffer(_frameBufferShaderPassID, ref _frameBufferShaderPassTexture, W, H);
-
-        //var _colour = Colour.White.ToOpenTK();
-        //Vertices =
-        //[
-        //    new Vertex(0, 0, _colour, 0f, 0f),
-        //    new Vertex(Width, 0, _colour, 1f,  0f),
-        //    new Vertex(0, Height, _colour, 0f,  1f),
-        //    new Vertex(Width, Height, _colour, 1f,  1f)
-        //];
-
-        //SetUpFBOTex((int)Width, (int)Height);
-
-        //_ortho = Matrix3.CreateFBOOrtho(Width, Height);
-
-        //if (FixedTileSize)
-        //{
-        //    View.W = Width / TileWidth;
-        //    View.H = Height / TileHeight;
-        //}
-        //else
-        //{
-        //    TileWidth = W / View.W;
-        //    TileHeight = H / View.H;
-        //}
     }
 
     public void Clear()
@@ -324,6 +275,6 @@ public class Camera : IEntity, IContainer
 
     public void Dispose()
     {
-
+        throw new NotImplementedException();
     }
 }

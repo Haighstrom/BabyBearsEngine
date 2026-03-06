@@ -15,7 +15,7 @@ internal class MenuWorld : World
         var texture = new TextureFactory().CreateTextureFromImageFile("Assets/bear.png");
         Add(new Image(texture, 200, 100, 300, 300) { Angle = 45f });
 
-        var camera = new Camera(0, 500, 50, 100, 100, 10, 10, msaa);
+        var camera = new Camera(500, 50, 100, 100, 10, 10, msaa);
         var rect = new ColouredRectangle(Colour.Yellow, 0, 0, 5, 5);
 
         var newBearTex = new TextureFactory().CreateTextureFromImageFile("Assets/bear.png");
