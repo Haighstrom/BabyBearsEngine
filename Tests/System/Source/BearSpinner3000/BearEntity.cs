@@ -20,9 +20,9 @@ internal class BearEntity(int startX, int startY) : IEntity
     private readonly float _ySway = Randomisation.Rand(0, 500);
     private double _totalElapsed = 0;
 
-    public void Render(Matrix3 projection)
+    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
-        _graphic.Render(projection);
+        _graphic.Render(ref projection, ref modelView);
     }
 
     public void Update(double elapsed)

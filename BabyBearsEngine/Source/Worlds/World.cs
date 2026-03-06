@@ -76,11 +76,12 @@ public class World() : IWorld
         GL.ClearColor(BackgroundColour.R / 255f, BackgroundColour.G / 255f, BackgroundColour.B / 255f, BackgroundColour.A / 255f);
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
-        var ortho = Matrix3.CreateOrtho(Window.Width, Window.Height);
+        var projection = Matrix3.CreateOrtho(Window.Width, Window.Height);
+        var modelView = Matrix3.Identity;
 
         foreach (var graphic in _graphics.ToList())
         {
-            graphic.Render(ortho);
+            graphic.Render(ref projection, ref modelView);
         }
     }
 }

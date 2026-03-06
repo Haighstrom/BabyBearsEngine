@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
-using OpenTK.Mathematics;
+using BabyBearsEngine.Source.Geometry;
 
 namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
 
@@ -19,9 +19,9 @@ public class BMPTextGraphic : ITextGraphic
     private float _width;
     private float _height;
     private string _text;
-    private Color4 _colour;
+    private OpenTK.Mathematics.Color4 _colour;
 
-    public BMPTextGraphic(FontDefinition fontDef, float x, float y, float width, float height, string text, Color4 colour)
+    public BMPTextGraphic(FontDefinition fontDef, float x, float y, float width, float height, string text, OpenTK.Mathematics.Color4 colour)
     {
         _x = x;
         _y = y;
@@ -84,7 +84,7 @@ public class BMPTextGraphic : ITextGraphic
         }
     }
 
-    public Color4 Colour
+    public OpenTK.Mathematics.Color4 Colour
     {
         get => _colour; 
         set
@@ -122,7 +122,7 @@ public class BMPTextGraphic : ITextGraphic
     private ITexture _tempTexture;
     private SimpleGraphic _anotherTempGraphic;
 
-    public void Render(Source.Geometry.Matrix3 projection)
+    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         if (_verticesChanged)
         {
@@ -133,11 +133,11 @@ public class BMPTextGraphic : ITextGraphic
             _verticesChanged = false;
         }
 
-        _image.Render(projection);
+        _image.Render(ref projection, ref modelView);
         //_anotherTempGraphic.Render();
         foreach (var g in _vertGroups)
         {
-            g.Render(projection);
+            g.Render(ref projection, ref modelView);
         }
     }
 
@@ -180,7 +180,7 @@ public class BMPTextGraphic : ITextGraphic
 
         foreach (char c in _text)
         {
-            Box2 source = _fontStruct.CharPositionsNormalised[c];
+            OpenTK.Mathematics.Box2 source = _fontStruct.CharPositionsNormalised[c];
             var w = _fontStruct.CharPositions[c].Size.X * ScaleX;
 
             //vertices.Add(Geometry.QuadToTris(
@@ -190,10 +190,10 @@ public class BMPTextGraphic : ITextGraphic
             //    new Vertex(X + x + w, Y + y + h, Colour, source.Max.X, source.Max.Y)
             //    ));
 
-            vertices.Add(new Vertex(0, 0, Color4.White, 0, 0),
-                new Vertex(200, 0, Color4.White, 1, 0),
-                new Vertex(0, 200, Color4.White, 0, 1),
-                new Vertex(200, 200, Color4.White, 1, 1)
+            vertices.Add(new Vertex(0, 0, OpenTK.Mathematics.Color4.White, 0, 0),
+                new Vertex(200, 0, OpenTK.Mathematics.Color4.White, 1, 0),
+                new Vertex(0, 200, OpenTK.Mathematics.Color4.White, 0, 1),
+                new Vertex(200, 200, OpenTK.Mathematics.Color4.White, 1, 1)
                 );
             break;
 
@@ -210,10 +210,10 @@ public class BMPTextGraphic : ITextGraphic
         }
 
         Vertex[] otherVertices = [
-                new(0, 0, Color4.White, 0, 0), // bottom left
-                new(200, 0, Color4.White, 1, 0), // bottom right
-                new(0, 200, Color4.White, 0, 1), // top left
-                new(200, 200, Color4.White, 1, 1), // top right
+                new(0, 0, OpenTK.Mathematics.Color4.White, 0, 0), // bottom left
+                new(200, 0, OpenTK.Mathematics.Color4.White, 1, 0), // bottom right
+                new(0, 200, OpenTK.Mathematics.Color4.White, 0, 1), // top left
+                new(200, 200, OpenTK.Mathematics.Color4.White, 1, 1), // top right
             ];
 
         //if (vertices.Count > 0)

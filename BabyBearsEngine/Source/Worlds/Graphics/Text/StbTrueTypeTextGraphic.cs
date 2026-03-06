@@ -1,6 +1,6 @@
 ﻿using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
-using OpenTK.Mathematics;
+using BabyBearsEngine.Source.Geometry;
 
 namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
 
@@ -10,7 +10,7 @@ public class StbTrueTypeTextGraphic(float x, float y, float width, float height,
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
     private readonly Texture _texture = FontTexture.GetStbFontTexture("Assets/Fonts/Times.ttf", text);
 
-    private Color4 _colour = Color4.White;
+    private OpenTK.Mathematics.Color4 _colour = OpenTK.Mathematics.Color4.White;
     private bool _verticesChanged = true;
 
     public float X
@@ -53,7 +53,7 @@ public class StbTrueTypeTextGraphic(float x, float y, float width, float height,
         }
     }
 
-    public Color4 Colour
+    public OpenTK.Mathematics.Color4 Colour
     {
         get => _colour;
         set
@@ -77,7 +77,7 @@ public class StbTrueTypeTextGraphic(float x, float y, float width, float height,
         }
     }
 
-    public void Render(Source.Geometry.Matrix3 projection)
+    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();

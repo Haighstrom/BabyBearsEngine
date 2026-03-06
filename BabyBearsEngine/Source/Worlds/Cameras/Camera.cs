@@ -168,7 +168,7 @@ public class Camera : IEntity, IContainer
         }
     }
 
-    public void Render(Matrix3 projection)
+    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         bool msaaEnabled = MSAASamples != MsaaSamples.Disabled;
 
@@ -179,12 +179,12 @@ public class Camera : IEntity, IContainer
 
         if (msaaEnabled)
         {
-            //Bind MSAA FBO to be the draw destination and clear it
+            //Bind MSAA FBO to be the draw destination
             _msaaFBO!.Bind();
         }
         else
         {
-            //Bind Shader Pass FBO to be the draw destination and clear it
+            //Bind Shader Pass FBO to be the draw destination
             _shaderPassFBO.Bind();
         }
 
@@ -199,18 +199,15 @@ public class Camera : IEntity, IContainer
         var prevVP = OpenGLHelper.GetViewport();
         GL.Viewport(0, 0, (int)Width, (int)Height);
 
-        //OpenGLHelper.LastBoundFBO = MSAAEnabled ? _msaaFBO!.Handle : _shaderPassFBO.Handle;
-
-        var ortho = Matrix3.CreateFBOOrtho(Width, Height);
+        var fboOrtho = Matrix3.CreateFBOOrtho(Width, Height);
         var identity = Matrix3.Identity;
         var mv = Matrix3.ScaleAroundOrigin(ref identity, TileWidth, TileHeight);
         mv = Matrix3.Translate(ref mv, -View.X, -View.Y);
-        var orthoMV = Matrix3.Multiply(ref ortho, ref mv);
 
         //draw stuff here 
         foreach (var graphic in _graphics.ToList())
         {
-            graphic.Render(orthoMV);
+            graphic.Render(ref fboOrtho, ref mv);
         }
 
         _vertexBuffer.Bind();
@@ -227,17 +224,12 @@ public class Camera : IEntity, IContainer
 
             //Do the MSAA render pass, drawing to the MSAATexture FBO
             _mSAAShader.Bind();
-            _mSAAShader.SetProjectionMatrix(ortho);
+            _mSAAShader.SetProjectionMatrix(ref fboOrtho);
             GL.DrawArrays(PrimitiveType.TriangleStrip, 0, Vertices.Length);
-
-            //Unbind the FBO 
-            GL.BindTexture(TextureTarget.Texture2DMultisample, 0);
         }
 
         //Revert the render target 
-        OpenGLHelper.LastBoundFBO = tempFBID;
-        //Bind the render target back to either the screen, or a camera higher up the heirachy, depending on what called this
-        GL.BindFramebuffer(FramebufferTarget.Framebuffer, OpenGLHelper.LastBoundFBO);
+        OpenGLHelper.BindFBO(tempFBID);
 
         //Bind the FBO to be drawn
         _shaderPassFBO.Texture.Bind();
@@ -249,7 +241,7 @@ public class Camera : IEntity, IContainer
         GL.Viewport(prevVP.X, prevVP.Y, prevVP.Width, prevVP.Height);
 
         _shader.Bind();
-        _shader.SetProjectionMatrix(projection);
+        _shader.SetProjectionMatrix(ref projection);
 
         //Render with assigned shader
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, Vertices.Length);

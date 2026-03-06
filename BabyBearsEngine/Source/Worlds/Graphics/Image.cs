@@ -10,15 +10,12 @@ public class Image(ITexture texture, float x, float y, float width, float height
     private float _angle = 0;
     private Colour _colour = Colour.White;
     private bool _verticesChanged = true;
-    private bool _modelViewChanged = true;
 
     /// <summary>
     /// advanced users only
     /// </summary>
     /// <returns></returns>
     public IShaderProgram GetShaderProgram() => _graphicRenderer.Shader;
-
-    //public void SetShadaer(ShaderReference shader) => Shader = ShaderMapping.GetShader(shader);
 
     public float X
     {
@@ -82,11 +79,10 @@ public class Image(ITexture texture, float x, float y, float width, float height
         set
         {
             _angle = value;
-            _modelViewChanged = true;
         }
     }
 
-    public void Render(Matrix3 projection)
+    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         if (_verticesChanged)
         {
@@ -94,13 +90,14 @@ public class Image(ITexture texture, float x, float y, float width, float height
             _verticesChanged = false;
         }
 
-        if (_modelViewChanged)
+        var mv = modelView;
+
+        if (_angle != 0)
         {
-            _graphicRenderer.UpdateAngle(_angle, x, y, width, height);
-            _modelViewChanged = false;
+            mv = Matrix3.RotateAroundPoint(ref mv, _angle, x + width / 2, y + height / 2);
         }
 
-        _graphicRenderer.Render(projection);
+        _graphicRenderer.Render(ref projection, ref mv);
     }
 
     #region Dispose

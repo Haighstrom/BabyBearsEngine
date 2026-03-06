@@ -171,15 +171,16 @@ public class TextImage : IRenderable, IDisposable
         Vertices = vertices.ToArray();
     }
 
-    public void Render(Matrix3 projection)
+    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();
         _texture.Bind();
 
-        if (_shader is IWorldShader worldShader)
+        if (_shader is IMVPShader mvpShader)
         {
-            worldShader.SetProjectionMatrix(projection);
+            mvpShader.SetProjectionMatrix(ref projection);
+            mvpShader.SetModelViewMatrix(ref modelView);
         }
 
         if (_verticesChanged)

@@ -51,7 +51,7 @@ internal class Triangle : IRenderable
         GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 0, 0);
     }
 
-    public void Render(Matrix3 projection)
+    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         _shader.Bind();
         _vao.Bind();

@@ -1,17 +1,19 @@
 ﻿using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
-using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Source.Worlds.Cameras;
 
 /// <summary>
 /// Shader used with the multisample FBO for the MSAA antialiasing pass only
 /// </summary>
-public class CameraMSAAShader : ShaderProgramBase, IWorldShader
+public class CameraMSAAShader : ShaderProgramBase, IMVPShader
 {
     private readonly int _mvMatrixLocation;
     private readonly int _pMatrixLocation;
     private readonly int _locationSamplesUniform;
+
+    private MsaaSamples _samples;
 
     public CameraMSAAShader(int width, int height, MsaaSamples samples = MsaaSamples.Disabled)
         : base(VertexShaders.CameraMSAA, FragmentShaders.CameraMSAA)
@@ -28,7 +30,6 @@ public class CameraMSAAShader : ShaderProgramBase, IWorldShader
         Samples = samples;
     }
 
-    private MsaaSamples _samples;
     public MsaaSamples Samples
     {
         get => _samples;
@@ -45,12 +46,7 @@ public class CameraMSAAShader : ShaderProgramBase, IWorldShader
         GL.Uniform1(_locationSamplesUniform, samples);
     }
 
-    public void SetModelViewMatrix(ref Matrix3 modelViewMatrix)
-    {
-        Bind();
-        GL.UniformMatrix3(_mvMatrixLocation, true, ref modelViewMatrix);
-    }
-    public void SetModelViewMatrix(Source.Geometry.Matrix3 matrix)
+    public void SetModelViewMatrix(ref Matrix3 matrix)
     {
         Bind();
 
@@ -65,16 +61,11 @@ public class CameraMSAAShader : ShaderProgramBase, IWorldShader
 
     public void SetProjectionMatrix(int width, int height)
     {
-        var pMatrix = OpenGLHelper.CreateOrthographicProjectionMatrix(width, height);
+        var pMatrix = Matrix3.CreateOrtho(width, height);
         SetProjectionMatrix(ref pMatrix);
     }
 
-    public void SetProjectionMatrix(ref Matrix3 projectionMatrix)
-    {
-        Bind();
-        GL.UniformMatrix3(_pMatrixLocation, true, ref projectionMatrix);
-    }
-    public void SetProjectionMatrix(Source.Geometry.Matrix3 matrix)
+    public void SetProjectionMatrix(ref Matrix3 matrix)
     {
         Bind();
 

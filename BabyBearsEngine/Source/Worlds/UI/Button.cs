@@ -23,10 +23,10 @@ public class Button(int x, int y, int width, int height, Colour colour, string t
     {
     }
 
-    public void Render(Matrix3 projection)
+    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
-        _graphic.Render(projection);
-        _textImage.Render(projection);
+        _graphic.Render(ref projection, ref modelView);
+        _textImage.Render(ref projection, ref modelView);
     }
 
     protected virtual void Dispose(bool disposing)

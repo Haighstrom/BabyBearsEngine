@@ -77,7 +77,7 @@ public class ColouredRectangle(Colour colour, float x, float y, float width, flo
         }
     }
 
-    public void Render(Matrix3 projection)
+    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();
@@ -88,7 +88,8 @@ public class ColouredRectangle(Colour colour, float x, float y, float width, flo
             _verticesChanged = false;
         }
 
-        _shader.SetProjectionMatrix(projection);
+        _shader.SetProjectionMatrix(ref projection);
+        _shader.SetModelViewMatrix(ref modelView);
 
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
     }

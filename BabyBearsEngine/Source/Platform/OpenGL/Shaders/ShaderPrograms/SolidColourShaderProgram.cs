@@ -3,7 +3,7 @@ using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.OpenGL;
 
-public sealed class SolidColourShaderProgram : ShaderProgramBase, IWorldShader
+public sealed class SolidColourShaderProgram : ShaderProgramBase, IMVPShader
 {
     private static readonly Lazy<SolidColourShaderProgram> s_instance = new(() => new SolidColourShaderProgram());
 
@@ -23,12 +23,12 @@ public sealed class SolidColourShaderProgram : ShaderProgramBase, IWorldShader
         GL.Uniform2(_windowSizeLocation, new Vector2(width, height));
     }
 
-    public void SetProjectionMatrix(Source.Geometry.Matrix3 matrix)
+    public void SetProjectionMatrix(ref Source.Geometry.Matrix3 matrix)
     {
         throw new NotImplementedException();
     }
 
-    public void SetModelViewMatrix(Source.Geometry.Matrix3 matrix)
+    public void SetModelViewMatrix(ref Source.Geometry.Matrix3 matrix)
     {
         throw new NotImplementedException();
     }

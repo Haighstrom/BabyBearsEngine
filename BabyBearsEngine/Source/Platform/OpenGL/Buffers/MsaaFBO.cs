@@ -42,6 +42,11 @@ public class MsaaFBO(int width, int height, int samples) : IDisposable
         GL.BindTexture(TextureTarget.Texture2DMultisample, Texture.Handle);
     }
 
+    public void UnbindTexture()
+    {
+        GL.BindTexture(TextureTarget.Texture2DMultisample, 0);
+    }
+
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)

@@ -1,14 +1,12 @@
 ﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
-using OpenTK.Mathematics;
-using Matrix3 = OpenTK.Mathematics.Matrix3;
 
 namespace BabyBearsEngine.Source.Platform.OpenGL.Rendering;
 
 internal class GraphicRenderer(ITexture texture) : IDisposable
 {
-    private static Vertex[] GetVertices(float x, float y, float w, float h, Color4 colour) =>
+    private static Vertex[] GetVertices(float x, float y, float w, float h, OpenTK.Mathematics.Color4 colour) =>
     [
         new (x, y, colour, 0, 0), // bottom left
         new (x + w, y, colour, 1, 0), // bottom right
@@ -26,36 +24,16 @@ internal class GraphicRenderer(ITexture texture) : IDisposable
         _vertexDataBuffer.SetNewVertices(GetVertices(x, y, w, h, colour.ToOpenTK()));
     }
 
-    public void UpdateAngle(float angle, float x, float y, float width, float height)
-    {
-        var mv = Matrix3.Identity;
-
-        var translateBack = new Matrix3(
-            1, 0, x + width / 2,
-            0, 1, y + height / 2,
-            0, 0, 1);
-
-        var rotationAroundOrigin = Matrix3.CreateRotationZ(MathHelper.DegreesToRadians(-angle));
-
-        var translateToOrigin = new Matrix3(
-            1, 0, -(x + width / 2),
-            0, 1, -(y + height / 2),
-            0, 0, 1);
-
-        mv = translateBack * rotationAroundOrigin * translateToOrigin * mv;
-
-        Shader.SetModelViewMatrix(ref mv);
-    }
-
-    public void Render(Geometry.Matrix3 projection)
+    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         Shader.Bind();
         _vertexDataBuffer.Bind();
         texture.Bind();
 
-        if (Shader is IWorldShader worldShader)
+        if (Shader is IMVPShader mvpShader)
         {
-            worldShader.SetProjectionMatrix(projection);
+            mvpShader.SetProjectionMatrix(ref projection);
+            mvpShader.SetModelViewMatrix(ref modelView);
         }
 
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);

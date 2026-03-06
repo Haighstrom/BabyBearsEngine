@@ -31,7 +31,7 @@ internal class SimpleGraphic : IRenderable, IDisposable
     }
 
 
-    public void Render(Matrix3 projection)
+    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         Shader.Bind();
         _vertexDataBuffer.Bind();

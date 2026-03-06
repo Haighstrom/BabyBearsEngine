@@ -1,10 +1,9 @@
 ﻿using BabyBearsEngine.Input;
 using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Platform.OpenTK;
 using BabyBearsEngine.PowerUsers;
 using BabyBearsEngine.Runtime;
 
-namespace BabyBearsEngine.Source.OpenTK;
+namespace BabyBearsEngine.Platform.OpenTK;
 
 internal class OpenTKContext(OpenTKGameEngine gameEngine) : IPlatformContext
 {

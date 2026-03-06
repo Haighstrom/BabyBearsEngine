@@ -4,5 +4,5 @@ namespace BabyBearsEngine.Graphics;
 
 public interface IRenderable : IDisposable
 {
-    void Render(Matrix3 projection);
+    void Render(ref Matrix3 projection, ref Matrix3 modelView);
 }

@@ -1,5 +1,5 @@
 ﻿using BabyBearsEngine.OpenGL;
-using OpenTK.Mathematics;
+using BabyBearsEngine.Source.Geometry;
 
 namespace BabyBearsEngine.Graphics;
 
@@ -9,7 +9,7 @@ public class PointGraphic : IRenderable
     private readonly PointShaderProgram _shader;
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
 
-    public PointGraphic(int x, int y, float size, Color4 colour)
+    public PointGraphic(int x, int y, float size, OpenTK.Mathematics.Color4 colour)
     {
         _shader = new PointShaderProgram();
         _shader.SetPointSize(size);
@@ -22,7 +22,7 @@ public class PointGraphic : IRenderable
         _vertexDataBuffer.SetNewVertices(vertices);
     }
 
-    public void Render(Source.Geometry.Matrix3 projection)
+    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();

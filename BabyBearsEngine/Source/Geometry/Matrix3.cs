@@ -126,21 +126,18 @@ public struct Matrix3
 
     public static Matrix3 RotateAroundZ(ref Matrix3 mat, float angleInDegrees)
     {
-        Matrix3 rotMat = CreateRotationAroundZAxis(angleInDegrees);
-        return Multiply(ref mat, ref rotMat);
+        var rotMat = CreateRotationAroundZAxis(angleInDegrees);
+
+        return mat * rotMat;
     }
 
     public static Matrix3 RotateAroundPoint(ref Matrix3 mat, float angleInDegrees, float x, float y)
     {
-        Matrix3 translate1 = CreateTranslation(x, y);
-        Matrix3 rotate = CreateRotationAroundZAxis(angleInDegrees);
-        Matrix3 translate2 = CreateTranslation(-x, -y);
+        var translateToOrigin = CreateTranslation(x, y);
+        var rotateAroundOrigin = CreateRotationAroundZAxis(angleInDegrees);
+        var translateBack = CreateTranslation(-x, -y);
 
-        Matrix3 result = Multiply(ref mat, ref translate1);
-        result = Multiply(ref result, ref rotate);
-        result = Multiply(ref result, ref translate2);
-
-        return result;
+        return mat * translateToOrigin * rotateAroundOrigin * translateBack;
     }
 
     public static Matrix3 RotateAroundPoint(ref Matrix3 mat, float angleInDegrees, Point p) => RotateAroundPoint(ref mat, angleInDegrees, p.X, p.Y);
