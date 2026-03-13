@@ -15,7 +15,7 @@ public class CameraMSAAShader : ShaderProgramBase, IMVPShader
 
     private MsaaSamples _samples;
 
-    public CameraMSAAShader(int width, int height, MsaaSamples samples = MsaaSamples.Disabled)
+    public CameraMSAAShader(MsaaSamples samples = MsaaSamples.Disabled)
         : base(VertexShaders.CameraMSAA, FragmentShaders.CameraMSAA)
     {
         _mvMatrixLocation = GL.GetUniformLocation(Handle, "MVMatrix");

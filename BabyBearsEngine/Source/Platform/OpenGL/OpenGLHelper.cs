@@ -1,8 +1,10 @@
-﻿using OpenTK.Mathematics;
+﻿using System.Collections.Generic;
+using System.IO;
+using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.OpenGL;
 
-public static class OpenGLHelper
+internal static class OpenGLHelper
 {
     private static int s_lastBoundShader = -1;
     private static int s_lastBoundVAO = -1;
@@ -186,11 +188,11 @@ public static class OpenGLHelper
         }
     }
 
-    public static void UnbindTexture()
+    public static void UnbindTexture(TextureTarget textureTarget = TextureTarget.Texture2D)
     {
         //if (s_lastBoundTexture != 0)
         {
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.BindTexture(textureTarget, 0);
             s_lastBoundTexture = 0;
         }
     }
@@ -236,5 +238,33 @@ public static class OpenGLHelper
                 GL.UniformMatrix3(location, 1, false, valuePointer);
             }
         }
+    }
+
+    public static void SaveTextureToFile(Texture t, string filePath, Dictionary<string, string> metadata = null)
+    {
+        var b = TextureToBitmap(t);
+        SaveBitmapToPNGFile(b, filePath, metadata);
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
+    public static System.Drawing.Bitmap TextureToBitmap(Texture t)
+    {
+        System.Drawing.Bitmap bmp = new(t.Width, t.Height);
+        GL.BindTexture(TextureTarget.Texture2D, t.Handle);
+        System.Drawing.Imaging.BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        GL.GetTexImage(TextureTarget.Texture2D, 0, PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+        bmp.UnlockBits(data);
+        return bmp;
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
+    public static void SaveBitmapToPNGFile(System.Drawing.Bitmap bmp, string filePath, Dictionary<string, string> metadata = null)
+    {
+        //Make sure the filepath has exactly one png extension
+        if (Path.GetExtension(filePath) == null)
+            filePath += ".png";
+
+        //Save the bitmap
+        bmp.Save(filePath);
     }
 }

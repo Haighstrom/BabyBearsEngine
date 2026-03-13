@@ -3,8 +3,8 @@
 uniform mat3 MVMatrix;
 uniform mat3 PMatrix;
 
-in vec2 Position;
-in vec2 TexCoord;
+layout (location = 0) in vec2 Position;
+layout (location = 2) in vec2 TexCoord;
 
 out TexCoordData
 {

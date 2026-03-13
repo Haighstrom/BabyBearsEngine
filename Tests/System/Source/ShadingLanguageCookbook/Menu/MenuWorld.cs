@@ -8,11 +8,14 @@ internal class MenuWorld : World
 {
     public MenuWorld()
     {
-        var msaa = MsaaSamples.Disabled;
+        var msaa = MsaaSamples.X16;
 
         Add(new BearSpinnerButton(20, 20));
 
         var texture = new TextureFactory().CreateTextureFromImageFile("Assets/bear.png");
+
+
+
         Add(new Image(texture, 200, 100, 300, 300) { Angle = 45f });
 
         var camera = new Camera(500, 50, 100, 100, 10, 10, msaa);

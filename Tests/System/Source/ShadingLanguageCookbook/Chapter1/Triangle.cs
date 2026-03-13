@@ -31,24 +31,24 @@ internal class Triangle : IRenderable
         var positionVBO = GL.GenBuffer();
         var colourVBO = GL.GenBuffer();
 
-        OpenGLHelper.BindVBO(positionVBO);
-        GL.BufferData(BufferTarget.ArrayBuffer, 9 * sizeof(float), positionData, BufferUsageHint.StaticDraw);
+        //OpenGLHelper.BindVBO(positionVBO);
+        //GL.BufferData(BufferTarget.ArrayBuffer, 9 * sizeof(float), positionData, BufferUsageHint.StaticDraw);
 
-        OpenGLHelper.BindVBO(colourVBO);
-        GL.BufferData(BufferTarget.ArrayBuffer, 9 * sizeof(float), colourData, BufferUsageHint.StaticDraw);
+        //OpenGLHelper.BindVBO(colourVBO);
+        //GL.BufferData(BufferTarget.ArrayBuffer, 9 * sizeof(float), colourData, BufferUsageHint.StaticDraw);
 
-        _vao = new();
+        //_vao = new();
 
-        _vao.Bind();
+        //_vao.Bind();
 
-        GL.EnableVertexAttribArray(0);
-        GL.EnableVertexAttribArray(1);
+        //GL.EnableVertexAttribArray(0);
+        //GL.EnableVertexAttribArray(1);
 
-        OpenGLHelper.BindVBO(positionVBO);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
+        //OpenGLHelper.BindVBO(positionVBO);
+        //GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
 
-        OpenGLHelper.BindVBO(colourVBO);
-        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 0, 0);
+        //OpenGLHelper.BindVBO(colourVBO);
+        //GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 0, 0);
     }
 
     public void Render(ref Matrix3 projection, ref Matrix3 modelView)

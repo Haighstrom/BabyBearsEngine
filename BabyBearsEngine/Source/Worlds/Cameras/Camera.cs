@@ -22,6 +22,8 @@ public class Camera : IEntity, IContainer
     private readonly List<IRenderable> _graphics = [];
     private readonly List<IUpdateable> _updateables = [];
 
+    private FBO _tempSecondFBO;
+
     private Camera(float x, float y, float width, float height, MsaaSamples samples = MsaaSamples.Disabled)
     {
         X = x;
@@ -31,15 +33,15 @@ public class Camera : IEntity, IContainer
         MSAASamples = samples;
 
         _shader = new();
-        _mSAAShader = new CameraMSAAShader((int)width, (int)height, samples);
+        _mSAAShader = new CameraMSAAShader(samples);
 
         var colour = Colour.White.ToOpenTK();
 
         Vertices = [
-            new (x, y, colour, 0, 0), // bottom left
-            new (x + width, y, colour, 1, 0), // bottom right
-            new (x, y + height, colour, 0, 1), // top left
-            new (x + width, y + height, colour, 1, 1), // top right
+            new (0, 0, colour, 0, 0), // bottom left
+            new (0 + width, 0, colour, 1, 0), // bottom right
+            new (0, 0 + height, colour, 0, 1), // top left
+            new (0 + width, 0 + height, colour, 1, 1), // top right
         ];
 
         _vertexBuffer.SetNewVertices(Vertices);
@@ -55,6 +57,7 @@ public class Camera : IEntity, IContainer
         }
 
         _shaderPassFBO = new((int)width, (int)height);
+        _tempSecondFBO = new((int)width, (int)height);
 
         //Check for OpenGL errors
         var err = GL.GetError();
@@ -168,6 +171,7 @@ public class Camera : IEntity, IContainer
         {
             //Bind MSAA FBO to be the draw destination
             _msaaFBO!.Bind();
+            //_tempSecondFBO.Bind();
         }
         else
         {
@@ -206,13 +210,17 @@ public class Camera : IEntity, IContainer
             GL.ClearColor(0, 0, 0, 0);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            ////Bind the FBO to be drawn
+            //Bind the FBO to be drawn
             _msaaFBO!.BindTexture();
+            //_tempSecondFBO.Texture.Bind();
 
             //Do the MSAA render pass, drawing to the MSAATexture FBO
             _mSAAShader.Bind();
             _mSAAShader.SetProjectionMatrix(ref fboOrtho);
+            _mSAAShader.SetModelViewMatrix(ref identity);
             GL.DrawArrays(PrimitiveType.TriangleStrip, 0, Vertices.Length);
+
+            OpenGLHelper.UnbindTexture(TextureTarget.Texture2DMultisample);
         }
 
         //Revert the render target 
@@ -227,11 +235,24 @@ public class Camera : IEntity, IContainer
         //reset viewport
         GL.Viewport(prevVP.X, prevVP.Y, prevVP.Width, prevVP.Height);
 
+        Matrix3 mv2 = modelView;
+        mv2 = Matrix3.Translate(ref mv2, X, Y);
+
         _shader.Bind();
         _shader.SetProjectionMatrix(ref projection);
+        _shader.SetModelViewMatrix(ref mv2);
 
+        //var texture = new TextureFactory().CreateTextureFromImageFile("Assets/fish.jpg");
+        //texture.Bind();
         //Render with assigned shader
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, Vertices.Length);
+
+        //Check for OpenGL errors
+        var err = GL.GetError();
+        if (err != ErrorCode.NoError)
+        {
+            Logger.Log($"OpenGL error! (Camera.SetUpFBOTex) {err}");
+        }
     }
 
     public void Clear()

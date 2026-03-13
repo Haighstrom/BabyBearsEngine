@@ -35,7 +35,9 @@ public class TextureFactory() : ITextureFactory
         // Here is an example of mips in action https://en.wikipedia.org/wiki/File:Mipmap_Aliasing_Comparison.png
         GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
-        return new Texture(handle, imageData.Width, imageData.Height);
+        var texture = new Texture(handle, imageData.Width, imageData.Height);
+
+        return texture;
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
