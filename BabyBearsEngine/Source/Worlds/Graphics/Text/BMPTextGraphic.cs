@@ -31,7 +31,7 @@ public class BMPTextGraphic : ITextGraphic
         _colour = colour;
         _fontStruct = new FontBitmapGenerator().GenerateCharSpritesheetAndPositions(FontLoader.LoadFont(fontDef), fontDef.CharactersToLoad, fontDef.AntiAliased, 13);
 
-        _tempTexture = new TextureFactory().GenTexture(_fontStruct.CharacterSS);
+        _tempTexture = new DefaultTextureFactory().GenTexture(_fontStruct.CharacterSS);
 
         //_anotherTempGraphic = new(_tempTexture,
         //    [
@@ -218,7 +218,7 @@ public class BMPTextGraphic : ITextGraphic
 
         //if (vertices.Count > 0)
         {
-            _vertGroups.Add(new SimpleGraphic(new TextureFactory().CreateTextureFromImageFile("assets/bear.png"), otherVertices));
+            _vertGroups.Add(new SimpleGraphic(new DefaultTextureFactory().CreateTextureFromImageFile("assets/bear.png"), otherVertices));
         }
 
         if (_fontStruct.HighestChar > Height)

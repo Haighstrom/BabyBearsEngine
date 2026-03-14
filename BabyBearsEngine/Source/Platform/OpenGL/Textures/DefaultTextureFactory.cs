@@ -2,7 +2,7 @@
 
 namespace BabyBearsEngine.OpenGL;
 
-public class TextureFactory() : ITextureFactory
+internal sealed class DefaultTextureFactory() : ITextureFactory
 {
     public ITexture CreateTextureFromImageFile(string filePath)
     {

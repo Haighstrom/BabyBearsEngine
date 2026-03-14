@@ -37,7 +37,7 @@ public class TextImage : IRenderable, IDisposable
 
         _fontStruct = new FontBitmapGenerator().GenerateCharSpritesheetAndPositions(font, fontDef.CharactersToLoad, fontDef.AntiAliased, 13);
 
-        _texture = new TextureFactory().GenTexture(_fontStruct.CharacterSS);
+        _texture = new DefaultTextureFactory().GenTexture(_fontStruct.CharacterSS);
     }
 
     public float X
