@@ -8,7 +8,7 @@ namespace BabyBearsEngine.Tests.System.Source.BearSpinner3000;
 internal class BearEntity(int startX, int startY) : IEntity
 {
     private bool _disposed;
-    private readonly Image _graphic = new(Textures.FromImageFile("Assets/SpinnableBear.png"), startX, startY, 60, 80) 
+    private readonly Image _graphic = new(Textures.CreateFromFile("Assets/SpinnableBear.png"), startX, startY, 60, 80) 
     { 
         Colour = ColourTools.RandSystemColour(), 
         Angle = Randomisation.Rand(360) 

@@ -2,7 +2,7 @@
 
 namespace BabyBearsEngine.Graphics;
 
-public interface IRenderable : IDisposable
+public interface IRenderable
 {
     void Render(ref Matrix3 projection, ref Matrix3 modelView);
 }

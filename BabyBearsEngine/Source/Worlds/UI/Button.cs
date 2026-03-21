@@ -2,60 +2,85 @@
 using BabyBearsEngine.Input;
 using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Rendering.Graphics.Text;
+using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Worlds.UI;
 
-public class Button(int x, int y, int width, int height, Colour colour, string textToDisplay = "") : IEntity
+public class Button : IEntity, IButtonTrigger
 {
-    private bool _disposed;
-    private readonly ColouredRectangle _graphic = new(colour, x, y, width, height);
-    private readonly TextImage _textImage = new(new FontDefinition("Times New Roman", 16), textToDisplay, Colour.Black, x, y, width, height);
+    private const double HoverDelaySeconds = 0.5; // tweak as needed
+
+    private readonly ColouredRectangle _graphic;
+    private readonly TextImage _textImage;
+    private readonly ButtonInteractionHandler _interaction;
+    private readonly int _x;
+    private readonly int _y;
+    private readonly int _width;
+    private readonly int _height;
+
+    public Button(int x, int y, int width, int height, Colour colour, string textToDisplay = "")
+    {
+        _x = x;
+        _y = y;
+        _width = width;
+        _height = height;
+        _graphic = new(colour, x, y, width, height);
+        _textImage = new(new FontDefinition("Times New Roman", 16), textToDisplay, Colour.Black, x, y, width, height);
+        _interaction = new ButtonInteractionHandler(this, HoverDelaySeconds);
+    }
 
     public void Update(double elapsed)
     {
-        if (Mouse.LeftPressed && Mouse.ClientX >= x && Mouse.ClientX < x + width && Mouse.ClientY >= y && Mouse.ClientY < y + height)
-        {
-            OnClicked();
-        }
+        bool isInside = Mouse.ClientX >= _x && Mouse.ClientX < _x + _width &&
+                        Mouse.ClientY >= _y && Mouse.ClientY < _y + _height;
+
+        _interaction.Update(elapsed, isInside, Mouse.LeftPressed);
     }
 
-    public virtual void OnClicked()
+    // --- Interface Implementation (The Bridge) ---
+    void IButtonTrigger.TriggerLeftClicked() => OnLeftClicked();
+    void IButtonTrigger.TriggerLeftPressed() => OnLeftPressed(); 
+    void IButtonTrigger.TriggerLeftReleased() => OnLeftReleased(); 
+    void IButtonTrigger.TriggerMouseEntered() => OnMouseEntered(); 
+    void IButtonTrigger.TriggerMouseExited() => OnMouseExited(); 
+    void IButtonTrigger.TriggerMouseHovered() => OnMouseHovered(); 
+
+    protected virtual void OnLeftClicked() 
     {
+        LeftClicked?.Invoke(this, EventArgs.Empty);
     }
+    protected virtual void OnLeftPressed() 
+    {
+        LeftPressed?.Invoke(this, EventArgs.Empty);
+    }
+    protected virtual void OnLeftReleased() 
+    {
+        LeftReleased?.Invoke(this, EventArgs.Empty);
+    }
+    protected virtual void OnMouseEntered() 
+    {
+        MouseEntered?.Invoke(this, EventArgs.Empty);
+    }
+    protected virtual void OnMouseExited() 
+    {
+        MouseExited?.Invoke(this, EventArgs.Empty);
+    }
+    protected virtual void OnMouseHovered() 
+    {
+        MouseHovered?.Invoke(this, EventArgs.Empty);
+    }
+
+    public event EventHandler? LeftClicked;
+    public event EventHandler? LeftPressed;
+    public event EventHandler? LeftReleased;
+    public event EventHandler? MouseEntered;
+    public event EventHandler? MouseExited;
+    public event EventHandler? MouseHovered;
+    public event EventHandler? NoMouseEvent;
 
     public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         _graphic.Render(ref projection, ref modelView);
         _textImage.Render(ref projection, ref modelView);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-                _graphic.Dispose();
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            _disposed = true;
-        }
-    }
-
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~Button()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
 }

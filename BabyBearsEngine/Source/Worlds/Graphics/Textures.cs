@@ -7,5 +7,5 @@ public static class Textures
 {
     private static ITextureFactory Implementation => EngineConfiguration.TextureFactory;
 
-    public static ITexture FromImageFile(string filePath) => Implementation.CreateTextureFromImageFile(filePath);
+    public static ITexture CreateFromFile(string filePath) => Implementation.CreateTextureFromImageFile(filePath);
 }

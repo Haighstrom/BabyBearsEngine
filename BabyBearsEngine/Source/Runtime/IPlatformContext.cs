@@ -11,5 +11,4 @@ public interface IPlatformContext
     IKeyboard Keyboard { get; }
     IMouse Mouse { get; }
     IGPUResourceDeletionService GPUResourceDeletionService { get; }
-    IWorldSwitcher WorldSwitcher { get; }
 }
