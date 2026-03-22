@@ -1,6 +1,6 @@
 ﻿using BabyBearsEngine.Worlds;
 
-namespace BabyBearsEngine.PowerUsers;
+namespace BabyBearsEngine;
 
 public interface IWorldSwitcher
 {

@@ -48,8 +48,6 @@ internal sealed class ButtonInteractionHandler(IButtonTrigger trigger, double ho
             _isPressedInside = false;
         }
 
-        if (!isInside && !isPressed) _trigger.TriggerNoMouseEvent();
-
         _wasMouseInside = isInside;
         _wasLeftPressed = isPressed;
     }

@@ -3,8 +3,10 @@
 internal class ReturnToMainMenuButton()
     : Button(10, 10, 80, 40, Colour.Yellow, "Return")
 {
-    public override void OnClicked()
+    protected override void OnLeftClicked()
     {
+        base.OnLeftClicked();
+
         Engine.ChangeWorld(new MenuWorld());
     }
 }

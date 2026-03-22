@@ -1,11 +1,10 @@
-﻿using System.Reflection.Metadata.Ecma335;
-using BabyBearsEngine.Runtime;
+﻿using BabyBearsEngine.Source.Runtime;
 
 namespace BabyBearsEngine.OpenGL;
 
 internal static class GPUResourceDeletion
 {
-    private const string ServiceNotAvailableMessage = "GPU resource deletion service is not available. Ensure GameServices.Initialise(...) is called before the render loop starts.";
+    private static IGPUResourceDeletionService Implementation => EngineConfiguration.GPUResourceDeletionService;
 
     private static bool TryRequestDelete(Action<IGPUResourceDeletionService, int> enqueueDelete, int handle)
     {
@@ -14,12 +13,7 @@ internal static class GPUResourceDeletion
             return true;
         }
 
-        if (!RuntimeServices.TryGetGPUResourceDeletionService(out var service))
-        {
-            return false;
-        }
-
-        enqueueDelete(service, handle);
+        enqueueDelete(Implementation, handle);
         return true;
     }
 
@@ -37,11 +31,6 @@ internal static class GPUResourceDeletion
 
     public static void ProcessDeletes()
     {
-        if (!RuntimeServices.TryGetGPUResourceDeletionService(out var service))
-        {
-            throw new InvalidOperationException(ServiceNotAvailableMessage);
-        }
-
-        service.ProcessDeletes();
+        Implementation.ProcessDeletes();
     }
 }

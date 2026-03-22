@@ -1,56 +1,56 @@
 ﻿using System.Collections.Generic;
-using BabyBearsEngine.Runtime;
+using BabyBearsEngine.Source.Runtime;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace BabyBearsEngine.Input;
 
 public static class Mouse
 {
-    private static IMouse Service => RuntimeServices.MouseService;
+    private static IMouse Implementation => EngineConfiguration.MouseService;
 
-    public static bool ButtonDown(MouseButton button) => Service.ButtonDown(button);
-    public static bool ButtonPressed(MouseButton button) => Service.ButtonPressed(button);
-    public static bool ButtonReleased(MouseButton button) => Service.ButtonReleased(button);
+    public static bool ButtonDown(MouseButton button) => Implementation.ButtonDown(button);
+    public static bool ButtonPressed(MouseButton button) => Implementation.ButtonPressed(button);
+    public static bool ButtonReleased(MouseButton button) => Implementation.ButtonReleased(button);
 
-    public static bool AnyButtonDown(IEnumerable<MouseButton> buttons) => Service.AnyButtonDown(buttons);
-    public static bool AnyButtonDown(params MouseButton[] buttons) => Service.AnyButtonDown(buttons);
+    public static bool AnyButtonDown(IEnumerable<MouseButton> buttons) => Implementation.AnyButtonDown(buttons);
+    public static bool AnyButtonDown(params MouseButton[] buttons) => Implementation.AnyButtonDown(buttons);
 
-    public static bool AnyButtonPressed(IEnumerable<MouseButton> buttons) => Service.AnyButtonPressed(buttons);
-    public static bool AnyButtonPressed(params MouseButton[] buttons) => Service.AnyButtonPressed(buttons);
+    public static bool AnyButtonPressed(IEnumerable<MouseButton> buttons) => Implementation.AnyButtonPressed(buttons);
+    public static bool AnyButtonPressed(params MouseButton[] buttons) => Implementation.AnyButtonPressed(buttons);
 
-    public static bool AnyButtonReleased(IEnumerable<MouseButton> buttons) => Service.AnyButtonReleased(buttons);
-    public static bool AnyButtonReleased(params MouseButton[] buttons) => Service.AnyButtonReleased(buttons);
+    public static bool AnyButtonReleased(IEnumerable<MouseButton> buttons) => Implementation.AnyButtonReleased(buttons);
+    public static bool AnyButtonReleased(params MouseButton[] buttons) => Implementation.AnyButtonReleased(buttons);
 
-    public static bool AllButtonsDown(IEnumerable<MouseButton> buttons) => Service.AllButtonsDown(buttons);
-    public static bool AllButtonsDown(params MouseButton[] buttons) => Service.AllButtonsDown(buttons);
+    public static bool AllButtonsDown(IEnumerable<MouseButton> buttons) => Implementation.AllButtonsDown(buttons);
+    public static bool AllButtonsDown(params MouseButton[] buttons) => Implementation.AllButtonsDown(buttons);
 
-    public static bool AllButtonsPressed(IEnumerable<MouseButton> buttons) => Service.AllButtonsPressed(buttons);
-    public static bool AllButtonsPressed(params MouseButton[] buttons) => Service.AllButtonsPressed(buttons);
+    public static bool AllButtonsPressed(IEnumerable<MouseButton> buttons) => Implementation.AllButtonsPressed(buttons);
+    public static bool AllButtonsPressed(params MouseButton[] buttons) => Implementation.AllButtonsPressed(buttons);
 
-    public static bool AllButtonsReleased(IEnumerable<MouseButton> buttons) => Service.AllButtonsReleased(buttons);
-    public static bool AllButtonsReleased(params MouseButton[] buttons) => Service.AllButtonsReleased(buttons);
+    public static bool AllButtonsReleased(IEnumerable<MouseButton> buttons) => Implementation.AllButtonsReleased(buttons);
+    public static bool AllButtonsReleased(params MouseButton[] buttons) => Implementation.AllButtonsReleased(buttons);
 
-    public static bool LeftDown => Service.LeftDown;
-    public static bool MiddleDown => Service.MiddleDown;
-    public static bool RightDown => Service.RightDown;
+    public static bool LeftDown => Implementation.LeftDown;
+    public static bool MiddleDown => Implementation.MiddleDown;
+    public static bool RightDown => Implementation.RightDown;
 
-    public static bool LeftUp => Service.LeftUp;
-    public static bool MiddleUp => Service.MiddleUp;
-    public static bool RightUp => Service.RightUp;
+    public static bool LeftUp => Implementation.LeftUp;
+    public static bool MiddleUp => Implementation.MiddleUp;
+    public static bool RightUp => Implementation.RightUp;
 
-    public static bool LeftPressed => Service.LeftPressed;
-    public static bool MiddlePressed => Service.MiddlePressed;
-    public static bool RightPressed => Service.RightPressed;
+    public static bool LeftPressed => Implementation.LeftPressed;
+    public static bool MiddlePressed => Implementation.MiddlePressed;
+    public static bool RightPressed => Implementation.RightPressed;
 
-    public static bool LeftReleased => Service.LeftReleased;
-    public static bool MiddleReleased => Service.MiddleReleased;
-    public static bool RightReleased => Service.RightReleased;
+    public static bool LeftReleased => Implementation.LeftReleased;
+    public static bool MiddleReleased => Implementation.MiddleReleased;
+    public static bool RightReleased => Implementation.RightReleased;
 
-    public static int ClientX => Service.ClientX;
-    public static int ClientY => Service.ClientY;
+    public static int ClientX => Implementation.ClientX;
+    public static int ClientY => Implementation.ClientY;
 
-    public static float WheelDelta => Service.WheelDelta;
-    public static int XDelta => Service.XDelta;
-    public static int YDelta => Service.YDelta;
+    public static float WheelDelta => Implementation.WheelDelta;
+    public static int XDelta => Implementation.XDelta;
+    public static int YDelta => Implementation.YDelta;
 }
 

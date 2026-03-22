@@ -1,6 +1,5 @@
 ﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenTK;
-using BabyBearsEngine.PowerUsers;
 using BabyBearsEngine.Source.GameEngine;
 using BabyBearsEngine.Worlds;
 using OpenTK.Windowing.Common;

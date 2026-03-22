@@ -1,6 +1,7 @@
 ﻿using BabyBearsEngine.Platform.OpenTK;
 using BabyBearsEngine.Runtime;
 using BabyBearsEngine.Source.GameEngine;
+using BabyBearsEngine.Source.Runtime;
 using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine;
@@ -37,7 +38,7 @@ public static class GameLauncher
 
         var context = s_platform.CreatePlatformContext(s_loadedEngine);
 
-        RuntimeServices.Initialise(context);
+        EngineConfiguration.Initialise(context);
         
         s_status = LauncherStatus.Initialised;
     }
