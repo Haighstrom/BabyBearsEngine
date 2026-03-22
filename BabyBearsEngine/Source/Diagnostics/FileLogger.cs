@@ -1,39 +1,54 @@
 ﻿using System.IO;
+using System.Threading;
 using Microsoft.Extensions.Logging;
 
 namespace BabyBearsEngine.Source.Diagnostics;
 
-public class FileLogger : ILogger
+public sealed class FileLogger(string filePath) : ILogger
 {
-    private string filePath;
-    private static object _lock = new object();
-    public FileLogger(string path)
-    {
-        filePath = path;
-    }
-    public IDisposable BeginScope<TState>(TState state)
-    {
-        return null;
-    }
+    private static readonly Lock s_lock = new();
 
-    public bool IsEnabled(LogLevel logLevel)
-    {
-        //return logLevel == LogLevel.Trace;
-        return true;
-    }
+    private readonly string _filePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
 
-    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+    public bool IsEnabled(LogLevel logLevel) => true;
+
+    public void Log<TState>(
+        LogLevel logLevel,
+        EventId eventId,
+        TState state,
+        Exception? exception,
+        Func<TState, Exception?, string> formatter)
     {
-        if (formatter != null)
+        if (!IsEnabled(logLevel))
         {
-            lock (_lock)
-            {
-                string fullFilePath = Path.Combine(filePath, DateTime.Now.ToString("yyyy-MM-dd") + "_log.txt");
-                var n = Environment.NewLine;
-                string exc = "";
-                if (exception != null) exc = n + exception.GetType() + ": " + exception.Message + n + exception.StackTrace + n;
-                File.AppendAllText(fullFilePath, logLevel.ToString() + ": " + DateTime.Now.ToString() + " " + formatter(state, exception) + n + exc);
-            }
+            return;
+        }
+
+        ArgumentNullException.ThrowIfNull(formatter);
+
+        var message = formatter(state, exception);
+
+        if (string.IsNullOrEmpty(message) && exception is null)
+        {
+            return;
+        }
+
+        var logRecord = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} " +
+                        $"[{logLevel}] " +
+                        $"{message}";
+
+        if (exception is not null)
+        {
+            logRecord += Environment.NewLine + exception;
+        }
+
+        logRecord += Environment.NewLine;
+
+        lock (s_lock)
+        {
+            File.AppendAllText(_filePath, logRecord);
         }
     }
 }
