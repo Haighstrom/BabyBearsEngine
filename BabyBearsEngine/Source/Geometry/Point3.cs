@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
 
 namespace BabyBearsEngine.Source.Geometry;
 
 [StructLayout(LayoutKind.Sequential)]
-public struct Point3 : IEquatable<Point3>
+public struct Point3(float x, float y, float z) : IEquatable<Point3>
 {
     public static readonly Point3 Zero = new();
 
@@ -42,16 +39,7 @@ public struct Point3 : IEquatable<Point3>
 
 
 
-    private float _x, _y, _z;
-
-
-    public Point3(float x, float y, float z)
-    {
-        _x = x;
-        _y = y;
-        _z = z;
-    }
-
+    private float _x = x, _y = y, _z = z;
 
     public float x { get => _x; set => _x = value; }
     public float y { get => _y; set => _y = value; }
@@ -142,7 +130,7 @@ public struct Point3 : IEquatable<Point3>
     /// </summary>
     /// <param name="b"></param>
     /// <returns></returns>
-    public Point3 CrossProduct(Point3 b)
+    public readonly Point3 CrossProduct(Point3 b)
     {
         return CrossProduct(this, b);
     }
@@ -162,7 +150,7 @@ public struct Point3 : IEquatable<Point3>
 
     public float[] ToArray()
     {
-        return new[] { x, y, z };
+        return [x, y, z];
     }
 
 
@@ -182,16 +170,18 @@ public struct Point3 : IEquatable<Point3>
     public static bool operator ==(Point3 p1, Point3 p2) { return p1.x == p2.x && p1.y == p2.y && p1.z == p2.z; }
     public static bool operator !=(Point3 p1, Point3 p2) { return p1.x != p2.x || p1.y != p2.y || p1.z != p2.z; }
 
-    public override bool Equals(object o)
+    public override bool Equals(object? o)
     {
-        if (!(o is Point3))
+        if (o is not Point3)
+        {
             return false;
+        }
 
         return Equals((Point3)o);
     }
 
 
-    public override int GetHashCode()
+    public override readonly int GetHashCode()
     {
         return base.GetHashCode();
     }
