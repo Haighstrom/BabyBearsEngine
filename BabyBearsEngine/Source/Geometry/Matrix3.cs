@@ -90,9 +90,9 @@ public struct Matrix3
     {
         return new Point3
             (
-                mat._values[0] * p.x + mat._values[3] * p.y + mat._values[6] * p.z,
-                mat._values[1] * p.x + mat._values[4] * p.y + mat._values[7] * p.z,
-                mat._values[2] * p.x + mat._values[5] * p.y + mat._values[8] * p.z
+                mat._values[0] * p.X + mat._values[3] * p.Y + mat._values[6] * p.Z,
+                mat._values[1] * p.X + mat._values[4] * p.Y + mat._values[7] * p.Z,
+                mat._values[2] * p.X + mat._values[5] * p.Y + mat._values[8] * p.Z
             );
     }
 

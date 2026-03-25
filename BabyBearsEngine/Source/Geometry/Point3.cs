@@ -1,196 +1,188 @@
 ﻿using System.Runtime.InteropServices;
-using System.Text.Json.Serialization;
-using System.Xml.Serialization;
 
 namespace BabyBearsEngine.Source.Geometry;
 
+/// <summary>
+/// Represents a 3-dimensional point or vector with <c>X</c>, <c>Y</c> and <c>Z</c> components.
+/// Provides common vector operations such as dot/cross products, normalization and basic arithmetic.
+/// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public struct Point3(float x, float y, float z) : IEquatable<Point3>
 {
+    /// <summary>
+    /// A <see cref="Point3"/> with all components set to zero.
+    /// </summary>
     public static readonly Point3 Zero = new();
 
     /// <summary>
-    /// Scalar or dot product
+    /// Computes the scalar (dot) product of two <see cref="Point3"/> values.
     /// </summary>
-    /// <param name="p1"></param>
-    /// <param name="p2"></param>
-    /// <returns></returns>
-    public static float DotProduct(Point3 p1, Point3 p2)
-    {
-        return p1.DotProduct(p2);
-    }
-
+    /// <param name="p1">The first point.</param>
+    /// <param name="p2">The second point.</param>
+    /// <returns>The dot product of <paramref name="p1"/> and <paramref name="p2"/>.</returns>
+    public static float DotProduct(Point3 p1, Point3 p2) => p1.DotProduct(p2);
 
     /// <summary>
-    /// Returns Vector or Cross Product between two Point3s, a x b
+    /// Computes the cross product of two <see cref="Point3"/> values.
     /// </summary>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <returns></returns>
-    public static Point3 CrossProduct(Point3 a, Point3 b)
-    {
-        return new Point3
-            (
-                a.y * b.z - a.z * b.y,
-                a.z * b.x - a.x * b.z,
-                a.x * b.y - a.y * b.x
-            );
-    }
-
-
-
-    private float _x = x, _y = y, _z = z;
-
-    public float x { get => _x; set => _x = value; }
-    public float y { get => _y; set => _y = value; }
-    public float z { get => _z; set => _z = value; }
-
-    [JsonIgnore]
-    [XmlIgnore]
-    public int X { get => (int)x; set => x = value; }
-
-    [JsonIgnore]
-    [XmlIgnore]
-    public int Y { get => (int)y; set => y = value; }
-
-    [JsonIgnore]
-    [XmlIgnore]
-    public int Z { get => (int)z; set => z = value; }
-
-    public float Length => (float)Math.Sqrt(x * x + y * y + z * z);
-    public float LengthSquared => x * x + y * y + z * z;
+    /// <param name="a">The left-hand operand.</param>
+    /// <param name="b">The right-hand operand.</param>
+    /// <returns>The cross product <c>a × b</c>.</returns>
+    public static Point3 CrossProduct(Point3 a, Point3 b) =>
+        new(
+            a.Y * b.Z - a.Z * b.Y,
+            a.Z * b.X - a.X * b.Z,
+            a.X * b.Y - a.Y * b.X
+        );
 
     /// <summary>
-    /// Returns a copy this Point, but with magnitude 1. Does not modify this Point.
+    /// The X component of the point.
     /// </summary>
-    public Point3 Normal
-    {
-        get
-        {
-            if (x == 0 && y == 0 && z == 0)
-                return new Point3();
-
-            float l = Length;
-
-            return new Point3(x / l, y / l, z / l);
-        }
-    }
-
-
+    public float X { readonly get => x; set => x = value; }
 
     /// <summary>
-    /// Normalize this Point3 - set it to have magnitude 1. If it's length is zero, it will be set to (0,0,0,0).
+    /// The Y component of the point.
+    /// </summary>
+    public float Y { readonly get => y; set => y = value; }
+
+    /// <summary>
+    /// The Z component of the point.
+    /// </summary>
+    public float Z { readonly get => z; set => z = value; }
+
+    /// <summary>
+    /// The Euclidean length (magnitude) of the vector represented by this point.
+    /// </summary>
+    public readonly float Length => (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+
+    /// <summary>
+    /// The squared length of the vector (avoids the square root operation).
+    /// </summary>
+    public readonly float LengthSquared => X * X + Y * Y + Z * Z;
+
+    /// <summary>
+    /// Returns a normalized copy of this vector (magnitude = 1). If this vector is zero, a zero vector is returned.
+    /// </summary>
+    public readonly Point3 Normal => (X == 0 && Y == 0 && Z == 0) ? new Point3() : new Point3(X / Length, Y / Length, Z / Length);
+
+    /// <summary>
+    /// Normalizes this vector in-place. If the length is zero, the vector is set to zero.
+    /// Note: this is a mutating method on a struct; callers should be aware of copies.
     /// </summary>
     public void Normalize()
     {
         var l = Length;
+
         if (l == 0)
         {
-            x = 0;
-            y = 0;
-            z = 0;
+            X = 0;
+            Y = 0;
+            Z = 0;
             return;
         }
-        x /= l;
-        y /= l;
-        z /= l;
+
+        X /= l;
+        Y /= l;
+        Z /= l;
     }
 
-
     /// <summary>
-    /// Preserves direction of the Point3 but clamps its magnitude to below maxLength
+    /// Clamps the magnitude of this vector to <paramref name="maxLength"/> while preserving direction. Mutates this instance.
     /// </summary>
-    /// <param name="maxLength"></param>
-    public Point3 Clamp(float maxLength)
+    /// <param name="maxLength">Maximum allowed length.</param>
+    public void Clamp(float maxLength)
     {
         float l = Length;
 
         if (l > maxLength)
         {
-            x = x * maxLength / l;
-            y = y * maxLength / l;
-            z = z * maxLength / l;
+            X = X * maxLength / l;
+            Y = Y * maxLength / l;
+            Z = Z * maxLength / l;
         }
-
-        return this;
     }
-
 
     /// <summary>
-    /// Returns dot product (scalar product) with another point
+    /// Returns the dot product (scalar product) with another point.
     /// </summary>
-    public float DotProduct(Point3 other)
-    {
-        return x * other.x + y * other.y + z * other.z;
-    }
-
+    /// <param name="other">The other point.</param>
+    public readonly float DotProduct(Point3 other) => X * other.X + Y * other.Y + Z * other.Z;
 
     /// <summary>
-    /// Returns vector product or cross product of this x b 
+    /// Returns the cross product of this vector with <paramref name="b"/>.
     /// </summary>
-    /// <param name="b"></param>
-    /// <returns></returns>
-    public readonly Point3 CrossProduct(Point3 b)
-    {
-        return CrossProduct(this, b);
-    }
+    /// <param name="b">The right-hand operand.</param>
+    public readonly Point3 CrossProduct(Point3 b) => CrossProduct(this, b);
 
+    /// <summary>
+    /// Converts this 3D point to a 2D <see cref="Point"/> by discarding the Z component.
+    /// </summary>
+    public readonly Point ToPoint() => new(X, Y);
 
-    public Point ToPoint()
-    {
-        return new Point(x, y);
-    }
+    /// <summary>
+    /// Converts this point to a 4D point with a w component of 1.
+    /// </summary>
+    public readonly Point4 ToPoint4() => new(X, Y, Z, 1);
 
+    /// <summary>
+    /// Returns the components as a new float array in the order [X, Y, Z].
+    /// </summary>
+    public readonly float[] ToArray() => [X, Y, Z];
 
-    public Point4 ToPoint4()
-    {
-        return new Point4(x, y, z, 1);
-    }
+    /// <summary>
+    /// Determines whether this instance is equal to another <see cref="Point3"/>.
+    /// Uses exact floating-point equality.
+    /// </summary>
+    /// <param name="other">The other point to compare.</param>
+    public readonly bool Equals(Point3 other) => X == other.X && Y == other.Y && Z == other.Z;
 
+    /// <summary>
+    /// Adds two <see cref="Point3"/> values component-wise.
+    /// </summary>
+    public static Point3 operator +(Point3 p1, Point3 p2) => new(p1.X + p2.X, p1.Y + p2.Y, p1.Z + p2.Z);
 
-    public float[] ToArray()
-    {
-        return [x, y, z];
-    }
+    /// <summary>
+    /// Subtracts the second <see cref="Point3"/> from the first component-wise.
+    /// </summary>
+    public static Point3 operator -(Point3 p1, Point3 p2) => new(p1.X - p2.X, p1.Y - p2.Y, p1.Z - p2.Z);
 
+    /// <summary>
+    /// Multiplies a <see cref="Point3"/> by a scalar.
+    /// </summary>
+    public static Point3 operator *(float f, Point3 p) => new(p.X * f, p.Y * f, p.Z * f);
 
-    public bool Equals(Point3 other)
-    {
-        return x == other.x && y == other.y && z == other.z;
-    }
+    /// <summary>
+    /// Multiplies a <see cref="Point3"/> by a scalar.
+    /// </summary>
+    public static Point3 operator *(Point3 p, float f) => new(p.X * f, p.Y * f, p.Z * f);
 
+    /// <summary>
+    /// Divides a <see cref="Point3"/> by a scalar.
+    /// </summary>
+    public static Point3 operator /(Point3 p, float f) => new(p.X / f, p.Y / f, p.Z / f);
 
+    /// <summary>
+    /// Determines whether two <see cref="Point3"/> values are equal (component-wise exact equality).
+    /// </summary>
+    public static bool operator ==(Point3 p1, Point3 p2) => p1.X == p2.X && p1.Y == p2.Y && p1.Z == p2.Z;
 
-    public static Point3 operator +(Point3 p1, Point3 p2) { return new Point3(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z); }
-    public static Point3 operator -(Point3 p1, Point3 p2) { return new Point3(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z); }
-    public static Point3 operator *(float f, Point3 p) { return new Point3(p.x * f, p.y * f, p.z * f); }
-    public static Point3 operator *(Point3 p, float f) { return new Point3(p.x * f, p.y * f, p.z * f); }
-    public static Point3 operator /(Point3 p, float f) { return new Point3(p.x / f, p.y / f, p.z / f); }
+    /// <summary>
+    /// Determines whether two <see cref="Point3"/> values are not equal (component-wise exact inequality).
+    /// </summary>
+    public static bool operator !=(Point3 p1, Point3 p2) => p1.X != p2.X || p1.Y != p2.Y || p1.Z != p2.Z;
 
-    public static bool operator ==(Point3 p1, Point3 p2) { return p1.x == p2.x && p1.y == p2.y && p1.z == p2.z; }
-    public static bool operator !=(Point3 p1, Point3 p2) { return p1.x != p2.x || p1.y != p2.y || p1.z != p2.z; }
+    /// <summary>
+    /// Determines whether this instance is equal to another object.
+    /// </summary>
+    public override readonly bool Equals(object? o) => o is Point3 p && Equals(p);
 
-    public override bool Equals(object? o)
-    {
-        if (o is not Point3)
-        {
-            return false;
-        }
+    /// <summary>
+    /// Returns a hash code for this instance.
+    /// </summary>
+    public override readonly int GetHashCode() => HashCode.Combine(X, Y, Z);
 
-        return Equals((Point3)o);
-    }
-
-
-    public override readonly int GetHashCode()
-    {
-        return base.GetHashCode();
-    }
-
-
-    public override string ToString()
-    {
-        return "(X : " + x + " Y : " + y + " Z : " + z + ")";
-    }
-
-
+    /// <summary>
+    /// Returns a string representation of the point.
+    /// </summary>
+    public override readonly string ToString() => $"(X : {X} Y : {Y} Z : {Z})";
 }
