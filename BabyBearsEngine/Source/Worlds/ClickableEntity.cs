@@ -6,7 +6,7 @@ namespace BabyBearsEngine.Worlds.UI;
 
 public class ClickableEntity : IEntity, IClickable
 {
-    private const double HoverDelaySeconds = 0.5; // tweak as needed
+    private const double HoverDelaySeconds = 0.5;
 
     private readonly ClickController _buttonHandler;
     private readonly int _x;
@@ -14,7 +14,7 @@ public class ClickableEntity : IEntity, IClickable
     private readonly int _width;
     private readonly int _height;
 
-    public ClickableEntity(int x, int y, int width, int height, Colour colour, string textToDisplay = "")
+    public ClickableEntity(int x, int y, int width, int height)
     {
         _x = x;
         _y = y;
@@ -33,6 +33,7 @@ public class ClickableEntity : IEntity, IClickable
         {
             MouseSolver.RegisterMouseOver(_buttonHandler);
         }
+        _buttonHandler.Update(elapsed);
     }
 
     // --- Interface Implementation (The Bridge) ---

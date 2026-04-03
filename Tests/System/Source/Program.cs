@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;
+﻿using BabyBearsEngine.Tests.System.Source.ClickTest;
+using BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;
 
 var appSettings = new ApplicationSettings()
 {
@@ -15,4 +16,5 @@ var appSettings = new ApplicationSettings()
 
 //option 2
 GameLauncher.Initialise(appSettings);
-GameLauncher.Run(new MenuWorld());
+//GameLauncher.Run(new MenuWorld());
+GameLauncher.Run(new ClickTestWorld());

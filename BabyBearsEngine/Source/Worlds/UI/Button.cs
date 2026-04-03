@@ -48,6 +48,12 @@ public class Button : IEntity, IClickable
     void IClickable.TriggerMouseEntered() => OnMouseEntered(); 
     void IClickable.TriggerMouseExited() => OnMouseExited(); 
     void IClickable.TriggerHover() => OnMouseHovered(); 
+    void IClickable.TriggerStopHover() => OnStopMouseHovered();
+
+    private void OnStopMouseHovered()
+    {
+        throw new NotImplementedException();
+    }
 
     protected virtual void OnLeftClicked() 
     {

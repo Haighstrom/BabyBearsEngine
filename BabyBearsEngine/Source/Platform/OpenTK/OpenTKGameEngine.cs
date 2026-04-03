@@ -1,6 +1,7 @@
 ﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenTK;
 using BabyBearsEngine.Source.GameEngine;
+using BabyBearsEngine.Source.Worlds;
 using BabyBearsEngine.Worlds;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -67,6 +68,8 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
         ApplyPendingWorldChangeIfAny();
 
         _world.Update(args.Time);
+
+        MouseSolver.Update();
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
