@@ -13,7 +13,7 @@ public static class Logger
         ILogger logger = factory.CreateLogger("Program");
         logger.LogInformation("Hello World! Logging is {Description}.", "fun");
 
-        var logLocation = Path.Combine(Directory.GetCurrentDirectory(), "logs");
+        var logLocation = Path.Combine(Directory.GetCurrentDirectory(), "log.txt");
 
         if (!Directory.Exists(logLocation))
         {

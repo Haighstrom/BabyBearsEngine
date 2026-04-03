@@ -64,7 +64,7 @@ public class Image(ITexture texture, float x, float y, float width, float height
     public virtual float Alpha
     {
         get => Colour.A;
-        set => Colour = new(Colour.R, Colour.G, Colour.B, value);
+        set => Colour = new(Colour.R, Colour.G, Colour.B, (byte)Math.Round(value * 255f));
     }
 
     public float Angle

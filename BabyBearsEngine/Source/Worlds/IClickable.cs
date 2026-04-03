@@ -1,11 +1,12 @@
 ﻿namespace BabyBearsEngine.Source.Worlds;
 
-internal interface IButtonTrigger
+internal interface IClickable
 {
     void TriggerLeftClicked();
     void TriggerLeftPressed();
     void TriggerLeftReleased();
     void TriggerMouseEntered();
     void TriggerMouseExited();
-    void TriggerMouseHovered();
+    void TriggerHover();
+    void TriggerStopHover();
 }
