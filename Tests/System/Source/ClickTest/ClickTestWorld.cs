@@ -4,6 +4,6 @@ internal class ClickTestWorld : World
 {
     public ClickTestWorld()
     {
-        Add(new HoverBox(50, 50, 100, 100));
+        Add(new ClickerBox(50, 50, 100, 100));
     }
 }

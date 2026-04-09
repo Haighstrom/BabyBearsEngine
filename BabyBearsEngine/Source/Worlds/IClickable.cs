@@ -2,11 +2,10 @@
 
 internal interface IClickable
 {
-    void TriggerLeftClicked();
     void TriggerLeftPressed();
     void TriggerLeftReleased();
     void TriggerMouseEntered();
     void TriggerMouseExited();
     void TriggerHover();
-    void TriggerStopHover();
+    void TriggerCancelHover();
 }

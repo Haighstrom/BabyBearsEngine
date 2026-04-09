@@ -8,7 +8,7 @@ public class ClickableEntity : IEntity, IClickable
 {
     private const double HoverDelaySeconds = 0.5;
 
-    private readonly ClickController _buttonHandler;
+    private readonly IClickController _buttonHandler;
     private readonly int _x;
     private readonly int _y;
     private readonly int _width;
@@ -37,13 +37,12 @@ public class ClickableEntity : IEntity, IClickable
     }
 
     // --- Interface Implementation (The Bridge) ---
-    void IClickable.TriggerLeftClicked() => OnLeftClicked();
     void IClickable.TriggerLeftPressed() => OnLeftPressed(); 
     void IClickable.TriggerLeftReleased() => OnLeftReleased(); 
     void IClickable.TriggerMouseEntered() => OnMouseEntered(); 
     void IClickable.TriggerMouseExited() => OnMouseExited(); 
     void IClickable.TriggerHover() => OnMouseHovered();
-    void IClickable.TriggerStopHover() => OnStopMouseHovered();
+    void IClickable.TriggerCancelHover() => OnStopMouseHovered();
 
     protected virtual void OnLeftClicked() 
     {
@@ -81,7 +80,6 @@ public class ClickableEntity : IEntity, IClickable
     public event EventHandler? MouseExited;
     public event EventHandler? MouseHovered;
     public event EventHandler? MouseHoverStopped;
-    public event EventHandler? NoMouseEvent;
 
     public virtual void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {

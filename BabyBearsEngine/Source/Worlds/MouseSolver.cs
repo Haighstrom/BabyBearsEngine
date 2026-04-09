@@ -5,10 +5,10 @@ namespace BabyBearsEngine.Source.Worlds;
 
 internal static class MouseSolver
 {
-    private static List<ClickController> s_prevMousedOver = [];
-    private static readonly List<ClickController> s_currentMousedOver = [];
+    private static List<IClickController> s_prevMousedOver = [];
+    private static readonly List<IClickController> s_currentMousedOver = [];
 
-    public static void RegisterMouseOver(ClickController clickController)
+    public static void RegisterMouseOver(IClickController clickController)
     {
         s_currentMousedOver.Add(clickController);
     }
@@ -25,7 +25,7 @@ internal static class MouseSolver
 
         topMostClicked?.SetMouseOver(true);
 
-        s_prevMousedOver = s_currentMousedOver.ToList();
+        s_prevMousedOver = [.. s_currentMousedOver];
         s_currentMousedOver.Clear();
     }
 }

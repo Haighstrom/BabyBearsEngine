@@ -42,13 +42,12 @@ public class Button : IEntity, IClickable
     }
 
     // --- Interface Implementation (The Bridge) ---
-    void IClickable.TriggerLeftClicked() => OnLeftClicked();
     void IClickable.TriggerLeftPressed() => OnLeftPressed(); 
     void IClickable.TriggerLeftReleased() => OnLeftReleased(); 
     void IClickable.TriggerMouseEntered() => OnMouseEntered(); 
     void IClickable.TriggerMouseExited() => OnMouseExited(); 
     void IClickable.TriggerHover() => OnMouseHovered(); 
-    void IClickable.TriggerStopHover() => OnStopMouseHovered();
+    void IClickable.TriggerCancelHover() => OnStopMouseHovered();
 
     private void OnStopMouseHovered()
     {
