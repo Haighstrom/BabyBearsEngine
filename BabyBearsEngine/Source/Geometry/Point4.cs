@@ -145,34 +145,22 @@ public struct Point4 : IEquatable<Point4>
     /// </summary>
     /// <param name="transformMatrix"></param>
     /// <returns></returns>
-    public Point4 Transform(ref Matrix4 transformMatrix)
+    public readonly Point4 Transform(ref Matrix4 transformMatrix)
     {
         return Matrix4.Multiply(ref transformMatrix, this);
     }
 
 
-    public Point ToPoint()
-    {
-        return new Point(x, y);
-    }
+    public Point ToPoint() => new Point(x, y);
 
 
-    public Point3 ToPoint3()
-    {
-        return new Point3(x, y, z);
-    }
+    public Point3 ToPoint3() => new Point3(x, y, z);
 
 
-    public float[] ToArray()
-    {
-        return new[] { x, y, z, w };
-    }
+    public float[] ToArray() => [x, y, z, w];
 
 
-    public bool Equals(Point4 other)
-    {
-        return x == other.x && y == other.y && z == other.z && w == other.w;
-    }
+    public bool Equals(Point4 other) => x == other.x && y == other.y && z == other.z && w == other.w;
 
 
 
@@ -185,25 +173,9 @@ public struct Point4 : IEquatable<Point4>
     public static bool operator ==(Point4 p1, Point4 p2) { return p1.x == p2.x && p1.y == p2.y && p1.z == p2.z && p1.w == p2.w; }
     public static bool operator !=(Point4 p1, Point4 p2) { return p1.x != p2.x || p1.y != p2.y || p1.z != p2.z || p1.w != p2.w; }
 
-    public override bool Equals(object o)
-    {
-        if (!(o is Point4))
-            return false;
+    public override bool Equals(object? o) => o is Point4 other && Equals(other);
 
-        return Equals((Point4)o);
-    }
+    public override readonly int GetHashCode() => base.GetHashCode();
 
-
-    public override int GetHashCode()
-    {
-        return base.GetHashCode();
-    }
-
-
-    public override string ToString()
-    {
-        return "(X : " + x + " Y : " + y + " Z : " + z + " W : " + w + ")";
-    }
-
-
+    public override string ToString() => FormattableString.Invariant($"(X : {x} Y : {y} Z : {z} W : {w})");
 }
