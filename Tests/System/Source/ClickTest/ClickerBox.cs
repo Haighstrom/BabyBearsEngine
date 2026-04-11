@@ -2,9 +2,10 @@
 
 namespace BabyBearsEngine.Tests.System.Source.ClickTest;
 
-internal class ClickerBox(int x, int y, int width, int height) : ClickableEntity(x, y, width, height)
+internal class ClickerBox(int x, int y, int width, int height, Colour defaultColour) 
+    : ClickableEntity(x, y, width, height)
 {
-    private readonly ColouredRectangle _rectangle = new(Colour.LightBlue, x, y, width, height);
+    private readonly ColouredRectangle _rectangle = new(defaultColour, x, y, width, height);
 
     public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
@@ -17,14 +18,14 @@ internal class ClickerBox(int x, int y, int width, int height) : ClickableEntity
     {
         base.OnMouseEntered();
 
-        _rectangle.Colour = Colour.Green;
+        _rectangle.Colour = Colour.LightBlue;
     }
 
     protected override void OnMouseExited()
     {
         base.OnMouseExited();
 
-        _rectangle.Colour = Colour.Red;
+        _rectangle.Colour = defaultColour;
     }
 
     protected override void OnLeftPressed()

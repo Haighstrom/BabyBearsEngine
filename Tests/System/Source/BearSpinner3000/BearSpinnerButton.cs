@@ -3,9 +3,9 @@
 internal class BearSpinnerButton(int x, int y) 
     : Button(x, y, 120, 60, Colour.White, "Bear Spinner 3000")
 {
-    protected override void OnLeftClicked()
+    protected override void OnLeftReleased()
     {
-        base.OnLeftClicked();
+        base.OnLeftReleased();
 
         Engine.ChangeWorld(new BearSpinnerWorld());
     }

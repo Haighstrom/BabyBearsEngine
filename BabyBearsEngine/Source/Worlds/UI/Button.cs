@@ -54,17 +54,13 @@ public class Button : IEntity, IClickable
         throw new NotImplementedException();
     }
 
-    protected virtual void OnLeftClicked() 
+    protected virtual void OnLeftReleased() 
     {
         LeftClicked?.Invoke(this, EventArgs.Empty);
     }
     protected virtual void OnLeftPressed() 
     {
         LeftPressed?.Invoke(this, EventArgs.Empty);
-    }
-    protected virtual void OnLeftReleased() 
-    {
-        LeftReleased?.Invoke(this, EventArgs.Empty);
     }
     protected virtual void OnMouseEntered() 
     {

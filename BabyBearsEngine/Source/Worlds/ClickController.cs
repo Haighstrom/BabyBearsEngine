@@ -123,6 +123,7 @@ internal sealed class ClickController(IClickable clickTarget, double timeToTrigg
                 {
                     _clickState = ClickState.None;
                     clickTarget.TriggerCancelHover();
+                    clickTarget.TriggerMouseExited();
                 }
                 else if (Mouse.LeftPressed)
                 {

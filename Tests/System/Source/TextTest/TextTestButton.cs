@@ -3,9 +3,9 @@
 internal class TextTestButton(int x, int y)
     : Button(x, y, 120, 60, Colour.White, "Text Test")
 {
-    protected override void OnLeftClicked()
+    protected override void OnLeftReleased()
     {
-        base.OnLeftClicked();
+        base.OnLeftReleased();
 
         Engine.ChangeWorld(new TextTestWorld());
     }
