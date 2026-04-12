@@ -49,9 +49,8 @@ public class Button : IEntity, IClickable
     void IClickable.TriggerHover() => OnMouseHovered(); 
     void IClickable.TriggerCancelHover() => OnStopMouseHovered();
 
-    private void OnStopMouseHovered()
+    protected virtual void OnStopMouseHovered()
     {
-        throw new NotImplementedException();
     }
 
     protected virtual void OnLeftReleased() 
@@ -81,7 +80,6 @@ public class Button : IEntity, IClickable
     public event EventHandler? MouseEntered;
     public event EventHandler? MouseExited;
     public event EventHandler? MouseHovered;
-    public event EventHandler? NoMouseEvent;
 
     public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
