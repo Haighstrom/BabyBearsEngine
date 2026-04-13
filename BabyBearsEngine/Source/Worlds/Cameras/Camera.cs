@@ -10,7 +10,7 @@ using BabyBearsEngine.Source.Worlds.Cameras;
 
 namespace BabyBearsEngine.Worlds;
 
-public class Camera : IEntity, IContainer
+public class Camera : AddableBase, IEntity, IContainer
 {
     private readonly VertexDataBuffer<Vertex> _vertexBuffer = new();
     private readonly CameraMSAAShader _mSAAShader;
@@ -19,10 +19,7 @@ public class Camera : IEntity, IContainer
     private readonly StandardMatrixShaderProgram _shader;
     private float _tileWidth, _tileHeight;
     private float _viewX, _viewY, _viewW, _viewH;
-    private readonly List<IRenderable> _graphics = [];
-    private readonly List<IUpdateable> _updateables = [];
-
-    private FBO _tempSecondFBO;
+    private readonly Container _container = new();
 
     private Camera(float x, float y, float width, float height, MsaaSamples samples = MsaaSamples.Disabled)
     {
@@ -57,7 +54,6 @@ public class Camera : IEntity, IContainer
         }
 
         _shaderPassFBO = new((int)width, (int)height);
-        _tempSecondFBO = new((int)width, (int)height);
 
         //Check for OpenGL errors
         var err = GL.GetError();
@@ -152,7 +148,7 @@ public class Camera : IEntity, IContainer
 
     public void Update(double elapsed)
     {
-        foreach (var updateable in _updateables.ToList())
+        foreach (var updateable in _container.GetUpdatables())
         {
             updateable.Update(elapsed);
         }
@@ -196,7 +192,7 @@ public class Camera : IEntity, IContainer
         mv = Matrix3.Translate(ref mv, -View.X, -View.Y);
 
         //draw stuff here 
-        foreach (var graphic in _graphics.ToList())
+        foreach (var graphic in _container.GetRenderables())
         {
             graphic.Render(ref fboOrtho, ref mv);
         }
@@ -255,44 +251,11 @@ public class Camera : IEntity, IContainer
         }
     }
 
-    public void Clear()
-    {
-        //dispose?
-        _graphics.Clear();
-        _updateables.Clear();
-    }
+    public void Add(IAddable entity) => _container.Add(entity);
 
-    public void Add(IRenderable graphic)
-    {
-        _graphics.Add(graphic);
-    }
+    public void Remove(IAddable entity) => _container.Remove(entity);
 
-    public void Add(IUpdateable updateable)
-    {
-        _updateables.Add(updateable);
-    }
-
-    public void Add(IEntity entity)
-    {
-        _graphics.Add(entity);
-        _updateables.Add(entity);
-    }
-
-    public void Remove(IRenderable graphic)
-    {
-        _graphics.Remove(graphic);
-    }
-
-    public void Remove(IUpdateable updateable)
-    {
-        _updateables.Remove(updateable);
-    }
-
-    public void Remove(IEntity entity)
-    {
-        _graphics.Remove(entity);
-        _updateables.Remove(entity);
-    }
+    public void RemoveAll() => _container.RemoveAll();
 
     public void Dispose()
     {

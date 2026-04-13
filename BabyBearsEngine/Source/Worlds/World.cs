@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using BabyBearsEngine.Graphics;
 using BabyBearsEngine.Source.Geometry;
@@ -7,8 +9,7 @@ namespace BabyBearsEngine.Worlds;
 
 public class World() : IWorld
 {
-    private readonly List<IRenderable> _graphics = [];
-    private readonly List<IUpdateable> _updateables = [];
+    private readonly Container _container = new();
 
     public Colour BackgroundColour { get; set; } = Colour.CornflowerBlue;
 
@@ -24,48 +25,16 @@ public class World() : IWorld
         //}
     }
 
-    public void Clear()
-    {
-        //dispose?
-        _graphics.Clear();
-        _updateables.Clear();
-    }
 
-    public void Add(IRenderable graphic)
-    {
-        _graphics.Add(graphic);
-    }
+    public void Add(IAddable entity) => _container.Add(entity);
 
-    public void Add(IUpdateable updateable)
-    {
-        _updateables.Add(updateable);
-    }
+    public void Remove(IAddable entity) => _container.Remove(entity);
 
-    public void Add(IEntity entity)
-    {
-        _graphics.Add(entity);
-        _updateables.Add(entity);
-    }
-
-    public void Remove(IRenderable graphic)
-    {
-        _graphics.Remove(graphic);
-    }
-
-    public void Remove(IUpdateable updateable)
-    {
-        _updateables.Remove(updateable);
-    }
-
-    public void Remove(IEntity entity)
-    {
-        _graphics.Remove(entity);
-        _updateables.Remove(entity);
-    }
+    public void RemoveAll() => _container.RemoveAll();
 
     public virtual void Update(double elapsed)
     {
-        foreach (var updateable in _updateables.ToList())
+        foreach (var updateable in _container.GetUpdatables())
         {
             updateable.Update(elapsed);
         }
@@ -79,7 +48,7 @@ public class World() : IWorld
         var projection = Matrix3.CreateOrtho(Window.Width, Window.Height);
         var modelView = Matrix3.Identity;
 
-        foreach (var graphic in _graphics.ToList())
+        foreach (var graphic in _container.GetRenderables())
         {
             graphic.Render(ref projection, ref modelView);
         }

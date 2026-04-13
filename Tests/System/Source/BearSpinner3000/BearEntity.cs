@@ -1,13 +1,13 @@
 ﻿using System;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
+using BabyBearsEngine.Source.Worlds;
 using BabyBearsEngine.Worlds.Graphics;
 
 namespace BabyBearsEngine.Tests.System.Source.BearSpinner3000;
 
-internal class BearEntity(int startX, int startY) : IEntity
+internal class BearEntity(int startX, int startY) : AddableBase, IEntity
 {
-    private bool _disposed;
     private readonly Image _graphic = new(Textures.CreateFromFile("Assets/SpinnableBear.png"), startX, startY, 60, 80) 
     { 
         Colour = ColourTools.RandSystemColour(), 
@@ -34,34 +34,5 @@ internal class BearEntity(int startX, int startY) : IEntity
 
         _graphic.X = startX + _xSway * (float)Math.Sin(_swaySpeed * _totalElapsed);
         _graphic.Y = startY + _ySway * (float)Math.Cos(_swaySpeed * _totalElapsed);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            _disposed = true;
-        }
-    }
-
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~Bear()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
 }

@@ -4,10 +4,11 @@ using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Platform.OpenGL.Buffers;
 using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
+using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
 
-public class TextImage : IRenderable, IDisposable
+public class TextImage : AddableBase, IRenderable, IDisposable
 {
     private readonly StandardMatrixShaderProgram _shader = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();

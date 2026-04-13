@@ -1,9 +1,10 @@
 ﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
+using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Graphics;
 
-public class ColouredRectangle(Colour colour, float x, float y, float width, float height) : IRenderable, IDisposable
+public class ColouredRectangle(Colour colour, float x, float y, float width, float height) : AddableBase, IRenderable, IDisposable
 {
     private bool _disposed;
 

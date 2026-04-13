@@ -2,10 +2,11 @@
 using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
+using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
 
-public class BMPTextGraphic : ITextGraphic
+public class BMPTextGraphic : AddableBase, ITextGraphic
 {
     private static FontLoader FontLoader { get; } = new();
 

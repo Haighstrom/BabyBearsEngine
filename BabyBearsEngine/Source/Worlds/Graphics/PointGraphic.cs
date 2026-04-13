@@ -1,9 +1,10 @@
 ﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
+using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Graphics;
 
-public class PointGraphic : IRenderable
+public class PointGraphic : AddableBase, IRenderable
 {
     private bool _disposed;
     private readonly PointShaderProgram _shader;

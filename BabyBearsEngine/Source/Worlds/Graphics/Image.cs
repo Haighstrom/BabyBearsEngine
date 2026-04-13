@@ -1,10 +1,11 @@
 ﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Platform.OpenGL.Rendering;
+using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Graphics;
 
-public class Image(ITexture texture, float x, float y, float width, float height) : IRenderable, IDisposable
+public class Image(ITexture texture, float x, float y, float width, float height) : AddableBase, IRenderable, IDisposable
 {
     private readonly GraphicRenderer _graphicRenderer = new(texture);
     private float _angle = 0;

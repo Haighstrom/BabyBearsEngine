@@ -1,10 +1,11 @@
 ﻿using System;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
+using BabyBearsEngine.Source.Worlds;
 using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
-internal class Triangle : IRenderable
+internal class Triangle : AddableBase, IRenderable
 {
     private bool _disposed;
     private readonly VAO _vao;

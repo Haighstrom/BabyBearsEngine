@@ -4,7 +4,7 @@ using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Worlds.UI;
 
-public class ClickableEntity : IEntity, IClickable
+public class ClickableEntity : AddableBase, IEntity, IClickable
 {
     private const double HoverDelaySeconds = 0.5;
 

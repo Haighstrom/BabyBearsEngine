@@ -1,9 +1,10 @@
 ﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
+using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Graphics;
 
-internal class SimpleGraphic : IRenderable, IDisposable
+internal class SimpleGraphic : AddableBase, IRenderable, IDisposable
 {
     private readonly object _syncRoot = new();
     private bool _disposed = false;
