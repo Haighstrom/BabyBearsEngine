@@ -4,7 +4,7 @@ using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Worlds.UI;
 
-public class ClickableEntity : AddableBase, IEntity, IClickable
+public class UIElementBase : AddableBase, IEntity, IClickable, IContainer
 {
     private const double HoverDelaySeconds = 0.5;
 
@@ -13,8 +13,11 @@ public class ClickableEntity : AddableBase, IEntity, IClickable
     private readonly int _y;
     private readonly int _width;
     private readonly int _height;
+    private readonly Container _container = new();
+    // Properties
+    public bool Visible { get; set; } = true;
 
-    public ClickableEntity(int x, int y, int width, int height)
+    public UIElementBase(int x, int y, int width, int height)
     {
         _x = x;
         _y = y;
@@ -22,8 +25,6 @@ public class ClickableEntity : AddableBase, IEntity, IClickable
         _height = height;
         _buttonHandler = new(this, HoverDelaySeconds);
     }
-
-    public bool Visible { get; set; } = true;
 
     private bool MouseOver => 
         Mouse.ClientX >= _x && Mouse.ClientX < _x + _width &&
@@ -36,10 +37,11 @@ public class ClickableEntity : AddableBase, IEntity, IClickable
             MouseSolver.RegisterMouseOver(_buttonHandler);
         }
         _buttonHandler.Update(elapsed);
-    }
 
-    public virtual void Render(ref Matrix3 projection, ref Matrix3 modelView)
-    {
+        foreach (var entity in _container.GetUpdatables())
+        {
+            entity.Update(elapsed);
+        }
     }
 
     // --- Interface Implementation (The Bridge) ---
@@ -81,4 +83,21 @@ public class ClickableEntity : AddableBase, IEntity, IClickable
     public event EventHandler? MouseExited;
     public event EventHandler? MouseHovered;
     public event EventHandler? MouseHoverStopped;
+
+    public virtual void Render(ref Matrix3 projection, ref Matrix3 modelView)
+    {
+        foreach (var entity in _container.GetRenderables())
+        {
+            if (!entity.Visible)
+            {
+                continue;
+            }
+
+            entity.Render(ref projection, ref modelView);
+        }
+    }
+
+    public void Add(IAddable entity) => _container.Add(entity);
+    public void Remove(IAddable entity) => _container.Remove(entity);
+    public void RemoveAll() => _container.RemoveAll();
 }

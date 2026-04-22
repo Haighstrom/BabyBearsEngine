@@ -45,6 +45,9 @@ public class BMPTextGraphic : AddableBase, ITextGraphic
         SetVerticesSimple();
     }
 
+    // Properties
+    public bool Visible { get; set; } = true;
+
     public float X
     {
         get => _x;

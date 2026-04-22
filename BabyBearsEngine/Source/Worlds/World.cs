@@ -50,6 +50,10 @@ public class World() : IWorld
 
         foreach (var graphic in _container.GetRenderables())
         {
+            if (!graphic.Visible)
+            {
+                continue;
+            }
             graphic.Render(ref projection, ref modelView);
         }
     }

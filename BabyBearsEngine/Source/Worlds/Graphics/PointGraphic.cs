@@ -23,6 +23,9 @@ public class PointGraphic : AddableBase, IRenderable
         _vertexDataBuffer.SetNewVertices(vertices);
     }
 
+    // Properties
+    public bool Visible { get; set; } = true;
+
     public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         _shader.Bind();

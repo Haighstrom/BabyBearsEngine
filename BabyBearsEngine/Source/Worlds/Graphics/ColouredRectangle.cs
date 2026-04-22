@@ -22,6 +22,9 @@ public class ColouredRectangle(Colour colour, float x, float y, float width, flo
         }
     }
 
+    // Properties
+    public bool Visible { get; set; } = true;
+
     public float Y
     {
         get => y;

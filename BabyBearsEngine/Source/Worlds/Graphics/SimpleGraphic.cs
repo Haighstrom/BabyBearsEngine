@@ -13,7 +13,6 @@ internal class SimpleGraphic : AddableBase, IRenderable, IDisposable
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
     public ITexture Texture { get; }
     public Vertex[] Vertices { get; }
-    public bool Visible { get; set; } = true;
 
     //private ITexture temp;
     public SimpleGraphic(ITexture texture, Vertex[] vertices)
@@ -31,6 +30,8 @@ internal class SimpleGraphic : AddableBase, IRenderable, IDisposable
         _vertexDataBuffer.SetNewVertices(Vertices);
     }
 
+    // Properties
+    public bool Visible { get; set; } = true;
 
     public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {

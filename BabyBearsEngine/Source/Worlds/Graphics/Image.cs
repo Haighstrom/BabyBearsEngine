@@ -77,6 +77,8 @@ public class Image(ITexture texture, float x, float y, float width, float height
         }
     }
 
+    public bool Visible { get; set; } = true;
+
     public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         if (_verticesChanged)

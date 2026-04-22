@@ -20,6 +20,8 @@ public class Camera : AddableBase, IEntity, IContainer
     private float _tileWidth, _tileHeight;
     private float _viewX, _viewY, _viewW, _viewH;
     private readonly Container _container = new();
+    // Properties
+    public bool Visible { get; set; } = true;
 
     private Camera(float x, float y, float width, float height, MsaaSamples samples = MsaaSamples.Disabled)
     {
@@ -194,6 +196,11 @@ public class Camera : AddableBase, IEntity, IContainer
         //draw stuff here 
         foreach (var graphic in _container.GetRenderables())
         {
+            if (!graphic.Visible)
+            {
+                continue;
+            }
+
             graphic.Render(ref fboOrtho, ref mv);
         }
 
@@ -231,7 +238,7 @@ public class Camera : AddableBase, IEntity, IContainer
         //reset viewport
         GL.Viewport(prevVP.X, prevVP.Y, prevVP.Width, prevVP.Height);
 
-        Matrix3 mv2 = modelView;
+        var mv2 = modelView;
         mv2 = Matrix3.Translate(ref mv2, X, Y);
 
         _shader.Bind();
@@ -256,9 +263,4 @@ public class Camera : AddableBase, IEntity, IContainer
     public void Remove(IAddable entity) => _container.Remove(entity);
 
     public void RemoveAll() => _container.RemoveAll();
-
-    public void Dispose()
-    {
-        throw new NotImplementedException();
-    }
 }

@@ -41,6 +41,9 @@ public class TextImage : AddableBase, IRenderable, IDisposable
         _texture = new DefaultTextureFactory().GenTexture(_fontStruct.CharacterSS);
     }
 
+    // Properties
+    public bool Visible { get; set; } = true;
+
     public float X
     {
         get => _x;

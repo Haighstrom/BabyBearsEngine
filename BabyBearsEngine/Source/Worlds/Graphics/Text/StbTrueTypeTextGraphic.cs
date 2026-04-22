@@ -14,6 +14,10 @@ public class StbTrueTypeTextGraphic(float x, float y, float width, float height,
     private OpenTK.Mathematics.Color4 _colour = OpenTK.Mathematics.Color4.White;
     private bool _verticesChanged = true;
 
+
+    // Properties
+    public bool Visible { get; set; } = true;
+
     public float X
     {
         get => x;
