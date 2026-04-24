@@ -32,10 +32,4 @@ internal interface IClickController
     /// </summary>
     /// <param name="isMouseOver">True if the mouse is over the target this frame.</param>
     void SetMouseOver(bool isMouseOver);
-
-    /// <summary>
-    /// Advance the controller state by <paramref name="elapsed"/> seconds.
-    /// </summary>
-    /// <param name="elapsed">Time in seconds since the last update.</param>
-    void Update(double elapsed);
 }

@@ -1,38 +1,27 @@
 ﻿using BabyBearsEngine.Input;
+using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Source.Worlds;
 
 /// <summary>
-/// Controls mouse interactions for a single <see cref="IClickable"/> target.
-///
-/// This class implements a small state machine to handle enter/exit, hover,
-/// mouse down/up and the case where the user presses inside then drags
-/// outside while holding the button.
-///
-/// <para>Notes:</para>
-/// <para>The owner must call <see cref="SetMouseOver(bool)"/> each frame
-/// <c>before</c> calling <see cref="Update(double)"/> so the controller sees
-/// the current mouse-over state.</para>
-/// <para>The controller assumes <c>Mouse.LeftPressed</c> and
-/// <c>Mouse.LeftReleased</c> are edge events (true only on the frame the action
-/// occurred).</para>
+/// Controls mouse interactions for a clickable region, raising events for each
+/// interaction. Implements a state machine to handle enter/exit, hover, press/release,
+/// and the case where the user presses inside then drags outside while holding the button.
 /// <para>
-/// <c>Mouse.LeftReleased</c> events are only forwarded to the target when the
-/// mouse was pressed while over the target and then released while still over
-/// the target (this represents a successful "click"). If the mouse is pressed
-/// over the target, dragged outside while the button remains down, and then
-/// released outside, the controller emits <c>TriggerMouseExited()</c> instead
-/// of <c>TriggerLeftReleased()</c> to indicate the interaction was cancelled.
+/// Call <see cref="Update(double)"/> each frame. The controller calls <see cref="IMouseInteractable.PositionOnScreen"/>
+/// on the supplied target to determine whether the mouse is over the region, and registers
+/// with <see cref="MouseSolver"/> so that only the top-most overlapping controller receives input.
 /// </para>
-/// <param name="clickTarget">The <see cref="IClickable"/> instance that will
-/// receive the triggered events (entered/exit/hover/press/release). This must
-/// not be null.</param>
-/// <param name="timeToTriggerHover">Time in seconds the mouse must remain
-/// over the target before a hover is triggered. Must be non-negative.</param>
+/// <para>
+/// <see cref="LeftReleased"/> is only raised when the mouse was pressed while over the
+/// region and released while still over it (a successful click). Pressing inside, dragging
+/// outside, and releasing raises <see cref="MouseExited"/> instead to signal cancellation.
+/// </para>
 /// </summary>
-internal sealed class ClickController(IClickable clickTarget, double timeToTriggerHover = 0.5) : IClickController
+/// <param name="target">The entity to hit-test each frame.</param>
+/// <param name="timeToTriggerHover">Seconds the mouse must remain over the region before <see cref="Hovered"/> is raised.</param>
+internal sealed class ClickController(IMouseInteractable target, double timeToTriggerHover = 0.5) : AddableBase, IUpdateable, IClickController
 {
-    // State machine describing the click/hover lifecycle for the target.
     private enum ClickState
     {
         None,
@@ -42,66 +31,63 @@ internal sealed class ClickController(IClickable clickTarget, double timeToTrigg
         MouseDownOutside,
     }
 
-    // Set by caller via SetMouseOver; indicates whether the mouse is currently
-    // over the clickable target for this frame.
+    private ClickState _clickState = ClickState.None;
+    private double _hoverTimeElapsed = 0;
     private bool _mouseIsOver = false;
 
-    // Current state of the controller.
-    private ClickState _clickState = ClickState.None;
+    public bool Active { get; set; } = true;
 
-    // Accumulated time spent in the MouseOver state; used to detect hover.
-    private double _hoverTimeElapsed = 0;
+    public event Action? HoverCancelled;
+    public event Action? Hovered;
+    public event Action? LeftPressed;
+    public event Action? LeftReleased;
+    public event Action? MouseEntered;
+    public event Action? MouseExited;
 
     /// <summary>
-    /// Inform the controller whether the mouse is over the target this frame.
-    /// Must be called before <see cref="Update(double)"/>.
+    /// Called by <see cref="MouseSolver"/> to inform this controller whether it is
+    /// the top-most entity under the mouse this frame.
     /// </summary>
     public void SetMouseOver(bool isMouseOver)
     {
         _mouseIsOver = isMouseOver;
     }
 
-    /// <summary>
-    /// Advance the controller state by <paramref name="elapsed"/> seconds.
-    /// Handles Enter/Exit, Hover, Press and Release transitions and triggers
-    /// the appropriate <see cref="IClickable"/> methods.
-    /// </summary>
+    /// <summary>Advance the controller state by <paramref name="elapsed"/> seconds.</summary>
     public void Update(double elapsed)
     {
+        if (target.PositionOnScreen.Contains(Mouse.ClientX, Mouse.ClientY))
+        {
+            MouseSolver.RegisterMouseOver(this);
+        }
+
         switch (_clickState)
         {
             case ClickState.None:
-                // No mouse over and nothing happening. If the mouse now becomes
-                // over the target, enter MouseOver and fire MouseEntered.
                 if (_mouseIsOver)
                 {
                     _clickState = ClickState.MouseOver;
-                    _hoverTimeElapsed = 0; // start hover timer when becoming mouse-over
-                    clickTarget.TriggerMouseEntered();
+                    _hoverTimeElapsed = 0;
+                    MouseEntered?.Invoke();
 
-                    // If the left button was pressed on the same frame we entered
-                    // mouse-over, immediately transition to MouseDownInside and
-                    // fire the left-pressed event so the click is not lost.
                     if (Mouse.LeftPressed)
                     {
                         _clickState = ClickState.MouseDownInside;
-                        clickTarget.TriggerLeftPressed();
+                        LeftPressed?.Invoke();
                     }
                 }
                 break;
 
             case ClickState.MouseOver:
-                // While the mouse is over the target we either detect an exit,
-                // a press, or we advance the hover timer until Hovering.
                 if (!_mouseIsOver)
                 {
                     _clickState = ClickState.None;
-                    clickTarget.TriggerMouseExited();
+                    MouseExited?.Invoke();
                 }
                 else if (Mouse.LeftPressed)
                 {
                     _clickState = ClickState.MouseDownInside;
-                    clickTarget.TriggerLeftPressed();
+                    LeftPressed?.Invoke();
                 }
                 else
                 {
@@ -110,57 +96,44 @@ internal sealed class ClickController(IClickable clickTarget, double timeToTrigg
                     if (_hoverTimeElapsed >= timeToTriggerHover)
                     {
                         _clickState = ClickState.Hovering;
-                        clickTarget.TriggerHover();
+                        Hovered?.Invoke();
                     }
                 }
                 break;
 
             case ClickState.Hovering:
-                // While hovering, a mouse exit or a press cancels the hover. A
-                // press transitions to MouseDownInside and should also trigger
-                // the press event (so clicks while hovering are detected).
                 if (!_mouseIsOver)
                 {
                     _clickState = ClickState.None;
-                    clickTarget.TriggerCancelHover();
-                    clickTarget.TriggerMouseExited();
+                    HoverCancelled?.Invoke();
+                    MouseExited?.Invoke();
                 }
                 else if (Mouse.LeftPressed)
                 {
                     _clickState = ClickState.MouseDownInside;
-                    clickTarget.TriggerCancelHover();
-                    clickTarget.TriggerLeftPressed();
+                    HoverCancelled?.Invoke();
+                    LeftPressed?.Invoke();
                 }
                 break;
 
             case ClickState.MouseDownInside:
-                // Button was pressed while mouse was over the target. If the
-                // button is released while still over the target we fire
-                // LeftReleased and return to MouseOver. If the mouse is moved
-                // outside while holding the button we enter MouseDownOutside
-                // and delay exit until the release.
                 if (Mouse.LeftReleased)
                 {
                     _clickState = ClickState.MouseOver;
-                    _hoverTimeElapsed = 0; // restart hover timing after click
-                    clickTarget.TriggerLeftReleased();
+                    _hoverTimeElapsed = 0;
+                    LeftReleased?.Invoke();
                 }
                 else if (!_mouseIsOver)
                 {
                     _clickState = ClickState.MouseDownOutside;
-                    // delay triggering mouse exit until mouse is released
                 }
                 break;
 
             case ClickState.MouseDownOutside:
-                // Button was pressed inside then the cursor moved outside while
-                // holding the button. When released we emit MouseExited (a
-                // cancellation) and return to None. If the cursor moves back
-                // inside while still pressed we resume MouseDownInside.
                 if (Mouse.LeftReleased)
                 {
                     _clickState = ClickState.None;
-                    clickTarget.TriggerMouseExited(); // delayed exit on release
+                    MouseExited?.Invoke();
                 }
                 else if (_mouseIsOver)
                 {

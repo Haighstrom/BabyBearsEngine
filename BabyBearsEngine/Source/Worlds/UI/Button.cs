@@ -5,7 +5,7 @@ using BabyBearsEngine.Source.Rendering.Graphics.Text;
 namespace BabyBearsEngine.Worlds.UI;
 
 public class Button(int x, int y, int width, int height, Colour colour, string textToDisplay = "", bool autoRecolour = true)
-    : ClickableEntity(x, y, width, height)
+    : Entity(x, y, width, height, clickable: true)
 {
     private readonly Colour _hoverColour = colour.Lightened(0.05f);
     private readonly Colour _pressedColour = colour.Darkened(0.05f);
