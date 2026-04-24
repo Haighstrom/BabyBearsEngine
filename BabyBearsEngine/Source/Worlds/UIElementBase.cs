@@ -1,10 +1,9 @@
 ﻿using BabyBearsEngine.Input;
-using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Worlds.UI;
 
-public class UIElementBase : AddableBase, IEntity, IClickable, IContainer
+public class UIElementBase : ContainerEntity, IClickable
 {
     private const double HoverDelaySeconds = 0.5;
 
@@ -13,9 +12,6 @@ public class UIElementBase : AddableBase, IEntity, IClickable, IContainer
     private readonly int _y;
     private readonly int _width;
     private readonly int _height;
-    private readonly Container _container = new();
-    // Properties
-    public bool Visible { get; set; } = true;
 
     public UIElementBase(int x, int y, int width, int height)
     {
@@ -30,7 +26,7 @@ public class UIElementBase : AddableBase, IEntity, IClickable, IContainer
         Mouse.ClientX >= _x && Mouse.ClientX < _x + _width &&
         Mouse.ClientY >= _y && Mouse.ClientY < _y + _height;
 
-    public void Update(double elapsed)
+    public override void Update(double elapsed)
     {
         if (MouseOver)
         {
@@ -38,10 +34,7 @@ public class UIElementBase : AddableBase, IEntity, IClickable, IContainer
         }
         _buttonHandler.Update(elapsed);
 
-        foreach (var entity in _container.GetUpdatables())
-        {
-            entity.Update(elapsed);
-        }
+        base.Update(elapsed);
     }
 
     // --- Interface Implementation (The Bridge) ---
@@ -84,20 +77,4 @@ public class UIElementBase : AddableBase, IEntity, IClickable, IContainer
     public event EventHandler? MouseHovered;
     public event EventHandler? MouseHoverStopped;
 
-    public virtual void Render(ref Matrix3 projection, ref Matrix3 modelView)
-    {
-        foreach (var entity in _container.GetRenderables())
-        {
-            if (!entity.Visible)
-            {
-                continue;
-            }
-
-            entity.Render(ref projection, ref modelView);
-        }
-    }
-
-    public void Add(IAddable entity) => _container.Add(entity);
-    public void Remove(IAddable entity) => _container.Remove(entity);
-    public void RemoveAll() => _container.RemoveAll();
 }

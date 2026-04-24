@@ -21,6 +21,9 @@ internal class BearEntity(int startX, int startY) : AddableBase, IEntity
     private readonly float _ySway = Randomisation.Rand(0, 500);
     private double _totalElapsed = 0;
 
+    public bool Active { get; set; } = true;
+    public bool Visible { get; set; } = true;
+
     public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         _graphic.Render(ref projection, ref modelView);

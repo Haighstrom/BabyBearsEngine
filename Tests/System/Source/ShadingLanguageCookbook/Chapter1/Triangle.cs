@@ -52,6 +52,8 @@ internal class Triangle : AddableBase, IRenderable
         //GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 0, 0);
     }
 
+    public bool Visible { get; set; } = true;
+
     public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         _shader.Bind();

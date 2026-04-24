@@ -10,7 +10,7 @@ using BabyBearsEngine.Source.Worlds.Cameras;
 
 namespace BabyBearsEngine.Worlds;
 
-public class Camera : AddableBase, IEntity, IContainer
+public class Camera : ContainerEntity
 {
     private readonly VertexDataBuffer<Vertex> _vertexBuffer = new();
     private readonly CameraMSAAShader _mSAAShader;
@@ -19,9 +19,6 @@ public class Camera : AddableBase, IEntity, IContainer
     private readonly StandardMatrixShaderProgram _shader;
     private float _tileWidth, _tileHeight;
     private float _viewX, _viewY, _viewW, _viewH;
-    private readonly Container _container = new();
-    // Properties
-    public bool Visible { get; set; } = true;
 
     private Camera(float x, float y, float width, float height, MsaaSamples samples = MsaaSamples.Disabled)
     {
@@ -148,15 +145,7 @@ public class Camera : AddableBase, IEntity, IContainer
 
     public event EventHandler? ViewChanged;
 
-    public void Update(double elapsed)
-    {
-        foreach (var updateable in _container.GetUpdatables())
-        {
-            updateable.Update(elapsed);
-        }
-    }
-
-    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
+    public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         bool msaaEnabled = MSAASamples != MsaaSamples.Disabled;
 
@@ -194,7 +183,7 @@ public class Camera : AddableBase, IEntity, IContainer
         mv = Matrix3.Translate(ref mv, -View.X, -View.Y);
 
         //draw stuff here 
-        foreach (var graphic in _container.GetRenderables())
+        foreach (var graphic in GetRenderables())
         {
             if (!graphic.Visible)
             {
@@ -258,9 +247,4 @@ public class Camera : AddableBase, IEntity, IContainer
         }
     }
 
-    public void Add(IAddable entity) => _container.Add(entity);
-
-    public void Remove(IAddable entity) => _container.Remove(entity);
-
-    public void RemoveAll() => _container.RemoveAll();
 }

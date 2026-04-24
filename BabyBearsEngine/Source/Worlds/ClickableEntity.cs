@@ -23,6 +23,7 @@ public class ClickableEntity : AddableBase, IEntity, IClickable
         _buttonHandler = new(this, HoverDelaySeconds);
     }
 
+    public bool Active { get; set; } = true;
     public bool Visible { get; set; } = true;
 
     private bool MouseOver => 
