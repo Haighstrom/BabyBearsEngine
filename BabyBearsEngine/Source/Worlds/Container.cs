@@ -4,7 +4,7 @@ using BabyBearsEngine.Graphics;
 
 namespace BabyBearsEngine.Worlds;
 
-internal class Container() : IContainer
+internal class Container(IContainer realParent) : IContainer
 {
     // Authoritative collection of added items. Other lists are derived
     // convenience views for rendering and updating.
@@ -38,7 +38,7 @@ internal class Container() : IContainer
             _graphics.Add(renderable);
         }
 
-        entity.SetParent(this);
+        entity.SetParent(realParent);
     }
 
     public void Remove(IAddable entity)

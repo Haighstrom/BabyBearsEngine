@@ -7,7 +7,12 @@ namespace BabyBearsEngine.Source.Worlds;
 
 public abstract class ContainerEntity : AddableBase, IEntity, IContainer
 {
-    private readonly Container _container = new();
+    private readonly Container _container;
+
+    protected ContainerEntity()
+    {
+        _container = new Container(this);
+    }
 
     public bool Active { get; set; } = true;
     public bool Visible { get; set; } = true;

@@ -7,9 +7,14 @@ using BabyBearsEngine.Source.Geometry;
 
 namespace BabyBearsEngine.Worlds;
 
-public class World() : IWorld
+public class World : IWorld
 {
-    private readonly Container _container = new();
+    private readonly Container _container;
+
+    public World()
+    {
+        _container = new Container(this);
+    }
 
     public Colour BackgroundColour { get; set; } = Colour.CornflowerBlue;
 
