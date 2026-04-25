@@ -1,10 +1,9 @@
 ﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Graphics;
 
-internal class SimpleGraphic : AddableBase, IRenderable, IDisposable
+internal class SimpleGraphic : GraphicBase, IDisposable
 {
     private readonly object _syncRoot = new();
     private bool _disposed = false;
@@ -30,10 +29,7 @@ internal class SimpleGraphic : AddableBase, IRenderable, IDisposable
         _vertexDataBuffer.SetNewVertices(Vertices);
     }
 
-    // Properties
-    public bool Visible { get; set; } = true;
-
-    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
+    public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         Shader.Bind();
         _vertexDataBuffer.Bind();

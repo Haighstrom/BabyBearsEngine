@@ -1,11 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using BabyBearsEngine.Graphics;
+using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Worlds;
 
 internal class Container(IContainer realParent) : IContainer
 {
+    // Layer assigned to IRenderable objects that do not implement ILayered.
+    private const int NonLayeredRenderableLayer = 0;
+
     // Authoritative collection of added items. Other lists are derived
     // convenience views for rendering and updating.
     private readonly List<IAddable> _children = [];
@@ -38,7 +42,12 @@ internal class Container(IContainer realParent) : IContainer
 
         if (entity is IRenderable renderable)
         {
-            _graphics.Add(renderable);
+            InsertRenderable(renderable);
+
+            if (entity is ILayered layered)
+            {
+                layered.LayerChanged += OnLayerChanged;
+            }
         }
 
         entity.SetParent(realParent);
@@ -64,6 +73,11 @@ internal class Container(IContainer realParent) : IContainer
         if (entity is IRenderable renderable)
         {
             _graphics.Remove(renderable);
+
+            if (entity is ILayered layered)
+            {
+                layered.LayerChanged -= OnLayerChanged;
+            }
         }
 
         entity.SetParent(null);
@@ -92,5 +106,28 @@ internal class Container(IContainer realParent) : IContainer
         _updateables.Clear();
         _graphics.Clear();
         _children.Clear();
+    }
+
+    private void InsertRenderable(IRenderable renderable)
+    {
+        int layer = (renderable as ILayered)?.Layer ?? NonLayeredRenderableLayer;
+
+        for (int i = 0; i < _graphics.Count; i++)
+        {
+            if (layer > ((_graphics[i] as ILayered)?.Layer ?? NonLayeredRenderableLayer))
+            {
+                _graphics.Insert(i, renderable);
+                return;
+            }
+        }
+
+        _graphics.Add(renderable);
+    }
+
+    private void OnLayerChanged(object? sender, LayerChangedEventArgs _)
+    {
+        var renderable = (IRenderable)sender!;
+        _graphics.Remove(renderable);
+        InsertRenderable(renderable);
     }
 }

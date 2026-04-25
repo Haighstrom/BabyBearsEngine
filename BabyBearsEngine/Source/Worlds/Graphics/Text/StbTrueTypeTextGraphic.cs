@@ -1,11 +1,10 @@
 ﻿using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
 
-public class StbTrueTypeTextGraphic(float x, float y, float width, float height, string text) : AddableBase, IRenderable, IDisposable
+public class StbTrueTypeTextGraphic(float x, float y, float width, float height, string text) : GraphicBase, IDisposable
 {
     private readonly R8ChannelShaderProgram _shader = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
@@ -15,8 +14,6 @@ public class StbTrueTypeTextGraphic(float x, float y, float width, float height,
     private bool _verticesChanged = true;
 
 
-    // Properties
-    public bool Visible { get; set; } = true;
 
     public float X
     {
@@ -82,7 +79,7 @@ public class StbTrueTypeTextGraphic(float x, float y, float width, float height,
         }
     }
 
-    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
+    public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();

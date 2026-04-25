@@ -1,8 +1,8 @@
 ﻿namespace BabyBearsEngine.Source.Worlds;
 
-public class LayerChangedEventArgs(float oldLayer, float newLayer) : EventArgs
+public class LayerChangedEventArgs(int oldLayer, int newLayer) : EventArgs
 {
-    public float NewLayer { get; } = newLayer;
+    public int NewLayer { get; } = newLayer;
 
-    public float OldLayer { get; } = oldLayer;
+    public int OldLayer { get; } = oldLayer;
 }

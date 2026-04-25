@@ -4,11 +4,10 @@ using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Platform.OpenGL.Buffers;
 using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
-using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
 
-public class TextImage : AddableBase, IRenderable, IDisposable
+public class TextImage : GraphicBase, IDisposable
 {
     private readonly StandardMatrixShaderProgram _shader = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
@@ -38,9 +37,6 @@ public class TextImage : AddableBase, IRenderable, IDisposable
 
         _texture = new DefaultTextureFactory().GenTexture(_fontStruct.CharacterSS);
     }
-
-    // Properties
-    public bool Visible { get; set; } = true;
 
     public float X { get; set; }
     public float Y { get; set; }
@@ -156,7 +152,7 @@ public class TextImage : AddableBase, IRenderable, IDisposable
         Vertices = vertices.ToArray();
     }
 
-    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
+    public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();

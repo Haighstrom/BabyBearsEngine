@@ -1,10 +1,9 @@
 ﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Graphics;
 
-public class PointGraphic : AddableBase, IRenderable
+public class PointGraphic : GraphicBase
 {
     private bool _disposed;
     private readonly PointShaderProgram _shader;
@@ -23,10 +22,7 @@ public class PointGraphic : AddableBase, IRenderable
         _vertexDataBuffer.SetNewVertices(vertices);
     }
 
-    // Properties
-    public bool Visible { get; set; } = true;
-
-    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
+    public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();

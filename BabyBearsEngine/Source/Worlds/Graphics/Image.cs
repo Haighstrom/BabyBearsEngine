@@ -1,11 +1,10 @@
 ﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Platform.OpenGL.Rendering;
-using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Graphics;
 
-public class Image(ITexture texture, float x, float y, float width, float height) : AddableBase, IRenderable, IDisposable
+public class Image(ITexture texture, float x, float y, float width, float height) : GraphicBase, IDisposable
 {
     private readonly GraphicRenderer _graphicRenderer = new(texture);
     private float _angle = 0;
@@ -60,9 +59,7 @@ public class Image(ITexture texture, float x, float y, float width, float height
         }
     }
 
-    public bool Visible { get; set; } = true;
-
-    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
+    public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         if (_verticesChanged)
         {

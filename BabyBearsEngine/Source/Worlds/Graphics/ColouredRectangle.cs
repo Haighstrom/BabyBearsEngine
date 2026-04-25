@@ -1,10 +1,9 @@
 ﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Graphics;
 
-public class ColouredRectangle(Colour colour, float x, float y, float width, float height) : AddableBase, IRenderable, IDisposable
+public class ColouredRectangle(Colour colour, float x, float y, float width, float height) : GraphicBase, IDisposable
 {
     private bool _disposed;
 
@@ -14,9 +13,6 @@ public class ColouredRectangle(Colour colour, float x, float y, float width, flo
 
     public float X { get; set; } = x;
     public float Y { get; set; } = y;
-
-    // Properties
-    public bool Visible { get; set; } = true;
 
     public float Width
     {
@@ -64,7 +60,7 @@ public class ColouredRectangle(Colour colour, float x, float y, float width, flo
         }
     }
 
-    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
+    public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();

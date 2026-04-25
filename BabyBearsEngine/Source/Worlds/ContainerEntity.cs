@@ -5,9 +5,10 @@ using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Source.Worlds;
 
-public abstract class ContainerEntity : AddableBase, IEntity, IContainer
+public abstract class ContainerEntity : AddableBase, IEntity, IContainer, ILayered
 {
     private readonly Container _container;
+    private int _layer;
 
     protected ContainerEntity()
     {
@@ -16,6 +17,20 @@ public abstract class ContainerEntity : AddableBase, IEntity, IContainer
 
     public bool Active { get; set; } = true;
     public bool Visible { get; set; } = true;
+
+    public int Layer => _layer;
+    public event EventHandler<LayerChangedEventArgs>? LayerChanged;
+
+    public void SetLayer(int layer)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(layer);
+        int old = _layer;
+        _layer = layer;
+        if (old != layer)
+        {
+            LayerChanged?.Invoke(this, new LayerChangedEventArgs(old, layer));
+        }
+    }
 
     protected IList<IUpdateable> GetUpdatables() => _container.GetUpdatables();
     protected IList<IRenderable> GetRenderables() => _container.GetRenderables();

@@ -2,11 +2,10 @@
 using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Source.Worlds;
 
 namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
 
-public class BMPTextGraphic : AddableBase, ITextGraphic
+public class BMPTextGraphic : GraphicBase, ITextGraphic
 {
     private static FontLoader FontLoader { get; } = new();
 
@@ -44,9 +43,6 @@ public class BMPTextGraphic : AddableBase, ITextGraphic
 
         SetVerticesSimple();
     }
-
-    // Properties
-    public bool Visible { get; set; } = true;
 
     public float X
     {
@@ -126,7 +122,7 @@ public class BMPTextGraphic : AddableBase, ITextGraphic
     private ITexture _tempTexture;
     private SimpleGraphic _anotherTempGraphic;
 
-    public void Render(ref Matrix3 projection, ref Matrix3 modelView)
+    public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         if (_verticesChanged)
         {
