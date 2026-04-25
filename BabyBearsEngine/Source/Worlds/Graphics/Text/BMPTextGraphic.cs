@@ -117,10 +117,8 @@ public class BMPTextGraphic : GraphicBase, ITextGraphic
     private float _extraSpaceWidth = 0;
     private float _extraLineSpacing = 0;
 
-    private Image _image;
-    private TextImage _textImage;
+    private Image _image = null!;
     private ITexture _tempTexture;
-    private SimpleGraphic _anotherTempGraphic;
 
     public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {

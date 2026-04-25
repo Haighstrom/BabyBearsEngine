@@ -2,6 +2,7 @@
 
 internal static class BitmapExtensions
 {
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     public static (int x, int y, int width, int height) NonZeroAlphaRegion(this System.Drawing.Bitmap bitmap)
     {
         int firstPixelX = bitmap.Width;

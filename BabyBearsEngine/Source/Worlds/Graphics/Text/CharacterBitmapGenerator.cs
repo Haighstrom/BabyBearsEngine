@@ -6,7 +6,7 @@ namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
 
 internal sealed class CharacterBitmapGenerator : ICharacterBitmapGenerator
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     public Bitmap GenerateCharacterBitmap(char c, Font font, bool antiAliased)
     {
         Bitmap image = new((int)font.Size * 3, (int)font.Size * 3, System.Drawing.Imaging.PixelFormat.Format32bppArgb);

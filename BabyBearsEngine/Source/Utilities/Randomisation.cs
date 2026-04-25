@@ -57,7 +57,7 @@ public static class Randomisation
             throw new InvalidOperationException($"Generic parameter T must be an enum. Provided was {typeof(T).Name}.");
 
         var values = Enum.GetValues(typeof(T));
-        return (T)values.GetValue(s_random.Next(values.Length));
+        return (T)values.GetValue(s_random.Next(values.Length))!;
     }
 
 

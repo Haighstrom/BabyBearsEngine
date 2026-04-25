@@ -14,15 +14,17 @@ public class TwoDimensionalArrayConverter : JsonConverterFactory
 
     public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
     {
-        Type elementType = typeToConvert.GetElementType();
+        // Non-null: GetElementType() only returns null for non-array types; CanConvert guarantees typeToConvert is a 2D array.
+        Type elementType = typeToConvert.GetElementType()!;
 
-        // Create the converter with the correct generic type argument
+        // Non-null: CreateInstance throws on failure and only returns null for Nullable<T>; TwoDimensionalArrayConverterInner<T> is a concrete class.
         JsonConverter converter = (JsonConverter)Activator.CreateInstance(
-            typeof(TwoDimensionalArrayConverterInner<>).MakeGenericType(elementType));
+            typeof(TwoDimensionalArrayConverterInner<>).MakeGenericType(elementType))!;
 
         return converter;
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Instantiated via reflection in CreateConverter.")]
     private class TwoDimensionalArrayConverterInner<TElement> : JsonConverter<TElement[,]>
     {
         public override TElement[,] Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -43,7 +45,8 @@ public class TwoDimensionalArrayConverter : JsonConverterFactory
                 var columns = new List<TElement>();
                 while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
                 {
-                    TElement element = JsonSerializer.Deserialize<TElement>(ref reader, options);
+                    TElement element = JsonSerializer.Deserialize<TElement>(ref reader, options)
+                        ?? throw new JsonException("Unexpected null element in 2D array.");
                     columns.Add(element);
                 }
 

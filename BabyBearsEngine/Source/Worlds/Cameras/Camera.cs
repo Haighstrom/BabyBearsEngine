@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using BabyBearsEngine.Graphics;
-using BabyBearsEngine.OpenGL;
+﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Diagnostics;
 using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Platform.OpenGL.Buffers;

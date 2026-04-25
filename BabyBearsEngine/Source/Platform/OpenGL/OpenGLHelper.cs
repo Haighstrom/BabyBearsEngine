@@ -240,7 +240,7 @@ internal static class OpenGLHelper
         }
     }
 
-    public static void SaveTextureToFile(Texture t, string filePath, Dictionary<string, string> metadata = null)
+    public static void SaveTextureToFile(Texture t, string filePath, Dictionary<string, string>? metadata = null)
     {
         var b = TextureToBitmap(t);
         SaveBitmapToPNGFile(b, filePath, metadata);
@@ -258,7 +258,7 @@ internal static class OpenGLHelper
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
-    public static void SaveBitmapToPNGFile(System.Drawing.Bitmap bmp, string filePath, Dictionary<string, string> metadata = null)
+    public static void SaveBitmapToPNGFile(System.Drawing.Bitmap bmp, string filePath, Dictionary<string, string>? metadata = null)
     {
         //Make sure the filepath has exactly one png extension
         if (Path.GetExtension(filePath) == null)
