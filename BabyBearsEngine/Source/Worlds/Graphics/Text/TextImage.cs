@@ -15,8 +15,6 @@ public class TextImage : AddableBase, IRenderable, IDisposable
     private readonly ITexture _texture;
     private readonly GeneratedFontStruct _fontStruct;
     private bool _disposedValue;
-    private float _x;
-    private float _y;
     private float _width;
     private float _height;
     private string _textToDisplay;
@@ -27,8 +25,8 @@ public class TextImage : AddableBase, IRenderable, IDisposable
 
     public TextImage(FontDefinition fontDef, string textToDisplay, Colour colour, float x, float y, float width, float height)
     {
-        _x = x;
-        _y = y;
+        X = x;
+        Y = y;
         _width = width;
         _height = height;
         _textToDisplay = textToDisplay;
@@ -44,25 +42,8 @@ public class TextImage : AddableBase, IRenderable, IDisposable
     // Properties
     public bool Visible { get; set; } = true;
 
-    public float X
-    {
-        get => _x;
-        set
-        {
-            _x = value;
-            _verticesChanged = true;
-        }
-    }
-
-    public float Y
-    {
-        get => _y;
-        set
-        {
-            _y = value;
-            _verticesChanged = true;
-        }
-    }
+    public float X { get; set; }
+    public float Y { get; set; }
 
     public float Width
     {
@@ -154,10 +135,10 @@ public class TextImage : AddableBase, IRenderable, IDisposable
 
             vertices.Add(
                 GeometryHelper.QuadToTris(
-                    new Vertex(X + x, Y + y, colorTK, source.Min.X, source.Min.Y),
-                    new Vertex(X + x + w, Y + y, colorTK, source.Max.X, source.Min.Y),
-                    new Vertex(X + x, Y + y + h, colorTK, source.Min.X, source.Max.Y),
-                    new Vertex(X + x + w, Y + y + h, colorTK, source.Max.X, source.Max.Y)
+                    new Vertex(x,     y,     colorTK, source.Min.X, source.Min.Y),
+                    new Vertex(x + w, y,     colorTK, source.Max.X, source.Min.Y),
+                    new Vertex(x,     y + h, colorTK, source.Min.X, source.Max.Y),
+                    new Vertex(x + w, y + h, colorTK, source.Max.X, source.Max.Y)
             ));
 
             x += w;
@@ -181,12 +162,6 @@ public class TextImage : AddableBase, IRenderable, IDisposable
         _vertexDataBuffer.Bind();
         _texture.Bind();
 
-        if (_shader is IMVPShader mvpShader)
-        {
-            mvpShader.SetProjectionMatrix(ref projection);
-            mvpShader.SetModelViewMatrix(ref modelView);
-        }
-
         if (_verticesChanged)
         {
             SetVerticesSimple();
@@ -194,6 +169,13 @@ public class TextImage : AddableBase, IRenderable, IDisposable
             _vertexDataBuffer.SetNewVertices(Vertices);
 
             _verticesChanged = false;
+        }
+
+        var mv = Matrix3.Translate(ref modelView, X, Y);
+        if (_shader is IMVPShader mvpShader)
+        {
+            mvpShader.SetProjectionMatrix(ref projection);
+            mvpShader.SetModelViewMatrix(ref mv);
         }
 
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, Vertices.Length);

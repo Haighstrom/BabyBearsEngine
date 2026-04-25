@@ -12,28 +12,11 @@ public class ColouredRectangle(Colour colour, float x, float y, float width, flo
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
     private bool _verticesChanged = true;
 
-    public float X
-    {
-        get => x;
-        set
-        {
-            x = value;
-            _verticesChanged = true;
-        }
-    }
+    public float X { get; set; } = x;
+    public float Y { get; set; } = y;
 
     // Properties
     public bool Visible { get; set; } = true;
-
-    public float Y
-    {
-        get => y;
-        set
-        {
-            y = value;
-            _verticesChanged = true;
-        }
-    }
 
     public float Width
     {
@@ -73,10 +56,10 @@ public class ColouredRectangle(Colour colour, float x, float y, float width, flo
 
             return
             [
-                new(x + width, y + height, colorTK), // top right
-                new(x + width, y, colorTK), // bottom right
-                new(x, y + height, colorTK), // top left
-                new(x, y, colorTK), // bottom left
+                new(width, height, colorTK), // top right
+                new(width, 0,      colorTK), // bottom right
+                new(0,     height, colorTK), // top left
+                new(0,     0,      colorTK), // bottom left
             ];
         }
     }
@@ -92,8 +75,9 @@ public class ColouredRectangle(Colour colour, float x, float y, float width, flo
             _verticesChanged = false;
         }
 
+        var mv = Matrix3.Translate(ref modelView, X, Y);
         _shader.SetProjectionMatrix(ref projection);
-        _shader.SetModelViewMatrix(ref modelView);
+        _shader.SetModelViewMatrix(ref mv);
 
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
     }

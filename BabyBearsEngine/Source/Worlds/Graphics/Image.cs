@@ -12,25 +12,8 @@ public class Image(ITexture texture, float x, float y, float width, float height
     private Colour _colour = Colour.White;
     private bool _verticesChanged = true;
 
-    public float X
-    {
-        get => x;
-        set
-        {
-            x = value;
-            _verticesChanged = true;
-        }
-    }
-
-    public float Y
-    {
-        get => y;
-        set
-        {
-            y = value;
-            _verticesChanged = true;
-        }
-    }
+    public float X { get; set; } = x;
+    public float Y { get; set; } = y;
 
     public float Width
     {
@@ -83,15 +66,15 @@ public class Image(ITexture texture, float x, float y, float width, float height
     {
         if (_verticesChanged)
         {
-            _graphicRenderer.UpdateVertices(x, y, width, height, _colour);
+            _graphicRenderer.UpdateVertices(width, height, _colour);
             _verticesChanged = false;
         }
 
-        var mv = modelView;
+        var mv = Matrix3.Translate(ref modelView, X, Y);
 
         if (_angle != 0)
         {
-            mv = Matrix3.RotateAroundPoint(ref mv, _angle, x + width / 2, y + height / 2);
+            mv = Matrix3.RotateAroundPoint(ref mv, _angle, width / 2, height / 2);
         }
 
         _graphicRenderer.Render(ref projection, ref mv);
