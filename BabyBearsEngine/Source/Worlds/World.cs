@@ -36,6 +36,7 @@ public class World : IWorld
     public void Remove(IAddable entity) => _container.Remove(entity);
 
     public void RemoveAll() => _container.RemoveAll();
+    public (float x, float y) GetWindowCoordinates(float x, float y) => (x, y);
 
     public virtual void Update(double elapsed)
     {

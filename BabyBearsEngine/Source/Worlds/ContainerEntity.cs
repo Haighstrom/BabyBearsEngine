@@ -49,4 +49,6 @@ public abstract class ContainerEntity : AddableBase, IEntity, IContainer
     public void Add(IAddable entity) => _container.Add(entity);
     public void Remove(IAddable entity) => _container.Remove(entity);
     public void RemoveAll() => _container.RemoveAll();
+    public virtual (float x, float y) GetWindowCoordinates(float x, float y) =>
+        Parent?.GetWindowCoordinates(x, y) ?? (x, y);
 }

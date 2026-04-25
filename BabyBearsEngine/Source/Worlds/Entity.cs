@@ -40,7 +40,23 @@ public class Entity : ContainerEntity, IMouseInteractable
     public int Y { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
-    public Rect PositionOnScreen => new(X, Y, Width, Height);
+    public Rect PositionOnScreen
+    {
+        get
+        {
+            var (wx, wy) = Parent?.GetWindowCoordinates(X, Y) ?? (X, Y);
+            return new((int)wx, (int)wy, Width, Height);
+        }
+    }
+
+    public override (float x, float y) GetWindowCoordinates(float x, float y) =>
+        Parent?.GetWindowCoordinates(x + X, y + Y) ?? (x + X, y + Y);
+
+    public sealed override void Render(ref Matrix3 projection, ref Matrix3 modelView)
+    {
+        var mv = Matrix3.Translate(ref modelView, X, Y);
+        base.Render(ref projection, ref mv);
+    }
 
     public event EventHandler? LeftPressed;
     public event EventHandler? LeftReleased;

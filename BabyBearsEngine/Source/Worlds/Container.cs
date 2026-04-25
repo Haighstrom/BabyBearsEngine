@@ -16,6 +16,9 @@ internal class Container(IContainer realParent) : IContainer
 
     public IList<IRenderable> GetRenderables() => [.. _graphics];
 
+    public (float x, float y) GetWindowCoordinates(float x, float y) =>
+        realParent.GetWindowCoordinates(x, y);
+
     public void Add(IAddable entity)
     {
         ArgumentNullException.ThrowIfNull(entity);

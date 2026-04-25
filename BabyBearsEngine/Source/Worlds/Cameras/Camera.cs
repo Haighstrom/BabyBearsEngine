@@ -19,6 +19,8 @@ public class Camera : ContainerEntity
     private readonly StandardMatrixShaderProgram _shader;
     private float _tileWidth, _tileHeight;
     private float _viewX, _viewY, _viewW, _viewH;
+    private float _width, _height;
+    private bool _verticesChanged;
 
     private Camera(float x, float y, float width, float height, MsaaSamples samples = MsaaSamples.Disabled)
     {
@@ -41,6 +43,7 @@ public class Camera : ContainerEntity
         ];
 
         _vertexBuffer.SetNewVertices(Vertices);
+        _verticesChanged = false;
 
         if (width <= 0 || height <= 0)
         {
@@ -84,10 +87,20 @@ public class Camera : ContainerEntity
         _viewH = viewH;
     }
 
-    private float X { get; set; }
-    private float Y { get; set; }
-    private float Width { get; set; }
-    private float Height { get; set; }
+    public float X { get; set; }
+    public float Y { get; set; }
+
+    public float Width
+    {
+        get => _width;
+        set { _width = value; _verticesChanged = true; }
+    }
+
+    public float Height
+    {
+        get => _height;
+        set { _height = value; _verticesChanged = true; }
+    }
 
     private Vertex[] Vertices { get; set; }
 
@@ -145,8 +158,28 @@ public class Camera : ContainerEntity
 
     public event EventHandler? ViewChanged;
 
+    public override (float x, float y) GetWindowCoordinates(float x, float y)
+    {
+        float sx = X + (x - View.X) * TileWidth;
+        float sy = Y + (y - View.Y) * TileHeight;
+        return Parent?.GetWindowCoordinates(sx, sy) ?? (sx, sy);
+    }
+
     public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
+        if (_verticesChanged)
+        {
+            var c = Colour.White.ToOpenTK();
+            Vertices = [
+                new (0,     0,       c, 0, 0),
+                new (Width, 0,       c, 1, 0),
+                new (0,     Height,  c, 0, 1),
+                new (Width, Height,  c, 1, 1),
+            ];
+            _vertexBuffer.SetNewVertices(Vertices);
+            _verticesChanged = false;
+        }
+
         bool msaaEnabled = MSAASamples != MsaaSamples.Disabled;
 
         _vertexBuffer.Bind();

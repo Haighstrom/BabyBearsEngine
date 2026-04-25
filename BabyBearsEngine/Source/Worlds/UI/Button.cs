@@ -1,28 +1,36 @@
-﻿using BabyBearsEngine.Graphics;
-using BabyBearsEngine.Source.Geometry;
+using BabyBearsEngine.Graphics;
 using BabyBearsEngine.Source.Rendering.Graphics.Text;
 
 namespace BabyBearsEngine.Worlds.UI;
 
-public class Button(int x, int y, int width, int height, Colour colour, string textToDisplay = "", bool autoRecolour = true)
-    : Entity(x, y, width, height, clickable: true)
+public class Button : Entity
 {
-    private readonly Colour _hoverColour = colour.Lightened(0.05f);
-    private readonly Colour _pressedColour = colour.Darkened(0.05f);
-    private readonly ColouredRectangle _rectangle = new(colour, x, y, width, height);
-    private readonly TextImage _textImage = new(new FontDefinition("Times New Roman", 16), textToDisplay, Colour.Black, x, y, width, height);
+    private readonly Colour _colour;
+    private readonly Colour _hoverColour;
+    private readonly Colour _pressedColour;
+    private readonly ColouredRectangle _rectangle;
+    private readonly bool _autoRecolour;
 
-    public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
+    public Button(int x, int y, int width, int height, Colour colour, string textToDisplay = "", bool autoRecolour = true)
+        : base(x, y, width, height, clickable: true)
     {
-        _rectangle.Render(ref projection, ref modelView);
-        _textImage.Render(ref projection, ref modelView);
+        _colour = colour;
+        _hoverColour = colour.Lightened(0.05f);
+        _pressedColour = colour.Darkened(0.05f);
+        _autoRecolour = autoRecolour;
+
+        _rectangle = new ColouredRectangle(colour, 0, 0, width, height);
+        var textImage = new TextImage(new FontDefinition("Times New Roman", 16), textToDisplay, Colour.Black, 0, 0, width, height);
+
+        Add(_rectangle);
+        Add(textImage);
     }
 
     protected override void OnLeftPressed()
     {
         base.OnLeftPressed();
 
-        if (autoRecolour)
+        if (_autoRecolour)
         {
             _rectangle.Colour = _pressedColour;
         }
@@ -32,7 +40,7 @@ public class Button(int x, int y, int width, int height, Colour colour, string t
     {
         base.OnLeftReleased();
 
-        if (autoRecolour)
+        if (_autoRecolour)
         {
             _rectangle.Colour = _hoverColour;
         }
@@ -42,7 +50,7 @@ public class Button(int x, int y, int width, int height, Colour colour, string t
     {
         base.OnMouseEntered();
 
-        if (autoRecolour)
+        if (_autoRecolour)
         {
             _rectangle.Colour = _hoverColour;
         }
@@ -52,9 +60,9 @@ public class Button(int x, int y, int width, int height, Colour colour, string t
     {
         base.OnMouseExited();
 
-        if (autoRecolour)
+        if (_autoRecolour)
         {
-            _rectangle.Colour = colour;
+            _rectangle.Colour = _colour;
         }
     }
 }
