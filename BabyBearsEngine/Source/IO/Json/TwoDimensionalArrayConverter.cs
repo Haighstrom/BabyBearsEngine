@@ -50,7 +50,7 @@ public class TwoDimensionalArrayConverter : JsonConverterFactory
                     columns.Add(element);
                 }
 
-                rows.Add(columns.ToArray());
+                rows.Add([.. columns]);
             }
 
             return ConvertToTwoDimensionalArray(rows);
