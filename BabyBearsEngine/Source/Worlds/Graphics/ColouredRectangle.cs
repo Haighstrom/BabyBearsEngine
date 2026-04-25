@@ -3,7 +3,7 @@ using BabyBearsEngine.Source.Geometry;
 
 namespace BabyBearsEngine.Graphics;
 
-public class ColouredRectangle(Colour colour, float x, float y, float width, float height) : GraphicBase, IDisposable
+public sealed class ColouredRectangle(Colour colour, float x, float y, float width, float height) : GraphicBase, IDisposable
 {
     private bool _disposed;
 
@@ -78,7 +78,7 @@ public class ColouredRectangle(Colour colour, float x, float y, float width, flo
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!_disposed)
         {

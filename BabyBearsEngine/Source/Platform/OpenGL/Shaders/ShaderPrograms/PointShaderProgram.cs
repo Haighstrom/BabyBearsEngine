@@ -2,7 +2,7 @@
 
 namespace BabyBearsEngine.OpenGL;
 
-public class PointShaderProgram : ShaderProgramBase
+public sealed class PointShaderProgram : ShaderProgramBase
 {
     private readonly int _pMatrixLocation;
 

@@ -7,7 +7,7 @@ namespace BabyBearsEngine.Worlds.UI;
 /// <summary>
 /// A <see cref="Panel"/> that can be repositioned by clicking and dragging a grab strip along its top edge.
 /// </summary>
-public class DraggablePanel : Panel
+public sealed class DraggablePanel : Panel
 {
     private const int GrabBarHeight = 30;
 
@@ -29,7 +29,7 @@ public class DraggablePanel : Panel
     public bool Draggable { get; set; } = true;
     public bool Dragging { get; private set; }
 
-    protected virtual Rect GrabArea => new(X, Y, Width, GrabBarHeight);
+    private Rect GrabArea => new(X, Y, Width, GrabBarHeight);
 
     public event EventHandler? DragStarted;
     public event EventHandler? DragStopped;

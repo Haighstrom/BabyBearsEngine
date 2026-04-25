@@ -4,7 +4,7 @@ using BabyBearsEngine.Source.Platform.OpenGL.Rendering;
 
 namespace BabyBearsEngine.Graphics;
 
-public class Image(ITexture texture, float x, float y, float width, float height) : GraphicBase, IDisposable
+public sealed class Image(ITexture texture, float x, float y, float width, float height) : GraphicBase, IDisposable
 {
     private readonly GraphicRenderer _graphicRenderer = new(texture);
     private float _angle = 0;
@@ -44,7 +44,7 @@ public class Image(ITexture texture, float x, float y, float width, float height
         }
     }
 
-    public virtual float Alpha
+    public float Alpha
     {
         get => Colour.A;
         set => Colour = new(Colour.R, Colour.G, Colour.B, (byte)Math.Round(value * 255f));
@@ -80,7 +80,7 @@ public class Image(ITexture texture, float x, float y, float width, float height
     #region Dispose
     private bool _disposedValue;
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!_disposedValue)
         {

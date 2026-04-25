@@ -9,7 +9,7 @@ namespace BabyBearsEngine.Source.Geometry;
 /// <summary>
 /// A class to represent a rectangle.
 /// </summary>
-public class Rect
+public sealed class Rect
 {
     /// <summary>
     /// A rectangle with top left (0,0) and nil width and height.

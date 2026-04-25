@@ -4,7 +4,7 @@ using BabyBearsEngine.Source.Geometry;
 
 namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
 
-public class StbTrueTypeTextGraphic(float x, float y, float width, float height, string text) : GraphicBase, IDisposable
+public sealed class StbTrueTypeTextGraphic(float x, float y, float width, float height, string text) : GraphicBase, IDisposable
 {
     private readonly R8ChannelShaderProgram _shader = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
@@ -97,7 +97,7 @@ public class StbTrueTypeTextGraphic(float x, float y, float width, float height,
 
     private bool _disposedValue;
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!_disposedValue)
         {

@@ -5,7 +5,7 @@ using BabyBearsEngine.Source.Geometry;
 
 namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
 
-public class BMPTextGraphic : GraphicBase, ITextGraphic
+public sealed class BMPTextGraphic : GraphicBase, ITextGraphic
 {
     private static FontLoader FontLoader { get; } = new();
 
@@ -230,7 +230,7 @@ public class BMPTextGraphic : GraphicBase, ITextGraphic
         }
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!_disposed)
         {

@@ -2,7 +2,7 @@
 
 namespace BabyBearsEngine.OpenGL;
 
-public class R8ChannelShaderProgram : ShaderProgramBase
+public sealed class R8ChannelShaderProgram : ShaderProgramBase
 {
     private readonly int _mvMatrixLocation;
     private readonly int _pMatrixLocation;

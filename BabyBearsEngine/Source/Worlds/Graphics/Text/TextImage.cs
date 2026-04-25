@@ -7,7 +7,7 @@ using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
 
 namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
 
-public class TextImage : GraphicBase, IDisposable
+public sealed class TextImage : GraphicBase, IDisposable
 {
     private readonly StandardMatrixShaderProgram _shader = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
@@ -177,7 +177,7 @@ public class TextImage : GraphicBase, IDisposable
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, Vertices.Length);
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!_disposedValue)
         {

@@ -1,6 +1,6 @@
 ﻿namespace BabyBearsEngine.OpenGL;
 
-public class VBO() : IDisposable
+public sealed class VBO() : IDisposable
 {
     private bool _disposed;
 
@@ -8,7 +8,7 @@ public class VBO() : IDisposable
 
     public void Bind() => OpenGLHelper.BindVBO(Handle);
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!_disposed)
         {

@@ -7,7 +7,7 @@ namespace BabyBearsEngine.Source.Platform.OpenGL.Buffers;
 /// </summary>
 /// <param name="width"></param>
 /// <param name="height"></param>
-public class MsaaFBO(int width, int height, int samples) : IDisposable
+public sealed class MsaaFBO(int width, int height, int samples) : IDisposable
 {
     private static Texture GetTexture(int width, int height, int samples)
     {
@@ -42,7 +42,7 @@ public class MsaaFBO(int width, int height, int samples) : IDisposable
         GL.BindTexture(TextureTarget.Texture2DMultisample, Texture.Handle);
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!_disposed)
         {

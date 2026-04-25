@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace BabyBearsEngine.IO;
 
-public class TwoDimensionalArrayConverter : JsonConverterFactory
+public sealed class TwoDimensionalArrayConverter : JsonConverterFactory
 {
     public override bool CanConvert(Type typeToConvert)
     {

@@ -3,7 +3,7 @@ using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
 
 namespace BabyBearsEngine.OpenGL;
 
-public class StandardMatrixShaderProgram : ShaderProgramBase, IMVPShader
+public sealed class StandardMatrixShaderProgram : ShaderProgramBase, IMVPShader
 {
     private readonly int _mvMatrixLocation;
     private readonly int _pMatrixLocation;

@@ -2,7 +2,7 @@
 
 namespace BabyBearsEngine.Source.Diagnostics;
 
-public class FileLoggerProvider(string path) : ILoggerProvider
+public sealed class FileLoggerProvider(string path) : ILoggerProvider
 {
     public ILogger CreateLogger(string categoryName)
     {

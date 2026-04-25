@@ -7,7 +7,7 @@ namespace BabyBearsEngine.Source.Platform.OpenGL.Buffers;
 /// </summary>
 /// <param name="width"></param>
 /// <param name="height"></param>
-public class FBO(int width, int height) : IDisposable
+public sealed class FBO(int width, int height) : IDisposable
 {
     private static Texture GetTexture(int width, int height)
     {
@@ -37,7 +37,7 @@ public class FBO(int width, int height) : IDisposable
         GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, Texture.Handle, 0);
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!_disposed)
         {

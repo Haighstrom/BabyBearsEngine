@@ -1,6 +1,6 @@
 ﻿namespace BabyBearsEngine.OpenGL;
 
-public class DefaultShaderProgram : ShaderProgramBase
+public sealed class DefaultShaderProgram : ShaderProgramBase
 {
     private readonly int _windowSizeLocation;
 

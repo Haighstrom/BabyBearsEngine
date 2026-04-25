@@ -3,7 +3,7 @@ using BabyBearsEngine.Source.Geometry;
 
 namespace BabyBearsEngine.Graphics;
 
-internal class SimpleGraphic : GraphicBase, IDisposable
+internal sealed class SimpleGraphic : GraphicBase, IDisposable
 {
     private readonly object _syncRoot = new();
     private bool _disposed = false;

@@ -1,6 +1,6 @@
 ﻿namespace BabyBearsEngine.OpenGL;
 
-public class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw) : IDisposable
+public sealed class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw) : IDisposable
 {
     private bool _disposed;
 
@@ -13,7 +13,7 @@ public class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw) 
         GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, bufferUsageHint);
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!_disposed)
         {

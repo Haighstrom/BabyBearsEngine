@@ -3,7 +3,7 @@ using BabyBearsEngine.Source.Geometry;
 
 namespace BabyBearsEngine.Graphics;
 
-public class PointGraphic : GraphicBase
+public sealed class PointGraphic : GraphicBase
 {
     private bool _disposed;
     private readonly PointShaderProgram _shader;
@@ -30,7 +30,7 @@ public class PointGraphic : GraphicBase
         GL.DrawArrays(PrimitiveType.Points, 0, 1);
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!_disposed)
         {

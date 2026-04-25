@@ -7,7 +7,7 @@ using BabyBearsEngine.Source.Worlds.Cameras;
 
 namespace BabyBearsEngine.Worlds;
 
-public class Camera : ContainerEntity
+public sealed class Camera : ContainerEntity
 {
     private readonly VertexDataBuffer<Vertex> _vertexBuffer = new();
     private readonly CameraMSAAShader _mSAAShader;
@@ -133,7 +133,7 @@ public class Camera : ContainerEntity
         }
     }
 
-    public virtual (float X, float Y, float Width, float Height) View
+    public (float X, float Y, float Width, float Height) View
     {
         get => (_viewX, _viewY, _viewW, _viewH);
         set
