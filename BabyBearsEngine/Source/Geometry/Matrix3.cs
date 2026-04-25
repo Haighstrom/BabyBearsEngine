@@ -27,7 +27,7 @@ public struct Matrix3
 
     public static Matrix3 CreateOrtho(float width, float height)
     {
-        Matrix3 mat = Identity;
+        var mat = Identity;
         mat = ScaleAroundOrigin(ref mat, 2 / width, 2 / height);
         mat = FlipY(ref mat);
         mat = Translate(ref mat, -width / 2, -height / 2);
@@ -40,7 +40,7 @@ public struct Matrix3
     /// </summary>
     public static Matrix3 CreateFBOOrtho(float width, float height)
     {
-        Matrix3 mat = CreateScale(2 / width, 2 / height);
+        var mat = CreateScale(2 / width, 2 / height);
         mat = Translate(ref mat, -width / 2, -height / 2);
         return mat;
     }
@@ -118,7 +118,7 @@ public struct Matrix3
 
     public static Matrix3 Translate(ref Matrix3 mat, float x, float y)
     {
-        Matrix3 transMat = CreateTranslation(x, y);
+        var transMat = CreateTranslation(x, y);
         return Multiply(ref mat, ref transMat);
     }
 
@@ -146,16 +146,16 @@ public struct Matrix3
 
     public static Matrix3 ScaleAroundOrigin(ref Matrix3 mat, float scaleX, float scaleY)
     {
-        Matrix3 scaleMat = CreateScale(scaleX, scaleY);
+        var scaleMat = CreateScale(scaleX, scaleY);
         return Multiply(ref mat, ref scaleMat);
     }
     public static Matrix3 ScaleAroundPoint(ref Matrix3 mat, float scaleX, float scaleY, float x, float y)
     {
-        Matrix3 translate1 = CreateTranslation(x, y);
-        Matrix3 scale = CreateScale(scaleX, scaleY);
-        Matrix3 translate2 = CreateTranslation(-x, -y);
+        var translate1 = CreateTranslation(x, y);
+        var scale = CreateScale(scaleX, scaleY);
+        var translate2 = CreateTranslation(-x, -y);
 
-        Matrix3 result = Multiply(ref mat, ref translate1);
+        var result = Multiply(ref mat, ref translate1);
         result = Multiply(ref result, ref scale);
         result = Multiply(ref result, ref translate2);
 

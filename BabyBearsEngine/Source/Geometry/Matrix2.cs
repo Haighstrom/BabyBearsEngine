@@ -84,14 +84,14 @@ public struct Matrix2
 
     public static Matrix2 RotateAroundZ(ref Matrix2 mat, float angleInDegrees)
     {
-        Matrix2 rotMat = CreateRotation(angleInDegrees);
+        var rotMat = CreateRotation(angleInDegrees);
         return Multiply(ref mat, ref rotMat);
     }
 
 
     public static Matrix2 ScaleAroundOrigin(ref Matrix2 mat, float scaleX, float scaleY)
     {
-        Matrix2 scaleMat = CreateScale(scaleX, scaleY);
+        var scaleMat = CreateScale(scaleX, scaleY);
         return Multiply(ref mat, ref scaleMat);
     }
 

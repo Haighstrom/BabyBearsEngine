@@ -51,7 +51,7 @@ public struct Matrix4
 
     public static Matrix4 CreateOrtho(float width, float height)
     {
-        Matrix4 mat = Identity;
+        var mat = Identity;
         mat = ScaleAroundOrigin(ref mat, 2 / width, 2 / height, 1);
         mat = FlipY(ref mat);
         mat = Translate(ref mat, -width / 2, -height / 2, 0);
@@ -60,7 +60,7 @@ public struct Matrix4
 
     public static Matrix4 CreateFBOOrtho(float width, float height)
     {
-        Matrix4 mat = Identity;
+        var mat = Identity;
         mat = ScaleAroundOrigin(ref mat, 2 / width, 2 / height, 1);
         mat = Translate(ref mat, -width / 2, -height / 2, 0);
         return mat;
@@ -164,23 +164,23 @@ public struct Matrix4
 
     public static Matrix4 Translate(ref Matrix4 mat, float x, float y, float z)
     {
-        Matrix4 transMat = CreateTranslation(x, y, z);
+        var transMat = CreateTranslation(x, y, z);
         return Multiply(ref mat, ref transMat);
     }
 
     public static Matrix4 RotateAroundZ(ref Matrix4 mat, float angleInDegrees)
     {
-        Matrix4 rotMat = CreateRotationAroundZAxis(angleInDegrees);
+        var rotMat = CreateRotationAroundZAxis(angleInDegrees);
         return Multiply(ref mat, ref rotMat);
     }
     public static Matrix4 RotateAroundPoint(ref Matrix4 mat, float angleInDegrees, Point p) => RotateAroundPoint(ref mat, angleInDegrees, p.X, p.Y);
     public static Matrix4 RotateAroundPoint(ref Matrix4 mat, float angleInDegrees, float x, float y)
     {
-        Matrix4 translate1 = CreateTranslation(x, y, 0);
-        Matrix4 rotate = CreateRotationAroundZAxis(angleInDegrees);
-        Matrix4 translate2 = CreateTranslation(-x, -y, 0);
+        var translate1 = CreateTranslation(x, y, 0);
+        var rotate = CreateRotationAroundZAxis(angleInDegrees);
+        var translate2 = CreateTranslation(-x, -y, 0);
 
-        Matrix4 result = Multiply(ref mat, ref translate1);
+        var result = Multiply(ref mat, ref translate1);
         result = Multiply(ref result, ref rotate);
         result = Multiply(ref result, ref translate2);
 
@@ -189,16 +189,16 @@ public struct Matrix4
 
     public static Matrix4 ScaleAroundOrigin(ref Matrix4 mat, float scaleX, float scaleY, float scaleZ)
     {
-        Matrix4 scaleMat = CreateScale(scaleX, scaleY, scaleZ);
+        var scaleMat = CreateScale(scaleX, scaleY, scaleZ);
         return Multiply(ref mat, ref scaleMat);
     }
     public static Matrix4 ScaleAroundPoint(ref Matrix4 mat, float scaleX, float scaleY, float x, float y)
     {
-        Matrix4 translate1 = CreateTranslation(x, y, 0);
-        Matrix4 scale = CreateScale(scaleX, scaleY, 0);
-        Matrix4 translate2 = CreateTranslation(-x, -y, 0);
+        var translate1 = CreateTranslation(x, y, 0);
+        var scale = CreateScale(scaleX, scaleY, 0);
+        var translate2 = CreateTranslation(-x, -y, 0);
 
-        Matrix4 result = Multiply(ref mat, ref translate1);
+        var result = Multiply(ref mat, ref translate1);
         result = Multiply(ref result, ref scale);
         result = Multiply(ref result, ref translate2);
 

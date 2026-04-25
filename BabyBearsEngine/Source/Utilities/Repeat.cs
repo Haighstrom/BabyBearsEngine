@@ -36,7 +36,7 @@ public static class Repeat
         {
             try
             {
-                TResult result = method();
+                var result = method();
                 return result;
             }
             catch

@@ -37,7 +37,7 @@ public static class CollectionExtensions
         int n = array.GetLength(0);
         int m = array.GetLength(1);
 
-        T[,] newArray = new T[m, n];
+        var newArray = new T[m, n];
 
         for (int i = 0; i < n; ++i)
             for (int j = 0; j < m; ++j)

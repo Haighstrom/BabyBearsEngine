@@ -15,10 +15,10 @@ public class TwoDimensionalArrayConverter : JsonConverterFactory
     public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
     {
         // Non-null: GetElementType() only returns null for non-array types; CanConvert guarantees typeToConvert is a 2D array.
-        Type elementType = typeToConvert.GetElementType()!;
+        var elementType = typeToConvert.GetElementType()!;
 
         // Non-null: CreateInstance throws on failure and only returns null for Nullable<T>; TwoDimensionalArrayConverterInner<T> is a concrete class.
-        JsonConverter converter = (JsonConverter)Activator.CreateInstance(
+        var converter = (JsonConverter)Activator.CreateInstance(
             typeof(TwoDimensionalArrayConverterInner<>).MakeGenericType(elementType))!;
 
         return converter;
@@ -45,7 +45,7 @@ public class TwoDimensionalArrayConverter : JsonConverterFactory
                 var columns = new List<TElement>();
                 while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
                 {
-                    TElement element = JsonSerializer.Deserialize<TElement>(ref reader, options)
+                    var element = JsonSerializer.Deserialize<TElement>(ref reader, options)
                         ?? throw new JsonException("Unexpected null element in 2D array.");
                     columns.Add(element);
                 }
@@ -64,7 +64,7 @@ public class TwoDimensionalArrayConverter : JsonConverterFactory
                 writer.WriteStartArray();
                 for (int j = 0; j < value.GetLength(1); j++)
                 {
-                    TElement element = value[i, j];
+                    var element = value[i, j];
                     JsonSerializer.Serialize(writer, element, options);
                 }
                 writer.WriteEndArray();
@@ -77,7 +77,7 @@ public class TwoDimensionalArrayConverter : JsonConverterFactory
             int rowCount = list.Count;
             int columnCount = list.Max(x => x.Length);
 
-            TElement[,] result = new TElement[rowCount, columnCount];
+            var result = new TElement[rowCount, columnCount];
             for (int i = 0; i < rowCount; i++)
             {
                 var row = list[i];

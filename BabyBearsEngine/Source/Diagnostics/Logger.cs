@@ -9,8 +9,8 @@ public static class Logger
 
     private static ILogger GetLoggerSimple()
     {
-        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
-        ILogger logger = factory.CreateLogger("Program");
+        using var factory = LoggerFactory.Create(builder => builder.AddConsole());
+        var logger = factory.CreateLogger("Program");
         logger.LogInformation("Hello World! Logging is {Description}.", "fun");
 
         var logLocation = Path.Combine(Directory.GetCurrentDirectory(), "log.txt");

@@ -178,7 +178,7 @@ public class BMPTextGraphic : GraphicBase, ITextGraphic
 
         foreach (char c in _text)
         {
-            OpenTK.Mathematics.Box2 source = _fontStruct.CharPositionsNormalised[c];
+            var source = _fontStruct.CharPositionsNormalised[c];
             var w = _fontStruct.CharPositions[c].Size.X * ScaleX;
 
             //vertices.Add(Geometry.QuadToTris(
