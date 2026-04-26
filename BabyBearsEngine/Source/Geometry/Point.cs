@@ -23,7 +23,7 @@ public record struct Point(float X, float Y) : IPosition
     /// The length of this point as a vector.
     /// </summary>
     [XmlIgnore, JsonIgnore]
-    public float Length => (float)Math.Sqrt(LengthSquared);
+    public readonly float Length => (float)Math.Sqrt(LengthSquared);
 
     /// <summary>
     /// The squared length of this point as a vector.
@@ -71,7 +71,7 @@ public record struct Point(float X, float Y) : IPosition
     /// </summary>
     /// <param name="angle">Rotation Angle in Degrees.</param>
     /// <param name="rotationAngleInDegrees"></param>
-    public Point Rotate(float angle) => Rotate(angle, Zero);
+    public readonly Point Rotate(float angle) => Rotate(angle, Zero);
 
     /// <summary>
     /// Returns a new point representing this one rotated around another point.
@@ -99,7 +99,7 @@ public record struct Point(float X, float Y) : IPosition
     /// Returns a new point representing this one scaled by the specified amount.
     /// </summary>
     /// <param name="scale">The amount to scale the x- and y- components by.</param>
-    public Point Scale(float scale) => Scale(scale, scale);
+    public readonly Point Scale(float scale) => Scale(scale, scale);
 
     /// <summary>
     /// Returns a new point representing this one moved by specified amounts.
