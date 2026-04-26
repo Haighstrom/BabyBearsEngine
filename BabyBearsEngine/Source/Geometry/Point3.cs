@@ -1,6 +1,6 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
-namespace BabyBearsEngine.Source.Geometry;
+namespace BabyBearsEngine.Geometry;
 
 /// <summary>
 /// Represents a 3-dimensional point or vector with <c>X</c>, <c>Y</c> and <c>Z</c> components.
@@ -27,7 +27,7 @@ public struct Point3(float x, float y, float z) : IEquatable<Point3>
     /// </summary>
     /// <param name="a">The left-hand operand.</param>
     /// <param name="b">The right-hand operand.</param>
-    /// <returns>The cross product <c>a × b</c>.</returns>
+    /// <returns>The cross product <c>a � b</c>.</returns>
     public static Point3 CrossProduct(Point3 a, Point3 b) =>
         new(
             a.Y * b.Z - a.Z * b.Y,

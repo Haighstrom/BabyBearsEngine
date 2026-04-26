@@ -1,12 +1,13 @@
 ﻿using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
+using Matrix3 = BabyBearsEngine.Geometry.Matrix3;
+using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
+using OpenTK.Mathematics;
 
-namespace BabyBearsEngine.Source.Platform.OpenGL.Rendering;
+namespace BabyBearsEngine.Platform.OpenGL.Rendering;
 
 internal class GraphicRenderer(ITexture texture) : IDisposable
 {
-    private static Vertex[] GetVertices(float w, float h, OpenTK.Mathematics.Color4 colour) =>
+    private static Vertex[] GetVertices(float w, float h, Color4 colour) =>
     [
         new (0, 0, colour, 0, 0),
         new (w, 0, colour, 1, 0),

@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Source.Platform.OpenGL.Buffers;
-using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
+using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Platform.OpenGL.Buffers;
+using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 
-namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
+namespace BabyBearsEngine.Rendering.Graphics.Text;
 
 public sealed class TextImage : GraphicBase, IDisposable
 {

@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Source.Geometry;
+using BabyBearsEngine.Geometry;
 
-namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
+namespace BabyBearsEngine.Rendering.Graphics.Text;
 
 public sealed class BMPTextGraphic : GraphicBase, ITextGraphic
 {

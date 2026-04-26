@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using BabyBearsEngine.OpenGL;
 
-namespace BabyBearsEngine.Source.Platform.OpenGL.Shaders;
+namespace BabyBearsEngine.Platform.OpenGL.Shaders;
 
 internal static class Shaders
 {

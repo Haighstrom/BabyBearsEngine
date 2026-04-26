@@ -1,6 +1,4 @@
-using BabyBearsEngine.Source.Worlds;
-
-namespace BabyBearsEngine.Worlds;
+﻿namespace BabyBearsEngine.Worlds;
 
 public interface ILayered
 {

@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Numerics;
 using BabyBearsEngine.OpenGL;
 using SixLabors.ImageSharp;
@@ -6,7 +6,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using StbTrueTypeSharp;
 using static StbTrueTypeSharp.StbTrueType;
 
-namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
+namespace BabyBearsEngine.Rendering.Graphics.Text;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Instantiated via FontTextureCache.")]
 internal sealed class FontTexture

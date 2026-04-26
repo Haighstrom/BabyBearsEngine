@@ -1,8 +1,8 @@
-﻿using System.IO;
+using System.IO;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 
-namespace BabyBearsEngine.Source.Diagnostics;
+namespace BabyBearsEngine.Diagnostics;
 
 public sealed class FileLogger(string filePath) : ILogger
 {

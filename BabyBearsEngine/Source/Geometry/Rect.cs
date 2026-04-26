@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
 
-namespace BabyBearsEngine.Source.Geometry;
+namespace BabyBearsEngine.Geometry;
 
 /// <summary>
 /// A class to represent a rectangle.

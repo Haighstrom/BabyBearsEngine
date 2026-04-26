@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 
-namespace BabyBearsEngine.Source.Diagnostics;
+namespace BabyBearsEngine.Diagnostics;
 
 public sealed class FileLoggerProvider(string path) : ILoggerProvider
 {

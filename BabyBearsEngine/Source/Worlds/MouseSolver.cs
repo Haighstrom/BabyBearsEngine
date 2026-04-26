@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
-namespace BabyBearsEngine.Source.Worlds;
+namespace BabyBearsEngine.Worlds;
 
 internal static class MouseSolver
 {

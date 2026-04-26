@@ -1,8 +1,8 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
 
-namespace BabyBearsEngine.Source.Geometry;
+namespace BabyBearsEngine.Geometry;
 
 /// <summary>
 /// A standard Point or 2-dimensional Vector.

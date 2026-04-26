@@ -1,8 +1,8 @@
-﻿using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
+using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 
-namespace BabyBearsEngine.Source.Worlds.Cameras;
+namespace BabyBearsEngine.Worlds.Cameras;
 
 /// <summary>
 /// Shader used with the multisample FBO for the MSAA antialiasing pass only

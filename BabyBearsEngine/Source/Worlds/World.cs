@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using BabyBearsEngine.Graphics;
-using BabyBearsEngine.Source.Geometry;
+﻿using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Worlds;
 

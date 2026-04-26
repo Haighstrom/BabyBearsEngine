@@ -1,6 +1,6 @@
-﻿using BabyBearsEngine.Source.Geometry;
+using BabyBearsEngine.Geometry;
 
-namespace BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
+namespace BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 
 internal interface IMVPShader
 {

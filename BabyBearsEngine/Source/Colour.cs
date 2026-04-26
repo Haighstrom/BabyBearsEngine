@@ -1,5 +1,5 @@
 using System.Runtime.InteropServices;
-using BabyBearsEngine.Source.Diagnostics;
+using BabyBearsEngine.Diagnostics;
 
 namespace BabyBearsEngine;
 

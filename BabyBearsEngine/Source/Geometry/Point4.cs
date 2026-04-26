@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
-using OpenTK.Mathematics;
 
-namespace BabyBearsEngine.Source.Geometry;
+namespace BabyBearsEngine.Geometry;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct Point4 : IEquatable<Point4>

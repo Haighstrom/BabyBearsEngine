@@ -1,7 +1,6 @@
 ﻿using BabyBearsEngine.Input;
-using BabyBearsEngine.Worlds;
 
-namespace BabyBearsEngine.Source.Worlds;
+namespace BabyBearsEngine.Worlds;
 
 /// <summary>
 /// Controls mouse interactions for a clickable region, raising events for each

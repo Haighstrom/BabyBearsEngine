@@ -1,6 +1,6 @@
-﻿using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.OpenGL;
 
-namespace BabyBearsEngine.Source.Platform.OpenGL.Buffers;
+namespace BabyBearsEngine.Platform.OpenGL.Buffers;
 
 /// <summary>
 /// A non-MSAA-enabled framebuffer with corresponding texture

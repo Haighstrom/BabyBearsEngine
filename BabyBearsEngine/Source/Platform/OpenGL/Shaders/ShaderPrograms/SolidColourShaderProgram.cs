@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
+﻿using Matrix3 = BabyBearsEngine.Geometry.Matrix3;
+using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.OpenGL;
@@ -23,12 +24,12 @@ public sealed class SolidColourShaderProgram : ShaderProgramBase, IMVPShader
         GL.Uniform2(_windowSizeLocation, new Vector2(width, height));
     }
 
-    public void SetProjectionMatrix(ref Source.Geometry.Matrix3 matrix)
+    public void SetProjectionMatrix(ref Matrix3 matrix)
     {
         throw new NotImplementedException();
     }
 
-    public void SetModelViewMatrix(ref Source.Geometry.Matrix3 matrix)
+    public void SetModelViewMatrix(ref Matrix3 matrix)
     {
         throw new NotImplementedException();
     }

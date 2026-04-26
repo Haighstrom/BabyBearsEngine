@@ -1,6 +1,6 @@
-﻿using System.Linq;
+using System.Linq;
 
-namespace BabyBearsEngine.Source.Geometry;
+namespace BabyBearsEngine.Geometry;
 
 public struct Matrix4
 {

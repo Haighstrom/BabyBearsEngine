@@ -11,4 +11,10 @@
     <ProjectReference Include="..\BabyBearsEngine\BabyBearsEngine.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\Demos\Assets\bear.png" Link="Assets\bear.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -1,7 +1,5 @@
-using System;
-using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Source.Worlds;
+﻿using System;
+using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds.Graphics;
 
 namespace BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;

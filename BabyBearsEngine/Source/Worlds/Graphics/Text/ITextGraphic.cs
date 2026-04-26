@@ -1,7 +1,7 @@
-﻿using BabyBearsEngine.Graphics;
+using BabyBearsEngine.Graphics;
 using OpenTK.Mathematics;
 
-namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
+namespace BabyBearsEngine.Rendering.Graphics.Text;
 
 public interface ITextGraphic : IRenderable
 {

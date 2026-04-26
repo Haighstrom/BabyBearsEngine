@@ -1,6 +1,3 @@
-using BabyBearsEngine;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 namespace BabyBearsEngine.Tests.System;
 
 [TestClass]

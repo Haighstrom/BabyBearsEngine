@@ -1,3 +1,3 @@
-﻿namespace BabyBearsEngine.Source.Platform.OpenGL.Shaders;
+namespace BabyBearsEngine.Platform.OpenGL.Shaders;
 
 public record ShaderReference(string reference);

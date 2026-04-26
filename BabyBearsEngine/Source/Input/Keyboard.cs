@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using BabyBearsEngine.Runtime;
-using BabyBearsEngine.Source.Runtime;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace BabyBearsEngine.Input;

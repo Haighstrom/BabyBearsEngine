@@ -1,8 +1,7 @@
 using System.ComponentModel;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenTK;
-using BabyBearsEngine.Source.GameEngine;
-using BabyBearsEngine.Source.Worlds;
+using BabyBearsEngine.GameEngine;
 using BabyBearsEngine.Worlds;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;

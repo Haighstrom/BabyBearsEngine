@@ -1,8 +1,8 @@
-﻿using BabyBearsEngine.Graphics;
+using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Source.Geometry;
+using BabyBearsEngine.Geometry;
 
-namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
+namespace BabyBearsEngine.Rendering.Graphics.Text;
 
 public sealed class StbTrueTypeTextGraphic(float x, float y, float width, float height, string text) : GraphicBase, IDisposable
 {

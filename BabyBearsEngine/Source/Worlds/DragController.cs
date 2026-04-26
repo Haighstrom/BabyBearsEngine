@@ -1,8 +1,7 @@
-using BabyBearsEngine.Input;
-using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Worlds;
+﻿using BabyBearsEngine.Input;
+using BabyBearsEngine.Geometry;
 
-namespace BabyBearsEngine.Source.Worlds;
+namespace BabyBearsEngine.Worlds;
 
 /// <summary>
 /// Tracks mouse drag interactions for a region, raising events when a drag starts, moves, or stops.

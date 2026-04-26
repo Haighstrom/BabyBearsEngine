@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Drawing;
 using OpenTK.Mathematics;
 
-namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
+namespace BabyBearsEngine.Rendering.Graphics.Text;
 
 internal record class GeneratedFontStruct(Bitmap CharacterSS, int WidestChar, int HighestChar, Dictionary<char, Box2i> CharPositions, Dictionary<char, Box2> CharPositionsNormalised)
 {

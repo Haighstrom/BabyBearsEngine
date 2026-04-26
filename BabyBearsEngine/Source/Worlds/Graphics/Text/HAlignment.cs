@@ -1,4 +1,4 @@
-﻿namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
+namespace BabyBearsEngine.Rendering.Graphics.Text;
 
 /// <summary>
 /// Horizontal typographic alignment

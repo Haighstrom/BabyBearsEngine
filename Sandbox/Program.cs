@@ -9,4 +9,4 @@ var appSettings = new ApplicationSettings()
 };
 
 GameLauncher.Initialise(appSettings);
-GameLauncher.Run(new World());
+GameLauncher.Run(new BabyBearsEngine.Sandbox.ScratchWorld());

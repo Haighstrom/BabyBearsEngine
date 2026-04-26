@@ -1,6 +1,4 @@
-using BabyBearsEngine.Graphics;
-using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Source.Worlds;
+﻿using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Worlds.UI;
 

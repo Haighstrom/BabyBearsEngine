@@ -1,6 +1,4 @@
-﻿using BabyBearsEngine.Worlds;
-
-namespace BabyBearsEngine.Source.Worlds;
+﻿namespace BabyBearsEngine.Worlds;
 
 public abstract class AddableBase : IAddable
 {

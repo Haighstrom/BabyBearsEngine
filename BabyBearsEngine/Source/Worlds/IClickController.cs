@@ -1,4 +1,4 @@
-﻿namespace BabyBearsEngine.Source.Worlds;
+namespace BabyBearsEngine.Worlds;
 
 /// <summary>
 /// Controller interface for mouse interactions with a clickable target.

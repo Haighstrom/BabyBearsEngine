@@ -1,9 +1,8 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BabyBearsEngine.Graphics;
-using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Worlds;
+using BabyBearsEngine.Geometry;
 
-namespace BabyBearsEngine.Source.Worlds;
+namespace BabyBearsEngine.Worlds;
 
 public abstract class ContainerEntity : AddableBase, IEntity, IContainer, ILayered
 {

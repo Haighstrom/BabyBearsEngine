@@ -1,5 +1,5 @@
-﻿using BabyBearsEngine.Runtime;
-using BabyBearsEngine.Source.GameEngine;
+using BabyBearsEngine.Runtime;
+using BabyBearsEngine.GameEngine;
 
 namespace BabyBearsEngine.Platform.OpenTK;
 

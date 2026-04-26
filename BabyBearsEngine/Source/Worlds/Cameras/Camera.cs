@@ -1,9 +1,8 @@
 ﻿using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Source.Diagnostics;
-using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Source.Platform.OpenGL.Buffers;
-using BabyBearsEngine.Source.Worlds;
-using BabyBearsEngine.Source.Worlds.Cameras;
+using BabyBearsEngine.Diagnostics;
+using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Platform.OpenGL.Buffers;
+using BabyBearsEngine.Worlds.Cameras;
 
 namespace BabyBearsEngine.Worlds;
 

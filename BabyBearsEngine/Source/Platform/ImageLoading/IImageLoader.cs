@@ -1,4 +1,4 @@
-﻿namespace BabyBearsEngine.Source.Platform.ImageLoading;
+namespace BabyBearsEngine.Platform.ImageLoading;
 
 internal interface IImageLoader
 {

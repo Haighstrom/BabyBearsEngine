@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BabyBearsEngine.Source.Geometry;
+﻿namespace BabyBearsEngine.Geometry;
 
 /// <summary>
 /// Type that exposes positional X and Y coordinates

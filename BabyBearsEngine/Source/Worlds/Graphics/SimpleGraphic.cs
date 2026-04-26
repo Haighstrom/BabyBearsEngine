@@ -1,5 +1,5 @@
-﻿using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Source.Geometry;
+using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Graphics;
 

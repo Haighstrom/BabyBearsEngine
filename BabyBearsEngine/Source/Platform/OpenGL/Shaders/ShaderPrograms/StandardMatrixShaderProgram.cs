@@ -1,5 +1,5 @@
-﻿using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Source.Platform.OpenGL.Shaders.ShaderPrograms;
+using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 
 namespace BabyBearsEngine.OpenGL;
 

@@ -1,6 +1,6 @@
-﻿using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Source.Geometry;
-using BabyBearsEngine.Source.Platform.OpenGL.Rendering;
+using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Platform.OpenGL.Rendering;
 
 namespace BabyBearsEngine.Graphics;
 

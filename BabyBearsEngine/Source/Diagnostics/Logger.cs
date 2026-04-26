@@ -1,7 +1,7 @@
-﻿using System.IO;
+using System.IO;
 using Microsoft.Extensions.Logging;
 
-namespace BabyBearsEngine.Source.Diagnostics;
+namespace BabyBearsEngine.Diagnostics;
 
 public static class Logger
 {

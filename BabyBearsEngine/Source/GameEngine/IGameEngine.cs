@@ -1,6 +1,6 @@
-﻿using BabyBearsEngine.Worlds;
+using BabyBearsEngine.Worlds;
 
-namespace BabyBearsEngine.Source.GameEngine;
+namespace BabyBearsEngine.GameEngine;
 
 public interface IGameEngine
 {

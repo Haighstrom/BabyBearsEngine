@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
-namespace BabyBearsEngine.Source.Diagnostics;
+namespace BabyBearsEngine.Diagnostics;
 
 public static class FileLoggerExtensions
 {

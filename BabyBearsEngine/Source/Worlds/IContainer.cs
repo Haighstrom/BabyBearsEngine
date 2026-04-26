@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using BabyBearsEngine.Graphics;
-
-namespace BabyBearsEngine.Worlds;
+﻿namespace BabyBearsEngine.Worlds;
 
 public interface IContainer
 {

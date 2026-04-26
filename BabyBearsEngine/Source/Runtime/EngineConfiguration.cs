@@ -1,8 +1,7 @@
 ﻿using BabyBearsEngine.Input;
 using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Runtime;
 
-namespace BabyBearsEngine.Source.Runtime;
+namespace BabyBearsEngine.Runtime;
 
 public static class EngineConfiguration
 {

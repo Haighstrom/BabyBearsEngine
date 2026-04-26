@@ -1,9 +1,9 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
 using BabyBearsEngine.IO;
 
-namespace BabyBearsEngine.Source.Rendering.Graphics.Text;
+namespace BabyBearsEngine.Rendering.Graphics.Text;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
 internal class FontLoader() : IFontLoader

@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-namespace BabyBearsEngine.Worlds;
+﻿namespace BabyBearsEngine.Worlds;
 
 public interface IWorld : IContainer
 {
