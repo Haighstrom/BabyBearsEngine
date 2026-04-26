@@ -46,7 +46,7 @@ public record struct Point(float X, float Y) : IPosition
     /// <summary>
     /// Returns a new point which has the same direction of this point but clamps its magnitude between the values specified (inclusive)
     /// </summary>
-    public Point Clamp(float minLength, float maxLength)
+    public readonly Point Clamp(float minLength, float maxLength)
     {
         Point point = new(X, Y);
 
