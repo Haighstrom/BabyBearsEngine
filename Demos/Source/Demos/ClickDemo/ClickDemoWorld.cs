@@ -1,6 +1,8 @@
+using BabyBearsEngine.Demos.Source;
+
 namespace BabyBearsEngine.Demos.Source.Demos.ClickDemo;
 
-internal class ClickDemoWorld : World
+internal class ClickDemoWorld : DemoWorld
 {
     public ClickDemoWorld()
     {
@@ -8,6 +10,6 @@ internal class ClickDemoWorld : World
         Add(new Button(50, 50, 100, 100, Colour.Green));
         Add(new Button(100, 100, 100, 100, Colour.Fuchsia));
 
-        Add(new DraggablePanel(300,50,100,100, Colour.Orange));
+        Add(new DraggablePanel(300, 50, 100, 100, Colour.Orange));
     }
 }

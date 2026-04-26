@@ -146,9 +146,6 @@ dotnet_style_prefer_inferred_tuple_names = true:suggestion
 # IDE0160: Convert to file-scoped namespace
 csharp_style_namespace_declarations = file_scoped:warning
 
-# Prefer Brances
-csharp_prefer_braces = true:suggestion
-
 # Newline settings
 csharp_new_line_before_open_brace = all
 csharp_new_line_before_else = true
@@ -174,7 +171,7 @@ csharp_style_allow_blank_line_after_token_in_conditional_expression_experimental
 csharp_style_allow_blank_line_after_token_in_arrow_expression_clause_experimental = false
 
 # Prefer "var" everywhere
-csharp_style_var_for_built_in_types = true:none
+csharp_style_var_for_built_in_types = false:none
 csharp_style_var_when_type_is_apparent = true:suggestion
 csharp_style_var_elsewhere = true:suggestion
 
