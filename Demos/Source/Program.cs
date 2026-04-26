@@ -1,4 +1,10 @@
-﻿using BabyBearsEngine.Demos.Source.Menu;
+using System;
+using BabyBearsEngine.Demos.Source;
+using BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
+using BabyBearsEngine.Demos.Source.Demos.ClickDemo;
+using BabyBearsEngine.Demos.Source.Demos.TextDemo;
+using BabyBearsEngine.Demos.Source.Menu;
+using Microsoft.Extensions.DependencyInjection;
 
 var appSettings = new ApplicationSettings()
 {
@@ -10,9 +16,15 @@ var appSettings = new ApplicationSettings()
     }
 };
 
-//option 1
-//GameLauncher.Run(appSettings, () => new MenuWorld());
-
-//option 2
 GameLauncher.Initialise(appSettings);
-GameLauncher.Run(new MenuWorld());
+
+var services = new ServiceCollection();
+services.AddSingleton<Func<World>>(sp => () => new MenuWorld(sp.GetServices<DemoWorld>()));
+services.AddTransient<DemoWorld, BearSpinnerWorld>();
+services.AddTransient<DemoWorld, ClickDemoWorld>();
+services.AddTransient<DemoWorld, TextDemoWorld>();
+
+var provider = services.BuildServiceProvider();
+var demos = provider.GetServices<DemoWorld>();
+
+GameLauncher.Run(new MenuWorld(demos));

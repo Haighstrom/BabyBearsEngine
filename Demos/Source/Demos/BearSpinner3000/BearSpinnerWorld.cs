@@ -5,7 +5,9 @@ namespace BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
 
 internal class BearSpinnerWorld : DemoWorld
 {
-    public BearSpinnerWorld()
+    public override string Name => "Bear Spinner 3000";
+
+    public BearSpinnerWorld(Func<World> menuWorldFactory) : base(menuWorldFactory)
     {
         Window.Resize += Window_Resize;
         AddBears();

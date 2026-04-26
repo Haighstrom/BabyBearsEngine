@@ -1,33 +1,33 @@
 using System;
-using BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
-using BabyBearsEngine.Demos.Source.Demos.ClickDemo;
-using BabyBearsEngine.Demos.Source.Demos.TextDemo;
+using System.Collections.Generic;
+using BabyBearsEngine.Demos.Source;
 
 namespace BabyBearsEngine.Demos.Source.Menu;
 
 internal class MenuWorld : World
 {
+    private const int BottomMargin = 20;
+    private const int ButtonHeight = 60;
+    private const int ButtonWidth = 120;
+    private const int HorizontalGap = 10;
     private const int StartX = 20;
     private const int StartY = 20;
-    private const int ButtonWidth = 120;
-    private const int ButtonHeight = 60;
-    private const int HorizontalGap = 10;
     private const int VerticalGap = 5;
-    private const int BottomMargin = 20;
 
     private int _buttonCount = 0;
 
-    public MenuWorld()
+    public MenuWorld(IEnumerable<DemoWorld> demoWorlds)
     {
-        AddDemoButton((x, y) => new BearSpinnerButton(x, y));
-        AddDemoButton((x, y) => new TextDemoButton(x, y));
-        AddDemoButton((x, y) => new ClickDemoButton(x, y));
+        foreach (var world in demoWorlds)
+        {
+            AddDemoButton(world);
+        }
     }
 
-    private void AddDemoButton(Func<int, int, Button> factory)
+    private void AddDemoButton(DemoWorld world)
     {
         var (x, y) = NextButtonPosition();
-        Add(factory(x, y));
+        Add(new DemoButton(x, y, world));
         _buttonCount++;
     }
 
