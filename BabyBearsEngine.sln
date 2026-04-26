@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.10.35004.147
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11716.220 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine", "BabyBearsEngine\BabyBearsEngine.csproj", "{E6320F4E-6F4C-45F8-B23C-8E7FBCD432D8}"
 EndProject
@@ -14,6 +14,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine.Sandbox", "Sandbox\BabyBearsEngine.Sandbox.csproj", "{2F184CEF-E86F-4A1C-AC79-979324AA6283}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine.Benchmarks", "Benchmarks\BabyBearsEngine.Benchmarks.csproj", "{95D06069-AE46-4363-A05A-12861FF4A5A1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CE1F152F-629D-46F4-ADC6-AF45A617316D}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
