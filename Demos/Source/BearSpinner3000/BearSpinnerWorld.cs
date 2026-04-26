@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BabyBearsEngine.Tests.System.Source.BearSpinner3000;
+namespace BabyBearsEngine.Demos.Source.BearSpinner3000;
 
 internal class BearSpinnerWorld : World
 {

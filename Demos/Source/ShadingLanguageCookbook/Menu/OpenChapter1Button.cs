@@ -1,6 +1,6 @@
-﻿using BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
+﻿using BabyBearsEngine.Demos.Source.ShadingLanguageCookbook.Chapter1;
 
-namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;
+namespace BabyBearsEngine.Demos.Source.ShadingLanguageCookbook.Menu;
 
 internal class OpenChapter1Button() 
     : Button(10, 10, 80, 40, Colour.Blue, "Chapter 1")

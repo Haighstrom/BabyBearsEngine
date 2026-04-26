@@ -1,6 +1,6 @@
 ﻿using BabyBearsEngine.OpenGL;
 
-namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Chapter1;
+namespace BabyBearsEngine.Demos.Source.ShadingLanguageCookbook.Chapter1;
 
 internal class BasicShaderProgram : ShaderProgramBase
 {

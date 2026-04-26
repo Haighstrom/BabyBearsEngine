@@ -1,10 +1,10 @@
 ﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Worlds;
-using BabyBearsEngine.Tests.System.Source.BearSpinner3000;
-using BabyBearsEngine.Tests.System.Source.TextTest;
+using BabyBearsEngine.Demos.Source.BearSpinner3000;
+using BabyBearsEngine.Demos.Source.TextTest;
 using BabyBearsEngine.Worlds.Graphics;
 
-namespace BabyBearsEngine.Tests.System.Source.ShadingLanguageCookbook.Menu;
+namespace BabyBearsEngine.Demos.Source.ShadingLanguageCookbook.Menu;
 
 internal class MenuWorld : World
 {

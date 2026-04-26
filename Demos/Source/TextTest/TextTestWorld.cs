@@ -1,4 +1,4 @@
-﻿namespace BabyBearsEngine.Tests.System.Source.TextTest;
+﻿namespace BabyBearsEngine.Demos.Source.TextTest;
 
 internal class TextTestWorld : World
 {

@@ -1,4 +1,4 @@
-﻿namespace BabyBearsEngine.Tests.System.Source.TextTest;
+﻿namespace BabyBearsEngine.Demos.Source.TextTest;
 
 internal class TextTestButton(int x, int y)
     : Button(x, y, 120, 60, Colour.White, "Text Test")

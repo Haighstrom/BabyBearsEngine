@@ -1,4 +1,4 @@
-﻿namespace BabyBearsEngine.Tests.System.Source.ClickTest;
+﻿namespace BabyBearsEngine.Demos.Source.ClickTest;
 
 internal class ClickTestWorld : World
 {

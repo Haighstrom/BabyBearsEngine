@@ -5,7 +5,7 @@ VisualStudioVersion = 17.10.35004.147
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine", "BabyBearsEngine\BabyBearsEngine.csproj", "{E6320F4E-6F4C-45F8-B23C-8E7FBCD432D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine.Tests.System", "Tests\System\BabyBearsEngine.Tests.System.csproj", "{B45E41D2-DE23-4A65-AF62-A913578C694C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine.Demos", "Demos\BabyBearsEngine.Demos.csproj", "{B45E41D2-DE23-4A65-AF62-A913578C694C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine.Tests.Unit", "Tests\Unit\BabyBearsEngine.Tests.Unit.csproj", "{65C6C13E-EC50-4C47-B197-AA8ECD41A5FA}"
 EndProject

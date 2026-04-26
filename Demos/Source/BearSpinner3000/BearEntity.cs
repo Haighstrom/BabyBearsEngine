@@ -4,7 +4,7 @@ using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Worlds;
 using BabyBearsEngine.Worlds.Graphics;
 
-namespace BabyBearsEngine.Tests.System.Source.BearSpinner3000;
+namespace BabyBearsEngine.Demos.Source.BearSpinner3000;
 
 internal class BearEntity(int startX, int startY) : AddableBase, IEntity
 {
