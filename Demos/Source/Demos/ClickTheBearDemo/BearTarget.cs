@@ -10,14 +10,17 @@ internal class BearTarget : Entity
 
     private readonly Image _image;
     private double _lifeRemaining = LifeSpan;
-    private bool _done;
+    private bool _done = false;
 
     public event EventHandler? BearClicked;
     public event EventHandler? BearExpired;
 
     public BearTarget(int x, int y) : base(x, y, 60, 60, clickable: true)
     {
-        _image = new Image(Textures.CreateFromFile("Assets/SpinnableBear.png"), 0, 0, 60, 60);
+        _image = new Image(Textures.CreateFromFile("Assets/SpinnableBear.png"), 0, 0, 60, 60)
+        {
+            Colour = ColourTools.RandSystemColour()
+        };
         Add(_image);
     }
 
