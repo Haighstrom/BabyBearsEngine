@@ -116,6 +116,7 @@ internal sealed class OpenTKWindowAdapter(OpenTKGameEngine engine) : IWindow
     }
 
     public void Centre() => engine.CenterWindow();
+    
     public void Close()
     {
         engine._programmaticClose = true;

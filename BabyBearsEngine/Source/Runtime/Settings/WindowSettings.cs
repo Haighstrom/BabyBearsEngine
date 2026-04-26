@@ -98,6 +98,11 @@ public record class WindowSettings()
     public string Title { get; set; } = "";
 
     /// <summary>
+    /// Whether to enforce that the window is created on the main thread. Set to false for test environments.
+    /// </summary>
+    public bool CheckForMainThread { get; set; } = true;
+
+    /// <summary>
     /// The desired Width of the window client
     /// </summary>
     public int Width { get; set; } = 400;

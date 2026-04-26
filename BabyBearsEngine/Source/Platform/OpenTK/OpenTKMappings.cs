@@ -12,20 +12,24 @@ internal static class OpenTkMappings
         UpdateFrequency = settings.TargetFramesPerSecond
     };
 
-    public static NativeWindowSettings ToOpenTK(this WindowSettings settings) => new()
+    public static NativeWindowSettings ToOpenTK(this WindowSettings settings)
     {
-        ClientSize = (settings.Width, settings.Height),
-        Title = settings.Title,
-        WindowBorder = settings.Border,
-        WindowState = settings.State,
-        // null lets GLFW choose position; CenterWindow() is called in OnLoad when Centre = true
-        Location = settings.Centre ? null : new Vector2i(settings.X, settings.Y),
-        Icon = settings.Icon,
-        MinimumClientSize = settings.MinClientSize.IsEmpty ? null : new Vector2i(settings.MinClientSize.X, settings.MinClientSize.Y),
-        MaximumClientSize = settings.MaxClientSize.IsEmpty ? null : new Vector2i(settings.MaxClientSize.X, settings.MaxClientSize.Y),
-        APIVersion = new Version(settings.OpenGLVersion.major, settings.OpenGLVersion.minor),
-        Vsync = settings.VSync ? VSyncMode.On : VSyncMode.Off,
-    };
+        GLFWProvider.CheckForMainThread = settings.CheckForMainThread;
+        return new NativeWindowSettings
+        {
+            ClientSize = (settings.Width, settings.Height),
+            Title = settings.Title,
+            WindowBorder = settings.Border,
+            WindowState = settings.State,
+            // null lets GLFW choose position; CenterWindow() is called in OnLoad when Centre = true
+            Location = settings.Centre ? null : new Vector2i(settings.X, settings.Y),
+            Icon = settings.Icon,
+            MinimumClientSize = settings.MinClientSize.IsEmpty ? null : new Vector2i(settings.MinClientSize.X, settings.MinClientSize.Y),
+            MaximumClientSize = settings.MaxClientSize.IsEmpty ? null : new Vector2i(settings.MaxClientSize.X, settings.MaxClientSize.Y),
+            APIVersion = new Version(settings.OpenGLVersion.major, settings.OpenGLVersion.minor),
+            Vsync = settings.VSync ? VSyncMode.On : VSyncMode.Off,
+        };
+    }
 
     public static CursorState ToCursorState(this WindowSettings settings)
     {
