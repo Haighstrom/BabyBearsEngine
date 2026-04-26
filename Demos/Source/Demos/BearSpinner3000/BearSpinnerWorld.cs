@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace BabyBearsEngine.Demos.Source.BearSpinner3000;
+namespace BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
 
 internal class BearSpinnerWorld : World
 {

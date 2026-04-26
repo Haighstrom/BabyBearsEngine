@@ -1,6 +1,6 @@
-﻿namespace BabyBearsEngine.Demos.Source.BearSpinner3000;
+namespace BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
 
-internal class BearSpinnerButton(int x, int y) 
+internal class BearSpinnerButton(int x, int y)
     : Button(x, y, 120, 60, Colour.White, "Bear Spinner 3000")
 {
     protected override void OnLeftReleased()

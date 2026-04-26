@@ -1,17 +1,17 @@
-﻿using System;
+using System;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Geometry;
 using BabyBearsEngine.Source.Worlds;
 using BabyBearsEngine.Worlds.Graphics;
 
-namespace BabyBearsEngine.Demos.Source.BearSpinner3000;
+namespace BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
 
 internal class BearEntity(int startX, int startY) : AddableBase, IEntity
 {
-    private readonly Image _graphic = new(Textures.CreateFromFile("Assets/SpinnableBear.png"), startX, startY, 60, 80) 
-    { 
-        Colour = ColourTools.RandSystemColour(), 
-        Angle = Randomisation.Rand(360) 
+    private readonly Image _graphic = new(Textures.CreateFromFile("Assets/SpinnableBear.png"), startX, startY, 60, 80)
+    {
+        Colour = ColourTools.RandSystemColour(),
+        Angle = Randomisation.Rand(360)
     };
     private readonly float _rotateSpeed = 10 * Randomisation.RandF(-10, 10);
     private readonly float _swaySpeed = Randomisation.RandF(-4, 4);

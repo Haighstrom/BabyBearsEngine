@@ -1,4 +1,4 @@
-﻿namespace BabyBearsEngine.Demos.Source.ShadingLanguageCookbook.Menu;
+namespace BabyBearsEngine.Demos.Source.Menu;
 
 internal class ReturnToMainMenuButton()
     : Button(10, 10, 80, 40, Colour.Yellow, "Return")

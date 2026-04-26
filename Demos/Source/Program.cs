@@ -1,4 +1,4 @@
-﻿using BabyBearsEngine.Demos.Source.ShadingLanguageCookbook.Menu;
+﻿using BabyBearsEngine.Demos.Source.Menu;
 
 var appSettings = new ApplicationSettings()
 {

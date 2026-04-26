@@ -1,10 +1,10 @@
-﻿using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Source.Worlds;
-using BabyBearsEngine.Demos.Source.BearSpinner3000;
-using BabyBearsEngine.Demos.Source.TextTest;
+using BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
+using BabyBearsEngine.Demos.Source.Demos.TextDemo;
 using BabyBearsEngine.Worlds.Graphics;
 
-namespace BabyBearsEngine.Demos.Source.ShadingLanguageCookbook.Menu;
+namespace BabyBearsEngine.Demos.Source.Menu;
 
 internal class MenuWorld : World
 {
@@ -13,7 +13,7 @@ internal class MenuWorld : World
         var msaa = MsaaSamples.X2;
 
         Add(new BearSpinnerButton(20, 20));
-        Add(new TextTestButton(20, 85));
+        Add(new TextDemoButton(20, 85));
 
         var texture = Textures.CreateFromFile("Assets/bear.png");
 
