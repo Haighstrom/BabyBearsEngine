@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
 
@@ -29,7 +29,7 @@ public record struct Point(float X, float Y) : IPosition
     /// The squared length of this point as a vector.
     /// </summary>
     [XmlIgnore, JsonIgnore]
-    public float LengthSquared => X * X + Y * Y;
+    public readonly float LengthSquared => X * X + Y * Y;
 
     /// <summary>
     /// Returns a new point representing the unit normal of this point as a vector.
@@ -41,7 +41,7 @@ public record struct Point(float X, float Y) : IPosition
     /// Returns a new point representing a vector of equal magnitude to this one at a right angle to this one.
     /// </summary>
     [XmlIgnore, JsonIgnore]
-    public Point Perpendicular => new(-Y, X);
+    public readonly Point Perpendicular => new(-Y, X);
 
     /// <summary>
     /// Returns a new point which has the same direction of this point but clamps its magnitude between the values specified (inclusive)
@@ -61,7 +61,7 @@ public record struct Point(float X, float Y) : IPosition
     /// <summary>
     /// Returns the dot (scalar) product with another point.
     /// </summary>
-    public float DotProduct(Point other)
+    public readonly float DotProduct(Point other)
     {
         return X * other.X + Y * other.Y;
     }
@@ -78,7 +78,7 @@ public record struct Point(float X, float Y) : IPosition
     /// </summary>
     /// <param name="angle">Rotation Angle in Degrees.</param>
     /// <param name="centre">The rotation centre.</param>
-    public Point Rotate(float angle, Point centre)
+    public readonly Point Rotate(float angle, Point centre)
     {
         var angleRadians = angle * RadianConversion;
 
@@ -93,7 +93,7 @@ public record struct Point(float X, float Y) : IPosition
     /// </summary>
     /// <param name="xScale">The amount to scale the x-component by.</param>
     /// <param name="yScale">The amount to scale the x-component by.</param>
-    public Point Scale(float xScale, float yScale) => new(X * xScale, Y * yScale);
+    public readonly Point Scale(float xScale, float yScale) => new(X * xScale, Y * yScale);
 
     /// <summary>
     /// Returns a new point representing this one scaled by the specified amount.
@@ -107,14 +107,14 @@ public record struct Point(float X, float Y) : IPosition
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    public Point Shift(float x, float y) => new(X + x, Y + y);
+    public readonly Point Shift(float x, float y) => new(X + x, Y + y);
 
     /// <summary>
     /// Return a Rect with Width and Height based on this Point's X and Y.
     /// </summary>
-    public Rect ToRect() => new(X, Y);
+    public readonly Rect ToRect() => new(X, Y);
 
-    public bool Equals(IPosition? other)
+    public readonly bool Equals(IPosition? other)
     {
         if (other is null)
             return false;
@@ -134,5 +134,5 @@ public record struct Point(float X, float Y) : IPosition
 
     public static Point operator -(Point p) => new(-p.X, -p.Y);
 
-    public override string ToString() => $"(X:{X},Y:{Y})";
+    public override readonly string ToString() => $"(X:{X},Y:{Y})";
 }
