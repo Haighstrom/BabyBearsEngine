@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine.Demos", "De
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine.Tests.Unit", "Tests\Unit\BabyBearsEngine.Tests.Unit.csproj", "{65C6C13E-EC50-4C47-B197-AA8ECD41A5FA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine.Tests.System", "Tests\System\BabyBearsEngine.Tests.System.csproj", "{8318191A-3C73-4006-B66D-5AF05886EA04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabyBearsEngine.Sandbox", "Sandbox\BabyBearsEngine.Sandbox.csproj", "{2F184CEF-E86F-4A1C-AC79-979324AA6283}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{65C6C13E-EC50-4C47-B197-AA8ECD41A5FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65C6C13E-EC50-4C47-B197-AA8ECD41A5FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{65C6C13E-EC50-4C47-B197-AA8ECD41A5FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8318191A-3C73-4006-B66D-5AF05886EA04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8318191A-3C73-4006-B66D-5AF05886EA04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8318191A-3C73-4006-B66D-5AF05886EA04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8318191A-3C73-4006-B66D-5AF05886EA04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F184CEF-E86F-4A1C-AC79-979324AA6283}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F184CEF-E86F-4A1C-AC79-979324AA6283}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F184CEF-E86F-4A1C-AC79-979324AA6283}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F184CEF-E86F-4A1C-AC79-979324AA6283}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
