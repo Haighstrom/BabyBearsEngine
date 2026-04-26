@@ -7,7 +7,6 @@ var appSettings = new ApplicationSettings()
         Width = 800,
         Height = 600,
         Title = "Bears",
-        CloseOnXButton = false,
     }
 };
 
@@ -16,4 +15,4 @@ var appSettings = new ApplicationSettings()
 
 //option 2
 GameLauncher.Initialise(appSettings);
-GameLauncher.Run(new MenuWorld());;
+GameLauncher.Run(new MenuWorld());

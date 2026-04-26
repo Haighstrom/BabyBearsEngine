@@ -8,7 +8,5 @@ internal class BearSpinnerButton(int x, int y)
         base.OnLeftReleased();
 
         Engine.ChangeWorld(new BearSpinnerWorld());
-
-        Window.Close();
     }
 }
