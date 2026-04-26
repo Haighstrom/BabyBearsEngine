@@ -114,13 +114,7 @@ public record struct Point(float X, float Y) : IPosition
     /// </summary>
     public readonly Rect ToRect() => new(X, Y);
 
-    public readonly bool Equals(IPosition? other)
-    {
-        if (other is null)
-            return false;
-        else
-            return X == other.X && Y == other.Y;
-    }
+    public readonly bool Equals(IPosition? other) => other is not null && X == other.X && Y == other.Y;
 
     public static Point operator +(Point p1, Point p2) => new(p1.X + p2.X, p1.Y + p2.Y);
 
