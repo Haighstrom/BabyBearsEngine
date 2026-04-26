@@ -43,10 +43,10 @@ internal sealed class OpenTKWindowAdapter(OpenTKGameEngine engine) : IWindow
         }
     }
 
-    public bool ExitOnClose
+    public bool CloseOnXButton
     {
-        get => engine.ExitOnClose;
-        set => engine.ExitOnClose = value;
+        get => engine.CloseOnXButton;
+        set => engine.CloseOnXButton = value;
     }
 
     public int Height => engine.ClientSize.Y;
@@ -116,4 +116,9 @@ internal sealed class OpenTKWindowAdapter(OpenTKGameEngine engine) : IWindow
     }
 
     public void Centre() => engine.CenterWindow();
+    public void Close()
+    {
+        engine._programmaticClose = true;
+        engine.Close();
+    }
 }

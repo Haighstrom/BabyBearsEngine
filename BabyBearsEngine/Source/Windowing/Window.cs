@@ -13,7 +13,7 @@ public static class Window
     public static bool CursorLockedToWindow { get => Implementation.CursorLockedToWindow; set => Implementation.CursorLockedToWindow = value; }
     public static CursorShape Cursor { get => Implementation.Cursor; set => Implementation.Cursor = value; }
     public static bool CursorVisible { get => Implementation.CursorVisible; set => Implementation.CursorVisible = value; }
-    public static bool ExitOnClose { get => Implementation.ExitOnClose; set => Implementation.ExitOnClose = value; }
+    public static bool CloseOnXButton { get => Implementation.CloseOnXButton; set => Implementation.CloseOnXButton = value; }
     public static int Height => Implementation.Height;
     public static WindowIcon Icon { get => Implementation.Icon; set => Implementation.Icon = value; }
     public static Point MaxClientSize { get => Implementation.MaxClientSize; set => Implementation.MaxClientSize = value; }
@@ -32,4 +32,5 @@ public static class Window
     }
 
     public static void Centre() => Implementation.Centre();
+    public static void Close() => Implementation.Close();
 }

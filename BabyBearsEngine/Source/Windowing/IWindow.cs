@@ -10,7 +10,7 @@ public interface IWindow
     bool CursorLockedToWindow { get; set; }
     CursorShape Cursor { get; set; }
     bool CursorVisible { get; set; }
-    bool ExitOnClose { get; set; }
+    bool CloseOnXButton { get; set; }
     int Height { get; }
     WindowIcon Icon { get; set; }
     Point MaxClientSize { get; set; }
@@ -25,4 +25,5 @@ public interface IWindow
     event Action<ResizeEventArgs>? Resize;
 
     void Centre();
+    void Close();
 }

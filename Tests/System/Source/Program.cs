@@ -6,7 +6,8 @@ var appSettings = new ApplicationSettings()
     {
         Width = 800,
         Height = 600,
-        Title = "Bears"
+        Title = "Bears",
+        CloseOnXButton = false,
     }
 };
 

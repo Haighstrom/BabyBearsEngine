@@ -13,9 +13,10 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
     : GameWindow(appSettings.GameLoopSettings.ToOpenTK(), appSettings.WindowSettings.ToOpenTK()), IWorldSwitcher, IGameEngine
 {
     private Func<IWorld>? _pendingWorldFactory;
+    internal bool _programmaticClose;
     private IWorld _world = new World();
 
-    public bool ExitOnClose { get; set; } = appSettings.WindowSettings.ExitOnClose;
+    public bool CloseOnXButton { get; set; } = appSettings.WindowSettings.CloseOnXButton;
 
     private void ApplyPendingWorldChangeIfAny()
     {
@@ -35,10 +36,12 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
 
     protected override void OnClosing(CancelEventArgs e)
     {
-        if (!ExitOnClose)
+        if (!CloseOnXButton && !_programmaticClose)
         {
             e.Cancel = true;
         }
+
+        _programmaticClose = false;
 
         base.OnClosing(e);
     }

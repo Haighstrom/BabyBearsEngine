@@ -38,11 +38,10 @@ public record class WindowSettings()
     public bool CursorVisible { get; set; } = true;
 
     /// <summary>
-    /// Whether when the window starts to close (e.g. X pressed, Close() called) the window will be destroyed. True by default.
-    /// Change this to false to allow custom behaviour when closing the window (e.g. popup saying there are unsaved changes).
-    /// Use Window.Exit to finally destroy the window, and hook onto the Window.Closing event to replace the default Close() functionality.
+    /// Whether pressing X on the title bar closes the window. Defaults to true.
+    /// Set to false to suppress the X button — use <c>Window.Close()</c> to close programmatically instead.
     /// </summary>
-    public bool ExitOnClose { get; set; } = true;
+    public bool CloseOnXButton { get; set; } = true;
 
     /// <summary>
     /// The desired Height of the window client
