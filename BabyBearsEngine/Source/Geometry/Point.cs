@@ -35,7 +35,7 @@ public record struct Point(float X, float Y) : IPosition
     /// Returns a new point representing the unit normal of this point as a vector.
     /// </summary>
     [XmlIgnore, JsonIgnore]
-    public Point Normal => (X == 0 && Y == 0) ? new Point() : new Point(X / Length, Y / Length);
+    public readonly Point Normal => (X == 0 && Y == 0) ? new Point() : new Point(X / Length, Y / Length);
 
     /// <summary>
     /// Returns a new point representing a vector of equal magnitude to this one at a right angle to this one.
