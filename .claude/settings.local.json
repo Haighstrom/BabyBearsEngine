@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(dotnet build *)",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(dotnet fsi *)",
+      "Bash(powershell -Command ' *)",
+      "PowerShell($dll = \\(Get-ChildItem -Recurse -Filter 'OpenTK.Windowing.Desktop.dll' 'C:\\\\Users\\\\simon\\\\.nuget\\\\packages\\\\opentk.windowing.desktop' | Select-Object -First 1\\).FullName; Write-Host \"DLL: $dll\")",
+      "PowerShell($dll = \\(Get-ChildItem -Recurse -Filter 'OpenTK.Windowing.Desktop.dll' 'C:\\\\Users\\\\simon\\\\.nuget\\\\packages\\\\opentk.windowing.desktop' | Sort-Object -Descending { $_.FullName } | Select-Object -First 1\\).FullName; Write-Host \"DLL: $dll\"; $asm = [System.Reflection.Assembly]::LoadFrom\\($dll\\); $t = $asm.GetType\\('OpenTK.Windowing.Desktop.NativeWindow'\\); if \\($t\\) { $t.GetProperties\\(\\) | Where-Object { $_.Name -match 'ize|Min|Max|Client' } | ForEach-Object { \"$\\($_.Name\\) : $\\($_.PropertyType.Name\\)\" } } else { \"Type not found\" })",
+      "PowerShell($dll = 'C:\\\\Users\\\\simon\\\\.nuget\\\\packages\\\\opentk.windowing.desktop\\\\4.9.4\\\\lib\\\\net8.0\\\\OpenTK.Windowing.Desktop.dll'; if \\(Test-Path $dll\\) { $asm = [System.Reflection.Assembly]::LoadFrom\\($dll\\); $t = $asm.GetType\\('OpenTK.Windowing.Desktop.NativeWindow'\\); if \\($t\\) { $t.GetProperties\\(\\) | Where-Object { $_.Name -match 'ize|Min|Max|Client' } | ForEach-Object { \"$\\($_.Name\\) : $\\($_.PropertyType.Name\\)\" } } else { \"Type not found\" } } else { \"DLL not found\" })",
+      "PowerShell($dll = 'C:\\\\Users\\\\simon\\\\.nuget\\\\packages\\\\opentk.windowing.desktop\\\\4.9.4\\\\lib\\\\netcoreapp3.1\\\\OpenTK.Windowing.Desktop.dll'; $asm = [System.Reflection.Assembly]::LoadFrom\\($dll\\); $t = $asm.GetType\\('OpenTK.Windowing.Desktop.NativeWindow'\\); if \\($t\\) { $t.GetProperties\\(\\) | Where-Object { $_.Name -match 'ize|Min|Max|Client|Loc|Bord|State|Title|Cursor|VSync|Icon' } | ForEach-Object { \"$\\($_.Name\\) : $\\($_.PropertyType.FullName\\)\" } } else { \"Type not found\" })",
+      "PowerShell($dll = 'C:\\\\Users\\\\simon\\\\.nuget\\\\packages\\\\opentk.windowing.desktop\\\\4.9.4\\\\lib\\\\netcoreapp3.1\\\\OpenTK.Windowing.Desktop.dll'; $asm = [System.Reflection.Assembly]::LoadFrom\\($dll\\); $asm.GetTypes\\(\\) | ForEach-Object { $_.FullName } | Select-Object -First 20)"
     ]
   }
 }

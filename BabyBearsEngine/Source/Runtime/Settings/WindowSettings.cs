@@ -2,7 +2,6 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Common.Input;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace BabyBearsEngine;
 
@@ -26,7 +25,7 @@ public record class WindowSettings()
     /// <summary>
     /// The cursor that should be used while the mouse is over the window
     /// </summary>
-    public Cursor Cursor { get; set; } = new Cursor();
+    public CursorShape Cursor { get; set; } = CursorShape.Default;
 
     /// <summary>
     /// Whether the mouse cursor is locked within the window. Defaults to false.
