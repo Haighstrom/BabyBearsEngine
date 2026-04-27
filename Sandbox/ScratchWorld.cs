@@ -11,7 +11,7 @@ internal class ScratchWorld : World
         var texture = Textures.CreateFromFile("Assets/bear.png");
         Add(new Image(texture, 200, 100, 300, 300) { Angle = 45f });
 
-        var camera = new Camera(500, 50, 100, 100, 10, 10, msaa);
+        var camera = Camera.WithTileSize(500, 50, 100, 100, 10, 10, msaa);
         camera.Add(new ColouredRectangle(Colour.Yellow, 0, 0, 5, 5));
 
         var newBearTex = Textures.CreateFromFile("Assets/bear.png");
