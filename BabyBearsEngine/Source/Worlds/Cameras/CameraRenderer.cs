@@ -66,7 +66,7 @@ internal sealed class CameraRenderer : IDisposable
             ResolveMSAA(ref fboOrtho, ref identity);
         }
 
-        CompositeOntoParent(camera, ref projection, ref modelView, prevVP, previousFBO);
+        CompositeOntoOutputFBO(camera, ref projection, ref modelView, prevVP, previousFBO);
     }
 
     private void Resize(float width, float height)
@@ -99,7 +99,7 @@ internal sealed class CameraRenderer : IDisposable
         OpenGLHelper.UnbindTexture(TextureTarget.Texture2DMultisample);
     }
 
-    private void CompositeOntoParent(Camera camera, ref Matrix3 projection, ref Matrix3 modelView, (int X, int Y, int Width, int Height) prevVP, int previousFBO)
+    private void CompositeOntoOutputFBO(Camera camera, ref Matrix3 projection, ref Matrix3 modelView, (int X, int Y, int Width, int Height) prevVP, int previousFBO)
     {
         OpenGLHelper.BindFBO(previousFBO);
 

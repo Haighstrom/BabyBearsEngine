@@ -28,7 +28,7 @@ public class ContainerBenchmarks
     }
 
     // Fresh entities per iteration: entities cannot be re-added once they belong to a container.
-    [IterationSetup(Targets = new[] { nameof(BuildScene) })]
+    [IterationSetup(Targets = [nameof(BuildScene)])]
     public void SetupBuildScene()
     {
         _entities = new StubRenderable[N];
