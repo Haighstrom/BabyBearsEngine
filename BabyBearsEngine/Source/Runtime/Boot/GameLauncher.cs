@@ -37,7 +37,7 @@ public static class GameLauncher
 
         var context = s_platform.CreatePlatformContext(s_loadedEngine);
 
-        EngineConfiguration.Initialise(context);
+        EngineConfiguration.Initialise(context.Window, context.Keyboard, context.Mouse, context.WorldSwitcher);
         
         s_status = LauncherStatus.Initialised;
     }

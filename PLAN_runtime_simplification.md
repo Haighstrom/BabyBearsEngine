@@ -28,7 +28,7 @@ Add a small system test to [Tests/System/GameLauncherTests.cs](Tests/System/Game
 
 ## Step 2 — Refactor `EngineConfiguration` to store services directly
 
-**Status:** Not started
+**Status:** Done
 
 Stop holding an `IPlatformContext` and instead store each service in its own field. This is the largest mechanical change and is the prerequisite for deleting `IPlatformContext`.
 
