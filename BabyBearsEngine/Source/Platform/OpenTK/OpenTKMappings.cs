@@ -1,7 +1,16 @@
-﻿using OpenTK.Mathematics;
-using OpenTK.Windowing.Common;
+using BabyBearsEngine.Input;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;
+
+using OpenTKCursorState = OpenTK.Windowing.Common.CursorState;
+using OpenTKImage = OpenTK.Windowing.Common.Input.Image;
+using OpenTKKeys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
+using OpenTKMouseButton = OpenTK.Windowing.GraphicsLibraryFramework.MouseButton;
+using OpenTKVSyncMode = OpenTK.Windowing.Common.VSyncMode;
+using OpenTKWindowBorder = OpenTK.Windowing.Common.WindowBorder;
+using OpenTKWindowIcon = OpenTK.Windowing.Common.Input.WindowIcon;
+using OpenTKWindowState = OpenTK.Windowing.Common.WindowState;
 
 namespace BabyBearsEngine.Platform.OpenTK;
 
@@ -19,29 +28,29 @@ internal static class OpenTkMappings
         {
             ClientSize = (settings.Width, settings.Height),
             Title = settings.Title,
-            WindowBorder = settings.Border,
-            WindowState = settings.State,
+            WindowBorder = settings.Border.ToOpenTK(),
+            WindowState = settings.State.ToOpenTK(),
             // null lets GLFW choose position; CenterWindow() is called in OnLoad when Centre = true
             Location = settings.Centre ? null : new Vector2i(settings.X, settings.Y),
-            Icon = settings.Icon,
+            Icon = settings.Icon.ToOpenTK(),
             MinimumClientSize = settings.MinClientSize.IsEmpty ? null : new Vector2i(settings.MinClientSize.X, settings.MinClientSize.Y),
             MaximumClientSize = settings.MaxClientSize.IsEmpty ? null : new Vector2i(settings.MaxClientSize.X, settings.MaxClientSize.Y),
             APIVersion = new Version(settings.OpenGLVersion.major, settings.OpenGLVersion.minor),
-            Vsync = settings.VSync ? VSyncMode.On : VSyncMode.Off,
+            Vsync = settings.VSync ? OpenTKVSyncMode.On : OpenTKVSyncMode.Off,
         };
     }
 
-    public static CursorState ToCursorState(this WindowSettings settings)
+    public static OpenTKCursorState ToCursorState(this WindowSettings settings)
     {
         if (settings.CursorLockedToWindow)
         {
-            return CursorState.Grabbed;
+            return OpenTKCursorState.Grabbed;
         }
         if (!settings.CursorVisible)
         {
-            return CursorState.Hidden;
+            return OpenTKCursorState.Hidden;
         }
-        return CursorState.Normal;
+        return OpenTKCursorState.Normal;
     }
 
     public static MouseCursor ToOpenTK(this CursorShape shape) => shape switch
@@ -59,4 +68,35 @@ internal static class OpenTkMappings
         CursorShape.ResizeNWSE   => MouseCursor.ResizeNWSE,
         _                        => MouseCursor.Default,
     };
+
+    public static OpenTKKeys ToOpenTK(this Keys key) => (OpenTKKeys)key;
+    public static Keys ToBBE(this OpenTKKeys key) => (Keys)key;
+
+    public static OpenTKMouseButton ToOpenTK(this MouseButton button) => (OpenTKMouseButton)button;
+    public static MouseButton ToBBE(this OpenTKMouseButton button) => (MouseButton)button;
+
+    public static OpenTKWindowBorder ToOpenTK(this WindowBorder border) => (OpenTKWindowBorder)border;
+    public static WindowBorder ToBBE(this OpenTKWindowBorder border) => (WindowBorder)border;
+
+    public static OpenTKWindowState ToOpenTK(this WindowState state) => (OpenTKWindowState)state;
+    public static WindowState ToBBE(this OpenTKWindowState state) => (WindowState)state;
+
+    public static OpenTKWindowIcon ToOpenTK(this WindowIcon icon)
+    {
+        if (icon.IsEmpty)
+        {
+            return new OpenTKWindowIcon();
+        }
+        return new OpenTKWindowIcon(new OpenTKImage(icon.Width, icon.Height, icon.Pixels));
+    }
+
+    public static WindowIcon ToBBE(this OpenTKWindowIcon icon)
+    {
+        if (icon.Images.Length == 0)
+        {
+            return new WindowIcon();
+        }
+        var first = icon.Images[0];
+        return new WindowIcon(first.Width, first.Height, first.Data);
+    }
 }

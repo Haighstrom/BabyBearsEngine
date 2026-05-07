@@ -1,15 +1,16 @@
-﻿namespace BabyBearsEngine.Platform.OpenTK;
-
 using System.Collections.Generic;
 using System.Linq;
 using BabyBearsEngine.Input;
-using global::OpenTK.Windowing.GraphicsLibraryFramework;
 
-internal sealed class OpenTKMouseAdapter(MouseState mouseState) : IMouse
+using OpenTKMouseState = OpenTK.Windowing.GraphicsLibraryFramework.MouseState;
+
+namespace BabyBearsEngine.Platform.OpenTK;
+
+internal sealed class OpenTKMouseAdapter(OpenTKMouseState mouseState) : IMouse
 {
-    public bool ButtonDown(MouseButton button) => mouseState.IsButtonDown(button);
-    public bool ButtonPressed(MouseButton button) => mouseState.IsButtonPressed(button);
-    public bool ButtonReleased(MouseButton button) => mouseState.IsButtonReleased(button);
+    public bool ButtonDown(MouseButton button) => mouseState.IsButtonDown(button.ToOpenTK());
+    public bool ButtonPressed(MouseButton button) => mouseState.IsButtonPressed(button.ToOpenTK());
+    public bool ButtonReleased(MouseButton button) => mouseState.IsButtonReleased(button.ToOpenTK());
 
     public bool AnyButtonDown(IEnumerable<MouseButton> buttons) => buttons.Any(ButtonDown);
     public bool AnyButtonDown(params MouseButton[] buttons) => buttons.Any(ButtonDown);
@@ -52,4 +53,3 @@ internal sealed class OpenTKMouseAdapter(MouseState mouseState) : IMouse
     public int XDelta => (int)mouseState.Delta.X;
     public int YDelta => (int)mouseState.Delta.Y;
 }
-

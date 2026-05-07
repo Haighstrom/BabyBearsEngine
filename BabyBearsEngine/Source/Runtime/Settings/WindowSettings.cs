@@ -1,7 +1,5 @@
 ﻿using System.Drawing;
 using OpenTK.Mathematics;
-using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Common.Input;
 
 namespace BabyBearsEngine;
 

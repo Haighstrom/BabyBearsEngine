@@ -1,6 +1,6 @@
-﻿using System.Drawing;
-using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Common.Input;
+using System.Drawing;
+
+using OpenTKResizeEventArgs = OpenTK.Windowing.Common.ResizeEventArgs;
 
 namespace BabyBearsEngine;
 
@@ -24,7 +24,7 @@ public static class Window
     public static int X { get => Implementation.X; set => Implementation.X = value; }
     public static int Y { get => Implementation.Y; set => Implementation.Y = value; }
 
-    public static event Action<ResizeEventArgs> Resize
+    public static event Action<OpenTKResizeEventArgs> Resize
     {
         add => Implementation.Resize += value;
         remove => Implementation.Resize -= value;

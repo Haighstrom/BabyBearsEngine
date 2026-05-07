@@ -70,8 +70,9 @@ These bite regardless of buckets 1 and 2.
 
 ---
 
-## Suggested first move
+## Status
 
-**Bucket 1(a) + the `Reset()` fix from Bucket 3.** Cheap, removes dead architectural weight without churning gameplay code. Detailed plan: [PLAN_runtime_simplification.md](PLAN_runtime_simplification.md).
-
-Then, when concrete test pain shows up, mirror `Keys` and `MouseButton` (Bucket 2). Defer the bigger renderer/world-context refactor until use cases force the interfaces' shape.
+- **Bucket 1(a)** — Done. `IGamePlatformFactory`, `IPlatformContext`, `OpenTKPlatformFactory`, `OpenTKContext` deleted. `GameLauncher` constructs the OpenTK engine and adapters directly. `EngineConfiguration` now holds per-service fields with public setters as a test seam, made `internal` with `[InternalsVisibleTo]` for the test assemblies.
+- **Bucket 3 reset fix** — Done. `EngineConfiguration.Reset()` added and called from `GameLauncher.Run`'s finally; covered by tests.
+- **Bucket 2** — Open. Decision: **mirror** OpenTK types where they leak through the public engine API. Plan: [PLAN_opentk_isolation.md](PLAN_opentk_isolation.md).
+- **Bucket 3 remaining** — Open. The static-facade reliance from gameplay code (passing `IEngineContext` through `World.Load/Update/Draw` instead) is deferred until a concrete need pushes for it.

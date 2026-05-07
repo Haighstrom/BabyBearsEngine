@@ -1,7 +1,9 @@
 using System.Drawing;
 using OpenTK.Mathematics;
-using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Common.Input;
+
+using OpenTKCursorState = OpenTK.Windowing.Common.CursorState;
+using OpenTKResizeEventArgs = OpenTK.Windowing.Common.ResizeEventArgs;
+using OpenTKVSyncMode = OpenTK.Windowing.Common.VSyncMode;
 
 namespace BabyBearsEngine.Platform.OpenTK;
 
@@ -11,14 +13,14 @@ internal sealed class OpenTKWindowAdapter(OpenTKGameEngine engine) : IWindow
 
     public WindowBorder Border
     {
-        get => engine.WindowBorder;
-        set => engine.WindowBorder = value;
+        get => engine.WindowBorder.ToBBE();
+        set => engine.WindowBorder = value.ToOpenTK();
     }
 
     public bool CursorLockedToWindow
     {
-        get => engine.CursorState == CursorState.Grabbed;
-        set => engine.CursorState = value ? CursorState.Grabbed : CursorState.Normal;
+        get => engine.CursorState == OpenTKCursorState.Grabbed;
+        set => engine.CursorState = value ? OpenTKCursorState.Grabbed : OpenTKCursorState.Normal;
     }
 
     public CursorShape Cursor
@@ -33,12 +35,12 @@ internal sealed class OpenTKWindowAdapter(OpenTKGameEngine engine) : IWindow
 
     public bool CursorVisible
     {
-        get => engine.CursorState == CursorState.Normal;
+        get => engine.CursorState == OpenTKCursorState.Normal;
         set
         {
-            if (engine.CursorState != CursorState.Grabbed)
+            if (engine.CursorState != OpenTKCursorState.Grabbed)
             {
-                engine.CursorState = value ? CursorState.Normal : CursorState.Hidden;
+                engine.CursorState = value ? OpenTKCursorState.Normal : OpenTKCursorState.Hidden;
             }
         }
     }
@@ -53,8 +55,8 @@ internal sealed class OpenTKWindowAdapter(OpenTKGameEngine engine) : IWindow
 
     public WindowIcon Icon
     {
-        get => engine.Icon ?? new WindowIcon();
-        set => engine.Icon = value;
+        get => engine.Icon?.ToBBE() ?? new WindowIcon();
+        set => engine.Icon = value.ToOpenTK();
     }
 
     public Point MaxClientSize
@@ -79,8 +81,8 @@ internal sealed class OpenTKWindowAdapter(OpenTKGameEngine engine) : IWindow
 
     public WindowState State
     {
-        get => engine.WindowState;
-        set => engine.WindowState = value;
+        get => engine.WindowState.ToBBE();
+        set => engine.WindowState = value.ToOpenTK();
     }
 
     public string Title
@@ -91,8 +93,8 @@ internal sealed class OpenTKWindowAdapter(OpenTKGameEngine engine) : IWindow
 
     public bool VSync
     {
-        get => engine.VSync == VSyncMode.On;
-        set => engine.VSync = value ? VSyncMode.On : VSyncMode.Off;
+        get => engine.VSync == OpenTKVSyncMode.On;
+        set => engine.VSync = value ? OpenTKVSyncMode.On : OpenTKVSyncMode.Off;
     }
 
     public int Width => engine.ClientSize.X;
@@ -109,14 +111,14 @@ internal sealed class OpenTKWindowAdapter(OpenTKGameEngine engine) : IWindow
         set => engine.Location = new Vector2i(engine.Location.X, value);
     }
 
-    public event Action<ResizeEventArgs>? Resize
+    public event Action<OpenTKResizeEventArgs>? Resize
     {
         add { engine.Resize += value; }
         remove { engine.Resize -= value; }
     }
 
     public void Centre() => engine.CenterWindow();
-    
+
     public void Close()
     {
         engine._programmaticClose = true;
