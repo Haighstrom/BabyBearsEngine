@@ -1,4 +1,4 @@
-var appSettings = new ApplicationSettings()
+﻿var appSettings = new ApplicationSettings()
 {
     WindowSettings = new WindowSettings()
     {

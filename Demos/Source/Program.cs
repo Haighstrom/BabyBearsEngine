@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using BabyBearsEngine.Demos.Source;
 using BabyBearsEngine.Demos.Source.Demos.AnimationDemo;
 using BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;

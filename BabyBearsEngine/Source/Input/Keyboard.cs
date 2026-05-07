@@ -1,8 +1,8 @@
-using System.Collections.Generic;
-using BabyBearsEngine.Runtime;
+﻿using System.Collections.Generic;
+using BabyBearsEngine.Input;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-namespace BabyBearsEngine.Input;
+namespace BabyBearsEngine;
 
 public static class Keyboard
 {

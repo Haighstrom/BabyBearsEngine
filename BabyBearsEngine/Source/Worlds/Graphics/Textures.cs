@@ -1,5 +1,4 @@
-using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Runtime;
+﻿using BabyBearsEngine.OpenGL;
 
 namespace BabyBearsEngine.Worlds.Graphics;
 

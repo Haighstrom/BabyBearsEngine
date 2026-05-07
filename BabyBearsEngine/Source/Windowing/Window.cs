@@ -1,5 +1,4 @@
-using System.Drawing;
-using BabyBearsEngine.Runtime;
+﻿using System.Drawing;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Common.Input;
 

@@ -1,6 +1,4 @@
-using BabyBearsEngine.Runtime;
-
-namespace BabyBearsEngine.OpenGL;
+﻿namespace BabyBearsEngine.OpenGL;
 
 internal static class GPUResourceDeletion
 {
