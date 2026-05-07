@@ -64,6 +64,7 @@ public static class GameLauncher
         }
         finally
         {
+            EngineConfiguration.Reset();
             s_loadedEngine = null;
             s_status = LauncherStatus.NotStarted;
         }

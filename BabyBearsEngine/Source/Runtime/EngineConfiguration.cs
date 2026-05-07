@@ -10,7 +10,7 @@ public static class EngineConfiguration
 
     private static ITextureFactory s_textureFactory = new DefaultTextureFactory();
     private static IGPUResourceDeletionService s_gpuResourceDeletionService = new DefaultGPUResourceDeletionService();
-    private static IPlatformContext? s_backend;
+    private static IPlatformContext? s_backend = null;
 
     private static IPlatformContext Backend
     {
@@ -34,6 +34,13 @@ public static class EngineConfiguration
         }
 
         s_backend = platformContext;
+    }
+
+    public static void Reset()
+    {
+        s_backend = null;
+        s_textureFactory = new DefaultTextureFactory();
+        s_gpuResourceDeletionService = new DefaultGPUResourceDeletionService();
     }
 
     public static ITextureFactory TextureFactory
