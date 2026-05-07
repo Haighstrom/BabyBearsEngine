@@ -1,6 +1,5 @@
 using BabyBearsEngine.Platform.OpenTK;
 using BabyBearsEngine.Runtime;
-using BabyBearsEngine.GameEngine;
 using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine;
@@ -9,22 +8,8 @@ public static class GameLauncher
 {
     private enum LauncherStatus { NotStarted, Initialised, Running }
 
-    private static IGamePlatformFactory s_platform = new OpenTKPlatformFactory();
-    private static IGameEngine? s_loadedEngine;
-
+    private static OpenTKGameEngine? s_loadedEngine = null;
     private static LauncherStatus s_status = LauncherStatus.NotStarted;
-
-    public static void SetPlatform(IGamePlatformFactory platform)
-    {
-        if (s_status != LauncherStatus.NotStarted)
-        {
-            throw new InvalidOperationException("Game already initialised");
-        }
-
-        s_platform = platform;
-    }
-
-    public static void SetDefaultPlatform() => SetPlatform(new OpenTKPlatformFactory());
 
     public static void Initialise(ApplicationSettings appSettings)
     {
@@ -33,12 +18,14 @@ public static class GameLauncher
             throw new InvalidOperationException("Game already initialised");
         }
 
-        s_loadedEngine = s_platform.CreateGameEngine(appSettings);
+        s_loadedEngine = new OpenTKGameEngine(appSettings);
 
-        var context = s_platform.CreatePlatformContext(s_loadedEngine);
+        EngineConfiguration.Initialise(
+            window: new OpenTKWindowAdapter(s_loadedEngine),
+            keyboard: new OpenTKKeyboardAdapter(s_loadedEngine.KeyboardState),
+            mouse: new OpenTKMouseAdapter(s_loadedEngine.MouseState),
+            worldSwitcher: s_loadedEngine);
 
-        EngineConfiguration.Initialise(context.Window, context.Keyboard, context.Mouse, context.WorldSwitcher);
-        
         s_status = LauncherStatus.Initialised;
     }
 
@@ -50,7 +37,7 @@ public static class GameLauncher
         }
 
         Ensure.NotNull(s_loadedEngine); //this shouldn't be a problem as launcher being started should assign this
-        
+
         if (s_status == LauncherStatus.Running)
         {
             throw new InvalidOperationException("Game already running.");

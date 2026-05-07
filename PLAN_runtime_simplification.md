@@ -47,7 +47,7 @@ Callers of `EngineConfiguration.Initialise(IPlatformContext)` are updated in Ste
 
 ## Step 3 — Inline service construction in `GameLauncher`
 
-**Status:** Not started
+**Status:** Done
 
 Drop the factory indirection. `GameLauncher` constructs the `OpenTKGameEngine` and the adapters itself.
 
