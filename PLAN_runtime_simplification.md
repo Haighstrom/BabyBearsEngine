@@ -72,7 +72,7 @@ After this step, [BabyBearsEngine/Source/Platform/OpenTK/OpenTKPlatformFactory.c
 
 ## Step 4 — Delete the now-unused indirection types
 
-**Status:** Not started
+**Status:** Done
 
 Remove the dead code:
 
