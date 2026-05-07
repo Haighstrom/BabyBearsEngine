@@ -3,7 +3,10 @@ using BabyBearsEngine.OpenGL;
 
 namespace BabyBearsEngine;
 
-public static class EngineConfiguration
+// Process-wide service registry. Setters and Reset() exist as a test seam — production code
+// initialises this once via GameLauncher; tests can substitute individual services and must
+// call Reset() in teardown to avoid state bleeding between cases.
+internal static class EngineConfiguration
 {
     private const string AlreadyInitialisedMessage = "Game services already initialised.";
     private const string NotInitialisedMessage = "The platform context has not been initialized. Please call Initialise() before accessing the platform context.";

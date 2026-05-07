@@ -89,7 +89,7 @@ Verify there are no remaining references with a grep for `IGamePlatformFactory`,
 
 ## Step 5 — Document the test seam
 
-**Status:** Not started
+**Status:** Done
 
 Add a short paragraph or `<remarks>` doc-comment on `EngineConfiguration` describing how to install fakes for unit tests:
 
