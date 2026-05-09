@@ -262,7 +262,9 @@ internal static class OpenGLHelper
     {
         //Make sure the filepath has exactly one png extension
         if (Path.GetExtension(filePath) == null)
+        {
             filePath += ".png";
+        }
 
         //Save the bitmap
         bmp.Save(filePath);

@@ -39,11 +39,26 @@ public partial record struct Colour(byte R, byte G, byte B, byte A = 255) : IEqu
 
     private static float HueToRgb(float p, float q, float t)
     {
-        if (t < 0f) t += 1f;
-        if (t > 1f) t -= 1f;
-        if (t < 1f / 6f) return p + (q - p) * 6f * t;
-        if (t < 1f / 2f) return q;
-        if (t < 2f / 3f) return p + (q - p) * (2f / 3f - t) * 6f;
+        if (t < 0f)
+        {
+            t += 1f;
+        }
+        if (t > 1f)
+        {
+            t -= 1f;
+        }
+        if (t < 1f / 6f)
+        {
+            return p + (q - p) * 6f * t;
+        }
+        if (t < 1f / 2f)
+        {
+            return q;
+        }
+        if (t < 2f / 3f)
+        {
+            return p + (q - p) * (2f / 3f - t) * 6f;
+        }
         return p;
     }
 

@@ -286,7 +286,9 @@ public struct Matrix4
             float oneOverPivot = 1.0f / pivot;
             inverse[icol, icol] = 1.0f;
             for (int k = 0; k < 4; ++k)
+            {
                 inverse[icol, k] *= oneOverPivot;
+            }
 
             // Do elimination of non-diagonal elements
             for (int j = 0; j < 4; ++j)
@@ -297,7 +299,9 @@ public struct Matrix4
                     float f = inverse[j, icol];
                     inverse[j, icol] = 0.0f;
                     for (int k = 0; k < 4; ++k)
+                    {
                         inverse[j, k] -= inverse[icol, k] * f;
+                    }
                 }
             }
         }
@@ -356,13 +360,19 @@ public struct Matrix4
         get
         {
             if (x < 0 || x > 3 || y < 0 || y > 3)
+            {
                 throw new Exception($"Requested an invalid Matrix4 index:{x},{y}");
+            }
+
             return _values[x * 4 + y];
         }
         set
         {
             if (x < 0 || x > 3 || y < 0 || y > 3)
+            {
                 throw new Exception($"Requested an invalid Matrix4 index:{x},{y}");
+            }
+
             _values[x * 4 + y] = value;
         }
     }

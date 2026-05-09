@@ -10,8 +10,12 @@ public static class CollectionExtensions
         List<T> list = new();
 
         for (int j = 0; j < array.GetLength(1); ++j)
+        {
             for (int i = 0; i < array.GetLength(0); ++i)
+            {
                 list.Add(array[i, j]);
+            }
+        }
 
         return list;
     }
@@ -22,7 +26,9 @@ public static class CollectionExtensions
         var rowVector = new T[rowLength];
 
         for (var i = 0; i < rowLength; i++)
+        {
             rowVector[i] = array[i, row];
+        }
 
         return rowVector;
     }
@@ -40,8 +46,12 @@ public static class CollectionExtensions
         var newArray = new T[m, n];
 
         for (int i = 0; i < n; ++i)
+        {
             for (int j = 0; j < m; ++j)
+            {
                 newArray[j, i] = array[i, j];
+            }
+        }
 
         return newArray;
     }
@@ -59,13 +69,17 @@ public static class CollectionExtensions
     public static void Add<T>(this IList<T> list, params T[] items)
     {
         foreach (var item in items)
+        {
             list.Add(item);
+        }
     }
 
     public static void Add<T>(this IList<T> list, IEnumerable<T> items)
     {
         foreach (var item in items)
+        {
             list.Add(item);
+        }
     }
 
     public static bool IsEmpty<T>(this T[] l)

@@ -30,7 +30,9 @@ public sealed class Rect
         Rect answer = new();
 
         if (!first.Intersects(second))
+        {
             return answer;
+        }
 
         answer.X = Math.Max(first.Left, second.Left);
         answer.Y = Math.Max(first.Top, second.Top);
@@ -94,7 +96,9 @@ public sealed class Rect
         string[] substrings = rectString.Split(',');
 
         if (substrings.Length != 4)
+        {
             throw new Exception("Error trying to decode rect string");
+        }
 
         for (int i = 0; i < 4; i++)
         {
@@ -374,17 +378,21 @@ public sealed class Rect
     public bool Intersects(Rect other, bool touchingCounts = false)
     {
         if (touchingCounts)
+        {
             return
                 Left <= other.Right &&
                 Right >= other.Left &&
                 Top <= other.Bottom &&
                 Bottom >= other.Top;
+        }
         else
+        {
             return
                 Left < other.Right &&
                 Right > other.Left &&
                 Top < other.Bottom &&
                 Bottom > other.Top;
+        }
     }
 
     /// <summary>
@@ -414,13 +422,21 @@ public sealed class Rect
     public bool Contains(Point point, bool onLeftAndTopEdgesCount = true, bool onRightAndBottomEdgesCount = false)
     {
         if (onLeftAndTopEdgesCount && onRightAndBottomEdgesCount)
+        {
             return X <= point.X && Y <= point.Y && X + W >= point.X && Y + H >= point.Y;
+        }
         else if (onLeftAndTopEdgesCount && !onRightAndBottomEdgesCount)
+        {
             return X <= point.X && Y <= point.Y && X + W > point.X && Y + H > point.Y;
+        }
         else if (!onLeftAndTopEdgesCount && onRightAndBottomEdgesCount)
+        {
             return X < point.X && Y < point.Y && X + W >= point.X && Y + H >= point.Y;
+        }
         else
+        {
             return X < point.X && Y < point.Y && X + W > point.X && Y + H > point.Y;
+        }
     }
 
     /// <summary>
@@ -434,13 +450,21 @@ public sealed class Rect
     public bool Contains(float x, float y, bool onLeftAndTopEdgesCount = true, bool onRightAndBottomEdgesCount = false)
     {
         if (onLeftAndTopEdgesCount && onRightAndBottomEdgesCount)
+        {
             return X <= x && Y <= y && X + W >= x && Y + H >= y;
+        }
         else if (onLeftAndTopEdgesCount && !onRightAndBottomEdgesCount)
+        {
             return X <= x && Y <= y && X + W > x && Y + H > y;
+        }
         else if (!onLeftAndTopEdgesCount && onRightAndBottomEdgesCount)
+        {
             return X < x && Y < y && X + W >= x && Y + H >= y;
+        }
         else
+        {
             return X < x && Y < y && X + W > x && Y + H > y;
+        }
     }
 
     /// <summary>

@@ -98,7 +98,9 @@ public struct Matrix2
         float det = mat.Determinant;
 
         if (det == 0)
+        {
             return mat;
+        }
 
         float invDet = 1 / det;
 
@@ -123,10 +125,14 @@ public struct Matrix2
     public Matrix2(float[] values)
     {
         if (values == null)
+        {
             throw new ArgumentNullException(nameof(values));
+        }
 
         if (values.Length != 4)
+        {
             throw new ArgumentException($"Did not supply 4 values, but {values.Length}.", nameof(values));
+        }
 
         _values = values;
     }
@@ -137,13 +143,19 @@ public struct Matrix2
         get
         {
             if (x < 0 || x > 1 || y < 0 || y > 1)
+            {
                 throw new Exception($"Requested an invalid Matrix2 index:{x},{y}");
+            }
+
             return _values[x * 2 + y];
         }
         set
         {
             if (x < 0 || x > 1 || y < 0 || y > 1)
+            {
                 throw new Exception($"Requested an invalid Matrix2 index:{x},{y}");
+            }
+
             _values[x * 2 + y] = value;
         }
     }

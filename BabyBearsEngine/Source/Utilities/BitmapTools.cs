@@ -33,7 +33,9 @@ internal static class BitmapTools
 
         // This code only works with 32bit argb images - assume no alpha if not this format
         if (bmlock.PixelFormat != System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+        {
             throw new InvalidOperationException($"Unsupported pixel format {bmlock.PixelFormat}. Should be Formar32bppArgb to use TexturePremultiplier");
+        }
 
         var ptr = (byte*)bmlock.Scan0.ToPointer();
 

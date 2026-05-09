@@ -66,7 +66,9 @@ public struct Point4 : IEquatable<Point4>
         get
         {
             if (x == 0 && y == 0 && z == 0 && w == 0)
+            {
                 return new Point4();
+            }
 
             float l = Length;
 

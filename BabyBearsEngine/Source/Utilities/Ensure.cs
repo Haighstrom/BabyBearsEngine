@@ -138,7 +138,9 @@ public static class Ensure
         NotNull(key);
 
         if (!dictionary.ContainsKey(key))
+        {
             throw new KeyNotFoundException(key!.ToString());
+        }
     }
 
     /// <summary>
@@ -149,7 +151,9 @@ public static class Ensure
     public static void FileExists(string fileName)
     {
         if (!File.Exists(fileName))
+        {
             throw new FileNotFoundException(fileName);
+        }
     }
 
     /// <summary>

@@ -24,21 +24,31 @@ internal class FontLoader() : IFontLoader
         var font = new Font(fontName, size, (System.Drawing.FontStyle)style, GraphicsUnit.Pixel);
 
         if (font.Name == fontName)
+        {
             return font;
+        }
         else
+        {
             return null;
+        }
     }
 
     private static Font? LoadFontCustom(string fontPath, float size, FontStyle style)
     {
         if (!Files.FileExists(fontPath))
+        {
             fontPath = DEFAULT_FONT_FOLDER + fontPath;
+        }
 
         if (!Files.FileExists(fontPath))
+        {
             fontPath = fontPath + ".ttf";
+        }
 
         if (!Files.FileExists(fontPath))
+        {
             return null;
+        }
 
         using var pfc = new PrivateFontCollection();
 

@@ -58,6 +58,8 @@ public static class Repeat
         Ensure.ArgumentNotNegative(times, nameof(times));
 
         for (int i = 0; i < times; ++i)
+        {
             method();
+        }
     }
 }

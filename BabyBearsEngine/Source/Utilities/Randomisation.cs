@@ -34,7 +34,9 @@ public static class Randomisation
     public static int Rand(int min, int max)
     {
         if (max < min)
+        {
             throw new Exception("cannot have max less than min");
+        }
 
         return min + s_random.Next(max - min);
     }
@@ -44,7 +46,9 @@ public static class Randomisation
     public static int Rand(int max)
     {
         if (max <= 0)
+        {
             return 0;
+        }
 
         return s_random.Next(max);
     }
@@ -53,7 +57,9 @@ public static class Randomisation
         where T : struct, IConvertible
     {
         if (!typeof(T).IsEnum)
+        {
             throw new InvalidOperationException($"Generic parameter T must be an enum. Provided was {typeof(T).Name}.");
+        }
 
         var values = Enum.GetValues(typeof(T));
         return (T)values.GetValue(s_random.Next(values.Length))!;
@@ -80,7 +86,9 @@ public static class Randomisation
     public static float RandF(int min, int max)
     {
         if (max <= min)
+        {
             return max;
+        }
         return
             min + (float)s_random.NextDouble() * (max - min);
     }
@@ -90,13 +98,18 @@ public static class Randomisation
     public static float RandF(float min, float max)
     {
         if (max <= min)
+        {
             return max;
+        }
         return min + (float)s_random.NextDouble() * (max - min);
     }
 
     public static float RandGaussianApprox(float min, float max)
     {
-        if (max <= min) return max;
+        if (max <= min)
+        {
+            return max;
+        }
 
         //guassian = approx (1 + cos x)/2PI [SD = 1] 
         //therefore (x+sinx)/2PI is integral, x from 0 to 2 PI gives 0-1 with normal distribution ish results
@@ -111,7 +124,9 @@ public static class Randomisation
         string def = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         StringBuilder ret = new();
         for (int i = 0; i < chars; i++)
+        {
             ret.Append(def.AsSpan(s_random.Next(def.Length), 1));
+        }
         return ret.ToString();
     }
 
@@ -176,25 +191,37 @@ public static class Randomisation
         int listSize = list.Count;
 
         if (listSize <= 1)
+        {
             return;
+        }
 
         int steps = amountShifted % listSize;
 
         if (steps == 0)
+        {
             return;
+        }
 
         if (steps < 0)
+        {
             steps += listSize;
+        }
 
         var buffer = new T[steps];
 
         for (int i = 0; i < steps; i++)
+        {
             buffer[i] = list[i];
+        }
 
         for (int i = steps; i < listSize; i++)
+        {
             list[i - steps] = list[i];
+        }
 
         for (int i = 0; i < steps; i++)
+        {
             list[listSize - steps + i] = buffer[i];
+        }
     }
 }

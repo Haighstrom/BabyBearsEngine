@@ -18,7 +18,9 @@ internal sealed class SimpleGraphic : GraphicBase, IDisposable
     {
         //temp = texture;
         if (vertices.Length < 3)
+        {
             throw new ArgumentException("Cannot make a SimpleGraphic with fewer than 3 vertices", nameof(vertices));
+        }
 
         Texture = texture;// new TextureFactory().CreateTextureFromImageFile("Assets/bear.png");//texture;
         Vertices = vertices;

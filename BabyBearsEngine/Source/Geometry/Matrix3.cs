@@ -240,7 +240,9 @@ public struct Matrix3
             float oneOverPivot = 1.0f / pivot;
             inverse[icol, icol] = 1.0f;
             for (int k = 0; k < 3; ++k)
+            {
                 inverse[icol, k] *= oneOverPivot;
+            }
 
             for (int j = 0; j < 3; ++j)
             {
@@ -249,7 +251,9 @@ public struct Matrix3
                     float f = inverse[j, icol];
                     inverse[j, icol] = 0.0f;
                     for (int k = 0; k < 3; ++k)
+                    {
                         inverse[j, k] -= inverse[icol, k] * f;
+                    }
                 }
             }
         }
@@ -349,7 +353,9 @@ public struct Matrix3
             float oneOverPivot = 1.0f / pivot;
             inverse[icol, icol] = 1.0f;
             for (int k = 0; k < 3; ++k)
+            {
                 inverse[icol, k] *= oneOverPivot;
+            }
 
             for (int j = 0; j < 3; ++j)
             {
@@ -358,7 +364,9 @@ public struct Matrix3
                     float f = inverse[j, icol];
                     inverse[j, icol] = 0.0f;
                     for (int k = 0; k < 3; ++k)
+                    {
                         inverse[j, k] -= inverse[icol, k] * f;
+                    }
                 }
             }
         }
@@ -405,14 +413,18 @@ public struct Matrix3
         get
         {
             if (x < 0 || x > 2 || y < 0 || y > 2)
+            {
                 throw new ArgumentException($"Requested an invalid Matrix3 index:{x},{y}");
+            }
 
             return _values[x * 3 + y];
         }
         set
         {
             if (x < 0 || x > 2 || y < 0 || y > 2)
+            {
                 throw new ArgumentException($"Requested an invalid Matrix3 index:{x},{y}");
+            }
 
             _values[x * 3 + y] = value;
         }

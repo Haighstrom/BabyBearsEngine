@@ -30,7 +30,9 @@ internal sealed class CharacterBitmapGenerator : ICharacterBitmapGenerator
             (x, y, width, height) = image.NonZeroAlphaRegion();
 
             if (width == 0 || height == 0)
+            {
                 throw new InvalidOperationException($"HFont.cs/GenerateCharacterBitmap: Font {font.Name}, Size {font.Size}, character 't' is giving size (W:{width},H:{height})");
+            }
         }
 
         image = new Bitmap(x + width, y + height, System.Drawing.Imaging.PixelFormat.Format32bppArgb); //include alpha at left/top of image so positioning is preserved

@@ -24,11 +24,15 @@ internal sealed class FontBitmapGenerator() : IFontBitmapGenerator
             var b = _charBitmapGenerator.GenerateCharacterBitmap(c, font, antiAliased);
 
             if (b.Width > widestChar)
+            {
                 widestChar = b.Width;
-            
+            }
+
             if (b.Height > highestChar)
+            {
                 highestChar = b.Height;
-            
+            }
+
             characterBMPs.Add(b);
         }
 

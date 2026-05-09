@@ -11,6 +11,7 @@ internal static class BitmapExtensions
         int lastPixelY = 0;
 
         for (int i = 0; i < bitmap.Width; i++)
+        {
             for (int j = 0; j < bitmap.Height; j++)
             {
                 if (bitmap.GetPixel(i, j).A > 0)
@@ -33,6 +34,7 @@ internal static class BitmapExtensions
                     }
                 }
             }
+        }
 
         if (firstPixelX <= lastPixelX && firstPixelY <= lastPixelY)
         {

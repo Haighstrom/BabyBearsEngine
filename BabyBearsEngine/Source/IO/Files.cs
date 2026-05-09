@@ -14,24 +14,36 @@ public static class Files
     public static void CopyFiles(string sourceDirectory, string destinationDirectory, CopyOptions options)
     {
         if (!Directory.Exists(destinationDirectory))
+        {
             Directory.CreateDirectory(destinationDirectory);
+        }
 
         if (sourceDirectory.Last() == '/')
+        {
             sourceDirectory = sourceDirectory.Remove(sourceDirectory.Length - 1);
+        }
 
         if (destinationDirectory.Last() != '/')
+        {
             destinationDirectory += '/';
+        }
 
         var so = (options & CopyOptions.BringAll) > 0 ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
 
         //copy subfolders first (if applicable)
         if ((options & CopyOptions.BringFolders) > 0)
+        {
             foreach (string dir in Directory.GetDirectories(sourceDirectory, "*", so))
+            {
                 Directory.CreateDirectory(Path.Combine(destinationDirectory, dir[(sourceDirectory.Length + 1)..]));
+            }
+        }
 
         //copy files
         foreach (string file in Directory.GetFiles(sourceDirectory, "*", so))
+        {
             File.Copy(file, Path.Combine(destinationDirectory, file[(sourceDirectory.Length + 1)..]), (options & CopyOptions.Overwrite) > 0);
+        }
     }
 
     public static bool CreateDirectory(string path)
