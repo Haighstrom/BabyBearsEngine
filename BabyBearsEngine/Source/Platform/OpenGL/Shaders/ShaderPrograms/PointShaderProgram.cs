@@ -16,8 +16,10 @@ public sealed class PointShaderProgram : ShaderProgramBase
         var pMatrix = OpenGLHelper.CreateOrthographicProjectionMatrix(Window.Width, Window.Height);
         SetProjectionMatrix(ref pMatrix);
 
-        Window.Resize += args => SetProjectionMatrix(args.Width, args.Height);
+        Window.Resize += OnWindowResize;
     }
+
+    private void OnWindowResize(WindowResizeEventArgs args) => SetProjectionMatrix(args.Width, args.Height);
 
     private void SetProjectionMatrix(int width, int height)
     {
@@ -42,7 +44,7 @@ public sealed class PointShaderProgram : ShaderProgramBase
     {
         if (disposing)
         {
-            Window.Resize -= args => SetProjectionMatrix(args.Width, args.Height);
+            Window.Resize -= OnWindowResize;
         }
 
         base.Dispose(disposing);

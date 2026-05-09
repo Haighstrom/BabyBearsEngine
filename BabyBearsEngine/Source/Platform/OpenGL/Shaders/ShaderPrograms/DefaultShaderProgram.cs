@@ -11,8 +11,10 @@ public sealed class DefaultShaderProgram : ShaderProgramBase
 
         SetWindowSize(Window.Width, Window.Height);
 
-        Window.Resize += args => SetWindowSize(args.Width, args.Height);
+        Window.Resize += OnWindowResize;
     }
+
+    private void OnWindowResize(WindowResizeEventArgs args) => SetWindowSize(args.Width, args.Height);
 
     private void SetWindowSize(int width, int height)
     {
@@ -24,7 +26,7 @@ public sealed class DefaultShaderProgram : ShaderProgramBase
     {
         if (disposing)
         {
-            Window.Resize -= args => SetWindowSize(args.Width, args.Height);
+            Window.Resize -= OnWindowResize;
         }
 
         base.Dispose(disposing);

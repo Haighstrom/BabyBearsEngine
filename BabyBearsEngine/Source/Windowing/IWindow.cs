@@ -1,7 +1,5 @@
 using System.Drawing;
 
-using OpenTKResizeEventArgs = OpenTK.Windowing.Common.ResizeEventArgs;
-
 namespace BabyBearsEngine;
 
 public interface IWindow
@@ -22,7 +20,7 @@ public interface IWindow
     int X { get; set; }
     int Y { get; set; }
 
-    event Action<OpenTKResizeEventArgs>? Resize;
+    event Action<WindowResizeEventArgs>? Resize;
 
     void Centre();
     void Close();

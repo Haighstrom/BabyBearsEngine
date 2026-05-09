@@ -13,7 +13,7 @@ internal class BearSpinnerWorld : DemoWorld
         AddBears();
     }
 
-    private void Window_Resize(OpenTK.Windowing.Common.ResizeEventArgs obj)
+    private void Window_Resize(WindowResizeEventArgs obj)
     {
         RemoveAll();
         AddBears();

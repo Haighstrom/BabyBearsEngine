@@ -79,12 +79,13 @@ Two small enums consumed by both `IWindow` and `WindowSettings`.
 
 ## Step 6 — Mirror the resize event payload
 
-**Status:** Not started
+**Status:** Done
 
 `IWindow.Resize` currently fires with `OpenTK.Windowing.Common.ResizeEventArgs`.
 
-- Replace with an engine-owned event shape — simplest is `event Action<int, int>?` carrying `(width, height)`. If a richer payload is needed later, introduce `BabyBearsEngine.Windowing.WindowResizeEvent`.
-- Update `IWindow`, the static `Window.Resize` event, and the adapter to translate OpenTK's event into the BBE one.
+- Introduced engine-owned `BabyBearsEngine.WindowResizeEventArgs` (named EventArgs class with `Width`/`Height`) per the global C# rule against tuple-shaped event payloads.
+- Updated `IWindow.Resize` and the static `Window.Resize` to `event Action<WindowResizeEventArgs>?`. Adapter (`OpenTKWindowAdapter`) subscribes once to the OpenTK `Resize` event in its constructor and re-raises a translated BBE event.
+- Consumers updated: `BearSpinnerWorld`, `DefaultShaderProgram`, `PointShaderProgram`, `R8ChannelShaderProgram`. Inline `+=`/`-=` lambda pairs in the shader programs were replaced with named handler methods (the previous lambdas couldn't actually unsubscribe — incidental fix).
 
 ---
 

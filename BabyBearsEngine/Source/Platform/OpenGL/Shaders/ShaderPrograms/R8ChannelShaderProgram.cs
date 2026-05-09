@@ -18,8 +18,10 @@ public sealed class R8ChannelShaderProgram : ShaderProgramBase
 
         SetProjectionMatrix(Window.Width, Window.Height);
 
-        Window.Resize += args => SetProjectionMatrix(args.Width, args.Height);
+        Window.Resize += OnWindowResize;
     }
+
+    private void OnWindowResize(WindowResizeEventArgs args) => SetProjectionMatrix(args.Width, args.Height);
 
     private void SetModelViewMatrix(ref Matrix3 modelViewMatrix)
     {
@@ -43,7 +45,7 @@ public sealed class R8ChannelShaderProgram : ShaderProgramBase
     {
         if (disposing)
         {
-            Window.Resize -= args => SetProjectionMatrix(args.Width, args.Height);
+            Window.Resize -= OnWindowResize;
         }
 
         base.Dispose(disposing);

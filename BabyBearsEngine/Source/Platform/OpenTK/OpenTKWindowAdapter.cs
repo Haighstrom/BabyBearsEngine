@@ -7,20 +7,27 @@ using OpenTKVSyncMode = OpenTK.Windowing.Common.VSyncMode;
 
 namespace BabyBearsEngine.Platform.OpenTK;
 
-internal sealed class OpenTKWindowAdapter(OpenTKGameEngine engine) : IWindow
+internal sealed class OpenTKWindowAdapter : IWindow
 {
+    private readonly OpenTKGameEngine _engine;
     private CursorShape _cursor = CursorShape.Default;
+
+    public OpenTKWindowAdapter(OpenTKGameEngine engine)
+    {
+        _engine = engine;
+        _engine.Resize += OnEngineResize;
+    }
 
     public WindowBorder Border
     {
-        get => engine.WindowBorder.ToBBE();
-        set => engine.WindowBorder = value.ToOpenTK();
+        get => _engine.WindowBorder.ToBBE();
+        set => _engine.WindowBorder = value.ToOpenTK();
     }
 
     public bool CursorLockedToWindow
     {
-        get => engine.CursorState == OpenTKCursorState.Grabbed;
-        set => engine.CursorState = value ? OpenTKCursorState.Grabbed : OpenTKCursorState.Normal;
+        get => _engine.CursorState == OpenTKCursorState.Grabbed;
+        set => _engine.CursorState = value ? OpenTKCursorState.Grabbed : OpenTKCursorState.Normal;
     }
 
     public CursorShape Cursor
@@ -29,99 +36,100 @@ internal sealed class OpenTKWindowAdapter(OpenTKGameEngine engine) : IWindow
         set
         {
             _cursor = value;
-            engine.Cursor = value.ToOpenTK();
+            _engine.Cursor = value.ToOpenTK();
         }
     }
 
     public bool CursorVisible
     {
-        get => engine.CursorState == OpenTKCursorState.Normal;
+        get => _engine.CursorState == OpenTKCursorState.Normal;
         set
         {
-            if (engine.CursorState != OpenTKCursorState.Grabbed)
+            if (_engine.CursorState != OpenTKCursorState.Grabbed)
             {
-                engine.CursorState = value ? OpenTKCursorState.Normal : OpenTKCursorState.Hidden;
+                _engine.CursorState = value ? OpenTKCursorState.Normal : OpenTKCursorState.Hidden;
             }
         }
     }
 
     public bool CloseOnXButton
     {
-        get => engine.CloseOnXButton;
-        set => engine.CloseOnXButton = value;
+        get => _engine.CloseOnXButton;
+        set => _engine.CloseOnXButton = value;
     }
 
-    public int Height => engine.ClientSize.Y;
+    public int Height => _engine.ClientSize.Y;
 
     public WindowIcon Icon
     {
-        get => engine.Icon?.ToBBE() ?? new WindowIcon();
-        set => engine.Icon = value.ToOpenTK();
+        get => _engine.Icon?.ToBBE() ?? new WindowIcon();
+        set => _engine.Icon = value.ToOpenTK();
     }
 
     public Point MaxClientSize
     {
         get
         {
-            var s = engine.MaximumSize;
+            var s = _engine.MaximumSize;
             return s.HasValue ? new Point(s.Value.X, s.Value.Y) : new Point();
         }
-        set => engine.MaximumSize = value.IsEmpty ? null : new Vector2i(value.X, value.Y);
+        set => _engine.MaximumSize = value.IsEmpty ? null : new Vector2i(value.X, value.Y);
     }
 
     public Point MinClientSize
     {
         get
         {
-            var s = engine.MinimumSize;
+            var s = _engine.MinimumSize;
             return s.HasValue ? new Point(s.Value.X, s.Value.Y) : new Point();
         }
-        set => engine.MinimumSize = value.IsEmpty ? null : new Vector2i(value.X, value.Y);
+        set => _engine.MinimumSize = value.IsEmpty ? null : new Vector2i(value.X, value.Y);
     }
 
     public WindowState State
     {
-        get => engine.WindowState.ToBBE();
-        set => engine.WindowState = value.ToOpenTK();
+        get => _engine.WindowState.ToBBE();
+        set => _engine.WindowState = value.ToOpenTK();
     }
 
     public string Title
     {
-        get => engine.Title;
-        set => engine.Title = value;
+        get => _engine.Title;
+        set => _engine.Title = value;
     }
 
     public bool VSync
     {
-        get => engine.VSync == OpenTKVSyncMode.On;
-        set => engine.VSync = value ? OpenTKVSyncMode.On : OpenTKVSyncMode.Off;
+        get => _engine.VSync == OpenTKVSyncMode.On;
+        set => _engine.VSync = value ? OpenTKVSyncMode.On : OpenTKVSyncMode.Off;
     }
 
-    public int Width => engine.ClientSize.X;
+    public int Width => _engine.ClientSize.X;
 
     public int X
     {
-        get => engine.Location.X;
-        set => engine.Location = new Vector2i(value, engine.Location.Y);
+        get => _engine.Location.X;
+        set => _engine.Location = new Vector2i(value, _engine.Location.Y);
     }
 
     public int Y
     {
-        get => engine.Location.Y;
-        set => engine.Location = new Vector2i(engine.Location.X, value);
+        get => _engine.Location.Y;
+        set => _engine.Location = new Vector2i(_engine.Location.X, value);
     }
 
-    public event Action<OpenTKResizeEventArgs>? Resize
-    {
-        add { engine.Resize += value; }
-        remove { engine.Resize -= value; }
-    }
+    public event Action<WindowResizeEventArgs>? Resize;
 
-    public void Centre() => engine.CenterWindow();
+    public void Centre() => _engine.CenterWindow();
 
     public void Close()
     {
-        engine._programmaticClose = true;
-        engine.Close();
+        _engine._programmaticClose = true;
+        _engine.Close();
+    }
+
+    private void OnEngineResize(OpenTKResizeEventArgs e)
+    {
+        Resize?.Invoke(new WindowResizeEventArgs(e.Width, e.Height));
     }
 }
