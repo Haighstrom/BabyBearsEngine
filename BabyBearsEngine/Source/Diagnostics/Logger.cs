@@ -15,11 +15,6 @@ public static class Logger
 
         var logLocation = Path.Combine(Directory.GetCurrentDirectory(), "log.txt");
 
-        if (!Directory.Exists(logLocation))
-        {
-            Directory.CreateDirectory(logLocation);
-        }
-
         factory.AddFile(logLocation);
 
         return logger;
