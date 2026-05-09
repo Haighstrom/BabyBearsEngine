@@ -45,9 +45,25 @@ public class ColourTests
         Assert.AreEqual((byte)255, c.A);
     }
 
-    // Note: out-of-range float clamping is intentionally not directly tested. In DEBUG builds,
-    // FloatToByte calls Logger.Log which currently fails due to a pre-existing bug in Logger
-    // (creates log.txt as a directory). Restore these tests once Logger is fixed.
+    [TestMethod]
+    public void FloatConstructor_ClampsBelowZero()
+    {
+        Colour c = new(-0.5f, -1f, -10f, -0.5f);
+        Assert.AreEqual((byte)0, c.R);
+        Assert.AreEqual((byte)0, c.G);
+        Assert.AreEqual((byte)0, c.B);
+        Assert.AreEqual((byte)0, c.A);
+    }
+
+    [TestMethod]
+    public void FloatConstructor_ClampsAboveOne()
+    {
+        Colour c = new(1.5f, 2f, 100f, 5f);
+        Assert.AreEqual((byte)255, c.R);
+        Assert.AreEqual((byte)255, c.G);
+        Assert.AreEqual((byte)255, c.B);
+        Assert.AreEqual((byte)255, c.A);
+    }
 
     [TestMethod]
     public void CopyByteAlphaConstructor_ReplacesAlpha_PreservesRgb()

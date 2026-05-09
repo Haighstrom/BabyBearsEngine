@@ -13,8 +13,7 @@ Foundational value types, recently-refactored surfaces, entry points. Stable eno
 ### 1.1 — Colour
 - **File:** [BabyBearsEngine/Source/Colour.cs](BabyBearsEngine/Source/Colour.cs)
 - **Docs:** Done (full XML).
-- **Tests:** Done. 26 tests in [Tests/Unit/ColourTests.cs](Tests/Unit/ColourTests.cs) covering constructors, normalised components, equality, `WithAlpha`, `Darkened`/`Lightened`, `ToArgb`, `ToColor`, OpenTK round-trip, named-colour spot checks.
-- **Follow-up:** Two clamp tests (out-of-range float input) skipped — they trip a pre-existing bug in [Logger.cs:18-21](BabyBearsEngine/Source/Diagnostics/Logger.cs#L18-L21) where `log.txt` is created as a *directory* instead of a file (the `if (!Directory.Exists(logLocation)) Directory.CreateDirectory(logLocation)` block uses the file path for both checks). DEBUG-mode `FloatToByte` clamp warnings then fail when the file logger tries to append. Restore those tests once Logger is fixed.
+- **Tests:** Done. 28 tests in [Tests/Unit/ColourTests.cs](Tests/Unit/ColourTests.cs) covering constructors (incl. clamp behaviour), normalised components, equality, `WithAlpha`, `Darkened`/`Lightened`, `ToArgb`, `ToColor`, OpenTK round-trip, named-colour spot checks.
 
 ### 1.2 — Rect
 - **File:** [BabyBearsEngine/Source/Geometry/Rect.cs](BabyBearsEngine/Source/Geometry/Rect.cs)
