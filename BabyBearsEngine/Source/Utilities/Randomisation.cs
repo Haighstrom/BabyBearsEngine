@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using OpenTK.Mathematics;
 
 namespace BabyBearsEngine;
 
@@ -61,7 +60,7 @@ public static class Randomisation
     }
 
 
-    public static Color4 RandColour() => new((byte)Rand(255), (byte)Rand(255), (byte)Rand(255), 255);
+    public static Colour RandColour() => new((byte)Rand(255), (byte)Rand(255), (byte)Rand(255), 255);
 
     //public static Point RandPoint() => new(RandF(2) - 1, RandF(2) - 1);
 

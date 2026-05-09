@@ -9,14 +9,14 @@ public sealed class PointGraphic : GraphicBase
     private readonly PointShaderProgram _shader;
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
 
-    public PointGraphic(int x, int y, float size, OpenTK.Mathematics.Color4 colour)
+    public PointGraphic(int x, int y, float size, Colour colour)
     {
         _shader = new PointShaderProgram();
         _shader.SetPointSize(size);
 
         VertexNoTexture[] vertices =
         [
-            new(x, y, colour),
+            new(x, y, colour.ToOpenTK()),
         ];
 
         _vertexDataBuffer.SetNewVertices(vertices);

@@ -10,7 +10,7 @@ public sealed class StbTrueTypeTextGraphic(float x, float y, float width, float 
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
     private readonly Texture _texture = FontTexture.GetStbFontTexture("Assets/Fonts/Times.ttf", text);
 
-    private OpenTK.Mathematics.Color4 _colour = OpenTK.Mathematics.Color4.White;
+    private Colour _colour = Colour.White;
     private bool _verticesChanged = true;
 
 
@@ -55,7 +55,7 @@ public sealed class StbTrueTypeTextGraphic(float x, float y, float width, float 
         }
     }
 
-    public OpenTK.Mathematics.Color4 Colour
+    public Colour Colour
     {
         get => _colour;
         set
@@ -69,12 +69,13 @@ public sealed class StbTrueTypeTextGraphic(float x, float y, float width, float 
     {
         get
         {
+            var c = Colour.ToOpenTK();
             return
             [
-                new(x + width, y + height, Colour, 1, 1), // top right
-                new(x + width, y, Colour, 1, 0), // bottom right
-                new(x, y + height, Colour, 0, 1), // top left
-                new(x, y, Colour, 0, 0), // bottom left
+                new(x + width, y + height, c, 1, 1), // top right
+                new(x + width, y, c, 1, 0), // bottom right
+                new(x, y + height, c, 0, 1), // top left
+                new(x, y, c, 0, 0), // bottom left
             ];
         }
     }

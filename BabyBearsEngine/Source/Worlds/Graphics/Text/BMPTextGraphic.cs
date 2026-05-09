@@ -19,9 +19,9 @@ public sealed class BMPTextGraphic : GraphicBase, ITextGraphic
     private float _width;
     private float _height;
     private string _text;
-    private OpenTK.Mathematics.Color4 _colour;
+    private Colour _colour;
 
-    public BMPTextGraphic(FontDefinition fontDef, float x, float y, float width, float height, string text, OpenTK.Mathematics.Color4 colour)
+    public BMPTextGraphic(FontDefinition fontDef, float x, float y, float width, float height, string text, Colour colour)
     {
         _x = x;
         _y = y;
@@ -84,9 +84,9 @@ public sealed class BMPTextGraphic : GraphicBase, ITextGraphic
         }
     }
 
-    public OpenTK.Mathematics.Color4 Colour
+    public Colour Colour
     {
-        get => _colour; 
+        get => _colour;
         set
         {
             if (_colour != value)
