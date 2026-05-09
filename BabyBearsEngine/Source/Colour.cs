@@ -573,8 +573,8 @@ public record struct Colour(byte R, byte G, byte B, byte A = 255) : IEquatable<C
     /// <summary>Returns this colour as a <see cref="System.Drawing.Color"/>.</summary>
     public readonly System.Drawing.Color ToColor => System.Drawing.Color.FromArgb(A, R, G, B);
 
-    /// <summary>Returns this colour as an OpenTK <see cref="OpenTK.Mathematics.Color4"/>.</summary>
-    public readonly OpenTK.Mathematics.Color4 ToOpenTK() => new(NormalisedR, NormalisedG, NormalisedB, NormalisedA);
+    /// <summary>Returns this colour as an OpenTK <see cref="OpenTK.Mathematics.Color4"/>. Internal bridge for the platform layer.</summary>
+    internal readonly OpenTK.Mathematics.Color4 ToOpenTK() => new(NormalisedR, NormalisedG, NormalisedB, NormalisedA);
 
     /// <summary>Returns this colour with the alpha replaced.</summary>
     /// <param name="alpha">New alpha component, 0–255.</param>

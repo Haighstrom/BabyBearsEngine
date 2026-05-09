@@ -101,11 +101,42 @@ Two small enums consumed by both `IWindow` and `WindowSettings`.
 
 ---
 
-## Step 8 — Address remaining leaks from the Step 1 survey
+## Step 8 — Address remaining `Color4` leaks
+
+**Status:** In progress (8a done; 8b–8d pending)
+
+Step 1 re-survey (after Steps 2–7) confirmed all remaining public-API leaks involve `OpenTK.Mathematics.Color4`. BBE already has its own [`Colour`](BabyBearsEngine/Source/Colour.cs) (`record struct` with byte RGBA) — migration is consumer-by-consumer.
+
+Convention: inbound conversions (foreign → BBE) are named after the target type (`ToColour`, `ToKeys`, `ToMouseButton`, `ToWindowBorder`, `ToWindowState`, `ToWindowIcon`); outbound (BBE → OpenTK) keeps the foreign-library marker (`ToOpenTK`).
+
+### 8a — Mappings + `Colour.ToOpenTK` visibility
+
+**Status:** Done
+
+- Renamed all `ToBBE` extensions in [OpenTKMappings.cs](BabyBearsEngine/Source/Platform/OpenTK/OpenTKMappings.cs) to typed equivalents (`ToKeys`, `ToMouseButton`, `ToWindowBorder`, `ToWindowState`, `ToWindowIcon`).
+- Added `ToColour(this Color4)` for inbound conversion. Outbound stayed as the existing `Colour.ToOpenTK()` instance method to avoid forcing platform `using` directives into multiple call sites.
+- `Colour.ToOpenTK()` changed from `public` to `internal` — visible only to platform/internal callers via existing `InternalsVisibleTo` setup. No external consumers found in Demos/Sandbox.
+- Updated three callers in `OpenTKWindowAdapter` (`WindowBorder`/`Icon`/`WindowState` getters).
+
+### 8b — `Randomisation.RandColour`
 
 **Status:** Not started
 
-Anything else discovered (text graphics, font generation, etc.) — handle case-by-case. Likely candidates are public API; resolution may be mirror, internalise, or leave alone if not user-facing.
+[Randomisation.cs:64](BabyBearsEngine/Source/Utilities/Randomisation.cs#L64) — change `public static Color4 RandColour()` to return BBE `Colour`. Drop the `using OpenTK.Mathematics;` from the file. Trivial change; BBE `Colour(byte, byte, byte, byte)` ctor matches the existing call shape.
+
+### 8c — `PointGraphic` ctor
+
+**Status:** Not started
+
+[PointGraphic.cs:12](BabyBearsEngine/Source/Worlds/Graphics/PointGraphic.cs#L12) — change ctor parameter from `Color4` to BBE `Colour`. The internal `VertexNoTexture` consumer of the colour stays as `Color4`; convert at the boundary using `Colour.ToOpenTK()`.
+
+### 8d — `ITextGraphic` + `BMPTextGraphic` + `StbTrueTypeTextGraphic`
+
+**Status:** Not started
+
+[ITextGraphic.Colour](BabyBearsEngine/Source/Worlds/Graphics/Text/ITextGraphic.cs#L8) is `Color4`; both implementations follow suit. Change the interface property type to BBE `Colour`, store as `Colour` internally in each impl, convert with `ToOpenTK()` only when constructing `Vertex` instances. Single coordinated change because the interface forces both impls.
+
+After 8b–8d, the BBE public surface should be entirely OpenTK-free.
 
 ---
 

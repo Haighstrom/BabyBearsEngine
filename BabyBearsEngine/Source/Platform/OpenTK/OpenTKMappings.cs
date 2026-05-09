@@ -3,6 +3,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;
 
+using OpenTKColor4 = OpenTK.Mathematics.Color4;
 using OpenTKCursorState = OpenTK.Windowing.Common.CursorState;
 using OpenTKImage = OpenTK.Windowing.Common.Input.Image;
 using OpenTKKeys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
@@ -69,17 +70,23 @@ internal static class OpenTkMappings
         _                        => MouseCursor.Default,
     };
 
+    public static Colour ToColour(this OpenTKColor4 colour) => new(
+        (byte)Math.Round(colour.R * 255),
+        (byte)Math.Round(colour.G * 255),
+        (byte)Math.Round(colour.B * 255),
+        (byte)Math.Round(colour.A * 255));
+
     public static OpenTKKeys ToOpenTK(this Keys key) => (OpenTKKeys)key;
-    public static Keys ToBBE(this OpenTKKeys key) => (Keys)key;
+    public static Keys ToKeys(this OpenTKKeys key) => (Keys)key;
 
     public static OpenTKMouseButton ToOpenTK(this MouseButton button) => (OpenTKMouseButton)button;
-    public static MouseButton ToBBE(this OpenTKMouseButton button) => (MouseButton)button;
+    public static MouseButton ToMouseButton(this OpenTKMouseButton button) => (MouseButton)button;
 
     public static OpenTKWindowBorder ToOpenTK(this WindowBorder border) => (OpenTKWindowBorder)border;
-    public static WindowBorder ToBBE(this OpenTKWindowBorder border) => (WindowBorder)border;
+    public static WindowBorder ToWindowBorder(this OpenTKWindowBorder border) => (WindowBorder)border;
 
     public static OpenTKWindowState ToOpenTK(this WindowState state) => (OpenTKWindowState)state;
-    public static WindowState ToBBE(this OpenTKWindowState state) => (WindowState)state;
+    public static WindowState ToWindowState(this OpenTKWindowState state) => (WindowState)state;
 
     public static OpenTKWindowIcon ToOpenTK(this WindowIcon icon)
     {
@@ -90,7 +97,7 @@ internal static class OpenTkMappings
         return new OpenTKWindowIcon(new OpenTKImage(icon.Width, icon.Height, icon.Pixels));
     }
 
-    public static WindowIcon ToBBE(this OpenTKWindowIcon icon)
+    public static WindowIcon ToWindowIcon(this OpenTKWindowIcon icon)
     {
         if (icon.Images.Length == 0)
         {

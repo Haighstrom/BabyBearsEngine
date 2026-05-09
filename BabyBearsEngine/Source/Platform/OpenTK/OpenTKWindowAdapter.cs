@@ -20,7 +20,7 @@ internal sealed class OpenTKWindowAdapter : IWindow
 
     public WindowBorder Border
     {
-        get => _engine.WindowBorder.ToBBE();
+        get => _engine.WindowBorder.ToWindowBorder();
         set => _engine.WindowBorder = value.ToOpenTK();
     }
 
@@ -62,7 +62,7 @@ internal sealed class OpenTKWindowAdapter : IWindow
 
     public WindowIcon Icon
     {
-        get => _engine.Icon?.ToBBE() ?? new WindowIcon();
+        get => _engine.Icon?.ToWindowIcon() ?? new WindowIcon();
         set => _engine.Icon = value.ToOpenTK();
     }
 
@@ -88,7 +88,7 @@ internal sealed class OpenTKWindowAdapter : IWindow
 
     public WindowState State
     {
-        get => _engine.WindowState.ToBBE();
+        get => _engine.WindowState.ToWindowState();
         set => _engine.WindowState = value.ToOpenTK();
     }
 
