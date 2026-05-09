@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
 
@@ -111,39 +112,40 @@ public sealed class Rect
     }
 
     /// <summary>
-    /// Generate a rect from the ToString() of another ie "X:" + x + ",Y:" + y + ",W:" + w + ",H:" + h. Useful for saving rects to file.
+    /// Parses a rectangle from the format produced by <see cref="ToString"/>: <c>{X=1,Y=2,W=3,H=4}</c>.
+    /// Values are parsed as <see cref="float"/> using <see cref="CultureInfo.InvariantCulture"/>.
     /// </summary>
-    /// <param name="rectString"></param>
+    /// <param name="rectString">A string in the form <c>{X=...,Y=...,W=...,H=...}</c>.</param>
+    /// <exception cref="FormatException">Thrown if the input does not match the expected format.</exception>
     public Rect(string rectString)
     {
-        X = Y = W = H = 0;
+        ArgumentNullException.ThrowIfNull(rectString);
 
-        string[] substrings = rectString.Split(',');
-
-        if (substrings.Length != 4)
+        if (rectString.Length < 2 || rectString[0] != '{' || rectString[^1] != '}')
         {
-            throw new Exception("Error trying to decode rect string");
+            throw new FormatException($"Expected format '{{X=..,Y=..,W=..,H=..}}', got '{rectString}'.");
         }
 
-        for (int i = 0; i < 4; i++)
+        string[] parts = rectString[1..^1].Split(',');
+        if (parts.Length != 4)
         {
-            substrings[i] = substrings[i][2..]; //Remove "X:" etc
-            switch (i)
-            {
-                case 0:
-                    X = float.Parse(substrings[i]);
-                    break;
-                case 1:
-                    Y = float.Parse(substrings[i]);
-                    break;
-                case 2:
-                    W = float.Parse(substrings[i]);
-                    break;
-                case 3:
-                    H = float.Parse(substrings[i]);
-                    break;
-            }
+            throw new FormatException($"Expected 4 comma-separated components, got {parts.Length} in '{rectString}'.");
         }
+
+        X = ParseComponent(parts[0], "X");
+        Y = ParseComponent(parts[1], "Y");
+        W = ParseComponent(parts[2], "W");
+        H = ParseComponent(parts[3], "H");
+    }
+
+    private static float ParseComponent(string part, string expectedKey)
+    {
+        string[] kv = part.Split('=');
+        if (kv.Length != 2 || kv[0] != expectedKey)
+        {
+            throw new FormatException($"Expected '{expectedKey}=...', got '{part}'.");
+        }
+        return float.Parse(kv[1], CultureInfo.InvariantCulture);
     }
 
     /// <summary>
@@ -534,8 +536,8 @@ public sealed class Rect
     public static Rect operator -(Rect left, Rect right) => new(left.X - right.X, left.Y - right.Y, left.W - right.W, left.H - right.H);
 
     /// <summary>
-    /// Returns a string of the form <c>(X:1.0,Y:2.0,W:3.0,H:4.0)</c>. Note: this format does NOT round-trip with the <see cref="Rect(string)"/> constructor,
-    /// which expects an unparenthesised <c>X:1,Y:2,W:3,H:4</c> form.
+    /// Returns a string of the form <c>{X=1,Y=2,W=3,H=4}</c> using <see cref="CultureInfo.InvariantCulture"/>.
+    /// Round-trips through <see cref="Rect(string)"/>.
     /// </summary>
-    public override string ToString() => $"(X:{X:0.0},Y:{Y:0.0},W:{W:0.0},H:{H:0.0})";
+    public override string ToString() => FormattableString.Invariant($"{{X={X},Y={Y},W={W},H={H}}}");
 }

@@ -125,9 +125,9 @@ public class RectTests
     }
 
     [TestMethod]
-    public void Constructor_String_ParsesXYWHFormat()
+    public void Constructor_String_ParsesBraceEqualsFormat()
     {
-        Rect r = new("X:1.5,Y:2.5,W:3.5,H:4.5");
+        Rect r = new("{X=1.5,Y=2.5,W=3.5,H=4.5}");
         Assert.AreEqual(1.5f, r.X);
         Assert.AreEqual(2.5f, r.Y);
         Assert.AreEqual(3.5f, r.W);
@@ -135,9 +135,37 @@ public class RectTests
     }
 
     [TestMethod]
+    public void Constructor_String_ThrowsOnMissingBraces()
+    {
+        Assert.ThrowsExactly<FormatException>(() => new Rect("X=1,Y=2,W=3,H=4"));
+    }
+
+    [TestMethod]
     public void Constructor_String_ThrowsOnWrongPartCount()
     {
-        Assert.ThrowsExactly<Exception>(() => new Rect("X:1,Y:2,W:3"));
+        Assert.ThrowsExactly<FormatException>(() => new Rect("{X=1,Y=2,W=3}"));
+    }
+
+    [TestMethod]
+    public void Constructor_String_ThrowsOnWrongKey()
+    {
+        Assert.ThrowsExactly<FormatException>(() => new Rect("{X=1,Y=2,Width=3,H=4}"));
+    }
+
+    [TestMethod]
+    public void Constructor_String_RoundTripsViaToString()
+    {
+        Rect original = new(1.5f, 2.5f, 3.5f, 4.5f);
+        Rect roundTripped = new(original.ToString());
+        Assert.AreEqual(original, roundTripped);
+    }
+
+    [TestMethod]
+    public void Constructor_String_RoundTripsForIntegerValues()
+    {
+        Rect original = new(1f, 2f, 3f, 4f);
+        Rect roundTripped = new(original.ToString());
+        Assert.AreEqual(original, roundTripped);
     }
 
     // Edge accessors
@@ -615,9 +643,16 @@ public class RectTests
     // ToString
 
     [TestMethod]
-    public void ToString_ProducesParenthesisedFormatToOneDecimal()
+    public void ToString_ProducesBraceEqualsFormat()
     {
         Rect r = new(1.5f, 2.5f, 3.5f, 4.5f);
-        Assert.AreEqual("(X:1.5,Y:2.5,W:3.5,H:4.5)", r.ToString());
+        Assert.AreEqual("{X=1.5,Y=2.5,W=3.5,H=4.5}", r.ToString());
+    }
+
+    [TestMethod]
+    public void ToString_OmitsTrailingZerosForIntegerValues()
+    {
+        Rect r = new(1f, 2f, 3f, 4f);
+        Assert.AreEqual("{X=1,Y=2,W=3,H=4}", r.ToString());
     }
 }
