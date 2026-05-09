@@ -17,8 +17,10 @@ Foundational value types, recently-refactored surfaces, entry points. Stable eno
 
 ### 1.2 — Rect
 - **File:** [BabyBearsEngine/Source/Geometry/Rect.cs](BabyBearsEngine/Source/Geometry/Rect.cs)
-- **Docs:** Finish (currently partial).
-- **Tests:** Add. Pure geometry — `Intersection`, `Intersects`, `Contains` (multiple overloads, edge-on-border cases), `Shift`, `Scale`, `ScaleAround`, `ResizeAround`, `Grow`, `Zeroed`, derived properties (`Left`/`Right`/`Top`/`Bottom`/`Centre*`/`*Right`/etc.), operators, `EmptyRect`/`UnitRect`. The string ctor + `ToString` round-trip is also worth pinning.
+- **Docs:** Done. Added XML to all 8 constructors, all 5 operators, `ToString`, and beefed up the class summary. Fixed a doc typo (duplicate `<param name="originX">` → `originY` on `ResizeAround`).
+- **Tests:** Done. 60 tests in [Tests/Unit/RectTests.cs](Tests/Unit/RectTests.cs) covering static factories, all 8 ctors, string ctor, edge accessors, area/size/min-max sides, P/corner/centre points, `Zeroed`, `Resize`, `Shift` (3 overloads), `Scale`/`ScaleAround`/`ScaleAroundCentre`, `ResizeAround`, `Grow` (uniform + per-side + negative), `Intersects` (with `touchingCounts`), `Intersection`, `Contains` (4 overloads incl. edge-flag combinations), `ToVertices`, equality + operators, `ToString`.
+- **Bug found and fixed:** [Rect.cs:413](BabyBearsEngine/Source/Geometry/Rect.cs#L413) — `Contains(float x, float y, float w, float h)` used `X + H` (height) instead of `X + W` (width) for the right-edge check. Wrong results for non-square rects. Test `Contains_XYWH_OverflowingRight_ReturnsFalse` is the regression guard.
+- **Open question (not blocking):** [Rect(string)](BabyBearsEngine/Source/Geometry/Rect.cs#L92) constructor's docstring says "Generate a rect from the ToString() of another", but `ToString()` produces `(X:1.0,Y:2.0,W:3.0,H:4.0)` (parenthesised) while the ctor expects unparenthesised `X:1,Y:2,W:3,H:4`. The two formats don't round-trip. Documented the mismatch on `ToString`; either the ctor should strip parens or `ToString` should drop them. Worth a follow-up.
 
 ### 1.3 — Static facades (Window / Keyboard / Mouse)
 - **Files:** [Windowing/Window.cs](BabyBearsEngine/Source/Windowing/Window.cs), [Input/Keyboard.cs](BabyBearsEngine/Source/Input/Keyboard.cs), [Input/Mouse.cs](BabyBearsEngine/Source/Input/Mouse.cs)

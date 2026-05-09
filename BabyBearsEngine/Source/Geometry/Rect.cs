@@ -5,7 +5,8 @@ using System.Xml.Serialization;
 namespace BabyBearsEngine.Geometry;
 
 /// <summary>
-/// A class to represent a rectangle.
+/// An axis-aligned rectangle defined by its top-left corner (<see cref="X"/>, <see cref="Y"/>) and its size (<see cref="W"/>, <see cref="H"/>).
+/// Coordinates use a top-left origin: increasing <see cref="Y"/> moves downward, so <see cref="Top"/> is the smaller Y and <see cref="Bottom"/> is the larger Y.
 /// </summary>
 public sealed class Rect
 {
@@ -42,6 +43,11 @@ public sealed class Rect
         return answer;
     }
 
+    /// <summary>Creates a rectangle from explicit top-left coordinates and size.</summary>
+    /// <param name="x">The X-coordinate of the top-left corner.</param>
+    /// <param name="y">The Y-coordinate of the top-left corner.</param>
+    /// <param name="width">The width.</param>
+    /// <param name="height">The height.</param>
     public Rect(float x, float y, float width, float height)
     {
         X = x;
@@ -50,36 +56,55 @@ public sealed class Rect
         H = height;
     }
 
+    /// <summary>Creates an empty rectangle at the origin (X = Y = W = H = 0).</summary>
     public Rect()
         : this(0, 0, 0, 0)
     {
     }
 
+    /// <summary>Creates a rectangle at the origin with the given size.</summary>
+    /// <param name="width">The width.</param>
+    /// <param name="height">The height.</param>
     public Rect(float width, float height)
         : this(0, 0, width, height)
     {
     }
 
+    /// <summary>Creates a rectangle as a copy of another.</summary>
+    /// <param name="rect">The rectangle to copy.</param>
     public Rect(Rect rect)
         : this(rect.X, rect.Y, rect.W, rect.H)
     {
     }
 
+    /// <summary>Creates a rectangle from a top-left position and explicit size.</summary>
+    /// <param name="position">The top-left corner.</param>
+    /// <param name="width">The width.</param>
+    /// <param name="height">The height.</param>
     public Rect(Point position, float width, float height)
         : this(position.X, position.Y, width, height)
     {
     }
 
+    /// <summary>Creates a rectangle at the origin whose width and height are taken from a <see cref="Point"/>.</summary>
+    /// <param name="size">A point whose X is the width and Y is the height.</param>
     public Rect(Point size)
         : this(0, 0, size.X, size.Y)
     {
     }
 
+    /// <summary>Creates a rectangle from explicit top-left coordinates and a size taken from a <see cref="Point"/>.</summary>
+    /// <param name="x">The X-coordinate of the top-left corner.</param>
+    /// <param name="y">The Y-coordinate of the top-left corner.</param>
+    /// <param name="size">A point whose X is the width and Y is the height.</param>
     public Rect(float x, float y, Point size)
         : this(x, y, size.X, size.Y)
     {
     }
 
+    /// <summary>Creates a rectangle from a top-left position and a size, both expressed as <see cref="Point"/>s.</summary>
+    /// <param name="position">The top-left corner.</param>
+    /// <param name="size">A point whose X is the width and Y is the height.</param>
     public Rect(Point position, Point size)
         : this(position.X, position.Y, size.X, size.Y)
     {
@@ -341,7 +366,7 @@ public sealed class Rect
     /// Resizes a rectangle while scaling its X and Y relative to the coordinates given.
     /// </summary>
     /// <param name="originX">The x-coordinate to scale around.</param>
-    /// <param name="originX">The y-coordinate to scale around.</param>
+    /// <param name="originY">The y-coordinate to scale around.</param>
     /// <param name="newW">The new width.</param>
     /// <param name="newH">The new height.</param>
     /// <returns>Returns a new resized rectangle.</returns>
@@ -410,7 +435,7 @@ public sealed class Rect
     /// <param name="w">The width of the rectangle to test.</param>
     /// <param name="h">The height of the rectangle to test.</param>
     /// <returns>Returns true if the other rectangle is within this one, false otherwise.</returns>
-    public bool Contains(float x, float y, float w, float h) => X <= x && Y <= y && X + H >= x + w && Y + H >= y + h;
+    public bool Contains(float x, float y, float w, float h) => X <= x && Y <= y && X + W >= x + w && Y + H >= y + h;
 
     /// <summary>
     /// Checks whether this rectangle contains a <see cref="Point"/>.
@@ -493,15 +518,24 @@ public sealed class Rect
         _ => false,
     };
 
+    /// <summary>Value equality: two rectangles are equal when their X, Y, W, and H all match.</summary>
     public static bool operator ==(Rect r1, Rect? r2) => r1.Equals(r2);
 
+    /// <summary>Negation of <see cref="op_Equality"/>.</summary>
     public static bool operator !=(Rect r1, Rect? r2) => !r1.Equals(r2);
 
+    /// <summary>Returns a new rectangle translated by <paramref name="p"/>. Width and height are unchanged.</summary>
     public static Rect operator +(Rect r, Point p) => new(r.X + p.X, r.Y + p.Y, r.W, r.H);
 
+    /// <summary>Returns a new rectangle whose X, Y, W, H are the component-wise sum of the operands.</summary>
     public static Rect operator +(Rect left, Rect right) => new(left.X + right.X, left.Y + right.Y, left.W + right.W, left.H + right.H);
 
+    /// <summary>Returns a new rectangle whose X, Y, W, H are the component-wise difference of the operands.</summary>
     public static Rect operator -(Rect left, Rect right) => new(left.X - right.X, left.Y - right.Y, left.W - right.W, left.H - right.H);
 
+    /// <summary>
+    /// Returns a string of the form <c>(X:1.0,Y:2.0,W:3.0,H:4.0)</c>. Note: this format does NOT round-trip with the <see cref="Rect(string)"/> constructor,
+    /// which expects an unparenthesised <c>X:1,Y:2,W:3,H:4</c> form.
+    /// </summary>
     public override string ToString() => $"(X:{X:0.0},Y:{Y:0.0},W:{W:0.0},H:{H:0.0})";
 }
