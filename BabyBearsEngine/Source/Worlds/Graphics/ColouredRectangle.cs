@@ -3,6 +3,16 @@ using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Graphics;
 
+/// <summary>
+/// A solid-colour filled rectangle. Construction allocates GL resources (vertex buffer, shader binding) —
+/// must be created on the engine thread after the GL context exists. Implements <see cref="IDisposable"/>
+/// to release those resources.
+/// </summary>
+/// <param name="colour">Fill colour.</param>
+/// <param name="x">X position in the parent's local space.</param>
+/// <param name="y">Y position in the parent's local space.</param>
+/// <param name="width">Width in pixels.</param>
+/// <param name="height">Height in pixels.</param>
 public sealed class ColouredRectangle(Colour colour, float x, float y, float width, float height) : GraphicBase, IDisposable
 {
     private bool _disposed;
@@ -11,9 +21,13 @@ public sealed class ColouredRectangle(Colour colour, float x, float y, float wid
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
     private bool _verticesChanged = true;
 
+    /// <summary>X position in the parent's local space.</summary>
     public float X { get; set; } = x;
+
+    /// <summary>Y position in the parent's local space.</summary>
     public float Y { get; set; } = y;
 
+    /// <summary>Width in pixels.</summary>
     public float Width
     {
         get => width;
@@ -24,16 +38,18 @@ public sealed class ColouredRectangle(Colour colour, float x, float y, float wid
         }
     }
 
+    /// <summary>Height in pixels.</summary>
     public float Height
     {
         get => height;
         set
         {
-            height = value; 
+            height = value;
             _verticesChanged = true;
         }
     }
 
+    /// <summary>Fill colour.</summary>
     public Colour Colour
     {
         get => colour;

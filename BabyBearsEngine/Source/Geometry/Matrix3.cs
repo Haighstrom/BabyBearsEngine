@@ -2,29 +2,48 @@ using System.Linq;
 
 namespace BabyBearsEngine.Geometry;
 
+/// <summary>
+/// A 3×3 matrix used for 2D affine transformations (translation, rotation, scale, shear, projection).
+/// Elements are stored column-major in <see cref="Values"/>:
+/// <code>
+/// (0  3  6)
+/// (1  4  7)
+/// (2  5  8)
+/// </code>
+/// Multiplication composes transforms: <c>a * b</c> applies <c>b</c> first then <c>a</c>.
+/// Most static helpers take <c>ref Matrix3</c> for performance — they return new matrices and never mutate the inputs.
+/// </summary>
 public struct Matrix3
 {
-    //Matrix Layout
-    //(0  3  6)
-    //(1  4  7)
-    //(2  5  8)
+    /// <summary>The identity matrix — leaves any vector or matrix unchanged when multiplied. Returns a fresh instance per access (the underlying array is not shared).</summary>
+    public static Matrix3 Identity => new(1, 0, 0, 0, 1, 0, 0, 0, 1);
 
-    public static Matrix3 Identity = new(1, 0, 0, 0, 1, 0, 0, 0, 1);
-    public static Matrix3 Zero = new(0, 0, 0, 0, 0, 0, 0, 0, 0);
-    public static Matrix3 FlipXMatrix = new(-1, 0, 0, 0, 1, 0, 0, 0, 1);
-    public static Matrix3 FlipYMatrix = new(1, 0, 0, 0, -1, 0, 0, 0, 1);
+    /// <summary>The zero matrix — all elements are zero. Returns a fresh instance per access.</summary>
+    public static Matrix3 Zero => new(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
+    /// <summary>A reflection across the Y axis (negates X). Returns a fresh instance per access.</summary>
+    public static Matrix3 FlipXMatrix => new(-1, 0, 0, 0, 1, 0, 0, 0, 1);
 
+    /// <summary>A reflection across the X axis (negates Y). Returns a fresh instance per access.</summary>
+    public static Matrix3 FlipYMatrix => new(1, 0, 0, 0, -1, 0, 0, 0, 1);
+
+    /// <summary>Returns a translation matrix that moves points by (<paramref name="x"/>, <paramref name="y"/>).</summary>
     public static Matrix3 CreateTranslation(float x, float y) => new(1, 0, 0, 0, 1, 0, x, y, 1);
 
+    /// <summary>Returns a rotation matrix that rotates points around the Z axis by <paramref name="angleInDegrees"/> (counter-clockwise in a right-handed coordinate system).</summary>
     public static Matrix3 CreateRotationAroundZAxis(float angleInDegrees)
     {
         double radians = Math.PI * angleInDegrees / 180.0;
         return new Matrix3((float)Math.Cos(radians), (float)Math.Sin(radians), 0, -(float)Math.Sin(radians), (float)Math.Cos(radians), 0, 0, 0, 1);
     }
 
+    /// <summary>Returns a scale matrix that scales X by <paramref name="scaleX"/> and Y by <paramref name="scaleY"/>.</summary>
     public static Matrix3 CreateScale(float scaleX, float scaleY) => new(scaleX, 0, 0, 0, scaleY, 0, 0, 0, 1);
 
+    /// <summary>
+    /// Returns an orthographic projection matrix mapping a (<paramref name="width"/>, <paramref name="height"/>) screen-space rectangle
+    /// (top-left origin, Y down) onto NDC (-1..1, Y up). Used to render directly to the screen.
+    /// </summary>
     public static Matrix3 CreateOrtho(float width, float height)
     {
         var mat = Identity;
@@ -34,9 +53,9 @@ public struct Matrix3
         return mat;
     }
 
-
     /// <summary>
-    /// Same as CreateOrtho but without the FlipY stage. Use for makign projection matrices when rendering to a framebuffer rather than screen.
+    /// Same as <see cref="CreateOrtho"/> but without the Y flip. Use this when rendering to a framebuffer texture
+    /// rather than directly to the screen, since the framebuffer's Y axis already matches OpenGL's convention.
     /// </summary>
     public static Matrix3 CreateFBOOrtho(float width, float height)
     {
@@ -45,10 +64,13 @@ public struct Matrix3
         return mat;
     }
 
+    /// <summary>Returns a new matrix whose elements are the component-wise sum of <paramref name="mat1"/> and <paramref name="mat2"/>.</summary>
     public static Matrix3 Add(ref Matrix3 mat1, ref Matrix3 mat2) => new(mat1._values.Zip(mat2._values, (a, b) => a + b).ToArray());
 
+    /// <summary>Returns a new matrix whose elements are the component-wise difference of <paramref name="mat1"/> and <paramref name="mat2"/>.</summary>
     public static Matrix3 Subtract(ref Matrix3 mat1, ref Matrix3 mat2) => new(mat1._values.Zip(mat2._values, (a, b) => a - b).ToArray());
 
+    /// <summary>Returns the matrix product <paramref name="mat1"/> × <paramref name="mat2"/>. Composition order: <paramref name="mat2"/> is applied first.</summary>
     public static Matrix3 Multiply(ref Matrix3 mat1, ref Matrix3 mat2)
     {
         return new Matrix3
@@ -66,11 +88,9 @@ public struct Matrix3
     }
 
     /// <summary>
-    /// Applying matrix to a Point to transform it to a new Point - it will be padded to (x y 1) then just the first 2 dimensions returned.
+    /// Transforms a 2D <see cref="Point"/>. The point is padded to <c>(x, y, 1)</c> before multiplication so translation is applied;
+    /// only the first two components of the result are returned.
     /// </summary>
-    /// <param name="mat"></param>
-    /// <param name="p"></param>
-    /// <returns></returns>
     public static Point Multiply(ref Matrix3 mat, Point p)
     {
         return new Point
@@ -80,12 +100,7 @@ public struct Matrix3
             );
     }
 
-    /// <summary>
-    /// Applying matrix to a Point3 to transform it to a new Point3
-    /// </summary>
-    /// <param name="mat"></param>
-    /// <param name="p"></param>
-    /// <returns></returns>
+    /// <summary>Transforms a homogeneous 3D <see cref="Point3"/> by this matrix.</summary>
     public static Point3 Multiply(ref Matrix3 mat, Point3 p)
     {
         return new Point3
@@ -96,9 +111,7 @@ public struct Matrix3
             );
     }
 
-    /// <summary>
-    /// Scalar multiplication
-    /// </summary>
+    /// <summary>Returns a new matrix with every element scaled by <paramref name="f"/>.</summary>
     public static Matrix3 Multiply(ref Matrix3 mat, float f)
     {
         return new Matrix3
@@ -116,14 +129,14 @@ public struct Matrix3
     }
 
 
+    /// <summary>Returns <paramref name="mat"/> composed with a translation by (<paramref name="x"/>, <paramref name="y"/>).</summary>
     public static Matrix3 Translate(ref Matrix3 mat, float x, float y)
     {
         var transMat = CreateTranslation(x, y);
         return Multiply(ref mat, ref transMat);
     }
 
-
-
+    /// <summary>Returns <paramref name="mat"/> composed with a rotation around the origin by <paramref name="angleInDegrees"/>.</summary>
     public static Matrix3 RotateAroundZ(ref Matrix3 mat, float angleInDegrees)
     {
         var rotMat = CreateRotationAroundZAxis(angleInDegrees);
@@ -131,6 +144,7 @@ public struct Matrix3
         return mat * rotMat;
     }
 
+    /// <summary>Returns <paramref name="mat"/> composed with a rotation by <paramref name="angleInDegrees"/> centred on (<paramref name="x"/>, <paramref name="y"/>).</summary>
     public static Matrix3 RotateAroundPoint(ref Matrix3 mat, float angleInDegrees, float x, float y)
     {
         var translateToOrigin = CreateTranslation(x, y);
@@ -140,15 +154,17 @@ public struct Matrix3
         return mat * translateToOrigin * rotateAroundOrigin * translateBack;
     }
 
+    /// <summary>Returns <paramref name="mat"/> composed with a rotation by <paramref name="angleInDegrees"/> centred on <paramref name="p"/>.</summary>
     public static Matrix3 RotateAroundPoint(ref Matrix3 mat, float angleInDegrees, Point p) => RotateAroundPoint(ref mat, angleInDegrees, p.X, p.Y);
 
-
-
+    /// <summary>Returns <paramref name="mat"/> composed with a scale around the origin.</summary>
     public static Matrix3 ScaleAroundOrigin(ref Matrix3 mat, float scaleX, float scaleY)
     {
         var scaleMat = CreateScale(scaleX, scaleY);
         return Multiply(ref mat, ref scaleMat);
     }
+
+    /// <summary>Returns <paramref name="mat"/> composed with a scale centred on (<paramref name="x"/>, <paramref name="y"/>).</summary>
     public static Matrix3 ScaleAroundPoint(ref Matrix3 mat, float scaleX, float scaleY, float x, float y)
     {
         var translate1 = CreateTranslation(x, y);
@@ -162,20 +178,22 @@ public struct Matrix3
         return result;
     }
 
+    /// <summary>Returns <paramref name="mat"/> composed with a reflection across the Y axis (negates X).</summary>
     public static Matrix3 FlipX(ref Matrix3 mat)
     {
-        return Multiply(ref mat, ref FlipXMatrix);
-    }
-    public static Matrix3 FlipY(ref Matrix3 mat)
-    {
-        return Multiply(ref mat, ref FlipYMatrix);
+        var flip = FlipXMatrix;
+        return Multiply(ref mat, ref flip);
     }
 
-    /// <summary>
-    /// Returns a new Matrix3 which is the inverse of Matrix3 mat
-    /// </summary>
-    /// <param name="mat"></param>
-    /// <returns></returns>
+    /// <summary>Returns <paramref name="mat"/> composed with a reflection across the X axis (negates Y).</summary>
+    public static Matrix3 FlipY(ref Matrix3 mat)
+    {
+        var flip = FlipYMatrix;
+        return Multiply(ref mat, ref flip);
+    }
+
+    /// <summary>Returns the inverse of <paramref name="mat"/>.</summary>
+    /// <exception cref="InvalidOperationException">Thrown when the matrix is singular (has no inverse).</exception>
     public static Matrix3 Invert(Matrix3 mat)
     {
         int[] colIdx = { 0, 0, 0 };
@@ -284,11 +302,8 @@ public struct Matrix3
             );
     }
 
-    /// <summary>
-    /// Returns a new Matrix3 which is the inverse of Matrix3 mat
-    /// </summary>
-    /// <param name="mat"></param>
-    /// <returns></returns>
+    /// <summary>Returns the inverse of <paramref name="mat"/>. Pass-by-reference variant for performance.</summary>
+    /// <exception cref="InvalidOperationException">Thrown when the matrix is singular (has no inverse).</exception>
     public static Matrix3 Invert(ref Matrix3 mat)
     {
         int[] colIdx = { 0, 0, 0 };
@@ -399,15 +414,20 @@ public struct Matrix3
 
     private float[] _values;
 
+    /// <summary>Creates a matrix from 9 elements in column-major order (see <see cref="Matrix3"/> for layout).</summary>
     public Matrix3(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8)
     {
         _values = new float[9] { m0, m1, m2, m3, m4, m5, m6, m7, m8 };
     }
+
+    /// <summary>Creates a matrix from a 9-element array in column-major order. The array is captured by reference (not copied).</summary>
     public Matrix3(float[] values)
     {
         _values = values;
     }
 
+    /// <summary>Indexer accessing element at column <paramref name="x"/>, row <paramref name="y"/> (0..2 for both).</summary>
+    /// <exception cref="ArgumentException">Thrown when either index is outside 0..2.</exception>
     public float this[int x, int y]
     {
         get

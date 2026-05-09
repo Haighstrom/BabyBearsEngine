@@ -4,6 +4,9 @@ using BabyBearsEngine.Graphics;
 
 namespace BabyBearsEngine.Worlds;
 
+// Internal helper used by ContainerEntity / World to share the actual storage and ordering
+// logic. realParent is the public-facing container that gets passed to entities as their
+// parent and that handles coordinate translation up the tree.
 internal class Container(IContainer realParent) : IContainer
 {
     // Layer assigned to IRenderable objects that do not implement ILayered.

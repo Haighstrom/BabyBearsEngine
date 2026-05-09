@@ -4,6 +4,16 @@ using BabyBearsEngine.Platform.OpenGL.Rendering;
 
 namespace BabyBearsEngine.Graphics;
 
+/// <summary>
+/// A textured rectangle drawn at a position and size, optionally tinted, alpha-blended, and rotated.
+/// Construction allocates GL resources (vertex buffer, etc.) — must be created on the engine thread
+/// after the GL context exists. Implements <see cref="IDisposable"/> to release those resources.
+/// </summary>
+/// <param name="texture">The texture to sample. Not owned by this image; not disposed when the image is disposed.</param>
+/// <param name="x">X position in the parent's local space.</param>
+/// <param name="y">Y position in the parent's local space.</param>
+/// <param name="width">Width in pixels.</param>
+/// <param name="height">Height in pixels.</param>
 public sealed class Image(ITexture texture, float x, float y, float width, float height) : GraphicBase, IDisposable
 {
     private readonly GraphicRenderer _graphicRenderer = new(texture);
@@ -11,9 +21,13 @@ public sealed class Image(ITexture texture, float x, float y, float width, float
     private Colour _colour = Colour.White;
     private bool _verticesChanged = true;
 
+    /// <summary>X position in the parent's local space.</summary>
     public float X { get; set; } = x;
+
+    /// <summary>Y position in the parent's local space.</summary>
     public float Y { get; set; } = y;
 
+    /// <summary>Width in pixels.</summary>
     public float Width
     {
         get => width;
@@ -24,6 +38,7 @@ public sealed class Image(ITexture texture, float x, float y, float width, float
         }
     }
 
+    /// <summary>Height in pixels.</summary>
     public float Height
     {
         get => height;
@@ -34,6 +49,7 @@ public sealed class Image(ITexture texture, float x, float y, float width, float
         }
     }
 
+    /// <summary>Tint colour multiplied with the texture sample. Defaults to <see cref="Colour.White"/> (no tint).</summary>
     public Colour Colour
     {
         get => _colour;
@@ -44,12 +60,14 @@ public sealed class Image(ITexture texture, float x, float y, float width, float
         }
     }
 
+    /// <summary>Convenience accessor for the alpha component of <see cref="Colour"/>, expressed as a normalised float (0–1) on set; raw byte (0–255) on get.</summary>
     public float Alpha
     {
         get => Colour.A;
         set => Colour = new(Colour.R, Colour.G, Colour.B, (byte)Math.Round(value * 255f));
     }
 
+    /// <summary>Rotation angle in degrees, applied around the image's centre.</summary>
     public float Angle
     {
         get => _angle;

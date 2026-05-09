@@ -1,0 +1,157 @@
+using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Graphics;
+using BabyBearsEngine.Worlds;
+
+namespace BabyBearsEngine.Tests.Unit;
+
+[TestClass]
+public class WorldTests
+{
+    private sealed class StubUpdateable : AddableBase, IUpdateable
+    {
+        public bool Active { get; set; } = true;
+        public int UpdateCalls { get; private set; }
+        public double LastElapsed { get; private set; }
+
+        public void Update(double elapsed)
+        {
+            UpdateCalls++;
+            LastElapsed = elapsed;
+        }
+    }
+
+    private sealed class StubRenderable : AddableBase, IRenderable
+    {
+        public bool Visible { get; set; } = true;
+        public void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
+    }
+
+    // Note: World.Draw is intentionally not tested here — it issues GL calls and reads
+    // Window.Width/Height through the static facade, both of which require booting the
+    // engine. The non-rendering paths (Add/Remove/Update/GetWindowCoordinates) are
+    // covered below.
+
+    // Defaults
+
+    [TestMethod]
+    public void Defaults_BackgroundIsCornflowerBlue()
+    {
+        var world = new World();
+        Assert.AreEqual(Colour.CornflowerBlue, world.BackgroundColour);
+    }
+
+    [TestMethod]
+    public void BackgroundColour_IsSettable()
+    {
+        var world = new World();
+        world.BackgroundColour = Colour.Red;
+        Assert.AreEqual(Colour.Red, world.BackgroundColour);
+    }
+
+    // Lifecycle hooks (default impls are no-ops; just verify they don't throw)
+
+    [TestMethod]
+    public void Load_OnDefaultWorld_DoesNotThrow()
+    {
+        var world = new World();
+        world.Load();
+    }
+
+    [TestMethod]
+    public void Unload_OnDefaultWorld_DoesNotThrow()
+    {
+        var world = new World();
+        world.Unload();
+    }
+
+    // Coordinate translation — World is the root, so local == window coordinates.
+
+    [TestMethod]
+    public void GetWindowCoordinates_ReturnsInputUnchanged()
+    {
+        var world = new World();
+        var (x, y) = world.GetWindowCoordinates(123f, 456f);
+        Assert.AreEqual(123f, x);
+        Assert.AreEqual(456f, y);
+    }
+
+    // Container delegation
+
+    [TestMethod]
+    public void Add_SetsParentToWorld()
+    {
+        var world = new World();
+        var entity = new StubUpdateable();
+
+        world.Add(entity);
+
+        Assert.AreSame(world, entity.Parent);
+    }
+
+    [TestMethod]
+    public void Remove_DetachesEntity()
+    {
+        var world = new World();
+        var entity = new StubUpdateable();
+        world.Add(entity);
+
+        world.Remove(entity);
+
+        Assert.IsNull(entity.Parent);
+    }
+
+    [TestMethod]
+    public void RemoveAll_DetachesEveryChild()
+    {
+        var world = new World();
+        var u = new StubUpdateable();
+        var r = new StubRenderable();
+        world.Add(u);
+        world.Add(r);
+
+        world.RemoveAll();
+
+        Assert.IsNull(u.Parent);
+        Assert.IsNull(r.Parent);
+    }
+
+    // Update
+
+    [TestMethod]
+    public void Update_CallsUpdateOnEveryUpdateable_WithElapsedPassedThrough()
+    {
+        var world = new World();
+        var a = new StubUpdateable();
+        var b = new StubUpdateable();
+        world.Add(a);
+        world.Add(b);
+
+        world.Update(0.025);
+
+        Assert.AreEqual(1, a.UpdateCalls);
+        Assert.AreEqual(0.025, a.LastElapsed);
+        Assert.AreEqual(1, b.UpdateCalls);
+        Assert.AreEqual(0.025, b.LastElapsed);
+    }
+
+    [TestMethod]
+    public void Update_OnEmptyWorld_DoesNotThrow()
+    {
+        var world = new World();
+        world.Update(0.016);
+    }
+
+    // Note: World.Update does NOT skip inactive children (unlike ContainerEntity.Update).
+    // This is current behaviour — flag for follow-up if you want consistency.
+    [TestMethod]
+    public void Update_DoesNotSkipInactiveChildren_CurrentBehaviour()
+    {
+        var world = new World();
+        var inactive = new StubUpdateable { Active = false };
+        world.Add(inactive);
+
+        world.Update(0.016);
+
+        Assert.AreEqual(1, inactive.UpdateCalls);
+    }
+}

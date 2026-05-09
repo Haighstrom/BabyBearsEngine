@@ -3,12 +3,22 @@ using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Graphics;
 
+/// <summary>
+/// Renders a single coloured point at a fixed pixel size. Construction allocates GL resources
+/// (shader, vertex buffer) — must be created on the engine thread after the GL context exists.
+/// Implements <see cref="IDisposable"/> to release those resources.
+/// </summary>
 public sealed class PointGraphic : GraphicBase
 {
     private bool _disposed;
     private readonly PointShaderProgram _shader;
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
 
+    /// <summary>Creates a point at (<paramref name="x"/>, <paramref name="y"/>) with the given pixel size and colour.</summary>
+    /// <param name="x">X position in the parent's local space.</param>
+    /// <param name="y">Y position in the parent's local space.</param>
+    /// <param name="size">Point diameter in pixels.</param>
+    /// <param name="colour">Point colour.</param>
     public PointGraphic(int x, int y, float size, Colour colour)
     {
         _shader = new PointShaderProgram();

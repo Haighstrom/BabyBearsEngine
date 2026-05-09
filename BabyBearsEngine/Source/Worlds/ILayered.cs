@@ -1,5 +1,10 @@
-﻿namespace BabyBearsEngine.Worlds;
+namespace BabyBearsEngine.Worlds;
 
+/// <summary>
+/// Implemented by anything that participates in layered ordering inside a container.
+/// Higher-numbered layers are drawn first (further behind); lower layers are drawn on top.
+/// Containers re-sort themselves automatically when <see cref="LayerChanged"/> fires.
+/// </summary>
 public interface ILayered
 {
     /// <summary>
@@ -8,6 +13,7 @@ public interface ILayered
     /// </summary>
     int Layer { get; }
 
+    /// <summary>Raised after <see cref="Layer"/> changes via <see cref="SetLayer"/>. Containers subscribe to this to keep their render order correct.</summary>
     event EventHandler<LayerChangedEventArgs>? LayerChanged;
 
     /// <summary>Sets the rendering layer. Must be 0 or greater.</summary>
