@@ -24,22 +24,22 @@ Foundational value types, recently-refactored surfaces, entry points. Stable eno
 
 ### 1.3 — Static facades (Window / Keyboard / Mouse)
 - **Files:** [Windowing/Window.cs](BabyBearsEngine/Source/Windowing/Window.cs), [Input/Keyboard.cs](BabyBearsEngine/Source/Input/Keyboard.cs), [Input/Mouse.cs](BabyBearsEngine/Source/Input/Mouse.cs)
-- **Docs:** Add. These are what game devs hit first.
-- **Tests:** Add via fakes. The wiring refactor made this seam usable — substitute fakes via `EngineConfiguration.{Window,Keyboard,Mouse}Service` and verify the static facades route through them. Also covers the per-service setter contract.
+- **Docs:** Done. Class-level summary explaining the facade pattern, `<inheritdoc cref="..."/>` on every member to defer to the underlying interface (avoids duplication).
+- **Tests:** Done — see 1.4 (combined into one piece of work).
 
 ### 1.4 — Platform interfaces (IWindow / IKeyboard / IMouse)
 - **Files:** [Windowing/IWindow.cs](BabyBearsEngine/Source/Windowing/IWindow.cs), [Input/IKeyboard.cs](BabyBearsEngine/Source/Input/IKeyboard.cs), [Input/IMouse.cs](BabyBearsEngine/Source/Input/IMouse.cs)
-- **Docs:** Add. Public contract.
-- **Tests:** None — no behaviour to test on the interface itself.
+- **Docs:** Done. Each interface has a class-level summary and per-member XML; the docs are the source of truth that the facades inherit from via `<inheritdoc>`.
+- **Tests (covers 1.3):** Done. 59 tests across [WindowFacadeTests.cs](Tests/Unit/WindowFacadeTests.cs), [KeyboardFacadeTests.cs](Tests/Unit/KeyboardFacadeTests.cs), [MouseFacadeTests.cs](Tests/Unit/MouseFacadeTests.cs). Each test substitutes a fake via `EngineConfiguration.{Window,Keyboard,Mouse}Service`, and asserts: (a) every member routes through the installed service; (b) overload pairs (`IEnumerable<T>` vs `params T[]`) hit the right interface method; (c) the `not initialised` contract throws `InvalidOperationException`; (d) replacing the service after install routes new calls to the new instance; (e) `Window.Resize` event subscription/unsubscription correctly hooks the underlying event.
 
 ### 1.5 — Mirrored enums
 - **Files:** [WindowBorder.cs](BabyBearsEngine/Source/Windowing/WindowBorder.cs), [WindowState.cs](BabyBearsEngine/Source/Windowing/WindowState.cs), [Keys.cs](BabyBearsEngine/Source/Input/Keys.cs), [MouseButton.cs](BabyBearsEngine/Source/Input/MouseButton.cs), [CursorShape.cs](BabyBearsEngine/Source/Runtime/Settings/CursorShape.cs)
-- **Docs:** Add. Trivial.
+- **Docs:** Done. `WindowBorder`, `WindowState`, `MouseButton`: class summary + per-value XML. `CursorShape`: class summary added (per-value docs were already present). `Keys`: class summary only — explains GLFW/OpenTK mirror, ASCII/keypad allocation, and the meaning of `Unknown`. Per-value docs skipped on `Keys` (120+ self-explanatory entries).
 - **Tests:** Round-trip tests already exist (OpenTKEnumMirrorTests.cs).
 
 ### 1.6 — Recent windowing types
 - **Files:** [WindowResizeEventArgs.cs](BabyBearsEngine/Source/Windowing/WindowResizeEventArgs.cs), [WindowIcon.cs](BabyBearsEngine/Source/Windowing/WindowIcon.cs)
-- **Docs:** Add. Trivial.
+- **Docs:** Done. Class summary + per-property XML. `WindowIcon` doc spells out the RGBA / row-major / `Width × Height × 4` byte layout contract that `Pixels` must follow.
 - **Tests:** None needed (data carriers).
 
 ### 1.7 — Boot path & settings records

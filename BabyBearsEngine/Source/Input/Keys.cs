@@ -1,7 +1,15 @@
 namespace BabyBearsEngine.Input;
 
+/// <summary>
+/// Identifies a key on the keyboard. Mirrors GLFW's key codes (the same values OpenTK uses for
+/// <c>OpenTK.Windowing.GraphicsLibraryFramework.Keys</c>), so casts between the two are safe.
+/// Values follow ASCII for printable keys (e.g. <see cref="A"/> = 65) and use GLFW's allocation
+/// scheme for non-printable keys (function keys, modifiers, navigation, keypad). <see cref="Unknown"/>
+/// (-1) is reported when the platform cannot identify a physical key.
+/// </summary>
 public enum Keys
 {
+    /// <summary>Reported when the platform cannot identify a physical key (e.g. a non-mapped scan code).</summary>
     Unknown = -1,
     Space = 32,
     Apostrophe = 39,

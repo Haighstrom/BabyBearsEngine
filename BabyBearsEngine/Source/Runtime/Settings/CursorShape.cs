@@ -1,5 +1,8 @@
 namespace BabyBearsEngine;
 
+/// <summary>
+/// The shape used for the mouse cursor while it hovers the application window.
+/// </summary>
 public enum CursorShape
 {
     /// <summary>The platform default arrow cursor.</summary>
