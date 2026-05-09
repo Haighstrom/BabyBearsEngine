@@ -91,12 +91,13 @@ Two small enums consumed by both `IWindow` and `WindowSettings`.
 
 ## Step 7 — Replace `Box2i` in `WindowSettings.Position`
 
-**Status:** Not started
+**Status:** Done
 
-`WindowSettings.Position` returns/accepts `OpenTK.Mathematics.Box2i`.
+`WindowSettings.Position` returned/accepted `OpenTK.Mathematics.Box2i`.
 
-- Either use `System.Drawing.Rectangle` (already used elsewhere in the file via `Point`), or introduce `BabyBearsEngine.Geometry.RectangleI` if a custom shape is preferable.
-- Update `WindowSettings`.
+- Replaced with engine-owned [BabyBearsEngine.Geometry.Rect](BabyBearsEngine/Source/Geometry/Rect.cs). Used a `using Rect = ...` alias because `BabyBearsEngine.Geometry.Point` would clash with the file's existing `System.Drawing.Point` (used by `MaxClientSize`/`MinClientSize`).
+- No external consumers of `WindowSettings.Position`, so no further updates required.
+- `Rect` uses `float`; integer cast at the setter boundary preserves `WindowSettings`'s int storage.
 
 ---
 

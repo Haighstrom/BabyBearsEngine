@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
-using OpenTK.Mathematics;
+
+using Rect = BabyBearsEngine.Geometry.Rect;
 
 namespace BabyBearsEngine;
 
@@ -73,15 +74,15 @@ public record class WindowSettings()
     /// <summary>
     /// The desired position of the window (X,Y are the top left of the window, W, H are the size of the client)
     /// </summary>
-    public Box2i Position
+    public Rect Position
     {
         get => new(X, Y, Width, Height);
         set
         {
-            X = value.Min.X;
-            Y = value.Min.Y;
-            Width = value.Max.X - value.Min.X;
-            Height = value.Max.Y - value.Min.Y;
+            X = (int)value.X;
+            Y = (int)value.Y;
+            Width = (int)value.W;
+            Height = (int)value.H;
         }
     }
 
