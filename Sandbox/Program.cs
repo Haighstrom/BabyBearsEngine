@@ -8,5 +8,4 @@
     }
 };
 
-GameLauncher.Initialise(appSettings);
-GameLauncher.Run(new BabyBearsEngine.Sandbox.ScratchWorld());
+GameLauncher.Run(appSettings, () => new BabyBearsEngine.Sandbox.ScratchWorld());

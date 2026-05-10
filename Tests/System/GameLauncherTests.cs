@@ -22,7 +22,7 @@ public class GameLauncherTests
         {
             try
             {
-                GameLauncher.Run(this);
+                GameLauncher.Run(TestSettings, () => this);
             }
             catch (InvalidOperationException ex)
             {

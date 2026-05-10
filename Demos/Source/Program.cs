@@ -24,8 +24,6 @@ var appSettings = new ApplicationSettings()
     }
 };
 
-GameLauncher.Initialise(appSettings);
-
 var services = new ServiceCollection();
 services.AddSingleton<Func<World>>(sp => () => new MenuWorld(sp.GetServices<DemoWorld>()));
 services.AddTransient<DemoWorld, AnimationDemoWorld>();
@@ -41,6 +39,5 @@ services.AddTransient<DemoWorld, TextDemoWorld>();
 services.AddTransient<DemoWorld, UIDemoWorld>();
 
 var provider = services.BuildServiceProvider();
-var demos = provider.GetServices<DemoWorld>();
 
-GameLauncher.Run(new MenuWorld(demos));
+GameLauncher.Run(appSettings, () => new MenuWorld(provider.GetServices<DemoWorld>()));

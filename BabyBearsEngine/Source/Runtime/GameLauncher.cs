@@ -1,64 +1,37 @@
-﻿using BabyBearsEngine.Platform.OpenTK;
+using BabyBearsEngine.Platform.OpenTK;
 using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine;
 
 public static class GameLauncher
 {
-    private enum LauncherStatus { NotStarted, Initialised, Running }
+    private static bool s_running = false;
 
-    private static OpenTKGameEngine? s_loadedEngine = null;
-    private static LauncherStatus s_status = LauncherStatus.NotStarted;
-
-    public static void Initialise(ApplicationSettings appSettings)
+    public static void Run(ApplicationSettings appSettings, Func<IWorld> worldFactory)
     {
-        if (s_status != LauncherStatus.NotStarted)
-        {
-            throw new InvalidOperationException("Game already initialised");
-        }
-
-        s_loadedEngine = new OpenTKGameEngine(appSettings);
-
-        EngineConfiguration.Initialise(
-            window: new OpenTKWindowAdapter(s_loadedEngine),
-            keyboard: new OpenTKKeyboardAdapter(s_loadedEngine.KeyboardState),
-            mouse: new OpenTKMouseAdapter(s_loadedEngine.MouseState),
-            worldSwitcher: s_loadedEngine);
-
-        s_status = LauncherStatus.Initialised;
-    }
-
-    public static void Run(IWorld world)
-    {
-        if (s_status == LauncherStatus.NotStarted)
-        {
-            throw new InvalidOperationException("Game not yet initialised. Call GameLauncher.Initialise first.");
-        }
-
-        Ensure.NotNull(s_loadedEngine); //this shouldn't be a problem as launcher being started should assign this
-
-        if (s_status == LauncherStatus.Running)
+        if (s_running)
         {
             throw new InvalidOperationException("Game already running.");
         }
 
-        s_status = LauncherStatus.Running;
+        s_running = true;
 
         try
         {
-            s_loadedEngine.Run(world);
+            var engine = new OpenTKGameEngine(appSettings);
+
+            EngineConfiguration.Initialise(
+                window: new OpenTKWindowAdapter(engine),
+                keyboard: new OpenTKKeyboardAdapter(engine.KeyboardState),
+                mouse: new OpenTKMouseAdapter(engine.MouseState),
+                worldSwitcher: engine);
+
+            engine.Run(worldFactory());
         }
         finally
         {
             EngineConfiguration.Reset();
-            s_loadedEngine = null;
-            s_status = LauncherStatus.NotStarted;
+            s_running = false;
         }
-    }
-
-    public static void Run(ApplicationSettings appSettings, Func<IWorld> worldFactory)
-    {
-        Initialise(appSettings);
-        Run(worldFactory());
     }
 }
