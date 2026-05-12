@@ -170,10 +170,15 @@ csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimenta
 csharp_style_allow_blank_line_after_token_in_conditional_expression_experimental = false
 csharp_style_allow_blank_line_after_token_in_arrow_expression_clause_experimental = false
 
-# Prefer "var" everywhere
-csharp_style_var_for_built_in_types = false:none
+# var vs explicit type preferences
+# Built-in types (int, string, bool, etc.): prefer explicit, surface a suggestion.
+# Type apparent on RHS (new Foo(), casts): prefer var as a suggestion — but see CLAUDE.md
+#   for the project's preference for target-typed `new()` (Foo f = new()), which
+#   .editorconfig has no setting for and which trumps the var suggestion.
+# Elsewhere (return values, complex expressions): allow either with no diagnostic.
+csharp_style_var_for_built_in_types = false:suggestion
 csharp_style_var_when_type_is_apparent = true:suggestion
-csharp_style_var_elsewhere = true:suggestion
+csharp_style_var_elsewhere = true:none
 
 # Prefer method-like constructs to have a block body
 csharp_style_expression_bodied_methods = false:none
