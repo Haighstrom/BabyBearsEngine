@@ -15,6 +15,17 @@ public record class ConsoleSettings()
     public static ConsoleSettings Default => new();
 
     /// <summary>
+    /// When true, log messages written to the console are colourised by severity (Warning=yellow,
+    /// Error/Critical=red, etc). Defaults to true.
+    /// </summary>
+    public bool ColouriseLogOutput { get; set; } = true;
+
+    /// <summary>
+    /// When true, log messages written to the console include a timestamp prefix. Defaults to true.
+    /// </summary>
+    public bool IncludeLogTimestamp { get; set; } = true;
+
+    /// <summary>
     /// Whether the console should be shown. Defaults to true if a debugger is being used, false otherwise.
     /// </summary>
     public bool ShowConsoleWindow { get; set; } = Debugger.IsAttached; //better than #if DEBUG because may be using Release version of this dll even if Debug in the application

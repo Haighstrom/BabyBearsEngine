@@ -28,7 +28,7 @@ public sealed record DiagnosticsSettings()
 #if !DEBUG
         if (CaptureFrames)
         {
-            Logger.Log("WARNING: DiagnosticsSettings.CaptureFrames is enabled in a Release build. This significantly increases per-frame cost and should not be shipped to end users.");
+            Logger.Warning("DiagnosticsSettings.CaptureFrames is enabled in a Release build. This significantly increases per-frame cost and should not be shipped to end users.");
         }
 #endif
     }

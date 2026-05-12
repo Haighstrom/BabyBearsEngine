@@ -37,7 +37,7 @@ internal sealed class CameraRenderer : IDisposable
         var err = GL.GetError();
         if (err != ErrorCode.NoError)
         {
-            Logger.Log($"OpenGL error! (CameraRenderer) {err}");
+            Logger.Error($"OpenGL error! (CameraRenderer) {err}");
         }
     }
 
@@ -118,7 +118,7 @@ internal sealed class CameraRenderer : IDisposable
         var err = GL.GetError();
         if (err != ErrorCode.NoError)
         {
-            Logger.Log($"OpenGL error! (CameraRenderer.Render) {err}");
+            Logger.Error($"OpenGL error! (CameraRenderer.Render) {err}");
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using BabyBearsEngine.Worlds;
+using Microsoft.Extensions.Logging;
 
 namespace BabyBearsEngine.Tests.System;
 
@@ -35,7 +36,8 @@ public class GameLauncherTests
 
     private static ApplicationSettings TestSettings => new()
     {
-        WindowSettings = new WindowSettings { CheckForMainThread = false }
+        WindowSettings = new WindowSettings { CheckForMainThread = false },
+        LogSettings = new LogSettings { MinimumLevel = LogLevel.None, FilePath = null },
     };
 
     [TestMethod]

@@ -1,5 +1,6 @@
 ﻿using System;
 using BabyBearsEngine.Worlds;
+using Microsoft.Extensions.Logging;
 
 namespace BabyBearsEngine.Tests.System;
 
@@ -98,12 +99,14 @@ public class ScreenCaptureTests
     private static ApplicationSettings SettingsWithCapture(int width = 200, int height = 100) => new()
     {
         WindowSettings = new WindowSettings { Width = width, Height = height, CheckForMainThread = false },
-        DiagnosticsSettings = new DiagnosticsSettings { CaptureFrames = true }
+        DiagnosticsSettings = new DiagnosticsSettings { CaptureFrames = true },
+        LogSettings = new LogSettings { MinimumLevel = LogLevel.None, FilePath = null },
     };
 
     private static ApplicationSettings SettingsWithoutCapture => new()
     {
-        WindowSettings = new WindowSettings { CheckForMainThread = false }
+        WindowSettings = new WindowSettings { CheckForMainThread = false },
+        LogSettings = new LogSettings { MinimumLevel = LogLevel.None, FilePath = null },
     };
 
     private static void AssertColourClose(Colour expected, Colour actual, int tolerance = 1)

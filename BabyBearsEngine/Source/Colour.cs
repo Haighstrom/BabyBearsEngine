@@ -16,7 +16,7 @@ public partial record struct Colour(byte R, byte G, byte B, byte A = 255) : IEqu
 #if DEBUG
         if (value < 0f || value > 1f)
         {
-            Logger.Log($"Colour component {componentName} was clamped from {value}");
+            Logger.Warning($"Colour component {componentName} was clamped from {value}");
         }
 #endif
         return (byte)Math.Clamp((int)Math.Round(value * 255f), 0, 255);

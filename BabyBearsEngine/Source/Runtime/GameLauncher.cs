@@ -1,3 +1,4 @@
+using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.Platform.OpenTK;
 using BabyBearsEngine.Worlds;
 
@@ -13,6 +14,8 @@ public static class GameLauncher
         {
             throw new InvalidOperationException("Game already running.");
         }
+
+        Logger.Initialise(appSettings.LogSettings, appSettings.ConsoleSettings);
 
         appSettings.DiagnosticsSettings.WarnIfEnabledInRelease();
 

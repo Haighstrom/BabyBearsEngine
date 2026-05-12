@@ -24,13 +24,6 @@ Open issues found during refactor / docs / tests work but deliberately deferred.
 - **Why deferred:** Behaviour change — could affect existing games that rely on the current semantics (unlikely but possible). Consistency call is the user's.
 - **Suggested fix:** Mirror the `if (!entity.Active) continue;` check from `ContainerEntity.Update`. Update or remove the regression test pinning the current behaviour.
 
-## `Logger` disposes its `LoggerFactory` while `s_logger` still references its providers
-
-- **File:** [BabyBearsEngine/Source/Diagnostics/Logger.cs](BabyBearsEngine/Source/Diagnostics/Logger.cs#L10)
-- **What's wrong:** `GetLoggerSimple()` declares `using var factory = LoggerFactory.Create(...)`. The `using` disposes the factory when the method returns, but `s_logger` still holds references to the providers from it. In practice, calls to `Logger.Log(...)` after disposal still work for both console and file output (verified during the directory-bug fix), but the pattern is fragile — the next behaviour change in `Microsoft.Extensions.Logging` could break it silently.
-- **Why deferred:** Console + file output both currently work; user has no immediate complaint.
-- **Suggested fix:** Drop the `using` keyword and store the factory in a static field alongside `s_logger`. Optionally, expose a `Shutdown()` method that disposes the factory at process exit. Or refactor to a non-singleton logger (instance-based, owned by the engine) — bigger change but avoids the static-state issue.
-
 ## `BMPTextGraphic` contains placeholder/stub vertex code
 
 - **File:** [BabyBearsEngine/Source/Worlds/Graphics/Text/BMPTextGraphic.cs](BabyBearsEngine/Source/Worlds/Graphics/Text/BMPTextGraphic.cs#L142)
