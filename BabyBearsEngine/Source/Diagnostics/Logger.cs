@@ -56,6 +56,13 @@ public static class Logger
             s_fileSink = sinks.File;
             s_errorFileSink = sinks.ErrorFile;
             s_dedupeKeys.Clear();
+
+            // Emit the per-run banner to console + main file. The error file already received it
+            // as a lazy preamble (won't appear until the first error fires). Trim trailing newlines
+            // because the sinks add their own.
+            string bannerLine = sinks.Banner.TrimEnd('\r', '\n');
+            s_consoleSink?.Write(LogLevel.Information, bannerLine, exception: null);
+            s_fileSink?.Write(LogLevel.Information, bannerLine, exception: null);
         }
     }
 
@@ -176,11 +183,16 @@ public static class Logger
     }
 
     /// <summary>
-    /// Writes a banner-style block: a title line plus arbitrary body lines, surrounded by <c>===</c>
-    /// dividers — matches the visual style of the run banner. Use for diagnostic info dumps where
+    /// Writes a banner-style block: an opening <c>===</c> divider, a title line, then arbitrary
+    /// body lines. Matches the visual style of the run banner. Use for diagnostic info dumps where
     /// the content should stand out from normal log entries (engine setup, system info, etc.).
     /// Routed only to console and main file sinks (never the error file).
     /// </summary>
+    /// <remarks>
+    /// Sections do not emit a closing divider — consecutive sections share their dividers (each
+    /// section's opening line closes the previous one). Call <see cref="SectionDivider"/> after the
+    /// last section to add a closing divider.
+    /// </remarks>
     public static void Section(string title, IEnumerable<string> lines, LogLevel level = LogLevel.Information)
     {
         ArgumentNullException.ThrowIfNull(title);
@@ -191,14 +203,22 @@ public static class Logger
             return;
         }
 
-        string separator = new('=', SectionWidth);
-        WriteRaw(level, separator);
+        WriteRaw(level, new string('=', SectionWidth));
         WriteRaw(level, $" {title}");
         foreach (string line in lines)
         {
             WriteRaw(level, $" {line}");
         }
-        WriteRaw(level, separator);
+    }
+
+    /// <summary>
+    /// Writes a single <c>===</c> divider line matching the visual style of <see cref="Section"/>.
+    /// Use after the final section to close off a series of sections, or as a heavyweight separator
+    /// elsewhere. Routed only to console and main file sinks (never the error file).
+    /// </summary>
+    public static void SectionDivider(LogLevel level = LogLevel.Information)
+    {
+        WriteRaw(level, new string('=', SectionWidth));
     }
 
     /// <summary>

@@ -1,3 +1,4 @@
+using System.Reflection;
 using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.Platform.OpenTK;
 using BabyBearsEngine.Worlds;
@@ -13,6 +14,16 @@ public static class GameLauncher
         if (s_running)
         {
             throw new InvalidOperationException("Game already running.");
+        }
+
+        // Open the console window (if requested) BEFORE Logger.Initialise so the console sink has
+        // somewhere visible to write to. On non-Windows the call no-ops.
+        var cs = appSettings.ConsoleSettings;
+        if (cs.ShowConsoleWindow)
+        {
+            ConsoleWindow.Open(cs.X, cs.Y, cs.Width, cs.Height);
+            string game = Assembly.GetEntryAssembly()?.GetName().Name ?? "unknown";
+            ConsoleWindow.SetTitle($"BabyBearsEngine - {game}");
         }
 
         Logger.Initialise(appSettings.LogSettings, appSettings.ConsoleSettings);

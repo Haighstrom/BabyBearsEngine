@@ -35,7 +35,7 @@ internal static class EngineDiagnostics
             ? "enabled (GL errors fire once per call site)"
             : "disabled (GL errors fire every time)";
 
-        Logger.Section("OpenGL Context",
+        Logger.Section("GL Context Information",
         [
             $"OpenGL {GL.GetString(StringName.Version)}",
             $"GLSL {GL.GetString(StringName.ShadingLanguageVersion)}",
@@ -54,12 +54,17 @@ internal static class EngineDiagnostics
             lines.Add($"Display {i + 1}: {m.Name}: {m.HorizontalResolution}x{m.VerticalResolution} @ {m.CurrentVideoMode.RefreshRate}Hz{primaryMark}");
         }
 
-        Logger.Section("Display Devices", lines);
+        Logger.Section("Display Information", lines);
+
+        // Close the final section's block and add a blank line before the next chunk (the
+        // "Engine Initialised" marker emitted later from LogInitialisationComplete).
+        Logger.SectionDivider();
+        Logger.NewLine();
     }
 
     /// <summary>Emits a one-line marker indicating engine startup is complete. Call at the end of <c>OnLoad</c>.</summary>
     public static void LogInitialisationComplete()
     {
-        Logger.SectionMarker($"BabyBearsEngine Initialised at {DateTime.Now:HH:mm:ss.fff}");
+        Logger.SectionMarker($"BabyBearsEngine Initialised at {DateTime.Now:HH:mm:ss}");
     }
 }

@@ -13,8 +13,8 @@ namespace BabyBearsEngine.Diagnostics;
 /// </summary>
 internal static class LoggerFactory
 {
-    /// <summary>The fully-constructed set of sinks for a logger run. Any slot may be null if the matching settings disable that destination.</summary>
-    internal readonly record struct LoggerSinks(ConsoleSink? Console, FileSink? File, FileSink? ErrorFile);
+    /// <summary>The fully-constructed set of sinks for a logger run. Any sink slot may be null if the matching settings disable that destination. <see cref="Banner"/> is the per-run banner text; <see cref="Logger.Initialise"/> emits it to console + main file via normal writes (so both destinations show it), while the error file receives it as a lazy preamble so an empty run leaves no errors.log on disk.</summary>
+    internal readonly record struct LoggerSinks(ConsoleSink? Console, FileSink? File, FileSink? ErrorFile, string Banner);
 
     public static LoggerSinks BuildSinks(LogSettings logSettings, ConsoleSettings consoleSettings)
     {
@@ -22,8 +22,9 @@ internal static class LoggerFactory
 
         return new LoggerSinks(
             Console: BuildConsoleSink(logSettings, consoleSettings),
-            File: BuildFileSink(logSettings, banner),
-            ErrorFile: BuildErrorFileSink(logSettings, banner));
+            File: BuildFileSink(logSettings),
+            ErrorFile: BuildErrorFileSink(logSettings, banner),
+            Banner: banner);
     }
 
     private static ConsoleSink? BuildConsoleSink(LogSettings logSettings, ConsoleSettings consoleSettings)
@@ -43,7 +44,7 @@ internal static class LoggerFactory
         return new FileSink(logSettings.ErrorFilePath, banner);
     }
 
-    private static FileSink? BuildFileSink(LogSettings logSettings, string banner)
+    private static FileSink? BuildFileSink(LogSettings logSettings)
     {
         if (logSettings.FilePath is null || logSettings.FileLevels == LogLevel.None)
         {
@@ -51,7 +52,9 @@ internal static class LoggerFactory
         }
 
         string? resolvedPath = ResolveFilePath(logSettings.FilePath, logSettings.FileMode);
-        return resolvedPath is null ? null : new FileSink(resolvedPath, banner);
+        // No preamble — the banner is written by Logger.Initialise via a normal write so it
+        // reaches both console and file sinks. The error file still uses a preamble for laziness.
+        return resolvedPath is null ? null : new FileSink(resolvedPath);
     }
 
     private static string BuildRunBanner()

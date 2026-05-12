@@ -19,7 +19,7 @@ public record class WindowSettings()
     /// <summary>
     /// Whether the window should be created centred on the screen on creation - ignores X,Y
     /// </summary>
-    public bool Centre { get; set; } = false;
+    public bool Centre { get; set; } = true;
 
     /// <summary>
     /// The cursor that should be used while the mouse is over the window
