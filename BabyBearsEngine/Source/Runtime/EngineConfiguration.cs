@@ -10,10 +10,12 @@ internal static class EngineConfiguration
 {
     private const string AlreadyInitialisedMessage = "Game services already initialised.";
     private const string NotInitialisedMessage = "The platform context has not been initialized. Please call Initialise() before accessing the platform context.";
+    private const string ScreenCaptureNotEnabledMessage = "Screen capture is not enabled. Set ApplicationSettings.DiagnosticsSettings.CaptureFrames = true to enable.";
 
     private static IGPUResourceDeletionService s_gpuResourceDeletionService = new DefaultGPUResourceDeletionService();
     private static IKeyboard? s_keyboard = null;
     private static IMouse? s_mouse = null;
+    private static IScreenCapture? s_screenCapture = null;
     private static ITextureFactory s_textureFactory = new DefaultTextureFactory();
     private static IWindow? s_window = null;
     private static IWorldSwitcher? s_worldSwitcher = null;
@@ -36,6 +38,12 @@ internal static class EngineConfiguration
         set => s_mouse = value ?? throw new ArgumentNullException(nameof(value));
     }
 
+    public static IScreenCapture ScreenCaptureService
+    {
+        get => s_screenCapture ?? throw new InvalidOperationException(ScreenCaptureNotEnabledMessage);
+        set => s_screenCapture = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
     public static ITextureFactory TextureFactory
     {
         get => s_textureFactory;
@@ -54,14 +62,14 @@ internal static class EngineConfiguration
         set => s_worldSwitcher = value ?? throw new ArgumentNullException(nameof(value));
     }
 
-    public static void Initialise(IWindow window, IKeyboard keyboard, IMouse mouse, IWorldSwitcher worldSwitcher)
+    public static void Initialise(IWindow window, IKeyboard keyboard, IMouse mouse, IWorldSwitcher worldSwitcher, IScreenCapture? screenCapture)
     {
         ArgumentNullException.ThrowIfNull(window, nameof(window));
         ArgumentNullException.ThrowIfNull(keyboard, nameof(keyboard));
         ArgumentNullException.ThrowIfNull(mouse, nameof(mouse));
         ArgumentNullException.ThrowIfNull(worldSwitcher, nameof(worldSwitcher));
 
-        if (s_window is not null || s_keyboard is not null || s_mouse is not null || s_worldSwitcher is not null)
+        if (s_window is not null || s_keyboard is not null || s_mouse is not null || s_worldSwitcher is not null || s_screenCapture is not null)
         {
             throw new InvalidOperationException(AlreadyInitialisedMessage);
         }
@@ -70,6 +78,7 @@ internal static class EngineConfiguration
         s_keyboard = keyboard;
         s_mouse = mouse;
         s_worldSwitcher = worldSwitcher;
+        s_screenCapture = screenCapture;
     }
 
     public static void Reset()
@@ -77,6 +86,7 @@ internal static class EngineConfiguration
         s_gpuResourceDeletionService = new DefaultGPUResourceDeletionService();
         s_keyboard = null;
         s_mouse = null;
+        s_screenCapture = null;
         s_textureFactory = new DefaultTextureFactory();
         s_window = null;
         s_worldSwitcher = null;

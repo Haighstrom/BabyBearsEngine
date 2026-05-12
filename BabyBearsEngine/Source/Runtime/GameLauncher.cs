@@ -14,6 +14,8 @@ public static class GameLauncher
             throw new InvalidOperationException("Game already running.");
         }
 
+        appSettings.DiagnosticsSettings.WarnIfEnabledInRelease();
+
         s_running = true;
 
         try
@@ -24,7 +26,8 @@ public static class GameLauncher
                 window: new OpenTKWindowAdapter(engine),
                 keyboard: new OpenTKKeyboardAdapter(engine.KeyboardState),
                 mouse: new OpenTKMouseAdapter(engine.MouseState),
-                worldSwitcher: engine);
+                worldSwitcher: engine,
+                screenCapture: appSettings.DiagnosticsSettings.CaptureFrames ? new OpenTKScreenCaptureAdapter(engine) : null);
 
             engine.Run(worldFactory());
         }

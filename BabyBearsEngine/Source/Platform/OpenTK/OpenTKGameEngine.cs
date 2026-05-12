@@ -76,6 +76,11 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
 
         GPUResourceDeletion.ProcessDeletes();
 
+        if (appSettings.DiagnosticsSettings.CaptureFrames)
+        {
+            EngineConfiguration.ScreenCaptureService.CaptureCurrentBackbuffer();
+        }
+
         SwapBuffers();
     }
 

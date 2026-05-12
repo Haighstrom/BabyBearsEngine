@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="BabyBearsEngine.Benchmarks" />
     <InternalsVisibleTo Include="BabyBearsEngine.Tests.System" />
     <InternalsVisibleTo Include="BabyBearsEngine.Tests.Unit" />
   </ItemGroup>

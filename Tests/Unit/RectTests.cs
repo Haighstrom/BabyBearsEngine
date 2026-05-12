@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Tests.Unit;
@@ -568,7 +568,7 @@ public class RectTests
     {
         Rect r = new(10f, 20f, 30f, 40f);
         var v = r.ToVertices();
-        Assert.AreEqual(4, v.Count);
+        Assert.HasCount(4, v);
         Assert.AreEqual(r.TopLeft, v[0]);
         Assert.AreEqual(r.TopRight, v[1]);
         Assert.AreEqual(r.BottomRight, v[2]);

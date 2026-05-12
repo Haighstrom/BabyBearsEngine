@@ -6,6 +6,8 @@ public record class ApplicationSettings()
 
     public ConsoleSettings ConsoleSettings { get; init; } = ConsoleSettings.Default;
 
+    public DiagnosticsSettings DiagnosticsSettings { get; init; } = DiagnosticsSettings.Default;
+
     public GameLoopSettings GameLoopSettings { get; init; } = GameLoopSettings.Default;
 
     public IoSettings IoSettings { get; init; } = IoSettings.Default;

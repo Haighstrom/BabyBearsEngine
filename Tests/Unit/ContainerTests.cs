@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using BabyBearsEngine.Geometry;
@@ -146,8 +146,8 @@ public class ContainerTests
 
         Assert.IsNull(u.Parent);
         Assert.IsNull(r.Parent);
-        Assert.AreEqual(0, container.GetUpdatables().Count);
-        Assert.AreEqual(0, container.GetRenderables().Count);
+        Assert.IsEmpty(container.GetUpdatables());
+        Assert.IsEmpty(container.GetRenderables());
     }
 
     // RemoveAll
@@ -165,8 +165,8 @@ public class ContainerTests
 
         Assert.IsNull(u.Parent);
         Assert.IsNull(r.Parent);
-        Assert.AreEqual(0, container.GetUpdatables().Count);
-        Assert.AreEqual(0, container.GetRenderables().Count);
+        Assert.IsEmpty(container.GetUpdatables());
+        Assert.IsEmpty(container.GetRenderables());
     }
 
     [TestMethod]
@@ -174,7 +174,7 @@ public class ContainerTests
     {
         var container = CreateContainer(out _);
         container.RemoveAll();
-        Assert.AreEqual(0, container.GetRenderables().Count);
+        Assert.IsEmpty(container.GetRenderables());
     }
 
     // Layer ordering
@@ -245,7 +245,7 @@ public class ContainerTests
         container.Remove(a);
         a.SetLayer(99);
 
-        Assert.AreEqual(1, container.GetRenderables().Count);
+        Assert.HasCount(1, container.GetRenderables());
         Assert.AreSame(b, container.GetRenderables().Single());
     }
 

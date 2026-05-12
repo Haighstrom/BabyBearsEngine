@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using BabyBearsEngine.Input;
@@ -188,7 +188,7 @@ public class KeyboardFacadeTests
 
         Keyboard.KeyDown(Keys.X);
 
-        Assert.AreEqual(0, _fake.Calls.Count);
-        Assert.AreEqual(1, second.Calls.Count);
+        Assert.IsEmpty(_fake.Calls);
+        Assert.HasCount(1, second.Calls);
     }
 }
