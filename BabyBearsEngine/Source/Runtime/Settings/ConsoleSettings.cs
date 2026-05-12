@@ -16,14 +16,10 @@ public record class ConsoleSettings()
 
     /// <summary>
     /// When true, log messages written to the console are colourised by severity (Warning=yellow,
-    /// Error/Critical=red, etc). Defaults to true.
+    /// Error=red, etc). Defaults to true. Use <see cref="LogSettings.MessageMetadata"/> to control
+    /// the timestamp and level prefixes themselves.
     /// </summary>
     public bool ColouriseLogOutput { get; set; } = true;
-
-    /// <summary>
-    /// When true, log messages written to the console include a timestamp prefix. Defaults to true.
-    /// </summary>
-    public bool IncludeLogTimestamp { get; set; } = true;
 
     /// <summary>
     /// Whether the console should be shown. Defaults to true if a debugger is being used, false otherwise.

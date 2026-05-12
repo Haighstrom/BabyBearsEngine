@@ -17,6 +17,8 @@ public static class GameLauncher
 
         Logger.Initialise(appSettings.LogSettings, appSettings.ConsoleSettings);
 
+        EngineDiagnostics.LogSystemInformation();
+
         appSettings.DiagnosticsSettings.WarnIfEnabledInRelease();
 
         s_running = true;

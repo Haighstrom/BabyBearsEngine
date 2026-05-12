@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenTK;
 using BabyBearsEngine.GameEngine;
@@ -63,7 +64,11 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
         CursorState = ws.ToCursorState();
         Cursor = ws.Cursor.ToOpenTK();
 
+        EngineDiagnostics.LogStartupContext(appSettings.LogSettings);
+
         _world.Load(); //does nothing currently - world is swapped
+
+        EngineDiagnostics.LogInitialisationComplete();
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
