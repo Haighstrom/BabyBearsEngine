@@ -1,4 +1,4 @@
-﻿using BabyBearsEngine.Input;
+using BabyBearsEngine.Input;
 using BabyBearsEngine.OpenGL;
 
 namespace BabyBearsEngine;
@@ -12,17 +12,17 @@ internal static class EngineConfiguration
     private const string NotInitialisedMessage = "The platform context has not been initialized. Please call Initialise() before accessing the platform context.";
     private const string ScreenCaptureNotEnabledMessage = "Screen capture is not enabled. Set ApplicationSettings.DiagnosticsSettings.CaptureFrames = true to enable.";
 
-    private static IGPUResourceDeletionService s_gpuResourceDeletionService = new DefaultGPUResourceDeletionService();
+    private static IGPUResourceDeletionService? s_gpuResourceDeletionService = null;
     private static IKeyboard? s_keyboard = null;
     private static IMouse? s_mouse = null;
     private static IScreenCapture? s_screenCapture = null;
-    private static ITextureFactory s_textureFactory = new DefaultTextureFactory();
+    private static ITextureFactory? s_textureFactory = null;
     private static IWindow? s_window = null;
     private static IWorldSwitcher? s_worldSwitcher = null;
 
     public static IGPUResourceDeletionService GPUResourceDeletionService
     {
-        get => s_gpuResourceDeletionService;
+        get => s_gpuResourceDeletionService ?? throw new InvalidOperationException(NotInitialisedMessage);
         set => s_gpuResourceDeletionService = value ?? throw new ArgumentNullException(nameof(value));
     }
 
@@ -46,7 +46,7 @@ internal static class EngineConfiguration
 
     public static ITextureFactory TextureFactory
     {
-        get => s_textureFactory;
+        get => s_textureFactory ?? throw new InvalidOperationException(NotInitialisedMessage);
         set => s_textureFactory = value ?? throw new ArgumentNullException(nameof(value));
     }
 
@@ -62,14 +62,27 @@ internal static class EngineConfiguration
         set => s_worldSwitcher = value ?? throw new ArgumentNullException(nameof(value));
     }
 
-    public static void Initialise(IWindow window, IKeyboard keyboard, IMouse mouse, IWorldSwitcher worldSwitcher, IScreenCapture? screenCapture)
+    public static void Initialise(
+        IWindow window,
+        IKeyboard keyboard,
+        IMouse mouse,
+        IWorldSwitcher worldSwitcher,
+        IScreenCapture? screenCapture,
+        IGPUResourceDeletionService? gpuResourceDeletion = null,
+        ITextureFactory? textureFactory = null)
     {
         ArgumentNullException.ThrowIfNull(window, nameof(window));
         ArgumentNullException.ThrowIfNull(keyboard, nameof(keyboard));
         ArgumentNullException.ThrowIfNull(mouse, nameof(mouse));
         ArgumentNullException.ThrowIfNull(worldSwitcher, nameof(worldSwitcher));
 
-        if (s_window is not null || s_keyboard is not null || s_mouse is not null || s_worldSwitcher is not null || s_screenCapture is not null)
+        if (s_window is not null
+            || s_keyboard is not null
+            || s_mouse is not null
+            || s_worldSwitcher is not null
+            || s_screenCapture is not null
+            || s_gpuResourceDeletionService is not null
+            || s_textureFactory is not null)
         {
             throw new InvalidOperationException(AlreadyInitialisedMessage);
         }
@@ -79,15 +92,17 @@ internal static class EngineConfiguration
         s_mouse = mouse;
         s_worldSwitcher = worldSwitcher;
         s_screenCapture = screenCapture;
+        s_gpuResourceDeletionService = gpuResourceDeletion ?? new DefaultGPUResourceDeletionService();
+        s_textureFactory = textureFactory ?? new DefaultTextureFactory();
     }
 
     public static void Reset()
     {
-        s_gpuResourceDeletionService = new DefaultGPUResourceDeletionService();
+        s_gpuResourceDeletionService = null;
         s_keyboard = null;
         s_mouse = null;
         s_screenCapture = null;
-        s_textureFactory = new DefaultTextureFactory();
+        s_textureFactory = null;
         s_window = null;
         s_worldSwitcher = null;
     }
