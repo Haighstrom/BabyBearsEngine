@@ -8,6 +8,18 @@ namespace BabyBearsEngine.Graphics;
 /// </summary>
 public interface IGraphic : IRenderable
 {
+    /// <summary>X position in the parent's local space.</summary>
+    float X { get; set; }
+
+    /// <summary>Y position in the parent's local space.</summary>
+    float Y { get; set; }
+
+    /// <summary>Width in pixels.</summary>
+    float Width { get; set; }
+
+    /// <summary>Height in pixels.</summary>
+    float Height { get; set; }
+
     /// <summary>
     /// Tint colour. For solid-colour graphics this is the fill colour; for textured graphics
     /// it multiplies the texture sample (so <see cref="Colour.White"/> means "no tint").
