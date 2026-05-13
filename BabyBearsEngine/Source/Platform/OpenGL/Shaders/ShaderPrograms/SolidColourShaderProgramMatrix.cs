@@ -5,9 +5,20 @@ namespace BabyBearsEngine.OpenGL;
 
 public sealed class SolidColourShaderProgramMatrix : ShaderProgramBase, IMVPShader
 {
-    private static readonly Lazy<SolidColourShaderProgramMatrix> s_instance = new(() => new SolidColourShaderProgramMatrix());
+    private static Lazy<SolidColourShaderProgramMatrix> s_instance = new(() => new SolidColourShaderProgramMatrix());
 
     internal static SolidColourShaderProgramMatrix Instance => s_instance.Value;
+
+    /// <summary>
+    /// Drop the cached instance so the next access reconstructs the GL shader program. Called
+    /// between game runs (in <c>GameLauncher.Run</c>'s teardown) so the next run doesn't reuse a
+    /// shader handle from a destroyed GL context. The previous instance's GL resources are
+    /// effectively leaked — the context is being torn down anyway.
+    /// </summary>
+    internal static void ResetForNextRun()
+    {
+        s_instance = new Lazy<SolidColourShaderProgramMatrix>(() => new SolidColourShaderProgramMatrix());
+    }
 
     private readonly int _mvMatrixLocation;
     private readonly int _pMatrixLocation;
