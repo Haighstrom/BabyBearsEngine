@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using BabyBearsEngine.Diagnostics;
 
@@ -52,9 +52,9 @@ public class FileSinkTests
         sink.Write(LogLevel.Error, "failed", ex);
 
         string content = ReadFile();
-        StringAssert.Contains(content, "failed");
-        StringAssert.Contains(content, "InvalidOperationException");
-        StringAssert.Contains(content, "boom");
+        Assert.Contains("failed", content);
+        Assert.Contains("InvalidOperationException", content);
+        Assert.Contains("boom", content);
     }
 
     [TestMethod]
@@ -70,7 +70,7 @@ public class FileSinkTests
 
         Assert.AreNotEqual(-1, preambleIdx, "Preamble should be written.");
         Assert.AreNotEqual(-1, messageIdx, "Message should be written.");
-        Assert.IsTrue(preambleIdx < messageIdx, "Preamble must appear before the first log message.");
+        Assert.IsLessThan(messageIdx, preambleIdx, "Preamble must appear before the first log message.");
     }
 
     [TestMethod]
@@ -86,9 +86,9 @@ public class FileSinkTests
         int preambleOccurrences = CountOccurrences(content, "PREAMBLE");
 
         Assert.AreEqual(1, preambleOccurrences, "Preamble must appear exactly once across multiple writes.");
-        StringAssert.Contains(content, "one");
-        StringAssert.Contains(content, "two");
-        StringAssert.Contains(content, "three");
+        Assert.Contains("one", content);
+        Assert.Contains("two", content);
+        Assert.Contains("three", content);
     }
 
     [TestMethod]

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -81,8 +81,8 @@ public class LoggerTests
 
         Logger.Verbose("hello");
 
-        StringAssert.Contains(ConsoleOutput, "[Verbose]");
-        StringAssert.Contains(ConsoleOutput, "hello");
+        Assert.Contains("[Verbose]", ConsoleOutput);
+        Assert.Contains("hello", ConsoleOutput);
     }
 
     [TestMethod]
@@ -92,7 +92,7 @@ public class LoggerTests
 
         Logger.Debug("hello");
 
-        StringAssert.Contains(ConsoleOutput, "[Debug]");
+        Assert.Contains("[Debug]", ConsoleOutput);
     }
 
     [TestMethod]
@@ -102,7 +102,7 @@ public class LoggerTests
 
         Logger.Information("hello");
 
-        StringAssert.Contains(ConsoleOutput, "[Information]");
+        Assert.Contains("[Information]", ConsoleOutput);
     }
 
     [TestMethod]
@@ -112,8 +112,8 @@ public class LoggerTests
 
         Logger.Info("hello");
 
-        StringAssert.Contains(ConsoleOutput, "[Information]");
-        StringAssert.Contains(ConsoleOutput, "hello");
+        Assert.Contains("[Information]", ConsoleOutput);
+        Assert.Contains("hello", ConsoleOutput);
     }
 
     [TestMethod]
@@ -123,8 +123,8 @@ public class LoggerTests
 
         Logger.Warning("uh oh");
 
-        StringAssert.Contains(ConsoleOutput, "[Warning]");
-        StringAssert.Contains(ConsoleOutput, "uh oh");
+        Assert.Contains("[Warning]", ConsoleOutput);
+        Assert.Contains("uh oh", ConsoleOutput);
     }
 
     [TestMethod]
@@ -134,8 +134,8 @@ public class LoggerTests
 
         Logger.Error("bad");
 
-        StringAssert.Contains(ConsoleOutput, "[Error]");
-        StringAssert.Contains(ConsoleOutput, "bad");
+        Assert.Contains("[Error]", ConsoleOutput);
+        Assert.Contains("bad", ConsoleOutput);
     }
 
     [TestMethod]
@@ -145,8 +145,8 @@ public class LoggerTests
 
         Logger.Error("crashed", new InvalidOperationException("boom"));
 
-        StringAssert.Contains(ConsoleOutput, "InvalidOperationException");
-        StringAssert.Contains(ConsoleOutput, "boom");
+        Assert.Contains("InvalidOperationException", ConsoleOutput);
+        Assert.Contains("boom", ConsoleOutput);
     }
 
     [TestMethod]
@@ -156,7 +156,7 @@ public class LoggerTests
 
         Logger.Fatal("dead");
 
-        StringAssert.Contains(ConsoleOutput, "[Fatal]");
+        Assert.Contains("[Fatal]", ConsoleOutput);
     }
 
     [TestMethod]
@@ -166,8 +166,8 @@ public class LoggerTests
 
         Logger.Fatal("dead", new InvalidOperationException("kaboom"));
 
-        StringAssert.Contains(ConsoleOutput, "InvalidOperationException");
-        StringAssert.Contains(ConsoleOutput, "kaboom");
+        Assert.Contains("InvalidOperationException", ConsoleOutput);
+        Assert.Contains("kaboom", ConsoleOutput);
     }
 
     [TestMethod]
@@ -177,8 +177,8 @@ public class LoggerTests
 
         Logger.GLError("gl bad");
 
-        StringAssert.Contains(ConsoleOutput, "[Error]");
-        StringAssert.Contains(ConsoleOutput, "gl bad");
+        Assert.Contains("[Error]", ConsoleOutput);
+        Assert.Contains("gl bad", ConsoleOutput);
     }
 
     // ─── Filter masks ───
@@ -192,9 +192,9 @@ public class LoggerTests
         Logger.Warning("warn-msg");
         Logger.Error("error-msg");
 
-        Assert.IsFalse(ConsoleOutput.Contains("info-msg"));
-        StringAssert.Contains(ConsoleOutput, "warn-msg");
-        StringAssert.Contains(ConsoleOutput, "error-msg");
+        Assert.DoesNotContain("info-msg", ConsoleOutput);
+        Assert.Contains("warn-msg", ConsoleOutput);
+        Assert.Contains("error-msg", ConsoleOutput);
     }
 
     [TestMethod]
@@ -205,8 +205,8 @@ public class LoggerTests
         Logger.Information("info-msg");
         Logger.Error("error-msg");
 
-        StringAssert.Contains(LogFileContent, "info-msg");
-        Assert.IsFalse(LogFileContent.Contains("error-msg"));
+        Assert.Contains("info-msg", LogFileContent);
+        Assert.DoesNotContain("error-msg", LogFileContent);
     }
 
     [TestMethod]
@@ -218,9 +218,9 @@ public class LoggerTests
         Logger.Error("error-msg");
         Logger.Fatal("fatal-msg");
 
-        Assert.IsFalse(ErrorFileContent.Contains("info-msg"));
-        StringAssert.Contains(ErrorFileContent, "error-msg");
-        StringAssert.Contains(ErrorFileContent, "fatal-msg");
+        Assert.DoesNotContain("info-msg", ErrorFileContent);
+        Assert.Contains("error-msg", ErrorFileContent);
+        Assert.Contains("fatal-msg", ErrorFileContent);
     }
 
     [TestMethod]
@@ -230,7 +230,7 @@ public class LoggerTests
 
         Logger.Information("nope");
 
-        Assert.IsFalse(ConsoleOutput.Contains("nope"));
+        Assert.DoesNotContain("nope", ConsoleOutput);
     }
 
     [TestMethod]
@@ -282,8 +282,8 @@ public class LoggerTests
         Logger.GLError("first-site");
         Logger.GLError("second-site");
 
-        StringAssert.Contains(ConsoleOutput, "first-site");
-        StringAssert.Contains(ConsoleOutput, "second-site");
+        Assert.Contains("first-site", ConsoleOutput);
+        Assert.Contains("second-site", ConsoleOutput);
     }
 
     [TestMethod]
@@ -322,7 +322,7 @@ public class LoggerTests
 
         Logger.Information("msg");
 
-        StringAssert.Contains(ConsoleOutput, "LoggerTests.cs:");
+        Assert.Contains("LoggerTests.cs:", ConsoleOutput);
     }
 
     [TestMethod]
@@ -332,7 +332,7 @@ public class LoggerTests
 
         Logger.Information("msg");
 
-        Assert.IsFalse(ConsoleOutput.Contains("LoggerTests.cs"));
+        Assert.DoesNotContain("LoggerTests.cs", ConsoleOutput);
     }
 
     // ─── Metadata flags (timestamp / level prefix) ───
@@ -344,8 +344,8 @@ public class LoggerTests
 
         Logger.Warning("msg");
 
-        Assert.IsFalse(ConsoleOutput.Contains("[Warning]"));
-        StringAssert.Contains(ConsoleOutput, "msg");
+        Assert.DoesNotContain("[Warning]", ConsoleOutput);
+        Assert.Contains("msg", ConsoleOutput);
     }
 
     [TestMethod]
@@ -366,7 +366,7 @@ public class LoggerTests
 
         Logger.Information("bare");
 
-        Assert.IsFalse(ConsoleOutput.Contains("[Information]"));
+        Assert.DoesNotContain("[Information]", ConsoleOutput);
         // Banner is still in output (always-on), but the test message should appear with no prefix.
         Assert.IsTrue(ConsoleOutput.Contains(Environment.NewLine + "bare") || ConsoleOutput.EndsWith("bare" + Environment.NewLine));
     }
@@ -384,11 +384,11 @@ public class LoggerTests
         string output = ConsoleOutput.Trim();
         string[] lines = output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
 
-        Assert.AreEqual(4, lines.Length, $"Expected 4 lines (divider + title + 2 body lines), got: {output}");
+        Assert.HasCount(4, lines, $"Expected 4 lines (divider + title + 2 body lines), got: {output}");
         Assert.IsTrue(lines[0].All(c => c == '='), "First line should be the opening divider.");
-        StringAssert.Contains(lines[1], "MyTitle");
-        StringAssert.Contains(lines[2], "alpha");
-        StringAssert.Contains(lines[3], "beta");
+        Assert.Contains("MyTitle", lines[1]);
+        Assert.Contains("alpha", lines[2]);
+        Assert.Contains("beta", lines[3]);
     }
 
     [TestMethod]
@@ -412,9 +412,9 @@ public class LoggerTests
         Logger.SectionMarker("hello");
 
         string output = ConsoleOutput.Trim();
-        StringAssert.Contains(output, "hello");
-        StringAssert.StartsWith(output, "=");
-        StringAssert.EndsWith(output, "=");
+        Assert.Contains("hello", output);
+        Assert.StartsWith("=", output);
+        Assert.EndsWith("=", output);
     }
 
     [TestMethod]
@@ -435,10 +435,10 @@ public class LoggerTests
     {
         Logger.Initialise(TestSettings(), PlainConsole());
 
-        StringAssert.Contains(ConsoleOutput, "Powered by BabyBearsEngine");
-        StringAssert.Contains(ConsoleOutput, "Run Started:");
-        StringAssert.Contains(LogFileContent, "Powered by BabyBearsEngine");
-        StringAssert.Contains(LogFileContent, "Run Started:");
+        Assert.Contains("Powered by BabyBearsEngine", ConsoleOutput);
+        Assert.Contains("Run Started:", ConsoleOutput);
+        Assert.Contains("Powered by BabyBearsEngine", LogFileContent);
+        Assert.Contains("Run Started:", LogFileContent);
     }
 
     [TestMethod]
@@ -456,8 +456,8 @@ public class LoggerTests
 
         Logger.Error("first");
 
-        StringAssert.Contains(ErrorFileContent, "Powered by BabyBearsEngine");
-        StringAssert.Contains(ErrorFileContent, "first");
+        Assert.Contains("Powered by BabyBearsEngine", ErrorFileContent);
+        Assert.Contains("first", ErrorFileContent);
     }
 
     [TestMethod]
@@ -510,8 +510,8 @@ public class LoggerTests
         Logger.Initialise(TestSettings(fileMode: LogFileMode.AppendToExisting), PlainConsole());
         Logger.Information("new");
 
-        StringAssert.Contains(LogFileContent, "pre-existing");
-        StringAssert.Contains(LogFileContent, "new");
+        Assert.Contains("pre-existing", LogFileContent);
+        Assert.Contains("new", LogFileContent);
     }
 
     [TestMethod]
@@ -522,8 +522,8 @@ public class LoggerTests
         Logger.Initialise(TestSettings(fileMode: LogFileMode.OverwriteExisting), PlainConsole());
         Logger.Information("new");
 
-        Assert.IsFalse(LogFileContent.Contains("pre-existing"));
-        StringAssert.Contains(LogFileContent, "new");
+        Assert.DoesNotContain("pre-existing", LogFileContent);
+        Assert.Contains("new", LogFileContent);
     }
 
     [TestMethod]
@@ -535,12 +535,12 @@ public class LoggerTests
         Logger.Information("new");
 
         string originalContent = File.ReadAllText(_logPath);
-        StringAssert.Contains(originalContent, "pre-existing");
-        Assert.IsFalse(originalContent.Contains("new"), "Original file should be untouched.");
+        Assert.Contains("pre-existing", originalContent);
+        Assert.DoesNotContain("new", originalContent, "Original file should be untouched.");
 
-        var siblings = Directory.GetFiles(_tempDir, "log_*.log");
-        Assert.AreEqual(1, siblings.Length, "Expected exactly one timestamped sibling file.");
-        StringAssert.Contains(File.ReadAllText(siblings[0]), "new");
+        string[] siblings = Directory.GetFiles(_tempDir, "log_*.log");
+        Assert.HasCount(1, siblings, "Expected exactly one timestamped sibling file.");
+        Assert.Contains("new", File.ReadAllText(siblings[0]));
     }
 
     // ─── Helpers ───
