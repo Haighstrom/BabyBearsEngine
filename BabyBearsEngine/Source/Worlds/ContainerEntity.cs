@@ -28,22 +28,23 @@ public abstract class ContainerEntity : AddableBase, IEntity, IContainer, ILayer
     public bool Visible { get; set; } = true;
 
     /// <inheritdoc/>
-    public int Layer => _layer;
+    public int Layer
+    {
+        get => _layer;
+        set
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(value);
+            int old = _layer;
+            _layer = value;
+            if (old != value)
+            {
+                LayerChanged?.Invoke(this, new LayerChangedEventArgs(old, value));
+            }
+        }
+    }
 
     /// <inheritdoc/>
     public event EventHandler<LayerChangedEventArgs>? LayerChanged;
-
-    /// <inheritdoc/>
-    public void SetLayer(int layer)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(layer);
-        int old = _layer;
-        _layer = layer;
-        if (old != layer)
-        {
-            LayerChanged?.Invoke(this, new LayerChangedEventArgs(old, layer));
-        }
-    }
 
     /// <summary>Returns a snapshot of the child <see cref="IUpdateable"/>s. Safe to mutate the container while iterating the returned list.</summary>
     protected IList<IUpdateable> GetUpdatables() => _container.GetUpdatables();

@@ -61,10 +61,25 @@ public class ContainerBenchmarks
 
     private sealed class StubRenderable(int layer) : IRenderable, ILayered
     {
+        private int _layer = layer;
         private IContainer? _parent = null;
 
         public bool Exists => true;
-        public int Layer { get; private set; } = layer;
+
+        public int Layer
+        {
+            get => _layer;
+            set
+            {
+                int old = _layer;
+                _layer = value;
+                if (old != value)
+                {
+                    LayerChanged?.Invoke(this, new LayerChangedEventArgs(old, value));
+                }
+            }
+        }
+
         public event EventHandler<LayerChangedEventArgs>? LayerChanged;
         public IContainer? Parent => _parent;
         public bool Visible { get; set; } = true;
@@ -72,16 +87,6 @@ public class ContainerBenchmarks
         public void Remove() { }
 
         public void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
-
-        public void SetLayer(int layer)
-        {
-            int old = Layer;
-            Layer = layer;
-            if (old != layer)
-            {
-                LayerChanged?.Invoke(this, new LayerChangedEventArgs(old, layer));
-            }
-        }
 
         public void SetParent(IContainer? parent)
         {

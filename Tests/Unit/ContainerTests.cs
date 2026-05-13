@@ -27,23 +27,29 @@ public class ContainerTests
 
     private sealed class StubLayeredRenderable : AddableBase, IRenderable, ILayered
     {
+        private int _layer;
+
+        public StubLayeredRenderable(int initialLayer = 0) => _layer = initialLayer;
+
         public bool Visible { get; set; } = true;
-        public int Layer { get; private set; }
-        public event EventHandler<LayerChangedEventArgs>? LayerChanged;
 
-        public StubLayeredRenderable(int initialLayer = 0) => Layer = initialLayer;
-
-        public void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
-
-        public void SetLayer(int layer)
+        public int Layer
         {
-            int old = Layer;
-            Layer = layer;
-            if (old != layer)
+            get => _layer;
+            set
             {
-                LayerChanged?.Invoke(this, new LayerChangedEventArgs(old, layer));
+                int old = _layer;
+                _layer = value;
+                if (old != value)
+                {
+                    LayerChanged?.Invoke(this, new LayerChangedEventArgs(old, value));
+                }
             }
         }
+
+        public event EventHandler<LayerChangedEventArgs>? LayerChanged;
+
+        public void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
     }
 
     private sealed class FakeRealParent : IContainer
@@ -224,7 +230,7 @@ public class ContainerTests
         container.Add(b);
         Assert.AreSame(b, container.GetRenderables()[0]); // b on top initially
 
-        a.SetLayer(10); // a now has the highest layer
+        a.Layer = 10; // a now has the highest layer
 
         var reordered = container.GetRenderables().ToList();
         Assert.AreSame(a, reordered[0]);
@@ -243,7 +249,7 @@ public class ContainerTests
         // Remove a, then change its layer. The container must NOT re-add it; it must
         // not be in the renderables list at all.
         container.Remove(a);
-        a.SetLayer(99);
+        a.Layer = 99;
 
         Assert.HasCount(1, container.GetRenderables());
         Assert.AreSame(b, container.GetRenderables().Single());

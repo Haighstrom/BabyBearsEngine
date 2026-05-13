@@ -11,6 +11,15 @@ public interface IWorld : IContainer
     /// <summary>The colour used to clear the screen at the start of each frame.</summary>
     Colour BackgroundColour { get; }
 
+    /// <summary>
+    /// A second <see cref="IContainer"/> rendered as a separate pass after the main world,
+    /// for content that should sit on top of every other widget — tooltips, open dropdowns,
+    /// modals, transient overlays. Add to it the same way as the world itself:
+    /// <c>world.Overlay.Add(tooltip)</c>. Children of the overlay are <see cref="IUpdateable"/>-updated
+    /// alongside the main scene and share the world's coordinate space.
+    /// </summary>
+    IContainer Overlay { get; }
+
     /// <summary>One-shot initialisation called when this world becomes the active world.</summary>
     void Load();
 

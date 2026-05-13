@@ -154,4 +154,60 @@ public class WorldTests
 
         Assert.AreEqual(1, inactive.UpdateCalls);
     }
+
+    // Overlay — a second container rendered/updated as a separate pass after the main scene.
+
+    [TestMethod]
+    public void Overlay_IsNonNull()
+    {
+        var world = new World();
+        Assert.IsNotNull(world.Overlay);
+    }
+
+    [TestMethod]
+    public void Overlay_IsDistinctFromMainContainer()
+    {
+        var world = new World();
+        var mainChild = new StubUpdateable();
+        var overlayChild = new StubUpdateable();
+
+        world.Add(mainChild);
+        world.Overlay.Add(overlayChild);
+
+        // RemoveAll on the world's main container should not affect overlay children.
+        world.RemoveAll();
+
+        Assert.IsNull(mainChild.Parent);
+        Assert.AreSame(world, overlayChild.Parent);
+    }
+
+    [TestMethod]
+    public void Overlay_Add_SetsParentToWorld()
+    {
+        var world = new World();
+        var entity = new StubUpdateable();
+
+        world.Overlay.Add(entity);
+
+        // Overlay shares the world's coordinate space, so parent points back to the world
+        // (not at the overlay container itself).
+        Assert.AreSame(world, entity.Parent);
+    }
+
+    [TestMethod]
+    public void Update_AlsoUpdatesOverlayChildren()
+    {
+        var world = new World();
+        var mainChild = new StubUpdateable();
+        var overlayChild = new StubUpdateable();
+        world.Add(mainChild);
+        world.Overlay.Add(overlayChild);
+
+        world.Update(0.025);
+
+        Assert.AreEqual(1, mainChild.UpdateCalls);
+        Assert.AreEqual(0.025, mainChild.LastElapsed);
+        Assert.AreEqual(1, overlayChild.UpdateCalls);
+        Assert.AreEqual(0.025, overlayChild.LastElapsed);
+    }
 }

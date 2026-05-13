@@ -11,15 +11,20 @@ namespace BabyBearsEngine.Worlds;
 public class World : IWorld
 {
     private readonly Container _container;
+    private readonly Container _overlay;
 
     /// <summary>Creates an empty world with the default background colour (cornflower blue).</summary>
     public World()
     {
         _container = new Container(this);
+        _overlay = new Container(this);
     }
 
     /// <summary>The colour used to clear the screen at the start of each frame. Defaults to <see cref="Colour.CornflowerBlue"/>.</summary>
     public Colour BackgroundColour { get; set; } = Colour.CornflowerBlue;
+
+    /// <inheritdoc/>
+    public IContainer Overlay => _overlay;
 
     /// <inheritdoc/>
     public void Load()
@@ -54,6 +59,10 @@ public class World : IWorld
         {
             updateable.Update(elapsed);
         }
+        foreach (var updateable in _overlay.GetUpdatables())
+        {
+            updateable.Update(elapsed);
+        }
     }
 
     /// <inheritdoc/>
@@ -66,6 +75,15 @@ public class World : IWorld
         var modelView = Matrix3.Identity;
 
         foreach (var graphic in _container.GetRenderables())
+        {
+            if (!graphic.Visible)
+            {
+                continue;
+            }
+            graphic.Render(ref projection, ref modelView);
+        }
+
+        foreach (var graphic in _overlay.GetRenderables())
         {
             if (!graphic.Visible)
             {

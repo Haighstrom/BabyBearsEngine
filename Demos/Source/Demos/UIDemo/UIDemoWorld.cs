@@ -39,12 +39,28 @@ internal class UIDemoWorld : DemoWorld
 
         SimpleToolTip tooltip = new(WidgetLeft, FirstRowY + 3 * RowHeight + 60, 180, 30,
             TooltipTheme.Default, "Hello from the tooltip!");
-        Add(tooltip);
+        Overlay.Add(tooltip);
 
         tooltipTarget.MouseHovered += (_, _) => tooltip.Show();
         tooltipTarget.MouseHoverStopped += (_, _) => tooltip.Hide();
         tooltipTarget.MouseExited += (_, _) => tooltip.Hide();
+
+        Add(MakeLabel(LabelLeft, FirstRowY + 4 * RowHeight, 180, 50, "Scrollbar (H):"));
+        Scrollbar hScrollbar = new(WidgetLeft, FirstRowY + 4 * RowHeight + 15, 300, 20, ScrollbarDirection.Horizontal, ScrollbarTheme.Default);
+        TextImage hScrollLabel = MakeLabel(WidgetLeft + 320, FirstRowY + 4 * RowHeight, 100, 50, FormatAmount(hScrollbar.AmountFilled));
+        hScrollbar.ScrollChanged += (_, e) => hScrollLabel.Text = FormatAmount(e.NewValue);
+        Add(hScrollbar);
+        Add(hScrollLabel);
+
+        Add(MakeLabel(LabelLeft, FirstRowY + 5 * RowHeight, 180, 50, "Scrollbar (V):"));
+        Scrollbar vScrollbar = new(WidgetLeft, FirstRowY + 5 * RowHeight, 20, 150, ScrollbarDirection.Vertical, ScrollbarTheme.Default);
+        TextImage vScrollLabel = MakeLabel(WidgetLeft + 40, FirstRowY + 5 * RowHeight, 100, 50, FormatAmount(vScrollbar.AmountFilled));
+        vScrollbar.ScrollChanged += (_, e) => vScrollLabel.Text = FormatAmount(e.NewValue);
+        Add(vScrollbar);
+        Add(vScrollLabel);
     }
+
+    private static string FormatAmount(float amountFilled) => $"{amountFilled * 100:0}%";
 
     public override void Update(double elapsed)
     {

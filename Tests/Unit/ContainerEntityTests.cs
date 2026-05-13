@@ -48,21 +48,21 @@ public class ContainerEntityTests
     // Layer
 
     [TestMethod]
-    public void SetLayer_StoresValue()
+    public void Layer_Set_StoresValue()
     {
         var ce = new TestContainerEntity();
-        ce.SetLayer(5);
+        ce.Layer = 5;
         Assert.AreEqual(5, ce.Layer);
     }
 
     [TestMethod]
-    public void SetLayer_FiresLayerChangedWithOldAndNew()
+    public void Layer_Set_FiresLayerChangedWithOldAndNew()
     {
         var ce = new TestContainerEntity();
         LayerChangedEventArgs? received = null;
         ce.LayerChanged += (_, args) => received = args;
 
-        ce.SetLayer(7);
+        ce.Layer = 7;
 
         Assert.IsNotNull(received);
         Assert.AreEqual(0, received.OldLayer);
@@ -70,23 +70,23 @@ public class ContainerEntityTests
     }
 
     [TestMethod]
-    public void SetLayer_ToSameValue_DoesNotFireEvent()
+    public void Layer_Set_ToSameValue_DoesNotFireEvent()
     {
         var ce = new TestContainerEntity();
-        ce.SetLayer(5);
+        ce.Layer = 5;
         bool fired = false;
         ce.LayerChanged += (_, _) => fired = true;
 
-        ce.SetLayer(5);
+        ce.Layer = 5;
 
         Assert.IsFalse(fired);
     }
 
     [TestMethod]
-    public void SetLayer_Negative_Throws()
+    public void Layer_Set_Negative_Throws()
     {
         var ce = new TestContainerEntity();
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => ce.SetLayer(-1));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => ce.Layer = -1);
     }
 
     // Update
