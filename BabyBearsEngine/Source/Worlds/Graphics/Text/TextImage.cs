@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BabyBearsEngine.Graphics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
@@ -7,7 +7,7 @@ using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 
 namespace BabyBearsEngine.Rendering.Graphics.Text;
 
-public sealed class TextImage : GraphicBase, IDisposable
+public sealed class TextImage : GraphicBase, IGraphic, IDisposable
 {
     private readonly StandardMatrixShaderProgram _shader = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
@@ -127,7 +127,7 @@ public sealed class TextImage : GraphicBase, IDisposable
         foreach (char c in _textToDisplay)
         {
             var source = _fontStruct.CharPositionsNormalised[c];
-            var w = _fontStruct.CharPositions[c].Size.X * ScaleX;
+            float w = _fontStruct.CharPositions[c].Size.X * ScaleX;
 
             vertices.Add(
                 GeometryHelper.QuadToTris(

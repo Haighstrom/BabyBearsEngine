@@ -14,7 +14,7 @@ namespace BabyBearsEngine.Graphics;
 /// <param name="y">Y position in the parent's local space.</param>
 /// <param name="width">Width in pixels.</param>
 /// <param name="height">Height in pixels.</param>
-public sealed class Image(ITexture texture, float x, float y, float width, float height) : GraphicBase, IDisposable
+public sealed class Image(ITexture texture, float x, float y, float width, float height) : GraphicBase, IGraphic, IDisposable
 {
     private readonly GraphicRenderer _graphicRenderer = new(texture);
     private float _angle = 0;

@@ -1,68 +1,86 @@
+using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Graphics;
 using BabyBearsEngine.Rendering.Graphics.Text;
+using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Worlds.UI;
 
+/// <summary>
+/// A clickable, labelled rectangle. All visual styling — background, state tints, and text
+/// style — comes from a <see cref="ButtonTheme"/>; the only thing the button itself owns is
+/// the geometry, the current interaction state, and the label text.
+/// </summary>
 public class Button : Entity
 {
-    private readonly Colour _colour;
-    private readonly Colour _hoverColour;
-    private readonly Colour _pressedColour;
-    private readonly ColouredRectangle _rectangle;
-    private readonly bool _autoRecolour;
+    private readonly IGraphic _background;
+    private bool _hovered = false;
+    private bool _pressed = false;
+    private readonly TextImage _textImage;
+    private readonly ButtonTheme _theme;
 
-    public Button(int x, int y, int width, int height, Colour colour, string textToDisplay = "", bool autoRecolour = true)
+    /// <param name="x">X position relative to the parent container.</param>
+    /// <param name="y">Y position relative to the parent container.</param>
+    /// <param name="width">Width in pixels.</param>
+    /// <param name="height">Height in pixels.</param>
+    /// <param name="theme">Visual styling for the button. Use <see cref="ButtonTheme.Default"/> for prototype work.</param>
+    /// <param name="text">Optional label text. Defaults to empty; can also be changed at runtime via <see cref="Text"/>.</param>
+    public Button(int x, int y, int width, int height, ButtonTheme theme, string text = "")
         : base(x, y, width, height, clickable: true)
     {
-        _colour = colour;
-        _hoverColour = colour.Lightened(0.05f);
-        _pressedColour = colour.Darkened(0.05f);
-        _autoRecolour = autoRecolour;
+        _theme = theme;
 
-        _rectangle = new ColouredRectangle(colour, 0, 0, width, height);
-        var textImage = new TextImage(new FontDefinition("Times New Roman", 16), textToDisplay, Colour.Black, 0, 0, width, height);
+        _background = theme.BackgroundFactory(new Rect(0, 0, width, height));
+        _background.Colour = theme.Idle;
+        Add(_background);
 
-        Add(_rectangle);
-        Add(textImage);
+        _textImage = new TextImage(theme.Text.Font, text, theme.Text.Colour, 0, 0, width, height)
+        {
+            HAlignment = theme.Text.HAlignment,
+            VAlignment = theme.Text.VAlignment,
+        };
+        Add(_textImage);
+    }
+
+    /// <summary>The button's label text. Mutating this updates the rendered glyphs on the next frame.</summary>
+    public string Text
+    {
+        get => _textImage.Text;
+        set => _textImage.Text = value;
+    }
+
+    private void ApplyState()
+    {
+        _background.Colour = _pressed ? _theme.Pressed
+                           : _hovered ? _theme.Hover
+                           : _theme.Idle;
     }
 
     protected override void OnLeftPressed()
     {
         base.OnLeftPressed();
-
-        if (_autoRecolour)
-        {
-            _rectangle.Colour = _pressedColour;
-        }
+        _pressed = true;
+        ApplyState();
     }
 
     protected override void OnLeftReleased()
     {
         base.OnLeftReleased();
-
-        if (_autoRecolour)
-        {
-            _rectangle.Colour = _hoverColour;
-        }
+        _pressed = false;
+        ApplyState();
     }
 
     protected override void OnMouseEntered()
     {
         base.OnMouseEntered();
-
-        if (_autoRecolour)
-        {
-            _rectangle.Colour = _hoverColour;
-        }
+        _hovered = true;
+        ApplyState();
     }
 
     protected override void OnMouseExited()
     {
         base.OnMouseExited();
-
-        if (_autoRecolour)
-        {
-            _rectangle.Colour = _colour;
-        }
+        _hovered = false;
+        _pressed = false;
+        ApplyState();
     }
 }

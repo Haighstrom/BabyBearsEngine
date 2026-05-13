@@ -13,7 +13,7 @@ namespace BabyBearsEngine.Graphics;
 /// <param name="y">Y position in the parent's local space.</param>
 /// <param name="width">Width in pixels.</param>
 /// <param name="height">Height in pixels.</param>
-public sealed class ColouredRectangle(Colour colour, float x, float y, float width, float height) : GraphicBase, IDisposable
+public sealed class ColouredRectangle(Colour colour, float x, float y, float width, float height) : GraphicBase, IGraphic, IDisposable
 {
     private bool _disposed;
 
