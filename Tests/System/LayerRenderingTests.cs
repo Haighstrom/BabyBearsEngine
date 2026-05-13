@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Graphics;
@@ -54,14 +54,9 @@ public class LayerRenderingTests
     /// used to verify the engine's "unlayered = treat as layer 0 (on top)" rule. Composes a
     /// real <see cref="ColouredRectangle"/> internally so it actually paints.
     /// </summary>
-    private sealed class UnlayeredRectangle : AddableBase, IRenderable, IDisposable
+    private sealed class UnlayeredRectangle(Colour colour, float x, float y, float w, float h) : AddableBase, IRenderable, IDisposable
     {
-        private readonly ColouredRectangle _inner;
-
-        public UnlayeredRectangle(Colour colour, float x, float y, float w, float h)
-        {
-            _inner = new ColouredRectangle(colour, x, y, w, h);
-        }
+        private readonly ColouredRectangle _inner = new(colour, x, y, w, h);
 
         public bool Visible { get; set; } = true;
 
