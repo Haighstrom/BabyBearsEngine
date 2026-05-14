@@ -1,25 +1,17 @@
-namespace BabyBearsEngine.Graphics;
+﻿using BabyBearsEngine.Worlds;
+
+namespace BabyBearsEngine.Worlds.Graphics;
 
 /// <summary>
-/// A renderable that can be tinted via a <see cref="Colour"/>. All graphics in the engine
-/// should expose this — for solid-colour graphics the colour is the fill, for textured
-/// graphics it multiplies the texture sample (so <see cref="Colour.White"/> means "no tint"),
-/// and UI widgets mutate it to apply hover / pressed / disabled state.
+/// A renderable, layered, rectangular thing that can be tinted via a <see cref="Colour"/>.
+/// All graphics in the engine implement this — geometry (X, Y, Width, Height) comes from
+/// <see cref="IRectAddable"/>; rendering and visibility from <see cref="IRenderable"/>;
+/// layer ordering from <see cref="ILayered"/>; and <see cref="Colour"/> is the per-graphic
+/// tint (fill for solid graphics, texture multiplier for textured ones, with
+/// <see cref="Colour.White"/> meaning "no tint").
 /// </summary>
-public interface IGraphic : IRenderable
+public interface IGraphic : IRenderable, ILayered, IRectAddable
 {
-    /// <summary>X position in the parent's local space.</summary>
-    float X { get; set; }
-
-    /// <summary>Y position in the parent's local space.</summary>
-    float Y { get; set; }
-
-    /// <summary>Width in pixels.</summary>
-    float Width { get; set; }
-
-    /// <summary>Height in pixels.</summary>
-    float Height { get; set; }
-
     /// <summary>
     /// Tint colour. For solid-colour graphics this is the fill colour; for textured graphics
     /// it multiplies the texture sample (so <see cref="Colour.White"/> means "no tint").

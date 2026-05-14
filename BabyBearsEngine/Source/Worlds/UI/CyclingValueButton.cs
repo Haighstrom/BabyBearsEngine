@@ -23,10 +23,10 @@ public class CyclingValueButton<T> : Button
     /// <param name="formatter">Optional formatter producing the label for each value. Defaults to <see cref="object.ToString"/>.</param>
     /// <param name="initialIndex">Index of the initially-selected value. Defaults to 0.</param>
     public CyclingValueButton(
-        int x,
-        int y,
-        int width,
-        int height,
+        float x,
+        float y,
+        float width,
+        float height,
         ButtonTheme theme,
         IReadOnlyList<T> values,
         Func<T, string>? formatter = null,

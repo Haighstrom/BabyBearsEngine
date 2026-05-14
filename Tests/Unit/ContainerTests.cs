@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Graphics;
+using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Tests.Unit;

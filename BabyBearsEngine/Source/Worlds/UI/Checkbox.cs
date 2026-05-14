@@ -1,5 +1,5 @@
-using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Graphics;
+﻿using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Worlds.UI;
@@ -21,7 +21,7 @@ public class Checkbox : Button
     /// <param name="height">Height in pixels.</param>
     /// <param name="theme">Visual styling for the checkbox.</param>
     /// <param name="isChecked">Initial check state. Defaults to <c>false</c>.</param>
-    public Checkbox(int x, int y, int width, int height, CheckboxTheme theme, bool isChecked = false)
+    public Checkbox(float x, float y, float width, float height, CheckboxTheme theme, bool isChecked = false)
         : base(x, y, width, height, theme.Box)
     {
         _isChecked = isChecked;

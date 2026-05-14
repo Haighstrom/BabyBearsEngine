@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Graphics;
+using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Tests.System;

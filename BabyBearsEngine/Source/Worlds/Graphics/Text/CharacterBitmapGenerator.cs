@@ -1,8 +1,8 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 
-namespace BabyBearsEngine.Rendering.Graphics.Text;
+namespace BabyBearsEngine.Worlds.Graphics.Text;
 
 internal sealed class CharacterBitmapGenerator : ICharacterBitmapGenerator
 {

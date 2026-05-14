@@ -3,10 +3,9 @@ using BabyBearsEngine.Geometry;
 namespace BabyBearsEngine.Worlds;
 
 /// <summary>
-/// Standard game entity. Has a position (<see cref="X"/>, <see cref="Y"/>) and size
-/// (<see cref="Width"/>, <see cref="Height"/>) relative to its parent, can hold child entities/graphics
-/// (inherited from <see cref="ContainerEntity"/>), and optionally exposes mouse interaction events
-/// when constructed with <c>clickable: true</c>.
+/// Standard game entity. Has a position and size inherited from <see cref="AddableRectBase"/>,
+/// can hold child entities/graphics (inherited from <see cref="ContainerEntity"/>), and
+/// optionally exposes mouse interaction events when constructed with <c>clickable: true</c>.
 /// </summary>
 public class Entity : ContainerEntity, IMouseInteractable
 {
@@ -17,13 +16,9 @@ public class Entity : ContainerEntity, IMouseInteractable
     /// <param name="width">Width in pixels.</param>
     /// <param name="height">Height in pixels.</param>
     /// <param name="clickable">When true, adds an internal click controller that raises the mouse interaction events (<see cref="LeftPressed"/>, <see cref="MouseEntered"/>, <see cref="MouseHovered"/>, etc.).</param>
-    public Entity(int x, int y, int width, int height, bool clickable = false)
+    public Entity(float x, float y, float width, float height, bool clickable = false)
+        : base(x, y, width, height)
     {
-        X = x;
-        Y = y;
-        Width = width;
-        Height = height;
-
         if (clickable)
         {
             var controller = new ClickController(this, HoverDelaySeconds);
@@ -37,25 +32,13 @@ public class Entity : ContainerEntity, IMouseInteractable
         }
     }
 
-    /// <summary>X position relative to the parent container.</summary>
-    public int X { get; set; }
-
-    /// <summary>Y position relative to the parent container.</summary>
-    public int Y { get; set; }
-
-    /// <summary>Width in pixels.</summary>
-    public int Width { get; set; }
-
-    /// <summary>Height in pixels.</summary>
-    public int Height { get; set; }
-
     /// <inheritdoc/>
     public Rect PositionOnScreen
     {
         get
         {
             var (wx, wy) = Parent?.GetWindowCoordinates(X, Y) ?? (X, Y);
-            return new((int)wx, (int)wy, Width, Height);
+            return new(wx, wy, Width, Height);
         }
     }
 

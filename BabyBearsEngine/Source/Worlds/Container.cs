@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using BabyBearsEngine.Graphics;
+using BabyBearsEngine.Worlds.Graphics;
 
 namespace BabyBearsEngine.Worlds;
 

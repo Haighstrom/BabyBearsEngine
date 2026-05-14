@@ -1,6 +1,6 @@
-using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Graphics;
-using BabyBearsEngine.Rendering.Graphics.Text;
+﻿using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Worlds.Graphics;
+using BabyBearsEngine.Worlds.Graphics.Text;
 using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Worlds.UI;
@@ -24,7 +24,7 @@ public class Button : Entity
     /// <param name="height">Height in pixels.</param>
     /// <param name="theme">Visual styling for the button. Use <see cref="ButtonTheme.Default"/> for prototype work.</param>
     /// <param name="text">Optional label text. Defaults to empty; can also be changed at runtime via <see cref="Text"/>.</param>
-    public Button(int x, int y, int width, int height, ButtonTheme theme, string text = "")
+    public Button(float x, float y, float width, float height, ButtonTheme theme, string text = "")
         : base(x, y, width, height, clickable: true)
     {
         _theme = theme;

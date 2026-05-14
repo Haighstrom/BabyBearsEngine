@@ -1,6 +1,6 @@
-using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Graphics;
-using BabyBearsEngine.Rendering.Graphics.Text;
+﻿using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Worlds.Graphics;
+using BabyBearsEngine.Worlds.Graphics.Text;
 using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Worlds.UI;
@@ -29,7 +29,7 @@ public sealed class SimpleToolTip : Entity
     /// <param name="height">Height in pixels.</param>
     /// <param name="theme">Visual styling.</param>
     /// <param name="text">The tooltip's label text.</param>
-    public SimpleToolTip(int x, int y, int width, int height, TooltipTheme theme, string text)
+    public SimpleToolTip(float x, float y, float width, float height, TooltipTheme theme, string text)
         : base(x, y, width, height)
     {
         Visible = false;

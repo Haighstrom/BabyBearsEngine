@@ -33,10 +33,10 @@ public class Scrollbar : Entity
     /// <param name="thumbProportion">Thumb size as a fraction of the track length (along the scroll axis), in [0.05, 1]. Defaults to 0.2 (20%).</param>
     /// <param name="amountFilled">Initial scroll position in [0, 1]. Defaults to 0.</param>
     public Scrollbar(
-        int x,
-        int y,
-        int width,
-        int height,
+        float x,
+        float y,
+        float width,
+        float height,
         ScrollbarDirection direction,
         ScrollbarTheme theme,
         float thumbProportion = 0.2f,
@@ -49,7 +49,7 @@ public class Scrollbar : Entity
 
         Add(theme.TrackFactory(new Rect(0, 0, width, height)));
 
-        (int tx, int ty, int tw, int th) = ComputeThumbRect(_amountFilled);
+        (float tx, float ty, float tw, float th) = ComputeThumbRect(_amountFilled);
         _thumb = new Button(tx, ty, tw, th, theme.Thumb);
         Add(_thumb);
 
@@ -94,18 +94,18 @@ public class Scrollbar : Entity
     /// <summary>Raised after <see cref="AmountFilled"/> changes — by user drag or direct assignment.</summary>
     public event EventHandler<ScrollChangedEventArgs>? ScrollChanged;
 
-    private (int X, int Y, int W, int H) ComputeThumbRect(float amountFilled)
+    private (float X, float Y, float W, float H) ComputeThumbRect(float amountFilled)
     {
         if (_direction == ScrollbarDirection.Horizontal)
         {
-            int thumbW = (int)(Width * _thumbProportion);
-            int thumbX = (int)((Width - thumbW) * amountFilled);
-            return (thumbX, 0, thumbW, Height);
+            float thumbW = Width * _thumbProportion;
+            float thumbX = (Width - thumbW) * amountFilled;
+            return (thumbX, 0f, thumbW, Height);
         }
 
-        int thumbH = (int)(Height * _thumbProportion);
-        int thumbY = (int)((Height - thumbH) * amountFilled);
-        return (0, thumbY, Width, thumbH);
+        float thumbH = Height * _thumbProportion;
+        float thumbY = (Height - thumbH) * amountFilled;
+        return (0f, thumbY, Width, thumbH);
     }
 
     private void OnDragPositionChanged(int newWindowX, int newWindowY)
@@ -114,8 +114,8 @@ public class Scrollbar : Entity
 
         if (_direction == ScrollbarDirection.Horizontal)
         {
-            int thumbW = (int)(Width * _thumbProportion);
-            int maxThumbX = Width - thumbW;
+            float thumbW = Width * _thumbProportion;
+            float maxThumbX = Width - thumbW;
             if (maxThumbX <= 0)
             {
                 return;
@@ -127,8 +127,8 @@ public class Scrollbar : Entity
         }
         else
         {
-            int thumbH = (int)(Height * _thumbProportion);
-            int maxThumbY = Height - thumbH;
+            float thumbH = Height * _thumbProportion;
+            float maxThumbY = Height - thumbH;
             if (maxThumbY <= 0)
             {
                 return;
@@ -144,13 +144,13 @@ public class Scrollbar : Entity
     {
         if (_direction == ScrollbarDirection.Horizontal)
         {
-            int thumbW = (int)(Width * _thumbProportion);
-            _thumb.X = (int)((Width - thumbW) * _amountFilled);
+            float thumbW = Width * _thumbProportion;
+            _thumb.X = (Width - thumbW) * _amountFilled;
         }
         else
         {
-            int thumbH = (int)(Height * _thumbProportion);
-            _thumb.Y = (int)((Height - thumbH) * _amountFilled);
+            float thumbH = Height * _thumbProportion;
+            _thumb.Y = (Height - thumbH) * _amountFilled;
         }
     }
 }

@@ -9,11 +9,8 @@ public sealed class Camera : ContainerEntity
     private readonly CameraRenderer _renderer;
 
     private Camera(float x, float y, float width, float height, Func<Func<float>, Func<float>, CameraView> createView, MsaaSamples samples = MsaaSamples.Disabled)
+        : base(x, y, width, height)
     {
-        X = x;
-        Y = y;
-        Width = width;
-        Height = height;
         MSAASamples = samples;
 
         _cameraView = createView(() => Width, () => Height);
@@ -25,11 +22,6 @@ public sealed class Camera : ContainerEntity
 
     public static Camera WithView(float x, float y, float width, float height, float viewX, float viewY, float viewW, float viewH, MsaaSamples samples = MsaaSamples.Disabled)
         => new(x, y, width, height, (getW, getH) => new FreeCameraView(viewX, viewY, viewW, viewH, getW, getH), samples);
-
-    public float X { get; set; }
-    public float Y { get; set; }
-    public float Width { get; set; }
-    public float Height { get; set; }
 
     public Colour BackgroundColour { get; set; } = Colour.White;
 

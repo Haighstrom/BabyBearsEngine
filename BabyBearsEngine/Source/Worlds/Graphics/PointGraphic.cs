@@ -1,41 +1,66 @@
-using BabyBearsEngine.OpenGL;
+﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
 
-namespace BabyBearsEngine.Graphics;
+namespace BabyBearsEngine.Worlds.Graphics;
 
 /// <summary>
 /// Renders a single coloured point at a fixed pixel size. Construction allocates GL resources
 /// (shader, vertex buffer) — must be created on the engine thread after the GL context exists.
 /// Implements <see cref="IDisposable"/> to release those resources.
 /// </summary>
-public sealed class PointGraphic : GraphicBase
+/// <remarks>
+/// <para>The point is drawn at (<see cref="IRect.X"/>, <see cref="IRect.Y"/>) — i.e. the
+/// inherited position from <see cref="AddableRectBase"/>. <see cref="IRect.Width"/> and
+/// <see cref="IRect.Height"/> are exposed for consistency with other <see cref="IGraphic"/>s
+/// but are not used to compute the rendered size; the point's pixel size comes from the
+/// <c>size</c> constructor parameter.</para>
+/// </remarks>
+public sealed class PointGraphic : GraphicBase, IGraphic, IDisposable
 {
-    private bool _disposed;
-    private readonly PointShaderProgram _shader;
+    private readonly PointShaderProgram _shader = new();
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
+    private Colour _colour;
+    private bool _verticesChanged = true;
+    private bool _disposed = false;
 
-    /// <summary>Creates a point at (<paramref name="x"/>, <paramref name="y"/>) with the given pixel size and colour.</summary>
     /// <param name="x">X position in the parent's local space.</param>
     /// <param name="y">Y position in the parent's local space.</param>
     /// <param name="size">Point diameter in pixels.</param>
     /// <param name="colour">Point colour.</param>
-    public PointGraphic(int x, int y, float size, Colour colour)
+    public PointGraphic(float x, float y, float size, Colour colour)
+        : base(x, y, size, size)
     {
-        _shader = new PointShaderProgram();
+        _colour = colour;
         _shader.SetPointSize(size);
+    }
 
-        VertexNoTexture[] vertices =
-        [
-            new(x, y, colour.ToOpenTK()),
-        ];
+    /// <summary>Point colour.</summary>
+    public Colour Colour
+    {
+        get => _colour;
+        set
+        {
+            _colour = value;
+            _verticesChanged = true;
+        }
+    }
 
-        _vertexDataBuffer.SetNewVertices(vertices);
+    protected override void OnPositionChanged()
+    {
+        base.OnPositionChanged();
+        _verticesChanged = true;
     }
 
     public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         _shader.Bind();
         _vertexDataBuffer.Bind();
+
+        if (_verticesChanged)
+        {
+            _vertexDataBuffer.SetNewVertices([new(X, Y, _colour.ToOpenTK())]);
+            _verticesChanged = false;
+        }
 
         GL.DrawArrays(PrimitiveType.Points, 0, 1);
     }
@@ -46,26 +71,15 @@ public sealed class PointGraphic : GraphicBase
         {
             if (disposing)
             {
-                // TODO: dispose managed state (managed objects)
                 _vertexDataBuffer.Dispose();
             }
 
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
             _disposed = true;
         }
     }
 
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~PointGraphic()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
-
     public void Dispose()
     {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }

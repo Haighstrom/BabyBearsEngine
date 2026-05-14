@@ -1,5 +1,5 @@
-using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Graphics;
+﻿using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Worlds.UI;
@@ -13,7 +13,7 @@ public class ProgressBar : Entity
 {
     private readonly IGraphic _background;
     private readonly IGraphic _fill;
-    private readonly int _fullWidth;
+    private readonly float _fullWidth;
     private float _amountFilled = 0f;
 
     /// <param name="x">X position relative to the parent container.</param>
@@ -22,7 +22,7 @@ public class ProgressBar : Entity
     /// <param name="height">Height in pixels.</param>
     /// <param name="theme">Visual styling for the bar.</param>
     /// <param name="amountFilled">Initial fill amount in [0, 1]. Defaults to 0.</param>
-    public ProgressBar(int x, int y, int width, int height, ProgressBarTheme theme, float amountFilled = 0f)
+    public ProgressBar(float x, float y, float width, float height, ProgressBarTheme theme, float amountFilled = 0f)
         : base(x, y, width, height)
     {
         _fullWidth = width;

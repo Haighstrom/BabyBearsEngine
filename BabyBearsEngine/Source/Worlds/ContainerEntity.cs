@@ -1,22 +1,32 @@
-using System.Collections.Generic;
-using BabyBearsEngine.Graphics;
+﻿using System.Collections.Generic;
+using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Worlds;
 
 /// <summary>
-/// Base for entities that themselves act as containers — i.e. anything that can hold child entities/graphics.
-/// Combines <see cref="IEntity"/>, <see cref="IContainer"/>, and <see cref="ILayered"/> in one type.
-/// <para><see cref="Update"/> walks active children; <see cref="Render"/> walks visible children. Subclasses
-/// (e.g. <see cref="Entity"/>) typically override <see cref="Render"/> to apply their own transform first.</para>
+/// Base for entities that themselves act as containers — i.e. anything that can hold child
+/// entities/graphics. Inherits position and size from <see cref="AddableRectBase"/>, owns a
+/// <see cref="Container"/> for children, and implements <see cref="ILayered"/> so the parent
+/// container can sort it among its siblings.
+/// <para><see cref="Update"/> walks active children; <see cref="Render"/> walks visible
+/// children. Subclasses (e.g. <see cref="Entity"/>) typically override <see cref="Render"/>
+/// to apply their own transform first.</para>
 /// </summary>
-public abstract class ContainerEntity : AddableBase, IEntity, IContainer, ILayered
+public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, ILayered
 {
     private readonly Container _container;
-    private int _layer;
+    private int _layer = 0;
 
-    /// <summary>Creates a container entity with no children, layer 0, and active+visible defaults.</summary>
+    /// <summary>Creates a container entity at the origin with zero size and no children, layer 0, and active+visible defaults.</summary>
     protected ContainerEntity()
+    {
+        _container = new Container(this);
+    }
+
+    /// <summary>Creates a container entity at (<paramref name="x"/>, <paramref name="y"/>) with the given size.</summary>
+    protected ContainerEntity(float x, float y, float width, float height)
+        : base(x, y, width, height)
     {
         _container = new Container(this);
     }

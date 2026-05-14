@@ -1,58 +1,22 @@
-using BabyBearsEngine.Graphics;
+﻿using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
 
-namespace BabyBearsEngine.Rendering.Graphics.Text;
+namespace BabyBearsEngine.Worlds.Graphics.Text;
 
-public sealed class StbTrueTypeTextGraphic(float x, float y, float width, float height, string text) : GraphicBase, IDisposable
+public sealed class StbTrueTypeTextGraphic : GraphicBase, IDisposable
 {
     private readonly R8ChannelShaderProgram _shader = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
-    private readonly Texture _texture = FontTexture.GetStbFontTexture("Assets/Fonts/Times.ttf", text);
+    private readonly Texture _texture;
 
     private Colour _colour = Colour.White;
     private bool _verticesChanged = true;
 
-
-
-    public float X
+    public StbTrueTypeTextGraphic(float x, float y, float width, float height, string text)
+        : base(x, y, width, height)
     {
-        get => x;
-        set
-        {
-            x = value;
-            _verticesChanged = true;
-        }
-    }
-
-    public float Y
-    {
-        get => y;
-        set
-        {
-            y = value;
-            _verticesChanged = true;
-        }
-    }
-
-    public float Width
-    {
-        get => width;
-        set
-        {
-            width = value;
-            _verticesChanged = true;
-        }
-    }
-
-    public float Height
-    {
-        get => height;
-        set
-        {
-            height = value;
-            _verticesChanged = true;
-        }
+        _texture = FontTexture.GetStbFontTexture("Assets/Fonts/Times.ttf", text);
     }
 
     public Colour Colour
@@ -69,15 +33,27 @@ public sealed class StbTrueTypeTextGraphic(float x, float y, float width, float 
     {
         get
         {
-            var c = Colour.ToOpenTK();
+            var c = _colour.ToOpenTK();
             return
             [
-                new(x + width, y + height, c, 1, 1), // top right
-                new(x + width, y, c, 1, 0), // bottom right
-                new(x, y + height, c, 0, 1), // top left
-                new(x, y, c, 0, 0), // bottom left
+                new(X + Width, Y + Height, c, 1, 1), // top right
+                new(X + Width, Y,          c, 1, 0), // bottom right
+                new(X,         Y + Height, c, 0, 1), // top left
+                new(X,         Y,          c, 0, 0), // bottom left
             ];
         }
+    }
+
+    protected override void OnPositionChanged()
+    {
+        base.OnPositionChanged();
+        _verticesChanged = true;
+    }
+
+    protected override void OnSizeChanged()
+    {
+        base.OnSizeChanged();
+        _verticesChanged = true;
     }
 
     public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
@@ -104,26 +80,15 @@ public sealed class StbTrueTypeTextGraphic(float x, float y, float width, float 
         {
             if (disposing)
             {
-                // TODO: dispose managed state (managed objects)
                 _vertexDataBuffer.Dispose();
             }
 
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
             _disposedValue = true;
         }
     }
 
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~Image()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
-
     public void Dispose()
     {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }

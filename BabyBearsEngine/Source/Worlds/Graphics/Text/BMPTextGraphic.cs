@@ -1,9 +1,9 @@
-using System.Collections.Generic;
-using BabyBearsEngine.Graphics;
+﻿using System.Collections.Generic;
+using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
 
-namespace BabyBearsEngine.Rendering.Graphics.Text;
+namespace BabyBearsEngine.Worlds.Graphics.Text;
 
 public sealed class BMPTextGraphic : GraphicBase, ITextGraphic
 {
@@ -14,74 +14,19 @@ public sealed class BMPTextGraphic : GraphicBase, ITextGraphic
     private readonly GeneratedFontStruct _fontStruct;
 
     private bool _disposed;
-    private float _x;
-    private float _y;
-    private float _width;
-    private float _height;
     private string _text;
     private Colour _colour;
 
     public BMPTextGraphic(FontDefinition fontDef, float x, float y, float width, float height, string text, Colour colour)
+        : base(x, y, width, height)
     {
-        _x = x;
-        _y = y;
-        _width = width;
-        _height = height;
         _text = text;
         _colour = colour;
         _fontStruct = new FontBitmapGenerator().GenerateCharSpritesheetAndPositions(FontLoader.LoadFont(fontDef), fontDef.CharactersToLoad, fontDef.AntiAliased, 13);
 
         _tempTexture = new DefaultTextureFactory().GenTexture(_fontStruct.CharacterSS);
 
-        //_anotherTempGraphic = new(_tempTexture,
-        //    [
-        //        new(0, 0, Color4.White, 0, 0), // bottom left
-        //        new(200, 0, Color4.White, 1, 0), // bottom right
-        //        new(0, 200, Color4.White, 0, 1), // top left
-        //        new(200, 200, Color4.White, 1, 1), // top right
-        //    ]);
-
         SetVerticesSimple();
-    }
-
-    public float X
-    {
-        get => _x;
-        set
-        {
-            _x = value;
-            _verticesChanged = true;
-        }
-    }
-
-    public float Y
-    {
-        get => _y;
-        set
-        {
-            _y = value;
-            _verticesChanged = true;
-        }
-    }
-
-    public float Width
-    {
-        get => _width;
-        set
-        {
-            _width = value;
-            _verticesChanged = true;
-        }
-    }
-
-    public float Height
-    {
-        get => _height;
-        set
-        {
-            _height = value;
-            _verticesChanged = true;
-        }
     }
 
     public Colour Colour
@@ -108,6 +53,18 @@ public sealed class BMPTextGraphic : GraphicBase, ITextGraphic
                 _verticesChanged = true;
             }
         }
+    }
+
+    protected override void OnPositionChanged()
+    {
+        base.OnPositionChanged();
+        _verticesChanged = true;
+    }
+
+    protected override void OnSizeChanged()
+    {
+        base.OnSizeChanged();
+        _verticesChanged = true;
     }
 
     float ScaleX = 1;

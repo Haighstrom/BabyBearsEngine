@@ -9,12 +9,12 @@ public sealed class DraggablePanel : Panel
 {
     private const int GrabBarHeight = 30;
 
-    public DraggablePanel(int x, int y, int width, int height, Colour colour)
+    public DraggablePanel(float x, float y, float width, float height, Colour colour)
         : base(x, y, width, height, colour)
     {
         var controller = new DragController(
             () => GrabArea,
-            () => (X, Y),
+            () => ((int)X, (int)Y),
             () => Draggable);
 
         controller.DragStarted += OnDragStarted;

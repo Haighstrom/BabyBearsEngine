@@ -1,6 +1,6 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace BabyBearsEngine.Rendering.Graphics.Text;
+namespace BabyBearsEngine.Worlds.Graphics.Text;
 
 internal class FontTextureCache
 {

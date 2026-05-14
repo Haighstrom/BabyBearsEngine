@@ -1,6 +1,6 @@
-using BabyBearsEngine.Graphics;
+﻿using BabyBearsEngine.Worlds.Graphics;
 
-namespace BabyBearsEngine.Rendering.Graphics.Text;
+namespace BabyBearsEngine.Worlds.Graphics.Text;
 
 public interface ITextGraphic : IRenderable
 {

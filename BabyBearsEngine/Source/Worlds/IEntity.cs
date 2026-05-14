@@ -1,12 +1,12 @@
-using BabyBearsEngine.Graphics;
+﻿using BabyBearsEngine.Worlds.Graphics;
 
 namespace BabyBearsEngine.Worlds;
 
 /// <summary>
-/// Marker interface for everything that participates in the engine's entity model: it can be added
-/// to a container (<see cref="IAddable"/>), receives per-frame updates (<see cref="IUpdateable"/>),
-/// and renders itself (<see cref="IRenderable"/>).
+/// The full entity contract. An entity is a layered, rectangular, addable thing that updates
+/// each frame, renders each frame, and holds children. Everything in the engine that lives
+/// as a "thing in the world" (entities, widgets, cameras) implements this.
 /// </summary>
-public interface IEntity : IUpdateable, IRenderable, IAddable
+public interface IEntity : IRenderable, ILayered, IRectAddable, IUpdateable, IContainer
 {
 }

@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using BabyBearsEngine.Demos.Source;
 using BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
-using BabyBearsEngine.Rendering.Graphics.Text;
+using BabyBearsEngine.Worlds.Graphics.Text;
 
 namespace BabyBearsEngine.Demos.Source.Demos.CameraDemo;
 

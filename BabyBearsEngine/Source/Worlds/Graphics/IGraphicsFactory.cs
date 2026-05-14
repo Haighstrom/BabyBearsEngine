@@ -1,6 +1,6 @@
-using BabyBearsEngine.Rendering.Graphics.Text;
+﻿using BabyBearsEngine.Worlds.Graphics.Text;
 
-namespace BabyBearsEngine.Graphics;
+namespace BabyBearsEngine.Worlds.Graphics;
 
 public interface IGraphicsFactory
 {

@@ -1,8 +1,8 @@
-using BabyBearsEngine.OpenGL;
+﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Platform.OpenGL.Rendering;
 
-namespace BabyBearsEngine.Graphics;
+namespace BabyBearsEngine.Worlds.Graphics;
 
 /// <summary>
 /// A textured rectangle drawn at a position and size, optionally tinted, alpha-blended, and rotated.
@@ -14,40 +14,12 @@ namespace BabyBearsEngine.Graphics;
 /// <param name="y">Y position in the parent's local space.</param>
 /// <param name="width">Width in pixels.</param>
 /// <param name="height">Height in pixels.</param>
-public sealed class Image(ITexture texture, float x, float y, float width, float height) : GraphicBase, IGraphic, IDisposable
+public sealed class Image(ITexture texture, float x, float y, float width, float height) : GraphicBase(x, y, width, height), IGraphic, IDisposable
 {
     private readonly GraphicRenderer _graphicRenderer = new(texture);
     private float _angle = 0;
     private Colour _colour = Colour.White;
     private bool _verticesChanged = true;
-
-    /// <summary>X position in the parent's local space.</summary>
-    public float X { get; set; } = x;
-
-    /// <summary>Y position in the parent's local space.</summary>
-    public float Y { get; set; } = y;
-
-    /// <summary>Width in pixels.</summary>
-    public float Width
-    {
-        get => width;
-        set
-        {
-            width = value;
-            _verticesChanged = true;
-        }
-    }
-
-    /// <summary>Height in pixels.</summary>
-    public float Height
-    {
-        get => height;
-        set
-        {
-            height = value;
-            _verticesChanged = true;
-        }
-    }
 
     /// <summary>Tint colour multiplied with the texture sample. Defaults to <see cref="Colour.White"/> (no tint).</summary>
     public Colour Colour
@@ -77,11 +49,17 @@ public sealed class Image(ITexture texture, float x, float y, float width, float
         }
     }
 
+    protected override void OnSizeChanged()
+    {
+        base.OnSizeChanged();
+        _verticesChanged = true;
+    }
+
     public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         if (_verticesChanged)
         {
-            _graphicRenderer.UpdateVertices(width, height, _colour);
+            _graphicRenderer.UpdateVertices(Width, Height, _colour);
             _verticesChanged = false;
         }
 
@@ -89,7 +67,7 @@ public sealed class Image(ITexture texture, float x, float y, float width, float
 
         if (_angle != 0)
         {
-            mv = Matrix3.RotateAroundPoint(ref mv, _angle, width / 2, height / 2);
+            mv = Matrix3.RotateAroundPoint(ref mv, _angle, Width / 2, Height / 2);
         }
 
         _graphicRenderer.Render(ref projection, ref mv);
@@ -104,27 +82,15 @@ public sealed class Image(ITexture texture, float x, float y, float width, float
         {
             if (disposing)
             {
-                // TODO: dispose managed state (managed objects)
-                //_texture.Dispose();
                 _graphicRenderer.Dispose();
             }
 
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
             _disposedValue = true;
         }
     }
 
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~Image()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
-
     public void Dispose()
     {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }

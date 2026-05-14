@@ -1,7 +1,6 @@
-using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Worlds;
+﻿using BabyBearsEngine.Geometry;
 
-namespace BabyBearsEngine.Graphics;
+namespace BabyBearsEngine.Worlds;
 
 /// <summary>
 /// Anything drawn by the engine each frame. Containers iterate their renderables in layer order

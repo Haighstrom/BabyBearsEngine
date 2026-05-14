@@ -1,61 +1,39 @@
-using BabyBearsEngine.OpenGL;
+﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
 
-namespace BabyBearsEngine.Graphics;
+namespace BabyBearsEngine.Worlds.Graphics;
 
 /// <summary>
 /// A solid-colour filled rectangle. Construction allocates GL resources (vertex buffer, shader binding) —
 /// must be created on the engine thread after the GL context exists. Implements <see cref="IDisposable"/>
 /// to release those resources.
 /// </summary>
-/// <param name="colour">Fill colour.</param>
-/// <param name="x">X position in the parent's local space.</param>
-/// <param name="y">Y position in the parent's local space.</param>
-/// <param name="width">Width in pixels.</param>
-/// <param name="height">Height in pixels.</param>
-public sealed class ColouredRectangle(Colour colour, float x, float y, float width, float height) : GraphicBase, IGraphic, IDisposable
+public sealed class ColouredRectangle : GraphicBase, IGraphic, IDisposable
 {
-    private bool _disposed;
-
     private readonly SolidColourShaderProgramMatrix _shader = SolidColourShaderProgramMatrix.Instance;
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
+    private Colour _colour;
     private bool _verticesChanged = true;
+    private bool _disposed = false;
 
-    /// <summary>X position in the parent's local space.</summary>
-    public float X { get; set; } = x;
-
-    /// <summary>Y position in the parent's local space.</summary>
-    public float Y { get; set; } = y;
-
-    /// <summary>Width in pixels.</summary>
-    public float Width
+    /// <param name="colour">Fill colour.</param>
+    /// <param name="x">X position in the parent's local space.</param>
+    /// <param name="y">Y position in the parent's local space.</param>
+    /// <param name="width">Width in pixels.</param>
+    /// <param name="height">Height in pixels.</param>
+    public ColouredRectangle(Colour colour, float x, float y, float width, float height)
+        : base(x, y, width, height)
     {
-        get => width;
-        set
-        {
-            width = value;
-            _verticesChanged = true;
-        }
-    }
-
-    /// <summary>Height in pixels.</summary>
-    public float Height
-    {
-        get => height;
-        set
-        {
-            height = value;
-            _verticesChanged = true;
-        }
+        _colour = colour;
     }
 
     /// <summary>Fill colour.</summary>
     public Colour Colour
     {
-        get => colour;
+        get => _colour;
         set
         {
-            colour = value;
+            _colour = value;
             _verticesChanged = true;
         }
     }
@@ -64,16 +42,22 @@ public sealed class ColouredRectangle(Colour colour, float x, float y, float wid
     {
         get
         {
-            var colorTK = Colour.ToOpenTK();
+            var colorTK = _colour.ToOpenTK();
 
             return
             [
-                new(width, height, colorTK), // top right
-                new(width, 0,      colorTK), // bottom right
-                new(0,     height, colorTK), // top left
+                new(Width, Height, colorTK), // top right
+                new(Width, 0,      colorTK), // bottom right
+                new(0,     Height, colorTK), // top left
                 new(0,     0,      colorTK), // bottom left
             ];
         }
+    }
+
+    protected override void OnSizeChanged()
+    {
+        base.OnSizeChanged();
+        _verticesChanged = true;
     }
 
     public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
@@ -100,26 +84,15 @@ public sealed class ColouredRectangle(Colour colour, float x, float y, float wid
         {
             if (disposing)
             {
-                // TODO: dispose managed state (managed objects)
                 _vertexDataBuffer.Dispose();
             }
 
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
             _disposed = true;
         }
     }
 
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~Image()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
-
     public void Dispose()
     {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }

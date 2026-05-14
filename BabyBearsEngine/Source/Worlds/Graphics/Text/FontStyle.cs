@@ -1,4 +1,4 @@
-namespace BabyBearsEngine.Rendering.Graphics.Text;
+﻿namespace BabyBearsEngine.Worlds.Graphics.Text;
 
 public enum FontStyle
 {

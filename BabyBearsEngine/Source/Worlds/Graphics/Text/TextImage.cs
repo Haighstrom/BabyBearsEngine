@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using BabyBearsEngine.Graphics;
+using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Platform.OpenGL.Buffers;
 using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 
-namespace BabyBearsEngine.Rendering.Graphics.Text;
+namespace BabyBearsEngine.Worlds.Graphics.Text;
 
 public sealed class TextImage : GraphicBase, IGraphic, IDisposable
 {
@@ -14,8 +14,6 @@ public sealed class TextImage : GraphicBase, IGraphic, IDisposable
     private readonly ITexture _texture;
     private readonly GeneratedFontStruct _fontStruct;
     private bool _disposedValue;
-    private float _width;
-    private float _height;
     private string _textToDisplay;
     private Colour _colour;
     private bool _verticesChanged = true;
@@ -23,11 +21,8 @@ public sealed class TextImage : GraphicBase, IGraphic, IDisposable
     private float _extraLineSpacing = 0;
 
     public TextImage(FontDefinition fontDef, string textToDisplay, Colour colour, float x, float y, float width, float height)
+        : base(x, y, width, height)
     {
-        X = x;
-        Y = y;
-        _width = width;
-        _height = height;
         _textToDisplay = textToDisplay;
         _colour = colour;
 
@@ -36,29 +31,6 @@ public sealed class TextImage : GraphicBase, IGraphic, IDisposable
         _fontStruct = new FontBitmapGenerator().GenerateCharSpritesheetAndPositions(font, fontDef.CharactersToLoad, fontDef.AntiAliased, 13);
 
         _texture = new DefaultTextureFactory().GenTexture(_fontStruct.CharacterSS);
-    }
-
-    public float X { get; set; }
-    public float Y { get; set; }
-
-    public float Width
-    {
-        get => _width;
-        set
-        {
-            _width = value;
-            _verticesChanged = true;
-        }
-    }
-
-    public float Height
-    {
-        get => _height;
-        set
-        {
-            _height = value; 
-            _verticesChanged = true;
-        }
     }
 
     public string Text
@@ -79,6 +51,12 @@ public sealed class TextImage : GraphicBase, IGraphic, IDisposable
             _colour = value;
             _verticesChanged = true;
         }
+    }
+
+    protected override void OnSizeChanged()
+    {
+        base.OnSizeChanged();
+        _verticesChanged = true;
     }
 
     private Vertex[] Vertices { get; set; } = [];

@@ -1,16 +1,27 @@
-using BabyBearsEngine.Geometry;
+﻿using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds;
 
-namespace BabyBearsEngine.Graphics;
+namespace BabyBearsEngine.Worlds.Graphics;
 
 /// <summary>
-/// Base class for renderable graphics (images, shapes, text). Combines the addable plumbing from
-/// <see cref="AddableBase"/> with layered ordering (<see cref="ILayered"/>) and visibility, leaving
-/// concrete subclasses to implement the actual <see cref="Render"/> call.
+/// Base class for renderable graphics (images, shapes, text). Inherits position and size from
+/// <see cref="AddableRectBase"/>, adds visibility and layered ordering on top, and leaves the
+/// actual <see cref="Render"/> call to concrete subclasses.
 /// </summary>
-public abstract class GraphicBase : AddableBase, IRenderable, ILayered
+public abstract class GraphicBase : AddableRectBase, IRenderable, ILayered
 {
-    private int _layer;
+    private int _layer = 0;
+
+    /// <summary>Creates a graphic at the origin with zero size.</summary>
+    protected GraphicBase()
+    {
+    }
+
+    /// <summary>Creates a graphic at (<paramref name="x"/>, <paramref name="y"/>) with the given size.</summary>
+    protected GraphicBase(float x, float y, float width, float height)
+        : base(x, y, width, height)
+    {
+    }
 
     /// <inheritdoc/>
     public int Layer

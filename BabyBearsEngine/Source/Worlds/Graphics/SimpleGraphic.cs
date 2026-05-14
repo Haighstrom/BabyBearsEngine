@@ -1,7 +1,7 @@
-using BabyBearsEngine.OpenGL;
+﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
 
-namespace BabyBearsEngine.Graphics;
+namespace BabyBearsEngine.Worlds.Graphics;
 
 internal sealed class SimpleGraphic : GraphicBase, IDisposable
 {
