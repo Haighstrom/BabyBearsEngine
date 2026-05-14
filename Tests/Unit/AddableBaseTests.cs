@@ -18,9 +18,9 @@ public class AddableBaseTests
         public void Remove(IAddable entity)
         {
             RemovedFromHere.Add(entity);
-            // Real Container.Remove calls SetParent(null) on the entity; mirror that so the
-            // post-remove state is consistent with production behaviour.
-            entity.SetParent(null);
+            // Real Container.Remove sets entity.Parent = null on the entity; mirror that so
+            // the post-remove state is consistent with production behaviour.
+            entity.Parent = null;
         }
 
         public void RemoveAll() { }
@@ -38,48 +38,48 @@ public class AddableBaseTests
         Assert.IsFalse(a.Exists);
     }
 
-    // SetParent attach / detach
+    // Parent attach / detach
 
     [TestMethod]
-    public void SetParent_Attaches_WhenPreviouslyNull()
+    public void Parent_Set_Attaches_WhenPreviouslyNull()
     {
         var a = new TestAddable();
         var c = new FakeContainer();
 
-        a.SetParent(c);
+        a.Parent = c;
 
         Assert.AreSame(c, a.Parent);
         Assert.IsTrue(a.Exists);
     }
 
     [TestMethod]
-    public void SetParent_Null_Detaches_WhenPreviouslyAttached()
+    public void Parent_SetNull_Detaches_WhenPreviouslyAttached()
     {
         var a = new TestAddable();
         var c = new FakeContainer();
-        a.SetParent(c);
+        a.Parent = c;
 
-        a.SetParent(null);
+        a.Parent = null;
 
         Assert.IsNull(a.Parent);
         Assert.IsFalse(a.Exists);
     }
 
     [TestMethod]
-    public void SetParent_NewContainer_WhileAlreadyAttached_Throws()
+    public void Parent_SetNewContainer_WhileAlreadyAttached_Throws()
     {
         var a = new TestAddable();
-        a.SetParent(new FakeContainer());
+        a.Parent = new FakeContainer();
 
-        Assert.ThrowsExactly<InvalidOperationException>(() => a.SetParent(new FakeContainer()));
+        Assert.ThrowsExactly<InvalidOperationException>(() => a.Parent = new FakeContainer());
     }
 
     [TestMethod]
-    public void SetParent_Null_WhileAlreadyDetached_Throws()
+    public void Parent_SetNull_WhileAlreadyDetached_Throws()
     {
         var a = new TestAddable();
 
-        Assert.ThrowsExactly<NullReferenceException>(() => a.SetParent(null));
+        Assert.ThrowsExactly<NullReferenceException>(() => a.Parent = null);
     }
 
     // Remove
@@ -89,7 +89,7 @@ public class AddableBaseTests
     {
         var a = new TestAddable();
         var c = new FakeContainer();
-        a.SetParent(c);
+        a.Parent = c;
 
         a.Remove();
 

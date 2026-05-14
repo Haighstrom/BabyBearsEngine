@@ -6,36 +6,40 @@ namespace BabyBearsEngine.Worlds;
 /// </summary>
 public abstract class AddableBase : IAddable
 {
-    /// <inheritdoc/>
-    public IContainer? Parent { get; private set; }
+    private IContainer? _parent;
 
     /// <inheritdoc/>
-    public bool Exists => Parent is not null;
-
-    /// <inheritdoc/>
-    /// <exception cref="InvalidOperationException">Thrown when <paramref name="container"/> is non-null while <see cref="Parent"/> is already set — cannot switch parents directly; detach first.</exception>
-    /// <exception cref="NullReferenceException">Thrown when <paramref name="container"/> is null and <see cref="Parent"/> is also null — already detached.</exception>
-    public void SetParent(IContainer? container)
+    /// <exception cref="InvalidOperationException">Thrown when assigning a non-null parent while <see cref="Parent"/> is already set — cannot switch parents directly; detach first by setting to <c>null</c>.</exception>
+    /// <exception cref="NullReferenceException">Thrown when assigning <c>null</c> while <see cref="Parent"/> is already <c>null</c> — already detached.</exception>
+    public IContainer? Parent
     {
-        //only allow flipping between having a parent and not having a parent, not switching from one parent to another without first removing from the first
-        if (container is null)
+        get => _parent;
+        set
         {
-            Ensure.NotNull(Parent);
-        }
-        else
-        {
-            Ensure.IsNull(Parent);
-        }
+            // Only allow flipping between having a parent and not having a parent; never switch
+            // directly from one parent to another without detaching first.
+            if (value is null)
+            {
+                Ensure.NotNull(_parent);
+            }
+            else
+            {
+                Ensure.IsNull(_parent);
+            }
 
-        Parent = container;
+            _parent = value;
+        }
     }
+
+    /// <inheritdoc/>
+    public bool Exists => _parent is not null;
 
     /// <inheritdoc/>
     /// <exception cref="NullReferenceException">Thrown when this addable has no parent to remove from.</exception>
     public void Remove()
     {
-        Ensure.NotNull(Parent);
+        Ensure.NotNull(_parent);
 
-        Parent.Remove(this);
+        _parent.Remove(this);
     }
 }

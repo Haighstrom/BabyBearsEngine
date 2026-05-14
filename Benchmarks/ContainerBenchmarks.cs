@@ -81,17 +81,12 @@ public class ContainerBenchmarks
         }
 
         public event EventHandler<LayerChangedEventArgs>? LayerChanged;
-        public IContainer? Parent => _parent;
+        public IContainer? Parent { get => _parent; set => _parent = value; }
         public bool Visible { get; set; } = true;
 
         public void Remove() { }
 
         public void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
-
-        public void SetParent(IContainer? parent)
-        {
-            _parent = parent;
-        }
     }
 
     public sealed class TestScene : ContainerEntity { }

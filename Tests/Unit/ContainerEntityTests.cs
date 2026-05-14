@@ -173,7 +173,7 @@ public class ContainerEntityTests
     {
         var ce = new TestContainerEntity();
         var parent = new FakeParent { Translation = (10f, 20f) };
-        ce.SetParent(parent);
+        ce.Parent = parent;
 
         var (x, y) = ce.GetWindowCoordinates(3f, 4f);
 

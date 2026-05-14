@@ -52,7 +52,7 @@ internal class Container(IContainer realParent) : IContainer
             }
         }
 
-        entity.SetParent(realParent);
+        entity.Parent = realParent;
     }
 
     public void Remove(IAddable entity)
@@ -82,7 +82,7 @@ internal class Container(IContainer realParent) : IContainer
             }
         }
 
-        entity.SetParent(null);
+        entity.Parent = null;
     }
 
     public void RemoveAll()

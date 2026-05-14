@@ -58,7 +58,7 @@ public class EntityTests
     {
         var parent = new FakeParent { ParentTranslation = (100f, 200f) };
         var e = new Entity(10, 20, 30, 40);
-        e.SetParent(parent);
+        e.Parent = parent;
 
         var rect = e.PositionOnScreen;
 
@@ -84,7 +84,7 @@ public class EntityTests
     {
         var parent = new FakeParent { ParentTranslation = (100f, 200f) };
         var e = new Entity(10, 20, 30, 40);
-        e.SetParent(parent);
+        e.Parent = parent;
 
         var (x, y) = e.GetWindowCoordinates(3f, 4f);
 
