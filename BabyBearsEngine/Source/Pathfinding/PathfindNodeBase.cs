@@ -1,0 +1,50 @@
+using BabyBearsEngine.Geometry;
+
+namespace BabyBearsEngine.Pathfinding;
+
+/// <summary>
+/// Base class for nodes that have a position. Equality is by position. Concrete subclasses
+/// (e.g. <see cref="PathfindNode"/>, <see cref="PathfindNode{TEnum}"/>) add the connection
+/// list and any per-node payload.
+/// </summary>
+public abstract class PathfindNodeBase : IPosition
+{
+    /// <param name="x">X coordinate.</param>
+    /// <param name="y">Y coordinate.</param>
+    /// <param name="distanceBetweenConnectedNodes">Cost of moving to any directly-connected neighbour. Defaults to 1.</param>
+    protected PathfindNodeBase(float x, float y, float distanceBetweenConnectedNodes = 1f)
+    {
+        X = x;
+        Y = y;
+        DistanceBetweenConnectedNodes = distanceBetweenConnectedNodes;
+    }
+
+    /// <inheritdoc/>
+    public float X { get; }
+
+    /// <inheritdoc/>
+    public float Y { get; }
+
+    /// <summary>The cost of moving from this node to any directly-connected neighbour.</summary>
+    public virtual float DistanceBetweenConnectedNodes { get; }
+
+    /// <summary>Algorithm scratch data (e.g. A* uses this for F/G scores).</summary>
+    public object? GraphSearchData { get; set; }
+
+    /// <inheritdoc/>
+    public bool Equals(IPosition? other)
+    {
+        if (other is null)
+        {
+            return false;
+        }
+
+        return X == other.X && Y == other.Y;
+    }
+
+    /// <inheritdoc/>
+    public override bool Equals(object? other) => Equals(other as IPosition);
+
+    /// <inheritdoc/>
+    public override int GetHashCode() => HashCode.Combine(X, Y);
+}
