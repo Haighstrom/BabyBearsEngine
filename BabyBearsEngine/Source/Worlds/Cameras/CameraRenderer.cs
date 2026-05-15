@@ -48,7 +48,7 @@ internal sealed class CameraRenderer : IDisposable
         _vertexBuffer.Dispose();
     }
 
-    public void Render(Camera camera, IList<IRenderable> renderables, ref Matrix3 projection, ref Matrix3 modelView)
+    public void Render(ICamera camera, IList<IRenderable> renderables, ref Matrix3 projection, ref Matrix3 modelView)
     {
         if (camera.Width != _lastWidth || camera.Height != _lastHeight)
         {
@@ -99,7 +99,7 @@ internal sealed class CameraRenderer : IDisposable
         OpenGLHelper.UnbindTexture(TextureTarget.Texture2DMultisample);
     }
 
-    private void CompositeOntoOutputFBO(Camera camera, ref Matrix3 projection, ref Matrix3 modelView, (int X, int Y, int Width, int Height) prevVP, int previousFBO)
+    private void CompositeOntoOutputFBO(ICamera camera, ref Matrix3 projection, ref Matrix3 modelView, (int X, int Y, int Width, int Height) prevVP, int previousFBO)
     {
         OpenGLHelper.BindFBO(previousFBO);
 
@@ -136,7 +136,7 @@ internal sealed class CameraRenderer : IDisposable
         _lastHeight = height;
     }
 
-    private (Matrix3 fboOrtho, Matrix3 identity) RenderChildrenToFBO(Camera camera, IList<IRenderable> renderables, bool msaaEnabled)
+    private (Matrix3 fboOrtho, Matrix3 identity) RenderChildrenToFBO(ICamera camera, IList<IRenderable> renderables, bool msaaEnabled)
     {
         _vertexBuffer.Bind();
 
