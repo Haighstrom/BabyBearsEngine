@@ -30,6 +30,12 @@ internal interface IClickController
     /// Inform the controller whether the mouse is currently over the target
     /// for this frame. This must be called before <see cref="Update(double)"/>.
     /// </summary>
+    /// <summary>
+    /// When true, <see cref="MouseSolver"/> continues propagating mouse-over state
+    /// to overlapping controllers beneath this one instead of stopping here.
+    /// </summary>
+    bool PassOnMouse { get; }
+
     /// <param name="isMouseOver">True if the mouse is over the target this frame.</param>
     void SetMouseOver(bool isMouseOver);
 }

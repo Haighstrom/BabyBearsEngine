@@ -36,6 +36,13 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
 
     public bool Active { get; set; } = true;
 
+    /// <summary>
+    /// When true, <see cref="MouseSolver"/> continues propagating mouse-over state to
+    /// overlapping controllers beneath this one instead of stopping here. Useful for
+    /// transparent overlays that should not block clicks on entities below them.
+    /// </summary>
+    public bool PassOnMouse { get; set; } = false;
+
     public event Action? HoverCancelled;
     public event Action? Hovered;
     public event Action? LeftPressed;

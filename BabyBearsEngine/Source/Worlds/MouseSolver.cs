@@ -19,12 +19,25 @@ internal static class MouseSolver
             prev.SetMouseOver(false);
         }
 
-        //work on the basis that the top-most entity will be the last one to register itself as moused over
-        var topMostClicked = s_currentMousedOver.Count > 0 ? s_currentMousedOver[^1] : null;
+        // The top-most entity is the last to register. Walk downward through the stack,
+        // notifying each controller until we reach one that does not pass mouse events through.
+        for (int i = s_currentMousedOver.Count - 1; i >= 0; i--)
+        {
+            s_currentMousedOver[i].SetMouseOver(true);
 
-        topMostClicked?.SetMouseOver(true);
+            if (!s_currentMousedOver[i].PassOnMouse)
+            {
+                break;
+            }
+        }
 
         s_prevMousedOver = [.. s_currentMousedOver];
+        s_currentMousedOver.Clear();
+    }
+
+    internal static void Reset()
+    {
+        s_prevMousedOver.Clear();
         s_currentMousedOver.Clear();
     }
 }
