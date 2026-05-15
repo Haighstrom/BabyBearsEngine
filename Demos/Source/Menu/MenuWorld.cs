@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using BabyBearsEngine.Demos.Source;
 
 namespace BabyBearsEngine.Demos.Source.Menu;
 
@@ -16,18 +15,18 @@ internal class MenuWorld : World
 
     private int _buttonCount = 0;
 
-    public MenuWorld(IEnumerable<DemoWorld> demoWorlds)
+    public MenuWorld(IEnumerable<(string Name, Func<World> Factory)> demos)
     {
-        foreach (var world in demoWorlds)
+        foreach (var (name, factory) in demos)
         {
-            AddDemoButton(world);
+            AddDemoButton(name, factory);
         }
     }
 
-    private void AddDemoButton(DemoWorld world)
+    private void AddDemoButton(string name, Func<World> factory)
     {
         var (x, y) = NextButtonPosition();
-        Add(new DemoButton(x, y, world));
+        Add(new DemoButton(x, y, name, factory));
         _buttonCount++;
     }
 

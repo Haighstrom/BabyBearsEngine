@@ -1,5 +1,4 @@
-﻿using System;
-using BabyBearsEngine.Demos.Source;
+using System;
 using BabyBearsEngine.Demos.Source.Demos.AnimationDemo;
 using BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
 using BabyBearsEngine.Demos.Source.Demos.CameraDemo;
@@ -12,7 +11,6 @@ using BabyBearsEngine.Demos.Source.Demos.ShaderDemo;
 using BabyBearsEngine.Demos.Source.Demos.TextDemo;
 using BabyBearsEngine.Demos.Source.Demos.UIDemo;
 using BabyBearsEngine.Demos.Source.Menu;
-using Microsoft.Extensions.DependencyInjection;
 
 var appSettings = new ApplicationSettings()
 {
@@ -24,20 +22,24 @@ var appSettings = new ApplicationSettings()
     }
 };
 
-var services = new ServiceCollection();
-services.AddSingleton<Func<World>>(sp => () => new MenuWorld(sp.GetServices<DemoWorld>()));
-services.AddTransient<DemoWorld, AnimationDemoWorld>();
-services.AddTransient<DemoWorld, BearSpinnerWorld>();
-services.AddTransient<DemoWorld, CameraDemoWorld>();
-services.AddTransient<DemoWorld, ClickDemoWorld>();
-services.AddTransient<DemoWorld, ClickTheBearDemoWorld>();
-services.AddTransient<DemoWorld, GraphicDemoWorld>();
-services.AddTransient<DemoWorld, KeyboardDemoWorld>();
-services.AddTransient<DemoWorld, MouseDemoWorld>();
-services.AddTransient<DemoWorld, ShaderDemoWorld>();
-services.AddTransient<DemoWorld, TextDemoWorld>();
-services.AddTransient<DemoWorld, UIDemoWorld>();
+Func<World> menuFactory = null!;
+Func<World> getMenu = () => menuFactory();
 
-var provider = services.BuildServiceProvider();
+(string Name, Func<World> Factory)[] demos =
+[
+    ("Animation Demo",    () => new AnimationDemoWorld(getMenu)),
+    ("Bear Spinner 3000", () => new BearSpinnerWorld(getMenu)),
+    ("Camera Demo",       () => new CameraDemoWorld(getMenu)),
+    ("Click Demo",        () => new ClickDemoWorld(getMenu)),
+    ("Click The Bear",    () => new ClickTheBearDemoWorld(getMenu)),
+    ("Graphic Demo",      () => new GraphicDemoWorld(getMenu)),
+    ("Keyboard Demo",     () => new KeyboardDemoWorld(getMenu)),
+    ("Mouse Demo",        () => new MouseDemoWorld(getMenu)),
+    ("Shader Demo",       () => new ShaderDemoWorld(getMenu)),
+    ("Text Demo",         () => new TextDemoWorld(getMenu)),
+    ("UI Demo",           () => new UIDemoWorld(getMenu)),
+];
 
-GameLauncher.Run(appSettings, () => new MenuWorld(provider.GetServices<DemoWorld>()));
+menuFactory = () => new MenuWorld(demos);
+
+GameLauncher.Run(appSettings, menuFactory);
