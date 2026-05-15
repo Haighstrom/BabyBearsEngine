@@ -47,10 +47,12 @@ public class Checkbox : Button
 
             if (value)
             {
+                OnChecked();
                 Checked?.Invoke(this, EventArgs.Empty);
             }
             else
             {
+                OnUnchecked();
                 Unchecked?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -61,6 +63,12 @@ public class Checkbox : Button
 
     /// <summary>Raised when the checkbox is unticked, by click or by setting <see cref="IsChecked"/>.</summary>
     public event EventHandler? Unchecked;
+
+    /// <summary>Called when the checkbox transitions to checked. Override in subclasses instead of subscribing to <see cref="Checked"/>.</summary>
+    protected virtual void OnChecked() { }
+
+    /// <summary>Called when the checkbox transitions to unchecked. Override in subclasses instead of subscribing to <see cref="Unchecked"/>.</summary>
+    protected virtual void OnUnchecked() { }
 
     protected override void OnLeftClicked()
     {
