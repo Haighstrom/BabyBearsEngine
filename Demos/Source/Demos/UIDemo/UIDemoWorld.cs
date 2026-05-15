@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+using System;
 using BabyBearsEngine.Demos.Source;
 using BabyBearsEngine.Worlds.Graphics.Text;
 
@@ -11,9 +10,10 @@ internal class UIDemoWorld : DemoWorld
     private const int WidgetLeft = 250;
     private const int RowHeight = 80;
     private const int FirstRowY = 100;
+    private const double FillRate = 0.4;
 
     private readonly ProgressBar _progressBar;
-    private readonly TimedProgressBar _timedProgressBar;
+    private bool _filling = false;
 
     public override string Name => "UI Demo";
 
@@ -30,8 +30,15 @@ internal class UIDemoWorld : DemoWorld
             ["Easy", "Normal", "Hard", "Nightmare"]));
 
         Add(MakeLabel(LabelLeft, FirstRowY + 2 * RowHeight, 180, 50, "Progress bar:"));
-        _progressBar = new ProgressBar(WidgetLeft, FirstRowY + 2 * RowHeight, 300, 30, ProgressBarTheme.Default);
+        _progressBar = new ProgressBar(WidgetLeft, FirstRowY + 2 * RowHeight + 10, 260, 30, ProgressBarTheme.Default);
         Add(_progressBar);
+
+        Button fillButton = new(WidgetLeft + 270, FirstRowY + 2 * RowHeight + 10, 120, 30,
+            ButtonTheme.FromColour(new Colour(160, 200, 255)), "Hold to fill");
+        fillButton.LeftPressed += (_, _) => _filling = true;
+        fillButton.LeftClicked += (_, _) => _filling = false;
+        fillButton.MouseExited += (_, _) => _filling = false;
+        Add(fillButton);
 
         Add(MakeLabel(LabelLeft, FirstRowY + 3 * RowHeight, 180, 50, "Tooltip:"));
         Button tooltipTarget = new(WidgetLeft, FirstRowY + 3 * RowHeight, 180, 50,
@@ -45,34 +52,21 @@ internal class UIDemoWorld : DemoWorld
         tooltipTarget.MouseHovered += (_, _) => tooltip.Show();
         tooltipTarget.MouseHoverStopped += (_, _) => tooltip.Hide();
         tooltipTarget.MouseExited += (_, _) => tooltip.Hide();
-
-        Add(MakeLabel(LabelLeft, FirstRowY + 4 * RowHeight, 180, 50, "Scrollbar (H):"));
-        Scrollbar hScrollbar = new(WidgetLeft, FirstRowY + 4 * RowHeight + 15, 300, 20, ScrollbarDirection.Horizontal, ScrollbarTheme.Default);
-        TextGraphic hScrollLabel = MakeLabel(WidgetLeft + 320, FirstRowY + 4 * RowHeight, 100, 50, FormatAmount(hScrollbar.AmountFilled));
-        hScrollbar.ScrollChanged += (_, e) => hScrollLabel.Text = FormatAmount(e.NewValue);
-        Add(hScrollbar);
-        Add(hScrollLabel);
-
-        Add(MakeLabel(LabelLeft, FirstRowY + 5 * RowHeight, 180, 50, "Scrollbar (V):"));
-        Scrollbar vScrollbar = new(WidgetLeft, FirstRowY + 5 * RowHeight, 20, 150, ScrollbarDirection.Vertical, ScrollbarTheme.Default);
-        TextGraphic vScrollLabel = MakeLabel(WidgetLeft + 40, FirstRowY + 5 * RowHeight, 100, 50, FormatAmount(vScrollbar.AmountFilled));
-        vScrollbar.ScrollChanged += (_, e) => vScrollLabel.Text = FormatAmount(e.NewValue);
-        Add(vScrollbar);
-        Add(vScrollLabel);
-
-        int timedBarY = FirstRowY + 5 * RowHeight + 170;
-        Add(MakeLabel(LabelLeft, timedBarY, 180, 50, "Timed bar (3 s):"));
-        _timedProgressBar = new TimedProgressBar(WidgetLeft, timedBarY + 10, 300, 30, ProgressBarTheme.Default, 3.0);
-        _timedProgressBar.BarFilled += (_, _) => _timedProgressBar.Restart();
-        Add(_timedProgressBar);
     }
-
-    private static string FormatAmount(float amountFilled) => $"{amountFilled * 100:0}%";
 
     public override void Update(double elapsed)
     {
         base.Update(elapsed);
-        _progressBar.AmountFilled = (float)((Stopwatch.GetTimestamp() / (double)Stopwatch.Frequency % 5d) / 5d);
+
+        if (_filling)
+        {
+            _progressBar.AmountFilled += (float)(elapsed * FillRate);
+
+            if (_progressBar.AmountFilled >= 1.0f)
+            {
+                _progressBar.AmountFilled = 0.0f;
+            }
+        }
     }
 
     private static TextGraphic MakeLabel(int x, int y, int width, int height, string text)

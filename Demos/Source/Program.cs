@@ -17,7 +17,7 @@ var appSettings = new ApplicationSettings()
     WindowSettings = new WindowSettings()
     {
         Width = 800,
-        Height = 800,
+        Height = 600,
         Title = "Bears",
     }
 };
@@ -38,6 +38,7 @@ Func<World> getMenu = () => menuFactory();
     ("Shader Demo",       () => new ShaderDemoWorld(getMenu)),
     ("Text Demo",         () => new TextDemoWorld(getMenu)),
     ("UI Demo",           () => new UIDemoWorld(getMenu)),
+    ("UI Demo 2",         () => new UIDemoWorld2(getMenu)),
 ];
 
 menuFactory = () => new MenuWorld(demos);
