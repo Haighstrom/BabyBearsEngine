@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Tasks;
 
@@ -10,7 +11,7 @@ namespace BabyBearsEngine.Tasks;
 /// reports <see cref="IsComplete"/> when every completion condition is true, and runs the
 /// on-complete actions when <see cref="Complete"/> is called.
 /// </summary>
-public class Task : ITask
+public class Task : UpdateableBase, ITask
 {
     /// <summary>A no-op task that completes immediately.</summary>
     public static ITask DoNothing => new Task();
@@ -36,9 +37,6 @@ public class Task : ITask
     {
         ActionsOnComplete.Add(actionOnComplete);
     }
-
-    /// <inheritdoc/>
-    public virtual bool Active { get; set; } = true;
 
     /// <inheritdoc/>
     public virtual bool IsComplete => CompletionConditions.All(c => c());
@@ -73,7 +71,7 @@ public class Task : ITask
     }
 
     /// <inheritdoc/>
-    public virtual void Update(double elapsed)
+    public override void Update(double elapsed)
     {
         if (!_isStarted)
         {

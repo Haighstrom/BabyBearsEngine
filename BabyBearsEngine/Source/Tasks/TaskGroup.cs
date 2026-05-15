@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Tasks;
 
@@ -8,7 +9,7 @@ namespace BabyBearsEngine.Tasks;
 /// as each completes, and reports <see cref="IsComplete"/> once the chain is exhausted <em>and</em>
 /// the group's own <see cref="CompletionConditions"/> are satisfied.
 /// </summary>
-public class TaskGroup : ITask
+public class TaskGroup : UpdateableBase, ITask
 {
     private bool _isStarted = false;
 
@@ -42,9 +43,6 @@ public class TaskGroup : ITask
     {
         CurrentTask = firstTask;
     }
-
-    /// <inheritdoc/>
-    public virtual bool Active { get; set; } = true;
 
     /// <summary>The currently-running task in the chain, or <c>null</c> if the chain is exhausted.</summary>
     public ITask? CurrentTask { get; set; }
@@ -127,7 +125,7 @@ public class TaskGroup : ITask
     }
 
     /// <inheritdoc/>
-    public virtual void Update(double elapsed)
+    public override void Update(double elapsed)
     {
         if (!_isStarted)
         {
