@@ -60,6 +60,9 @@ public class Entity : ContainerEntity, IMouseInteractable
         }
     }
 
+    /// <inheritdoc cref="IMouseInteractable.HitRect"/>
+    public virtual Rect HitRect => PositionOnScreen;
+
     /// <summary>
     /// Translates a point from this entity's local space to window space by adding this entity's
     /// position and walking up the parent chain.

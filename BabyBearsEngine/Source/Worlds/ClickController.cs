@@ -62,7 +62,7 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
     /// <summary>Advance the controller state by <paramref name="elapsed"/> seconds.</summary>
     public void Update(double elapsed)
     {
-        if (target.PositionOnScreen.Contains(Mouse.ClientX, Mouse.ClientY))
+        if (target.HitRect.Contains(Mouse.ClientX, Mouse.ClientY))
         {
             MouseSolver.RegisterMouseOver(this);
         }
