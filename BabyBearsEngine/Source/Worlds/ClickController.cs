@@ -12,7 +12,7 @@ namespace BabyBearsEngine.Worlds;
 /// with <see cref="MouseSolver"/> so that only the top-most overlapping controller receives input.
 /// </para>
 /// <para>
-/// <see cref="LeftReleased"/> is only raised when the mouse was pressed while over the
+/// <see cref="LeftClicked"/> is only raised when the mouse was pressed while over the
 /// region and released while still over it (a successful click). Pressing inside, dragging
 /// outside, and releasing raises <see cref="MouseExited"/> instead to signal cancellation.
 /// </para>
@@ -46,7 +46,7 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
     public event Action? HoverCancelled;
     public event Action? Hovered;
     public event Action? LeftPressed;
-    public event Action? LeftReleased;
+    public event Action? LeftClicked;
     public event Action? MouseEntered;
     public event Action? MouseExited;
 
@@ -140,7 +140,7 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
                 {
                     _clickState = ClickState.MouseOver;
                     _hoverTimeElapsed = 0;
-                    LeftReleased?.Invoke();
+                    LeftClicked?.Invoke();
                 }
                 break;
 

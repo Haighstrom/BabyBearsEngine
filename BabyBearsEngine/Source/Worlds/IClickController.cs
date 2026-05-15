@@ -16,12 +16,12 @@ namespace BabyBearsEngine.Worlds;
 /// - The controller assumes mouse input exposes edge events (e.g.
 ///   <c>Mouse.LeftPressed</c> and <c>Mouse.LeftReleased</c> are true only on
 ///   the frame the action occurred).
-/// - A <c>LeftReleased</c> should be forwarded to the target only when the
+/// - A <c>LeftClicked</c> should be forwarded to the target only when the
 ///   mouse was pressed while over the target and then released while still
 ///   over the target (a successful click). If the mouse is pressed over the
 ///   target, dragged outside while holding the button, and released outside,
 ///   the interaction is cancelled (for example the controller may emit a
-///   mouse-exit/cancel event instead of a release).
+///   mouse-exit/cancel event instead of a click).
 /// </para>
 /// </summary>
 internal interface IClickController

@@ -62,9 +62,9 @@ public class Button : Entity
         ApplyState();
     }
 
-    protected override void OnLeftReleased()
+    protected override void OnLeftClicked()
     {
-        base.OnLeftReleased();
+        base.OnLeftClicked();
         _pressed = false;
         ApplyState();
     }

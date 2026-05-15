@@ -68,7 +68,7 @@ public class ClickControllerTests
         _controller.MouseEntered += () => _events.Add("MouseEntered");
         _controller.MouseExited += () => _events.Add("MouseExited");
         _controller.LeftPressed += () => _events.Add("LeftPressed");
-        _controller.LeftReleased += () => _events.Add("LeftReleased");
+        _controller.LeftClicked += () => _events.Add("LeftClicked");
         _controller.Hovered += () => _events.Add("Hovered");
         _controller.HoverCancelled += () => _events.Add("HoverCancelled");
     }
@@ -185,7 +185,7 @@ public class ClickControllerTests
     // MouseDownInside state
 
     [TestMethod]
-    public void Update_FromMouseDownInside_LeftReleasedWhileOver_RaisesLeftReleased()
+    public void Update_FromMouseDownInside_LeftReleasedWhileOver_RaisesLeftClicked()
     {
         Frame(isOver: true);
         Frame(isOver: true, leftPressed: true);
@@ -193,7 +193,7 @@ public class ClickControllerTests
 
         Frame(isOver: true, leftReleased: true);
 
-        CollectionAssert.AreEqual(new[] { "LeftReleased" }, _events);
+        CollectionAssert.AreEqual(new[] { "LeftClicked" }, _events);
     }
 
     [TestMethod]
@@ -209,11 +209,11 @@ public class ClickControllerTests
     }
 
     [TestMethod]
-    public void Update_FromMouseDownInside_LeftReleasedAndMouseExited_SameFrame_RaisesMouseExited_NotLeftReleased()
+    public void Update_FromMouseDownInside_LeftReleasedAndMouseExited_SameFrame_RaisesMouseExited_NotLeftClicked()
     {
         // Edge case: exit and release occur on the same frame (e.g. fast mouse movement places
         // the cursor outside the region on the same frame the button comes up). Exit takes
-        // priority — the interaction is cancelled: MouseExited fires, LeftReleased does not.
+        // priority — the interaction is cancelled: MouseExited fires, LeftClicked does not.
         Frame(isOver: true);
         Frame(isOver: true, leftPressed: true);
         _events.Clear();
@@ -252,7 +252,7 @@ public class ClickControllerTests
     }
 
     [TestMethod]
-    public void Update_FromMouseDownOutside_MouseReenteredThenLeftReleased_RaisesLeftReleased()
+    public void Update_FromMouseDownOutside_MouseReenteredThenLeftReleased_RaisesLeftClicked()
     {
         // Dragging outside then back inside and releasing counts as a successful click.
         Frame(isOver: true);
@@ -263,11 +263,11 @@ public class ClickControllerTests
 
         Frame(isOver: true, leftReleased: true);
 
-        CollectionAssert.AreEqual(new[] { "LeftReleased" }, _events);
+        CollectionAssert.AreEqual(new[] { "LeftClicked" }, _events);
     }
 
     [TestMethod]
-    public void Update_FromMouseDownOutside_MouseReenteredAndLeftReleased_SameFrame_RaisesMouseExited_NotLeftReleased()
+    public void Update_FromMouseDownOutside_MouseReenteredAndLeftReleased_SameFrame_RaisesMouseExited_NotLeftClicked()
     {
         // Edge case from issue #1: mouse over → pressed → exited → re-enters AND releases
         // on the same frame. Because the cursor was outside at some point while the button
@@ -291,7 +291,7 @@ public class ClickControllerTests
         Frame(isOver: true, leftPressed: true);
         Frame(isOver: true, leftReleased: true);
 
-        CollectionAssert.AreEqual(new[] { "MouseEntered", "LeftPressed", "LeftReleased" }, _events);
+        CollectionAssert.AreEqual(new[] { "MouseEntered", "LeftPressed", "LeftClicked" }, _events);
     }
 
     [TestMethod]

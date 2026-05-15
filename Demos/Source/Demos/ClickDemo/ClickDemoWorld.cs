@@ -51,7 +51,7 @@ internal class ClickDemoWorld : DemoWorld
         button.MouseEntered += (_, _) => status.Text = "MouseEntered";
         button.MouseExited += (_, _) => status.Text = "MouseExited";
         button.LeftPressed += (_, _) => status.Text = "LeftPressed";
-        button.LeftReleased += (_, _) => status.Text = "LeftReleased";
+        button.LeftClicked += (_, _) => status.Text = "LeftClicked";
         button.MouseHovered += (_, _) => status.Text = "MouseHovered  (0.5 s dwell)";
         button.MouseHoverStopped += (_, _) => status.Text = "MouseHoverStopped";
 
@@ -73,8 +73,8 @@ internal class ClickDemoWorld : DemoWorld
         TextGraphic orangeCount = MakeLabel(x, y + 200, SectionW, 28, "Orange: 0 clicks", 15);
         TextGraphic blueCount = MakeLabel(x + 130, y + 200, SectionW - 130, 28, "Blue: 0 clicks", 15);
 
-        orange.LeftReleased += (_, _) => orangeCount.Text = $"Orange: {++orangeClicks} clicks";
-        blue.LeftReleased += (_, _) => blueCount.Text = $"Blue: {++blueClicks} clicks";
+        orange.LeftClicked += (_, _) => orangeCount.Text = $"Orange: {++orangeClicks} clicks";
+        blue.LeftClicked += (_, _) => blueCount.Text = $"Blue: {++blueClicks} clicks";
 
         Add(MakeLabel(x, y + 236, SectionW, 22, "In the overlap, only Blue responds."));
         Add(orangeCount);
@@ -100,8 +100,8 @@ internal class ClickDemoWorld : DemoWorld
         TextGraphic orangeCount = MakeLabel(x, y + 200, SectionW, 28, "Orange: 0 clicks", 15);
         TextGraphic blueCount = MakeLabel(x + 130, y + 200, SectionW - 130, 28, "Blue: 0 clicks", 15);
 
-        orange.LeftReleased += (_, _) => orangeCount.Text = $"Orange: {++orangeClicks} clicks";
-        blue.LeftReleased += (_, _) => blueCount.Text = $"Blue: {++blueClicks} clicks";
+        orange.LeftClicked += (_, _) => orangeCount.Text = $"Orange: {++orangeClicks} clicks";
+        blue.LeftClicked += (_, _) => blueCount.Text = $"Blue: {++blueClicks} clicks";
 
         Add(MakeLabel(x, y + 236, SectionW, 22, "Both counters increment when clicking the overlap."));
         Add(orangeCount);

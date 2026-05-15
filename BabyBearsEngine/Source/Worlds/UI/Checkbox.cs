@@ -62,9 +62,9 @@ public class Checkbox : Button
     /// <summary>Raised when the checkbox is unticked, by click or by setting <see cref="IsChecked"/>.</summary>
     public event EventHandler? Unchecked;
 
-    protected override void OnLeftReleased()
+    protected override void OnLeftClicked()
     {
-        base.OnLeftReleased();
+        base.OnLeftClicked();
         IsChecked = !_isChecked;
     }
 }

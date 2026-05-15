@@ -59,9 +59,9 @@ public class CyclingValueButton<T> : Button
     /// <summary>Raised after a click cycles to the next value, with the old and new values.</summary>
     public event EventHandler<CyclingValueChangedEventArgs<T>>? ValueChanged;
 
-    protected override void OnLeftReleased()
+    protected override void OnLeftClicked()
     {
-        base.OnLeftReleased();
+        base.OnLeftClicked();
 
         T oldValue = CurrentValue;
         _currentIndex = (_currentIndex + 1) % _values.Count;

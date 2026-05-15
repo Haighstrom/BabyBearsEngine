@@ -5,9 +5,9 @@ namespace BabyBearsEngine.Demos.Source.Menu;
 internal class DemoButton(int x, int y, DemoWorld world)
     : Button(x, y, 120, 60, ButtonTheme.FromColour(Colour.White), world.Name)
 {
-    protected override void OnLeftReleased()
+    protected override void OnLeftClicked()
     {
-        base.OnLeftReleased();
+        base.OnLeftClicked();
         Engine.ChangeWorld(world);
     }
 }

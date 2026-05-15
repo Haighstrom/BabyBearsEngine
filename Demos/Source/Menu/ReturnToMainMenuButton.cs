@@ -5,9 +5,9 @@ namespace BabyBearsEngine.Demos.Source.Menu;
 internal class ReturnToMainMenuButton(Func<World> menuWorldFactory)
     : Button(5, 5, 80, 40, ButtonTheme.FromColour(Colour.Yellow), "Return")
 {
-    protected override void OnLeftReleased()
+    protected override void OnLeftClicked()
     {
-        base.OnLeftReleased();
+        base.OnLeftClicked();
         Engine.ChangeWorld(menuWorldFactory());
     }
 }

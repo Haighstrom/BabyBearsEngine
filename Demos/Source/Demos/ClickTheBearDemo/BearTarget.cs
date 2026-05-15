@@ -48,7 +48,7 @@ internal class BearTarget : Entity
         }
     }
 
-    protected override void OnLeftReleased()
+    protected override void OnLeftClicked()
     {
         if (_done)
         {
