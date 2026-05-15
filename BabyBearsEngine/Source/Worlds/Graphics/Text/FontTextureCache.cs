@@ -1,28 +1,31 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using BabyBearsEngine.OpenGL;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 
-internal class FontTextureCache
+internal static class FontTextureCache
 {
-    private static readonly Dictionary<FontDefinition, FontTexture> s_fontTextures = [];
+    private static readonly Dictionary<FontDefinition, CachedFontAtlas> s_cache = [];
 
-    internal static FontTexture GetOrCreate(FontDefinition fontDefinition)
+    internal static CachedFontAtlas GetOrCreate(FontDefinition fontDefinition)
     {
-        if (s_fontTextures.TryGetValue(fontDefinition, out var existingFontAtlas))
+        if (s_cache.TryGetValue(fontDefinition, out var existing))
         {
-            return existingFontAtlas;
+            return existing;
         }
 
-        var newFontAtlas = BuildFontTexture(fontDefinition);
-
-        s_fontTextures[fontDefinition] = newFontAtlas;
-
-        return newFontAtlas;
+        CachedFontAtlas atlas = Build(fontDefinition);
+        s_cache[fontDefinition] = atlas;
+        return atlas;
     }
 
-    private static FontTexture BuildFontTexture(FontDefinition fontDefinition)
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "GDI+ only called on Windows.")]
+    private static CachedFontAtlas Build(FontDefinition fontDefinition)
     {
-        // Your sprite sheet build logic here
-        throw new NotImplementedException();
+        var font = new FontLoader().LoadFont(fontDefinition);
+        GeneratedFontStruct fontStruct = new FontBitmapGenerator().GenerateCharSpritesheetAndPositions(
+            font, fontDefinition.CharactersToLoad, fontDefinition.AntiAliased, 13);
+        ITexture texture = new DefaultTextureFactory().GenTexture(fontStruct.CharacterSS);
+        return new CachedFontAtlas(fontStruct, texture);
     }
 }

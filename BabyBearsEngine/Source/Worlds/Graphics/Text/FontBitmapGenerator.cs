@@ -74,8 +74,6 @@ internal sealed class FontBitmapGenerator() : IFontBitmapGenerator
             b.Dispose();
         }
 
-        characterSS.Save("fontAsBitmap.png");
-
         return new GeneratedFontStruct(
             CharacterSS: characterSS,
             WidestChar: widestChar,

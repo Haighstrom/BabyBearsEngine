@@ -26,11 +26,9 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         _textToDisplay = textToDisplay;
         _colour = colour;
 
-        var font = new FontLoader().LoadFont(fontDef);
-
-        _fontStruct = new FontBitmapGenerator().GenerateCharSpritesheetAndPositions(font, fontDef.CharactersToLoad, fontDef.AntiAliased, 13);
-
-        _texture = new DefaultTextureFactory().GenTexture(_fontStruct.CharacterSS);
+        CachedFontAtlas atlas = FontTextureCache.GetOrCreate(fontDef);
+        _fontStruct = atlas.FontStruct;
+        _texture = atlas.Texture;
     }
 
     public string Text
