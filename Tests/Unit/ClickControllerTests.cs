@@ -1,10 +1,11 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Input;
 using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Tests.Unit;
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments", Justification = "<Pending>")]
 [TestClass]
 public class ClickControllerTests
 {
@@ -62,7 +63,7 @@ public class ClickControllerTests
         _mouse = new();
         EngineConfiguration.MouseService = _mouse;
         _controller = new(new FakeTarget());
-        _events = new();
+        _events = [];
 
         _controller.MouseEntered += () => _events.Add("MouseEntered");
         _controller.MouseExited += () => _events.Add("MouseExited");
@@ -90,7 +91,7 @@ public class ClickControllerTests
     {
         Frame(isOver: false);
 
-        Assert.AreEqual(0, _events.Count);
+        Assert.IsEmpty(_events);
     }
 
     [TestMethod]
@@ -141,7 +142,7 @@ public class ClickControllerTests
 
         Frame(isOver: true, elapsed: 0.4);
 
-        Assert.AreEqual(0, _events.Count);
+        Assert.IsEmpty(_events);
     }
 
     [TestMethod]
@@ -204,7 +205,7 @@ public class ClickControllerTests
 
         Frame(isOver: false);
 
-        Assert.AreEqual(0, _events.Count);
+        Assert.IsEmpty(_events);
     }
 
     [TestMethod]
@@ -247,7 +248,7 @@ public class ClickControllerTests
 
         Frame(isOver: true);
 
-        Assert.AreEqual(0, _events.Count);
+        Assert.IsEmpty(_events);
     }
 
     [TestMethod]
