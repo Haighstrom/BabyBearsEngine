@@ -7,7 +7,7 @@ public class MouseSolverTests
 {
     private sealed class FakeController : IClickController
     {
-        public bool PassOnMouse { get; set; } = false;
+        public bool ClickThrough { get; set; } = false;
         public bool MouseIsOver { get; private set; } = false;
 
         public void SetMouseOver(bool isMouseOver)
@@ -38,7 +38,7 @@ public class MouseSolverTests
         MouseSolver.Update();
     }
 
-    // Top-most only (PassOnMouse = false)
+    // Top-most only (ClickThrough = false)
 
     [TestMethod]
     public void Update_TwoControllers_TopMostOnly_OnlyTopReceivesMouseOver()
@@ -54,13 +54,13 @@ public class MouseSolverTests
         Assert.IsFalse(bottom.MouseIsOver);
     }
 
-    // PassOnMouse propagation
+    // ClickThrough propagation
 
     [TestMethod]
-    public void Update_TopHasPassOnMouse_BothReceiveMouseOver()
+    public void Update_TopHasClickThrough_BothReceiveMouseOver()
     {
         FakeController bottom = new();
-        FakeController top = new() { PassOnMouse = true };
+        FakeController top = new() { ClickThrough = true };
         MouseSolver.RegisterMouseOver(bottom);
         MouseSolver.RegisterMouseOver(top);
 
@@ -71,9 +71,9 @@ public class MouseSolverTests
     }
 
     [TestMethod]
-    public void Update_BottomHasPassOnMouse_TopMostOnly_OnlyTopReceivesMouseOver()
+    public void Update_BottomHasClickThrough_TopMostOnly_OnlyTopReceivesMouseOver()
     {
-        FakeController bottom = new() { PassOnMouse = true };
+        FakeController bottom = new() { ClickThrough = true };
         FakeController top = new();
         MouseSolver.RegisterMouseOver(bottom);
         MouseSolver.RegisterMouseOver(top);
@@ -85,11 +85,11 @@ public class MouseSolverTests
     }
 
     [TestMethod]
-    public void Update_ThreeControllers_TopTwoPassOn_AllThreeReceiveMouseOver()
+    public void Update_ThreeControllers_TopTwoClickThrough_AllThreeReceiveMouseOver()
     {
         FakeController bottom = new();
-        FakeController middle = new() { PassOnMouse = true };
-        FakeController top = new() { PassOnMouse = true };
+        FakeController middle = new() { ClickThrough = true };
+        FakeController top = new() { ClickThrough = true };
         MouseSolver.RegisterMouseOver(bottom);
         MouseSolver.RegisterMouseOver(middle);
         MouseSolver.RegisterMouseOver(top);
@@ -102,11 +102,11 @@ public class MouseSolverTests
     }
 
     [TestMethod]
-    public void Update_ThreeControllers_OnlyTopPassesOn_StopsAtMiddle()
+    public void Update_ThreeControllers_OnlyTopClicksThrough_StopsAtMiddle()
     {
         FakeController bottom = new();
         FakeController middle = new();
-        FakeController top = new() { PassOnMouse = true };
+        FakeController top = new() { ClickThrough = true };
         MouseSolver.RegisterMouseOver(bottom);
         MouseSolver.RegisterMouseOver(middle);
         MouseSolver.RegisterMouseOver(top);

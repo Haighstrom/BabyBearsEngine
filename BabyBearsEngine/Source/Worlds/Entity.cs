@@ -36,16 +36,16 @@ public class Entity : ContainerEntity, IMouseInteractable
 
     /// <summary>
     /// When true, mouse-over state propagates through this entity to overlapping clickable
-    /// entities beneath it, rather than stopping here. Only meaningful when clickable.
+    /// entities beneath it rather than stopping here. Only meaningful when clickable.
     /// </summary>
-    public bool PassOnMouse
+    public bool ClickThrough
     {
-        get => _clickController?.PassOnMouse ?? false;
+        get => _clickController?.ClickThrough ?? false;
         set
         {
             if (_clickController is not null)
             {
-                _clickController.PassOnMouse = value;
+                _clickController.ClickThrough = value;
             }
         }
     }

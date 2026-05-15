@@ -25,7 +25,7 @@ internal static class MouseSolver
         {
             s_currentMousedOver[i].SetMouseOver(true);
 
-            if (!s_currentMousedOver[i].PassOnMouse)
+            if (!s_currentMousedOver[i].ClickThrough)
             {
                 break;
             }

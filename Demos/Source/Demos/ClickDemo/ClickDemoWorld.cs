@@ -88,13 +88,13 @@ internal class ClickDemoWorld : DemoWorld
         int x = Col2X, y = Row2Y;
         int orangeClicks = 0, blueClicks = 0;
 
-        Add(MakeHeader(x, y, "Click-Through  (PassOnMouse = true)"));
+        Add(MakeHeader(x, y, "Click-Through  (ClickThrough = true)"));
         Add(MakeLabel(x, y + 28, SectionW, 20, "Click in the overlapping area:"));
 
         Button orange = new(x, y + 55, 190, 85, ButtonTheme.FromColour(new Colour(255, 150, 50)), "Orange");
         Button blue = new(x + 130, y + 100, 190, 85, ButtonTheme.FromColour(new Colour(80, 120, 255)), "Blue")
         {
-            PassOnMouse = true,
+            ClickThrough = true,
         };
 
         TextImage orangeCount = MakeLabel(x, y + 200, SectionW, 28, "Orange: 0 clicks", 15);

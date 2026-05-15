@@ -34,7 +34,7 @@ internal interface IClickController
     /// When true, <see cref="MouseSolver"/> continues propagating mouse-over state
     /// to overlapping controllers beneath this one instead of stopping here.
     /// </summary>
-    bool PassOnMouse { get; }
+    bool ClickThrough { get; }
 
     /// <param name="isMouseOver">True if the mouse is over the target this frame.</param>
     void SetMouseOver(bool isMouseOver);
