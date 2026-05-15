@@ -30,14 +30,32 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
         // Mipmaps are smaller copies of the texture, scaled down. Each mipmap level is half the size of the previous one
         // Generated mipmaps go all the way down to just one pixel.
         // OpenGL will automatically switch between mipmaps when an object gets sufficiently far away.
-        // This prevents moiré effects, as well as saving on texture bandwidth.
-        // Here you can see and read about the morié effect https://en.wikipedia.org/wiki/Moir%C3%A9_pattern
+        // This prevents moirï¿½ effects, as well as saving on texture bandwidth.
+        // Here you can see and read about the moriï¿½ effect https://en.wikipedia.org/wiki/Moir%C3%A9_pattern
         // Here is an example of mips in action https://en.wikipedia.org/wiki/File:Mipmap_Aliasing_Comparison.png
         GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
         var texture = new Texture(handle, imageData.Width, imageData.Height);
 
         return texture;
+    }
+
+    public ITexture GenBorderedRectangle(int width, int height, int borderThickness, Colour fillColour, Colour borderColour)
+    {
+        Colour[,] pixels = new Colour[width, height];
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                pixels[x, y] = x < borderThickness || x >= width - borderThickness
+                             || y < borderThickness || y >= height - borderThickness
+                    ? borderColour
+                    : fillColour;
+            }
+        }
+
+        return GenTexture(pixels);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
@@ -62,5 +80,38 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
         bmp.UnlockBits(bmpd);
 
         return t;
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
+    public ITexture GenTexture(Colour[,] pixels)
+    {
+        int width = pixels.GetLength(0);
+        int height = pixels.GetLength(1);
+
+        System.Drawing.Bitmap bmp = new(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        var bmpd = bmp.LockBits(
+            new System.Drawing.Rectangle(0, 0, width, height),
+            System.Drawing.Imaging.ImageLockMode.WriteOnly,
+            System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+        unsafe
+        {
+            byte* ptr = (byte*)bmpd.Scan0;
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    Colour c = pixels[x, y];
+                    byte* p = ptr + y * bmpd.Stride + x * 4;
+                    p[0] = c.B; // Format32bppArgb stores as BGRA
+                    p[1] = c.G;
+                    p[2] = c.R;
+                    p[3] = c.A;
+                }
+            }
+        }
+
+        bmp.UnlockBits(bmpd);
+        return GenTexture(bmp);
     }
 }
