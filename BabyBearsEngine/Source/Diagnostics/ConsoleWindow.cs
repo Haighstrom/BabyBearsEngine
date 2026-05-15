@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using BabyBearsEngine.Platform;
 
 namespace BabyBearsEngine.Diagnostics;
 
@@ -8,7 +9,7 @@ namespace BabyBearsEngine.Diagnostics;
 /// no-op (with a single warning logged the first time). Internal: game devs configure visibility
 /// and position via <see cref="ConsoleSettings"/> at startup rather than calling these directly.
 /// </summary>
-internal static partial class ConsoleWindow
+internal static class ConsoleWindow
 {
     private static bool s_visible = false;
     private static bool s_unsupportedWarned = false;
@@ -60,7 +61,7 @@ internal static partial class ConsoleWindow
             return;
         }
 
-        AllocConsole();
+        NativeMethods.AllocConsole();
         s_visible = true;
     }
 
@@ -90,7 +91,7 @@ internal static partial class ConsoleWindow
             return;
         }
 
-        FreeConsole();
+        NativeMethods.FreeConsole();
         s_visible = false;
     }
 
@@ -103,13 +104,13 @@ internal static partial class ConsoleWindow
             return;
         }
 
-        IntPtr handle = GetConsoleWindow();
+        IntPtr handle = NativeMethods.GetConsoleWindow();
         if (handle == IntPtr.Zero)
         {
             return;
         }
 
-        MoveWindow(handle, x, y, width, height, bRepaint: true);
+        NativeMethods.MoveWindow(handle, x, y, width, height, bRepaint: true);
     }
 
     /// <summary>Sets the console window title. No-op if no console is allocated or on non-Windows.</summary>
@@ -140,14 +141,14 @@ internal static partial class ConsoleWindow
             return;
         }
 
-        IntPtr handle = GetConsoleWindow();
+        IntPtr handle = NativeMethods.GetConsoleWindow();
         if (handle == IntPtr.Zero)
         {
             return;
         }
 
-        IntPtr insertAfter = topmost ? HWND_TOPMOST : HWND_NOTOPMOST;
-        SetWindowPos(handle, insertAfter, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+        IntPtr insertAfter = topmost ? NativeMethods.HWND_TOPMOST : NativeMethods.HWND_NOTOPMOST;
+        NativeMethods.SetWindowPos(handle, insertAfter, 0, 0, 0, 0, NativeMethods.SWP_NOMOVE | NativeMethods.SWP_NOSIZE);
     }
 
     private static (int Width, int Height) GetMaxWorkArea()
@@ -157,11 +158,11 @@ internal static partial class ConsoleWindow
             return (0, 0);
         }
 
-        IntPtr hWnd = GetConsoleWindow();
-        IntPtr monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTOPRIMARY);
-        var info = new MONITORINFO { Size = (uint)Marshal.SizeOf<MONITORINFO>() };
+        IntPtr hWnd = NativeMethods.GetConsoleWindow();
+        IntPtr monitor = NativeMethods.MonitorFromWindow(hWnd, NativeMethods.MONITOR_DEFAULTTOPRIMARY);
+        NativeMethods.MONITORINFO info = new() { Size = (uint)Marshal.SizeOf<NativeMethods.MONITORINFO>() };
 
-        if (!GetMonitorInfo(monitor, ref info))
+        if (!NativeMethods.GetMonitorInfo(monitor, ref info))
         {
             return (0, 0);
         }
@@ -178,57 +179,5 @@ internal static partial class ConsoleWindow
 
         Logger.Warning("ConsoleWindow operations are only supported on Windows. Skipping.");
         s_unsupportedWarned = true;
-    }
-
-    // ─── P/Invoke imports ───
-
-    [LibraryImport("Kernel32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool AllocConsole();
-
-    [LibraryImport("Kernel32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool FreeConsole();
-
-    [LibraryImport("Kernel32.dll", SetLastError = true)]
-    private static partial IntPtr GetConsoleWindow();
-
-    [LibraryImport("User32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, [MarshalAs(UnmanagedType.Bool)] bool bRepaint);
-
-    [LibraryImport("User32.dll", SetLastError = true)]
-    private static partial IntPtr MonitorFromWindow(IntPtr hWnd, uint dwFlags);
-
-    [LibraryImport("User32.dll", EntryPoint = "GetMonitorInfoW", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
-
-    [LibraryImport("User32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-    private const uint MONITOR_DEFAULTTOPRIMARY = 0x00000001;
-    private const uint SWP_NOMOVE = 0x0002;
-    private const uint SWP_NOSIZE = 0x0001;
-    private static readonly IntPtr HWND_TOPMOST = new(-1);
-    private static readonly IntPtr HWND_NOTOPMOST = new(-2);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct RECT
-    {
-        public int Left;
-        public int Top;
-        public int Right;
-        public int Bottom;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct MONITORINFO
-    {
-        public uint Size;
-        public RECT Monitor;
-        public RECT WorkArea;
-        public uint Flags;
     }
 }
