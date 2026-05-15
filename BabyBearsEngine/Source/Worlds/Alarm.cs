@@ -4,7 +4,7 @@
 /// A timer that fires <see cref="Elapsed"/> after a set duration, then either removes itself
 /// (one-shot) or resets and fires again (repeating).
 /// </summary>
-public class Alarm(double duration, bool repeating = false) : AddableBase, IUpdateable
+public class Alarm(double duration, bool repeating = false) : UpdateableBase
 {
     private double _elapsed = 0.0;
 
@@ -14,11 +14,9 @@ public class Alarm(double duration, bool repeating = false) : AddableBase, IUpda
         Elapsed += onElapsed;
     }
 
-    public bool Active { get; set; } = true;
-
     public event Action? Elapsed;
 
-    public void Update(double elapsed)
+    public override void Update(double elapsed)
     {
         if (!Active)
         {
