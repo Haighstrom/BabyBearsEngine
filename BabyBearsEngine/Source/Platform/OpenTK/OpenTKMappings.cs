@@ -38,6 +38,7 @@ internal static class OpenTkMappings
             MaximumClientSize = settings.MaxClientSize.IsEmpty ? null : new Vector2i(settings.MaxClientSize.X, settings.MaxClientSize.Y),
             APIVersion = new Version(settings.OpenGLVersion.major, settings.OpenGLVersion.minor),
             Vsync = settings.VSync ? OpenTKVSyncMode.On : OpenTKVSyncMode.Off,
+            StartVisible = false,
         };
     }
 

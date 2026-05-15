@@ -69,6 +69,8 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
         _world.Load(); //does nothing currently - world is swapped
 
         EngineDiagnostics.LogInitialisationComplete();
+
+        IsVisible = true;
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
