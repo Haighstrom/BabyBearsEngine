@@ -20,7 +20,7 @@ public interface ICamera : IRect, IUpdateable, IRenderable, IContainer
     MsaaSamples MSAASamples { get; set; }
 
     /// <summary>The view transform controlling which region of world space this camera displays.</summary>
-    Cameras.CameraView View { get; }
+    Cameras.ICameraView View { get; }
 
     /// <summary>Raised when the camera's view changes (scroll, zoom, resize).</summary>
     event EventHandler? ViewChanged;

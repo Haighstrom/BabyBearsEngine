@@ -1,6 +1,6 @@
 ﻿namespace BabyBearsEngine.Worlds.Cameras;
 
-public abstract class CameraView(Func<float> getCameraWidth, Func<float> getCameraHeight)
+public abstract class CameraView(Func<float> getCameraWidth, Func<float> getCameraHeight) : ICameraView
 {
     protected readonly Func<float> _getCameraHeight = getCameraHeight;
     protected readonly Func<float> _getCameraWidth = getCameraWidth;

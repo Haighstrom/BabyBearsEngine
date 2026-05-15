@@ -39,7 +39,7 @@ public sealed class Camera : ContainerEntity, ICamera
 
     public MsaaSamples MSAASamples { get; set; } = MsaaSamples.Disabled;
 
-    public CameraView View => _cameraView;
+    public ICameraView View => _cameraView;
 
 
     public event EventHandler? ViewChanged

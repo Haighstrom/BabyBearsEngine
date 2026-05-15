@@ -41,7 +41,7 @@ public sealed class UICamera : ContainerEntity, ICamera
     public MsaaSamples MSAASamples { get; set; }
 
     /// <inheritdoc/>
-    public Cameras.CameraView View => _view;
+    public Cameras.ICameraView View => _view;
 
     /// <inheritdoc/>
     public event EventHandler? ViewChanged
