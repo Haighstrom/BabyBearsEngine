@@ -200,7 +200,7 @@ internal static partial class ConsoleWindow
     [LibraryImport("User32.dll", SetLastError = true)]
     private static partial IntPtr MonitorFromWindow(IntPtr hWnd, uint dwFlags);
 
-    [LibraryImport("User32.dll", SetLastError = true)]
+    [LibraryImport("User32.dll", EntryPoint = "GetMonitorInfoW", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
 

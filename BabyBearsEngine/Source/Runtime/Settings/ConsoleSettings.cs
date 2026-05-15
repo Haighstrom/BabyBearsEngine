@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using BabyBearsEngine.Diagnostics;
 
 namespace BabyBearsEngine;
 
@@ -44,7 +45,7 @@ public record class ConsoleSettings()
     public int Width { get; set; } = DefaultWidth;
 
     /// <summary>
-    /// The height of the console in pixels. Defaults to the height of the window.
+    /// The height of the console in pixels. Defaults to the full working-area height of the screen.
     /// </summary>
-    public int Height { get; set; } = 300;//new ConsoleWindow().MaxHeight;
+    public int Height { get; set; } = ConsoleWindow.MaxHeight;
 }
