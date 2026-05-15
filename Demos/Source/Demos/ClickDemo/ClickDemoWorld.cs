@@ -21,18 +21,18 @@ internal class ClickDemoWorld : DemoWorld
         AddClickThroughSection();
     }
 
-    private static TextImage MakeHeader(int x, int y, string text)
+    private static TextGraphic MakeHeader(int x, int y, string text)
     {
-        return new TextImage(new FontDefinition("Times New Roman", 16), text, Colour.Black, x, y, SectionW, 25)
+        return new TextGraphic(new FontDefinition("Times New Roman", 16), text, Colour.Black, x, y, SectionW, 25)
         {
             HAlignment = HAlignment.Left,
             VAlignment = VAlignment.Centred,
         };
     }
 
-    private static TextImage MakeLabel(int x, int y, int w, int h, string text, int fontSize = 13)
+    private static TextGraphic MakeLabel(int x, int y, int w, int h, string text, int fontSize = 13)
     {
-        return new TextImage(new FontDefinition("Times New Roman", fontSize), text, Colour.Black, x, y, w, h)
+        return new TextGraphic(new FontDefinition("Times New Roman", fontSize), text, Colour.Black, x, y, w, h)
         {
             HAlignment = HAlignment.Left,
             VAlignment = VAlignment.Centred,
@@ -46,7 +46,7 @@ internal class ClickDemoWorld : DemoWorld
         Add(MakeHeader(x, y, "Click Events"));
 
         Button button = new(x + 70, y + 35, 210, 110, ButtonTheme.FromColour(new Colour(100, 160, 255)), "Click me!");
-        TextImage status = MakeLabel(x, y + 160, SectionW, 35, "- hover, click, or drag off -", 16);
+        TextGraphic status = MakeLabel(x, y + 160, SectionW, 35, "- hover, click, or drag off -", 16);
 
         button.MouseEntered += (_, _) => status.Text = "MouseEntered";
         button.MouseExited += (_, _) => status.Text = "MouseExited";
@@ -70,8 +70,8 @@ internal class ClickDemoWorld : DemoWorld
         Button orange = new(x, y + 55, 190, 85, ButtonTheme.FromColour(new Colour(255, 150, 50)), "Orange");
         Button blue = new(x + 130, y + 100, 190, 85, ButtonTheme.FromColour(new Colour(80, 120, 255)), "Blue");
 
-        TextImage orangeCount = MakeLabel(x, y + 200, SectionW, 28, "Orange: 0 clicks", 15);
-        TextImage blueCount = MakeLabel(x + 130, y + 200, SectionW - 130, 28, "Blue: 0 clicks", 15);
+        TextGraphic orangeCount = MakeLabel(x, y + 200, SectionW, 28, "Orange: 0 clicks", 15);
+        TextGraphic blueCount = MakeLabel(x + 130, y + 200, SectionW - 130, 28, "Blue: 0 clicks", 15);
 
         orange.LeftReleased += (_, _) => orangeCount.Text = $"Orange: {++orangeClicks} clicks";
         blue.LeftReleased += (_, _) => blueCount.Text = $"Blue: {++blueClicks} clicks";
@@ -97,8 +97,8 @@ internal class ClickDemoWorld : DemoWorld
             ClickThrough = true,
         };
 
-        TextImage orangeCount = MakeLabel(x, y + 200, SectionW, 28, "Orange: 0 clicks", 15);
-        TextImage blueCount = MakeLabel(x + 130, y + 200, SectionW - 130, 28, "Blue: 0 clicks", 15);
+        TextGraphic orangeCount = MakeLabel(x, y + 200, SectionW, 28, "Orange: 0 clicks", 15);
+        TextGraphic blueCount = MakeLabel(x + 130, y + 200, SectionW - 130, 28, "Blue: 0 clicks", 15);
 
         orange.LeftReleased += (_, _) => orangeCount.Text = $"Orange: {++orangeClicks} clicks";
         blue.LeftReleased += (_, _) => blueCount.Text = $"Blue: {++blueClicks} clicks";

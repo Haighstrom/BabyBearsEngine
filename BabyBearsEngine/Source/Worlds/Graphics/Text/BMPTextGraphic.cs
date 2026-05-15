@@ -74,7 +74,7 @@ public sealed class BMPTextGraphic : GraphicBase, ITextGraphic
     private float _extraSpaceWidth = 0;
     private float _extraLineSpacing = 0;
 
-    private Image _image = null!;
+    private TextureGraphic _image = null!;
     private ITexture _tempTexture;
 
     public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
@@ -99,7 +99,7 @@ public sealed class BMPTextGraphic : GraphicBase, ITextGraphic
     private void SetVerticesSimple()
     {
 
-        _image = new Image(_tempTexture, 200, 200, 100, 100);
+        _image = new TextureGraphic(_tempTexture, 200, 200, 100, 100);
 
         //foreach (var sg in _vertGroups)
         //{

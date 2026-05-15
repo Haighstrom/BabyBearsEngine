@@ -9,12 +9,12 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// Construction allocates GL resources (vertex buffer, etc.) — must be created on the engine thread
 /// after the GL context exists. Implements <see cref="IDisposable"/> to release those resources.
 /// </summary>
-/// <param name="texture">The texture to sample. Not owned by this image; not disposed when the image is disposed.</param>
+/// <param name="texture">The texture to sample. Not owned by this graphic; not disposed when the graphic is disposed.</param>
 /// <param name="x">X position in the parent's local space.</param>
 /// <param name="y">Y position in the parent's local space.</param>
 /// <param name="width">Width in pixels.</param>
 /// <param name="height">Height in pixels.</param>
-public sealed class Image(ITexture texture, float x, float y, float width, float height) : GraphicBase(x, y, width, height), IGraphic, IDisposable
+public sealed class TextureGraphic(ITexture texture, float x, float y, float width, float height) : GraphicBase(x, y, width, height), IGraphic, IDisposable
 {
     private readonly GraphicRenderer _graphicRenderer = new(texture);
     private float _angle = 0;

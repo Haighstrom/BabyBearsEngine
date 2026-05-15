@@ -19,11 +19,11 @@ internal class CameraDemoWorld : DemoWorld
 
         var leftCamera = Camera.WithTileSize(5, 50, CameraWidth, CameraHeight, 1, 1);
         leftCamera.BackgroundColour = Colour.AliceBlue;
-        leftCamera.Add(new TextImage(fontDef, "No MSAA", Colour.Black, 5, 5, CameraWidth - 10, 30));
+        leftCamera.Add(new TextGraphic(fontDef, "No MSAA", Colour.Black, 5, 5, CameraWidth - 10, 30));
 
         var rightCamera = Camera.WithTileSize(405, 50, CameraWidth, CameraHeight, 1, 1, MsaaSamples.X4);
         rightCamera.BackgroundColour = Colour.Cornsilk;
-        rightCamera.Add(new TextImage(fontDef, "MSAA x4", Colour.Black, 5, 5, CameraWidth - 10, 30));
+        rightCamera.Add(new TextGraphic(fontDef, "MSAA x4", Colour.Black, 5, 5, CameraWidth - 10, 30));
 
         for (int i = 0; i < BearCount; i++)
         {

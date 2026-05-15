@@ -54,7 +54,7 @@ internal class ClickTheBearDemoWorld : DemoWorld
         float x = ScoreMarginLeft + col * (ScoreIconSize + ScoreIconGap);
         float y = ScoreMarginTop + row * (ScoreIconSize + ScoreIconGap);
 
-        Add(new Image(Textures.CreateFromFile("Assets/SpinnableBear.png"), x, y, ScoreIconSize, ScoreIconSize));
+        Add(new TextureGraphic(Textures.CreateFromFile("Assets/SpinnableBear.png"), x, y, ScoreIconSize, ScoreIconSize));
         _scoreCount++;
     }
 }

@@ -27,14 +27,14 @@ public sealed record TooltipTheme
     /// <summary>Builds a theme with a solid-colour background and a custom text colour.</summary>
     public static TooltipTheme FromColours(Colour background, Colour textColour) => new()
     {
-        BackgroundFactory = r => new ColouredRectangle(background, r.X, r.Y, r.W, r.H),
+        BackgroundFactory = r => new ColourGraphic(background, r.X, r.Y, r.W, r.H),
         Text = TextTheme.Default with { Colour = textColour },
     };
 
     /// <summary>Builds a theme with a textured background and a custom text colour.</summary>
     public static TooltipTheme FromTexture(ITexture background, Colour textColour) => new()
     {
-        BackgroundFactory = r => new Image(background, r.X, r.Y, r.W, r.H),
+        BackgroundFactory = r => new TextureGraphic(background, r.X, r.Y, r.W, r.H),
         Text = TextTheme.Default with { Colour = textColour },
     };
 }

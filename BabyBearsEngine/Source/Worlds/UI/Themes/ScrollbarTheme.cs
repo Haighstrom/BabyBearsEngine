@@ -30,14 +30,14 @@ public sealed record ScrollbarTheme
     /// <summary>Builds a theme with a solid-colour track and a solid-colour thumb (with synthesised hover / pressed tints).</summary>
     public static ScrollbarTheme FromColours(Colour track, Colour thumb) => new()
     {
-        TrackFactory = r => new ColouredRectangle(track, r.X, r.Y, r.W, r.H),
+        TrackFactory = r => new ColourGraphic(track, r.X, r.Y, r.W, r.H),
         Thumb = ButtonTheme.FromColour(thumb),
     };
 
     /// <summary>Builds a theme with a textured track and a textured thumb (with state colours applied as tints).</summary>
     public static ScrollbarTheme FromTextures(ITexture track, ITexture thumb) => new()
     {
-        TrackFactory = r => new Image(track, r.X, r.Y, r.W, r.H),
+        TrackFactory = r => new TextureGraphic(track, r.X, r.Y, r.W, r.H),
         Thumb = ButtonTheme.FromTexture(thumb),
     };
 }

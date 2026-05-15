@@ -55,7 +55,7 @@ public sealed record ButtonTheme
     public static readonly ButtonTheme Default = FromColour(s_defaultBaseColour);
 
     /// <summary>
-    /// Builds a theme whose background is a solid <see cref="ColouredRectangle"/> in
+    /// Builds a theme whose background is a solid <see cref="ColourGraphic"/> in
     /// <paramref name="baseColour"/>, with hover and pressed tints synthesised in whichever
     /// direction has headroom — light base colours darken on hover, dark ones lighten — and
     /// a disabled tint produced by fading the base colour's alpha.
@@ -73,12 +73,12 @@ public sealed record ButtonTheme
             Pressed = pressed,
             Disabled = new Colour(baseColour, 0.4f),
             Text = TextTheme.Default,
-            BackgroundFactory = r => new ColouredRectangle(baseColour, r.X, r.Y, r.W, r.H),
+            BackgroundFactory = r => new ColourGraphic(baseColour, r.X, r.Y, r.W, r.H),
         };
     }
 
     /// <summary>
-    /// Builds a theme whose background is an <see cref="Image"/> sampling
+    /// Builds a theme whose background is an <see cref="TextureGraphic"/> sampling
     /// <paramref name="texture"/>, with hover and pressed states applied as tint colours over
     /// the texture sample.
     /// </summary>
@@ -89,7 +89,7 @@ public sealed record ButtonTheme
         Pressed = new Colour(200, 200, 200),
         Disabled = new Colour(255, 255, 255, 128),
         Text = TextTheme.Default,
-        BackgroundFactory = r => new Image(texture, r.X, r.Y, r.W, r.H),
+        BackgroundFactory = r => new TextureGraphic(texture, r.X, r.Y, r.W, r.H),
     };
 
     /// <summary>

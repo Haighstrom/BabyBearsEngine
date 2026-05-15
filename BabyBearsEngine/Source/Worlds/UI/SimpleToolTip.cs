@@ -21,7 +21,7 @@ namespace BabyBearsEngine.Worlds.UI;
 public sealed class SimpleToolTip : Entity
 {
     private readonly IGraphic _background;
-    private readonly TextImage _text;
+    private readonly TextGraphic _text;
 
     /// <param name="x">Initial X position relative to the parent container.</param>
     /// <param name="y">Initial Y position relative to the parent container.</param>
@@ -37,7 +37,7 @@ public sealed class SimpleToolTip : Entity
         _background = theme.BackgroundFactory(new Rect(0, 0, width, height));
         Add(_background);
 
-        _text = new TextImage(theme.Text.Font, text, theme.Text.Colour, 0, 0, width, height)
+        _text = new TextGraphic(theme.Text.Font, text, theme.Text.Colour, 0, 0, width, height)
         {
             HAlignment = theme.Text.HAlignment,
             VAlignment = theme.Text.VAlignment,

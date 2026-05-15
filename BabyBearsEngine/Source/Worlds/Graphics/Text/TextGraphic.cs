@@ -7,7 +7,7 @@ using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 
-public sealed class TextImage : GraphicBase, IGraphic, IDisposable
+public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
 {
     private readonly StandardMatrixShaderProgram _shader = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
@@ -20,7 +20,7 @@ public sealed class TextImage : GraphicBase, IGraphic, IDisposable
     private float _extraSpaceWidth = 0;
     private float _extraLineSpacing = 0;
 
-    public TextImage(FontDefinition fontDef, string textToDisplay, Colour colour, float x, float y, float width, float height)
+    public TextGraphic(FontDefinition fontDef, string textToDisplay, Colour colour, float x, float y, float width, float height)
         : base(x, y, width, height)
     {
         _textToDisplay = textToDisplay;
@@ -172,7 +172,7 @@ public sealed class TextImage : GraphicBase, IGraphic, IDisposable
     }
 
     // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~Image()
+    // ~TextGraphic()
     // {
     //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
     //     Dispose(disposing: false);

@@ -43,7 +43,7 @@ public sealed record CheckboxTheme
     public static CheckboxTheme FromColours(Colour boxColour, Colour tickColour) => new()
     {
         Box = ButtonTheme.FromColour(boxColour),
-        TickFactory = r => new ColouredRectangle(
+        TickFactory = r => new ColourGraphic(
             tickColour,
             r.X + r.W * 0.2f,
             r.Y + r.H * 0.2f,
@@ -58,6 +58,6 @@ public sealed record CheckboxTheme
     public static CheckboxTheme FromTextures(ITexture boxTexture, ITexture tickTexture) => new()
     {
         Box = ButtonTheme.FromTexture(boxTexture),
-        TickFactory = r => new Image(tickTexture, r.X, r.Y, r.W, r.H),
+        TickFactory = r => new TextureGraphic(tickTexture, r.X, r.Y, r.W, r.H),
     };
 }

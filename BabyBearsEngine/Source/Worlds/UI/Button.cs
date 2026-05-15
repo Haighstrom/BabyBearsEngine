@@ -15,7 +15,7 @@ public class Button : Entity
     private readonly IGraphic _background;
     private bool _hovered = false;
     private bool _pressed = false;
-    private readonly TextImage _textImage;
+    private readonly TextGraphic _textImage;
     private readonly ButtonTheme _theme;
 
     /// <param name="x">X position relative to the parent container.</param>
@@ -33,7 +33,7 @@ public class Button : Entity
         _background.Colour = theme.Idle;
         Add(_background);
 
-        _textImage = new TextImage(theme.Text.Font, text, theme.Text.Colour, 0, 0, width, height)
+        _textImage = new TextGraphic(theme.Text.Font, text, theme.Text.Colour, 0, 0, width, height)
         {
             HAlignment = theme.Text.HAlignment,
             VAlignment = theme.Text.VAlignment,

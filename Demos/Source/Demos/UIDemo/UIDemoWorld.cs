@@ -47,14 +47,14 @@ internal class UIDemoWorld : DemoWorld
 
         Add(MakeLabel(LabelLeft, FirstRowY + 4 * RowHeight, 180, 50, "Scrollbar (H):"));
         Scrollbar hScrollbar = new(WidgetLeft, FirstRowY + 4 * RowHeight + 15, 300, 20, ScrollbarDirection.Horizontal, ScrollbarTheme.Default);
-        TextImage hScrollLabel = MakeLabel(WidgetLeft + 320, FirstRowY + 4 * RowHeight, 100, 50, FormatAmount(hScrollbar.AmountFilled));
+        TextGraphic hScrollLabel = MakeLabel(WidgetLeft + 320, FirstRowY + 4 * RowHeight, 100, 50, FormatAmount(hScrollbar.AmountFilled));
         hScrollbar.ScrollChanged += (_, e) => hScrollLabel.Text = FormatAmount(e.NewValue);
         Add(hScrollbar);
         Add(hScrollLabel);
 
         Add(MakeLabel(LabelLeft, FirstRowY + 5 * RowHeight, 180, 50, "Scrollbar (V):"));
         Scrollbar vScrollbar = new(WidgetLeft, FirstRowY + 5 * RowHeight, 20, 150, ScrollbarDirection.Vertical, ScrollbarTheme.Default);
-        TextImage vScrollLabel = MakeLabel(WidgetLeft + 40, FirstRowY + 5 * RowHeight, 100, 50, FormatAmount(vScrollbar.AmountFilled));
+        TextGraphic vScrollLabel = MakeLabel(WidgetLeft + 40, FirstRowY + 5 * RowHeight, 100, 50, FormatAmount(vScrollbar.AmountFilled));
         vScrollbar.ScrollChanged += (_, e) => vScrollLabel.Text = FormatAmount(e.NewValue);
         Add(vScrollbar);
         Add(vScrollLabel);
@@ -68,9 +68,9 @@ internal class UIDemoWorld : DemoWorld
         _progressBar.AmountFilled = (float)((Stopwatch.GetTimestamp() / (double)Stopwatch.Frequency % 5d) / 5d);
     }
 
-    private static TextImage MakeLabel(int x, int y, int width, int height, string text)
+    private static TextGraphic MakeLabel(int x, int y, int width, int height, string text)
     {
-        return new TextImage(new FontDefinition("Times New Roman", 18), text, Colour.Black, x, y, width, height)
+        return new TextGraphic(new FontDefinition("Times New Roman", 18), text, Colour.Black, x, y, width, height)
         {
             HAlignment = HAlignment.Left,
             VAlignment = VAlignment.Centred,

@@ -33,14 +33,14 @@ public sealed record ProgressBarTheme
     /// <summary>Builds a theme with solid-colour background and fill rectangles.</summary>
     public static ProgressBarTheme FromColours(Colour background, Colour fill) => new()
     {
-        BackgroundFactory = r => new ColouredRectangle(background, r.X, r.Y, r.W, r.H),
-        FillFactory = r => new ColouredRectangle(fill, r.X, r.Y, r.W, r.H),
+        BackgroundFactory = r => new ColourGraphic(background, r.X, r.Y, r.W, r.H),
+        FillFactory = r => new ColourGraphic(fill, r.X, r.Y, r.W, r.H),
     };
 
     /// <summary>Builds a theme with textured background and fill.</summary>
     public static ProgressBarTheme FromTextures(ITexture background, ITexture fill) => new()
     {
-        BackgroundFactory = r => new Image(background, r.X, r.Y, r.W, r.H),
-        FillFactory = r => new Image(fill, r.X, r.Y, r.W, r.H),
+        BackgroundFactory = r => new TextureGraphic(background, r.X, r.Y, r.W, r.H),
+        FillFactory = r => new TextureGraphic(fill, r.X, r.Y, r.W, r.H),
     };
 }

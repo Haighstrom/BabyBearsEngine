@@ -52,11 +52,11 @@ public class LayerRenderingTests
     /// <summary>
     /// An <see cref="IRenderable"/> that deliberately does NOT implement <see cref="ILayered"/>,
     /// used to verify the engine's "unlayered = treat as layer 0 (on top)" rule. Composes a
-    /// real <see cref="ColouredRectangle"/> internally so it actually paints.
+    /// real <see cref="ColourGraphic"/> internally so it actually paints.
     /// </summary>
     private sealed class UnlayeredRectangle(Colour colour, float x, float y, float w, float h) : AddableBase, IRenderable, IDisposable
     {
-        private readonly ColouredRectangle _inner = new(colour, x, y, w, h);
+        private readonly ColourGraphic _inner = new(colour, x, y, w, h);
 
         public bool Visible { get; set; } = true;
 
@@ -87,11 +87,11 @@ public class LayerRenderingTests
     }
 
     [TestMethod]
-    public void Smoke_SingleColouredRectangleDirectlyOnWorld_Renders()
+    public void Smoke_SingleColouredRectangleGraphicDirectlyOnWorld_Renders()
     {
         var world = new LayerCaptureWorld(w =>
         {
-            w.Add(new ColouredRectangle(Colour.Blue, 0, 0, WindowWidth, WindowHeight));
+            w.Add(new ColourGraphic(Colour.Blue, 0, 0, WindowWidth, WindowHeight));
         });
 
         GameLauncher.Run(SettingsWithCapture(), () => world);
@@ -108,10 +108,10 @@ public class LayerRenderingTests
         var world = new LayerCaptureWorld(w =>
         {
             var parent = new Entity(0, 0, WindowWidth, WindowHeight);
-            parent.Add(new ColouredRectangle(Colour.Red, 0, 0, WindowWidth, WindowHeight));
+            parent.Add(new ColourGraphic(Colour.Red, 0, 0, WindowWidth, WindowHeight));
 
             var child = new Entity(0, 0, WindowWidth, WindowHeight);
-            child.Add(new ColouredRectangle(Colour.Blue, 0, 0, WindowWidth, WindowHeight));
+            child.Add(new ColourGraphic(Colour.Blue, 0, 0, WindowWidth, WindowHeight));
             parent.Add(child);
 
             w.Add(parent);
@@ -129,11 +129,11 @@ public class LayerRenderingTests
         // added later, blue's lower layer wins.
         var world = new LayerCaptureWorld(w =>
         {
-            var blue = new ColouredRectangle(Colour.Blue, 0, 0, WindowWidth, WindowHeight)
+            var blue = new ColourGraphic(Colour.Blue, 0, 0, WindowWidth, WindowHeight)
             {
                 Layer = 0,
             };
-            var red = new ColouredRectangle(Colour.Red, 0, 0, WindowWidth, WindowHeight)
+            var red = new ColourGraphic(Colour.Red, 0, 0, WindowWidth, WindowHeight)
             {
                 Layer = 5,
             };
@@ -153,8 +153,8 @@ public class LayerRenderingTests
         // (deterministic add order within a layer).
         var world = new LayerCaptureWorld(w =>
         {
-            w.Add(new ColouredRectangle(Colour.Red, 0, 0, WindowWidth, WindowHeight));
-            w.Add(new ColouredRectangle(Colour.Blue, 0, 0, WindowWidth, WindowHeight));
+            w.Add(new ColourGraphic(Colour.Red, 0, 0, WindowWidth, WindowHeight));
+            w.Add(new ColourGraphic(Colour.Blue, 0, 0, WindowWidth, WindowHeight));
         });
 
         GameLauncher.Run(SettingsWithCapture(), () => world);
@@ -171,7 +171,7 @@ public class LayerRenderingTests
         var world = new LayerCaptureWorld(w =>
         {
             w.Add(new UnlayeredRectangle(Colour.Blue, 0, 0, WindowWidth, WindowHeight));
-            w.Add(new ColouredRectangle(Colour.Red, 0, 0, WindowWidth, WindowHeight)
+            w.Add(new ColourGraphic(Colour.Red, 0, 0, WindowWidth, WindowHeight)
             {
                 Layer = 5,
             });
@@ -190,8 +190,8 @@ public class LayerRenderingTests
         // of layer values or add order in the main container.
         var world = new LayerCaptureWorld(w =>
         {
-            w.Add(new ColouredRectangle(Colour.Red, 0, 0, WindowWidth, WindowHeight));
-            w.Overlay.Add(new ColouredRectangle(Colour.Blue, 0, 0, WindowWidth, WindowHeight));
+            w.Add(new ColourGraphic(Colour.Red, 0, 0, WindowWidth, WindowHeight));
+            w.Overlay.Add(new ColourGraphic(Colour.Blue, 0, 0, WindowWidth, WindowHeight));
         });
 
         GameLauncher.Run(SettingsWithCapture(), () => world);

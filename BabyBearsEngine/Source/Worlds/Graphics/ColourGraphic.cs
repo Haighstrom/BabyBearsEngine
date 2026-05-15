@@ -8,7 +8,7 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// must be created on the engine thread after the GL context exists. Implements <see cref="IDisposable"/>
 /// to release those resources.
 /// </summary>
-public sealed class ColouredRectangle : GraphicBase, IGraphic, IDisposable
+public sealed class ColourGraphic : GraphicBase, IGraphic, IDisposable
 {
     private readonly SolidColourShaderProgramMatrix _shader = SolidColourShaderProgramMatrix.Instance;
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
@@ -21,7 +21,7 @@ public sealed class ColouredRectangle : GraphicBase, IGraphic, IDisposable
     /// <param name="y">Y position in the parent's local space.</param>
     /// <param name="width">Width in pixels.</param>
     /// <param name="height">Height in pixels.</param>
-    public ColouredRectangle(Colour colour, float x, float y, float width, float height)
+    public ColourGraphic(Colour colour, float x, float y, float width, float height)
         : base(x, y, width, height)
     {
         _colour = colour;

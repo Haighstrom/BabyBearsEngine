@@ -8,7 +8,7 @@ internal class BearTarget : Entity
     private const double LifeSpan = 3.0;
     private const double FadeStartAt = 1.0;
 
-    private readonly Image _image;
+    private readonly TextureGraphic _image;
     private double _lifeRemaining = LifeSpan;
     private bool _done = false;
 
@@ -17,7 +17,7 @@ internal class BearTarget : Entity
 
     public BearTarget(int x, int y) : base(x, y, 60, 60, clickable: true)
     {
-        _image = new Image(Textures.CreateFromFile("Assets/SpinnableBear.png"), 0, 0, 60, 60)
+        _image = new TextureGraphic(Textures.CreateFromFile("Assets/SpinnableBear.png"), 0, 0, 60, 60)
         {
             Colour = ColourTools.RandSystemColour()
         };

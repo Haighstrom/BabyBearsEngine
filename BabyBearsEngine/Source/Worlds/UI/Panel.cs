@@ -8,6 +8,6 @@ public class Panel : Entity
     public Panel(float x, float y, float width, float height, Colour colour)
         : base(x, y, width, height)
     {
-        Add(new ColouredRectangle(colour, 0, 0, width, height));
+        Add(new ColourGraphic(colour, 0, 0, width, height));
     }
 }
