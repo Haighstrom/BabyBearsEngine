@@ -116,15 +116,24 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
                 break;
 
             case ClickState.MouseDownInside:
-                if (Mouse.LeftReleased)
+                if (!_mouseIsOver)
+                {
+                    // Exit takes priority: cancel the interaction even if release also occurs this frame.
+                    if (Mouse.LeftReleased)
+                    {
+                        _clickState = ClickState.None;
+                        MouseExited?.Invoke();
+                    }
+                    else
+                    {
+                        _clickState = ClickState.MouseDownOutside;
+                    }
+                }
+                else if (Mouse.LeftReleased)
                 {
                     _clickState = ClickState.MouseOver;
                     _hoverTimeElapsed = 0;
                     LeftReleased?.Invoke();
-                }
-                else if (!_mouseIsOver)
-                {
-                    _clickState = ClickState.MouseDownOutside;
                 }
                 break;
 
