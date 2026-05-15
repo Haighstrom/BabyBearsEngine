@@ -36,7 +36,7 @@ public abstract class AddableBase : IAddable
 
     /// <inheritdoc/>
     /// <exception cref="NullReferenceException">Thrown when this addable has no parent to remove from.</exception>
-    public void Remove()
+    public virtual void Remove()
     {
         Ensure.NotNull(_parent);
 
