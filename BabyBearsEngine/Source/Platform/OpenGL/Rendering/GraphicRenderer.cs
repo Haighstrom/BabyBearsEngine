@@ -7,12 +7,12 @@ namespace BabyBearsEngine.Platform.OpenGL.Rendering;
 
 internal class GraphicRenderer(ITexture texture) : IDisposable
 {
-    private static Vertex[] GetVertices(float w, float h, Color4 colour) =>
+    private static Vertex[] GetVertices(float w, float h, Color4 colour, float u1, float v1, float u2, float v2) =>
     [
-        new (0, 0, colour, 0, 0),
-        new (w, 0, colour, 1, 0),
-        new (0, h, colour, 0, 1),
-        new (w, h, colour, 1, 1),
+        new (0, 0, colour, u1, v1),
+        new (w, 0, colour, u2, v1),
+        new (0, h, colour, u1, v2),
+        new (w, h, colour, u2, v2),
     ];
 
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
@@ -20,9 +20,9 @@ internal class GraphicRenderer(ITexture texture) : IDisposable
 
     public StandardMatrixShaderProgram Shader { get; set; } = new();
 
-    public void UpdateVertices(float w, float h, Colour colour)
+    public void UpdateVertices(float w, float h, Colour colour, float u1 = 0, float v1 = 0, float u2 = 1, float v2 = 1)
     {
-        _vertexDataBuffer.SetNewVertices(GetVertices(w, h, colour.ToOpenTK()));
+        _vertexDataBuffer.SetNewVertices(GetVertices(w, h, colour.ToOpenTK(), u1, v1, u2, v2));
     }
 
     public void Render(ref Matrix3 projection, ref Matrix3 modelView)

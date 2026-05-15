@@ -1,12 +1,15 @@
-using BabyBearsEngine.Platform.ImageLoading;
+﻿using BabyBearsEngine.Platform.ImageLoading;
 
 namespace BabyBearsEngine.OpenGL;
 
 internal sealed class DefaultTextureFactory() : ITextureFactory
 {
+    public ISpriteTexture CreateSpriteTextureFromImageFile(string filePath, int columns, int rows)
+        => new SpriteTexture(CreateTextureFromImageFile(filePath), columns, rows);
+
     public ITexture CreateTextureFromImageFile(string filePath)
     {
-        var handle = GL.GenTexture();
+        int handle = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, handle);
 
         var imageData = ImageLoader.LoadAsRgba8(filePath);
@@ -42,7 +45,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
 
     public ITexture GenBorderedRectangle(int width, int height, int borderThickness, Colour fillColour, Colour borderColour)
     {
-        Colour[,] pixels = new Colour[width, height];
+        var pixels = new Colour[width, height];
 
         for (int x = 0; x < width; x++)
         {
