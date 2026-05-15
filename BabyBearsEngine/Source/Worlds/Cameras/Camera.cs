@@ -1,9 +1,10 @@
 ﻿using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Input;
 using BabyBearsEngine.Worlds.Cameras;
 
 namespace BabyBearsEngine.Worlds;
 
-public sealed class Camera : ContainerEntity
+public sealed class Camera : ContainerEntity, ICamera
 {
     private readonly CameraView _cameraView;
     private readonly CameraRenderer _renderer;
@@ -26,6 +27,15 @@ public sealed class Camera : ContainerEntity
     public Colour BackgroundColour { get; set; } = Colour.White;
 
     public float GameSpeed { get; set; } = 1;
+
+    public bool MouseIntersecting
+    {
+        get
+        {
+            var (wx, wy) = Parent?.GetWindowCoordinates(X, Y) ?? (X, Y);
+            return new Rect(wx, wy, Width, Height).Contains(Mouse.ClientX, Mouse.ClientY);
+        }
+    }
 
     public MsaaSamples MSAASamples { get; set; } = MsaaSamples.Disabled;
 
