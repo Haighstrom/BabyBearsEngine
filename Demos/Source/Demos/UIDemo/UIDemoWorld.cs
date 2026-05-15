@@ -13,6 +13,7 @@ internal class UIDemoWorld : DemoWorld
     private const int FirstRowY = 100;
 
     private readonly ProgressBar _progressBar;
+    private readonly TimedProgressBar _timedProgressBar;
 
     public override string Name => "UI Demo";
 
@@ -58,6 +59,12 @@ internal class UIDemoWorld : DemoWorld
         vScrollbar.ScrollChanged += (_, e) => vScrollLabel.Text = FormatAmount(e.NewValue);
         Add(vScrollbar);
         Add(vScrollLabel);
+
+        int timedBarY = FirstRowY + 5 * RowHeight + 170;
+        Add(MakeLabel(LabelLeft, timedBarY, 180, 50, "Timed bar (3 s):"));
+        _timedProgressBar = new TimedProgressBar(WidgetLeft, timedBarY + 10, 300, 30, ProgressBarTheme.Default, 3.0);
+        _timedProgressBar.BarFilled += (_, _) => _timedProgressBar.Restart();
+        Add(_timedProgressBar);
     }
 
     private static string FormatAmount(float amountFilled) => $"{amountFilled * 100:0}%";
