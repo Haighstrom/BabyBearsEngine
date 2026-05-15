@@ -11,6 +11,8 @@ public class Entity : ContainerEntity, IMouseInteractable
 {
     private const double HoverDelaySeconds = 0.5;
 
+    private readonly ClickController? _clickController = null;
+
     /// <param name="x">X position relative to parent.</param>
     /// <param name="y">Y position relative to parent.</param>
     /// <param name="width">Width in pixels.</param>
@@ -21,14 +23,30 @@ public class Entity : ContainerEntity, IMouseInteractable
     {
         if (clickable)
         {
-            var controller = new ClickController(this, HoverDelaySeconds);
-            controller.HoverCancelled += OnStopMouseHovered;
-            controller.Hovered += OnMouseHovered;
-            controller.LeftPressed += OnLeftPressed;
-            controller.LeftReleased += OnLeftReleased;
-            controller.MouseEntered += OnMouseEntered;
-            controller.MouseExited += OnMouseExited;
-            Add(controller);
+            _clickController = new(this, HoverDelaySeconds);
+            _clickController.HoverCancelled += OnStopMouseHovered;
+            _clickController.Hovered += OnMouseHovered;
+            _clickController.LeftPressed += OnLeftPressed;
+            _clickController.LeftReleased += OnLeftReleased;
+            _clickController.MouseEntered += OnMouseEntered;
+            _clickController.MouseExited += OnMouseExited;
+            Add(_clickController);
+        }
+    }
+
+    /// <summary>
+    /// When true, mouse-over state propagates through this entity to overlapping clickable
+    /// entities beneath it, rather than stopping here. Only meaningful when clickable.
+    /// </summary>
+    public bool PassOnMouse
+    {
+        get => _clickController?.PassOnMouse ?? false;
+        set
+        {
+            if (_clickController is not null)
+            {
+                _clickController.PassOnMouse = value;
+            }
         }
     }
 
