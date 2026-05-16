@@ -14,7 +14,7 @@ public class WaypointController(IWaypointable target) : UpdateableBase, IWaypoin
 
     public bool ReachedDestination => Waypoints.Count == 0;
 
-    public IList<IPosition> Waypoints { get; } = new List<IPosition>();
+    public IList<IPosition> Waypoints { get; } = [];
 
     public event EventHandler? Arrived;
 
