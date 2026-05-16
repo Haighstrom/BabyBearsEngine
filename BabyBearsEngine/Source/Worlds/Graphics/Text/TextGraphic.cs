@@ -22,6 +22,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
     private FontDefinition _fontDef;
     private string _textToDisplay;
     private Colour _colour;
+    private float _angle = 0f;
     private bool _multiline = false;
     private int _numCharsToDraw = int.MaxValue;
     private float _scaleX = 1f;
@@ -45,6 +46,13 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         _fontDef = fontDef;
         _fontStruct = atlas.FontStruct;
         _texture = atlas.Texture;
+    }
+
+    /// <inheritdoc/>
+    public float Angle
+    {
+        get => _angle;
+        set => _angle = value;
     }
 
     /// <inheritdoc/>
@@ -436,6 +444,11 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
 
         var mv = Matrix3.Translate(ref modelView, X, Y);
+
+        if (_angle != 0)
+        {
+            mv = Matrix3.RotateAroundPoint(ref mv, _angle, Width / 2, Height / 2);
+        }
 
         _shader.Bind();
         _vertexDataBuffer.Bind();

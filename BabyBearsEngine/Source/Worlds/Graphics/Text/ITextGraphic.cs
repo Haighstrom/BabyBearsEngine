@@ -7,6 +7,9 @@ namespace BabyBearsEngine.Worlds.Graphics.Text;
 
 public interface ITextGraphic : IRenderable
 {
+    /// <summary>Rotation angle in degrees, applied around the graphic's centre.</summary>
+    float Angle { get; set; }
+
     /// <summary>The colour used to tint rendered glyphs.</summary>
     Colour Colour { get; set; }
 
