@@ -44,7 +44,7 @@ internal static class TextLayout
 
         foreach (char c in line)
         {
-            width += fontStruct.CharPositions[c].Size.X * scaleX;
+            width += fontStruct.GetCharPosition(c).Size.X * scaleX;
             width += c == ' ' ? extraSpaceWidth : extraCharSpacing;
         }
 
@@ -57,7 +57,7 @@ internal static class TextLayout
         float scaleX,
         float extraSpaceWidth,
         float extraCharSpacing)
-        => fontStruct.CharPositions[c].Size.X * scaleX + (c == ' ' ? extraSpaceWidth : extraCharSpacing);
+        => fontStruct.GetCharPosition(c).Size.X * scaleX + (c == ' ' ? extraSpaceWidth : extraCharSpacing);
 
     private static void WrapSegment(
         string text,

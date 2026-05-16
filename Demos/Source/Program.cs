@@ -39,6 +39,7 @@ Func<World> getMenu = () => menuFactory();
     ("Shader Demo",       () => new ShaderDemoWorld(getMenu)),
     ("Stencil Demo",      () => new StencilDemoWorld(getMenu)),
     ("Text Demo",         () => new TextDemoWorld(getMenu)),
+    ("Text Demo 2",       () => new TextDemoWorld2(getMenu)),
     ("UI Demo",           () => new UIDemoWorld(getMenu)),
     ("UI Demo 2",         () => new UIDemoWorld2(getMenu)),
 ];

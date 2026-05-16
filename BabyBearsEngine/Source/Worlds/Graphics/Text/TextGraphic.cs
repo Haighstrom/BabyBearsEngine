@@ -11,9 +11,10 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
 {
     private readonly StandardMatrixShaderProgram _shader = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
-    private readonly ITexture _texture;
-    private readonly GeneratedFontStruct _fontStruct;
+    private ITexture _texture;
+    private GeneratedFontStruct _fontStruct;
     private bool _disposedValue;
+    private FontDefinition _fontDef;
     private string _textToDisplay;
     private Colour _colour;
     private bool _multiline = false;
@@ -28,6 +29,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         _colour = colour;
 
         CachedFontAtlas atlas = FontTextureCache.GetOrCreate(fontDef);
+        _fontDef = fontDef;
         _fontStruct = atlas.FontStruct;
         _texture = atlas.Texture;
     }
@@ -48,6 +50,19 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         set
         {
             _colour = value;
+            _verticesChanged = true;
+        }
+    }
+
+    public FontDefinition Font
+    {
+        get => _fontDef;
+        set
+        {
+            CachedFontAtlas atlas = FontTextureCache.GetOrCreate(value);
+            _fontDef = value;
+            _fontStruct = atlas.FontStruct;
+            _texture = atlas.Texture;
             _verticesChanged = true;
         }
     }
@@ -144,8 +159,8 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
 
             foreach (char c in line.Content)
             {
-                var source = _fontStruct.CharPositionsNormalised[c];
-                float w = _fontStruct.CharPositions[c].Size.X * ScaleX;
+                var source = _fontStruct.GetCharPositionNormalised(c);
+                float w = _fontStruct.GetCharPosition(c).Size.X * ScaleX;
 
                 vertices.Add(
                     GeometryHelper.QuadToTris(

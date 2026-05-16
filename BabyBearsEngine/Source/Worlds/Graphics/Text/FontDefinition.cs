@@ -6,7 +6,7 @@ namespace BabyBearsEngine.Worlds.Graphics.Text;
 public record class FontDefinition(string FontName, float FontSize, FontStyle FontStyle = FontStyle.Regular, bool AntiAliased = FontDefinition.AntiAliasedDefault, string ExtraCharactersToLoad = "", bool IncludeDefaultCharacters = true)
 {
     private const bool AntiAliasedDefault = false;
-    private const string DefaultCharsToLoad = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 !�$%^&*()-=_+[]{};'#:@~,./<>?|`���—\"\\";
+    private const string DefaultCharsToLoad = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 !£$%^&*()-=_+[]{};'#:@~,./<>?|`€—–…•←→↑↓‘’“”\"\\";
 
     private static string BuildCharactersToLoad(bool includeDefaultCharacters, string extraCharactersToLoad)
     {

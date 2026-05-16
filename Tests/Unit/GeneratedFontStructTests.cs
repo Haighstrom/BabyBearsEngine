@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Drawing;
 using BabyBearsEngine.Worlds.Graphics.Text;
 using OpenTK.Mathematics;
 
@@ -9,7 +8,7 @@ namespace BabyBearsEngine.Tests.Unit;
 public class GeneratedFontStructTests
 {
     private static GeneratedFontStruct MakeStruct(int highestChar, Dictionary<char, Box2i> charPositions) =>
-        new(new Bitmap(1, 1), 0, highestChar, charPositions, []);
+        new(null!, 0, highestChar, charPositions, []);
 
     private static Dictionary<char, Box2i> MakePositions(params (char c, int width)[] entries)
     {

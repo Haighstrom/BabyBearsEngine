@@ -7,6 +7,8 @@ public interface ITextGraphic : IRenderable
 {
     Colour Colour { get; set; }
 
+    FontDefinition Font { get; set; }
+
     bool Multiline { get; set; }
 
     string Text { get; set; }
