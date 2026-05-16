@@ -15,10 +15,10 @@ public interface ISpriteTexture : ITexture
     /// <summary>Total frames (<see cref="Columns"/> × <see cref="Rows"/>).</summary>
     int Frames { get; }
 
-    /// <summary>Normalised UV width of one frame (1 / <see cref="Columns"/>).</summary>
+    /// <summary>Normalised UV width of one frame, accounting for any padding between frames.</summary>
     float FrameU { get; }
 
-    /// <summary>Normalised UV height of one frame (1 / <see cref="Rows"/>).</summary>
+    /// <summary>Normalised UV height of one frame, accounting for any padding between frames.</summary>
     float FrameV { get; }
 
     /// <summary>

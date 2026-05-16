@@ -1,51 +1,52 @@
-﻿using BabyBearsEngine.Platform.ImageLoading;
+using BabyBearsEngine.Platform.ImageLoading;
 
 namespace BabyBearsEngine.OpenGL;
 
 internal sealed class DefaultTextureFactory() : ITextureFactory
 {
+    private const int SpritePadding = 2;
+
     public ISpriteTexture CreateSpriteTextureFromImageFile(string filePath, int columns, int rows)
-        => new SpriteTexture(CreateTextureFromImageFile(filePath), columns, rows);
+    {
+        int handle = GL.GenTexture();
+        GL.BindTexture(TextureTarget.Texture2D, handle);
+
+        Rgba8ImageData orig = ImageLoader.LoadAsRgba8(filePath);
+        Rgba8ImageData padded = CreatePaddedSpriteSheet(orig, columns, rows, SpritePadding);
+
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, padded.Width, padded.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, padded.Data);
+
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+
+        Texture texture = new(handle, padded.Width, padded.Height);
+        return new SpriteTexture(texture, columns, rows, SpritePadding);
+    }
 
     public ITexture CreateTextureFromImageFile(string filePath)
     {
         int handle = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, handle);
 
-        var imageData = ImageLoader.LoadAsRgba8(filePath);
+        Rgba8ImageData imageData = ImageLoader.LoadAsRgba8(filePath);
 
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, imageData.Width, imageData.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, imageData.Data);
 
-        // First, we set the min and mag filter. These are used for when the texture is scaled down and up, respectively.
-        // Here, we use Linear for both. This means that OpenGL will try to blend pixels, meaning that textures scaled too far will look blurred.
-        // You could also use (amongst other options) Nearest, which just grabs the nearest pixel, which makes the texture look pixelated if scaled too far.
-        // NOTE: The default settings for both of these are LinearMipmap. If you leave these as default but don't generate mipmaps,
-        // your image will fail to render at all (usually resulting in pure black instead).
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
-        // Now, set the wrapping mode. S is for the X axis, and T is for the Y axis.
-        // We set this to Repeat so that textures will repeat when wrapped. Not demonstrated here since the texture coordinates exactly match
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-
-        // Next, generate mipmaps.
-        // Mipmaps are smaller copies of the texture, scaled down. Each mipmap level is half the size of the previous one
-        // Generated mipmaps go all the way down to just one pixel.
-        // OpenGL will automatically switch between mipmaps when an object gets sufficiently far away.
-        // This prevents moir� effects, as well as saving on texture bandwidth.
-        // Here you can see and read about the mori� effect https://en.wikipedia.org/wiki/Moir%C3%A9_pattern
-        // Here is an example of mips in action https://en.wikipedia.org/wiki/File:Mipmap_Aliasing_Comparison.png
         GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
-        var texture = new Texture(handle, imageData.Width, imageData.Height);
-
-        return texture;
+        return new Texture(handle, imageData.Width, imageData.Height);
     }
 
     public ITexture GenBorderedRectangle(int width, int height, int borderThickness, Colour fillColour, Colour borderColour)
     {
-        var pixels = new Colour[width, height];
+        Colour[,] pixels = new Colour[width, height];
 
         for (int x = 0; x < width; x++)
         {
@@ -62,19 +63,21 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
-    public ITexture GenTexture(System.Drawing.Bitmap bmp)//, TEXPARAMETER_VALUE minMagFilter = TEXPARAMETER_VALUE.GL_NEAREST)
+    public ITexture GenTexture(System.Drawing.Bitmap bmp)
     {
         bmp = BitmapTools.PremultiplyAlpha(bmp);
 
         Texture t = new(
-            handle: GL.GenTexture(), 
-            width: bmp.Width, 
+            handle: GL.GenTexture(),
+            width: bmp.Width,
             height: bmp.Height);
 
         GL.BindTexture(TextureTarget.Texture2D, t.Handle);
 
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
         var bmpd = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
@@ -116,5 +119,60 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
 
         bmp.UnlockBits(bmpd);
         return GenTexture(bmp);
+    }
+
+    private static Rgba8ImageData CreatePaddedSpriteSheet(Rgba8ImageData orig, int columns, int rows, int padding)
+    {
+        int frameW = orig.Width / columns;
+        int frameH = orig.Height / rows;
+        int newW = orig.Width + (columns + 1) * padding;
+        int newH = orig.Height + (rows + 1) * padding;
+        byte[] newData = new byte[newW * newH * 4]; // all zeros = transparent
+
+        for (int col = 0; col < columns; col++)
+        {
+            for (int row = 0; row < rows; row++)
+            {
+                int srcX = col * frameW;
+                int srcY = row * frameH;
+                int dstX = padding + col * (frameW + padding);
+                int dstY = padding + row * (frameH + padding);
+
+                for (int y = 0; y < frameH; y++)
+                {
+                    for (int x = 0; x < frameW; x++)
+                    {
+                        CopyPixel(orig.Data, orig.Width, srcX + x, srcY + y, newData, newW, dstX + x, dstY + y);
+                    }
+                }
+
+                // Mirror the outermost pixel row/column of each frame into the adjacent padding pixel.
+                // This prevents a dark or transparent fringe at frame edges when GL_LINEAR filtering blends
+                // into the padding region; any sample that overshoots by <1 texel gets the correct colour.
+                for (int y = 0; y < frameH; y++)
+                {
+                    CopyPixel(orig.Data, orig.Width, srcX, srcY + y, newData, newW, dstX - 1, dstY + y);
+                    CopyPixel(orig.Data, orig.Width, srcX + frameW - 1, srcY + y, newData, newW, dstX + frameW, dstY + y);
+                }
+
+                for (int x = 0; x < frameW; x++)
+                {
+                    CopyPixel(orig.Data, orig.Width, srcX + x, srcY, newData, newW, dstX + x, dstY - 1);
+                    CopyPixel(orig.Data, orig.Width, srcX + x, srcY + frameH - 1, newData, newW, dstX + x, dstY + frameH);
+                }
+            }
+        }
+
+        return new Rgba8ImageData(newW, newH, newData);
+    }
+
+    private static void CopyPixel(byte[] src, int srcW, int srcX, int srcY, byte[] dst, int dstW, int dstX, int dstY)
+    {
+        int srcOff = (srcY * srcW + srcX) * 4;
+        int dstOff = (dstY * dstW + dstX) * 4;
+        dst[dstOff] = src[srcOff];
+        dst[dstOff + 1] = src[srcOff + 1];
+        dst[dstOff + 2] = src[srcOff + 2];
+        dst[dstOff + 3] = src[srcOff + 3];
     }
 }

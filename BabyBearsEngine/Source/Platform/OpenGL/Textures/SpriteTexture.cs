@@ -1,7 +1,10 @@
 namespace BabyBearsEngine.OpenGL;
 
-internal sealed class SpriteTexture(ITexture inner, int columns, int rows) : ISpriteTexture
+internal sealed class SpriteTexture(ITexture inner, int columns, int rows, int padding) : ISpriteTexture
 {
+    private readonly float _paddingU = (float)padding / inner.Width;
+    private readonly float _paddingV = (float)padding / inner.Height;
+
     public int Handle => inner.Handle;
 
     public int Width => inner.Width;
@@ -14,16 +17,16 @@ internal sealed class SpriteTexture(ITexture inner, int columns, int rows) : ISp
 
     public int Frames => Columns * Rows;
 
-    public float FrameU => 1f / Columns;
+    public float FrameU => (1f - (Columns + 1) * _paddingU) / Columns;
 
-    public float FrameV => 1f / Rows;
+    public float FrameV => (1f - (Rows + 1) * _paddingV) / Rows;
 
     public (float U1, float V1, float U2, float V2) GetFrameUVs(int frame)
     {
         int col = frame % Columns;
         int row = frame / Columns;
-        float u1 = col * FrameU;
-        float v1 = row * FrameV;
+        float u1 = _paddingU + col * (FrameU + _paddingU);
+        float v1 = _paddingV + row * (FrameV + _paddingV);
         return (u1, v1, u1 + FrameU, v1 + FrameV);
     }
 
