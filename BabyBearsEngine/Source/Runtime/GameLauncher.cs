@@ -48,6 +48,11 @@ public static class GameLauncher
 
             engine.Run(worldFactory());
         }
+        catch (Exception ex)
+        {
+            Logger.Fatal("Unhandled exception in engine loop.", ex);
+            throw;
+        }
         finally
         {
             // Drop cached shader-program singletons so the next Run gets fresh GL handles in

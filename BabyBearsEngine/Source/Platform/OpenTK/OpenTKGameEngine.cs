@@ -83,6 +83,12 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
 
         GPUResourceDeletion.ProcessDeletes();
 
+        ErrorCode glError = GL.GetError();
+        if (glError != ErrorCode.NoError)
+        {
+            throw new InvalidOperationException($"OpenGL error after frame render: {glError}");
+        }
+
         if (appSettings.DiagnosticsSettings.CaptureFrames)
         {
             EngineConfiguration.ScreenCaptureService.CaptureCurrentBackbuffer();
