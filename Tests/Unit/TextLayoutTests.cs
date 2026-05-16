@@ -239,6 +239,34 @@ public class TextLayoutTests
         Assert.AreEqual("cd", lines[1].Content);
     }
 
+    // ComputeLines — rendered char count
+
+    [TestMethod]
+    public void ComputeLines_WordWrap_BreakSpaceNotCountedInRenderedChars()
+    {
+        // "hello world" wraps at the space; the space becomes the break and is not in either line
+        GeneratedFontStruct fs = MakeFontStruct("hello world");
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("hello world", fs, 55f, 1f, 0f, 0f);
+
+        int totalRendered = 0;
+        foreach (LineInfo line in lines) totalRendered += line.Content.Length;
+
+        Assert.AreEqual(10, totalRendered); // "hello"(5) + "world"(5), space excluded
+    }
+
+    [TestMethod]
+    public void ComputeLines_ExplicitNewline_NewlineNotCountedInRenderedChars()
+    {
+        // "hello\nworld": newline is a separator, not rendered
+        GeneratedFontStruct fs = MakeFontStruct("hello world");
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("hello\nworld", fs, 1000f, 1f, 0f, 0f);
+
+        int totalRendered = 0;
+        foreach (LineInfo line in lines) totalRendered += line.Content.Length;
+
+        Assert.AreEqual(10, totalRendered); // "hello"(5) + "world"(5), newline excluded
+    }
+
     // MeasureLine
 
     [TestMethod]

@@ -13,9 +13,13 @@ public interface ITextGraphic : IRenderable
 
     float ExtraSpaceWidth { get; set; }
 
+    int FirstCharToDraw { get; set; }
+
     FontDefinition Font { get; set; }
 
     bool Multiline { get; set; }
+
+    int NumCharsToDraw { get; set; }
 
     TextDecoration? Strikethrough { get; set; }
 

@@ -20,12 +20,14 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
     private string _textToDisplay;
     private Colour _colour;
     private bool _multiline = false;
+    private int _numCharsToDraw = int.MaxValue;
     private TextDecoration? _strikethrough = null;
     private TextDecoration? _underline = null;
     private bool _verticesChanged = true;
     private float _extraCharSpacing = 0f;
     private float _extraLineSpacing = 0f;
     private float _extraSpaceWidth = 0f;
+    private int _firstCharToDraw = 0;
 
     public TextGraphic(FontDefinition fontDef, string textToDisplay, Colour colour, float x, float y, float width, float height)
         : base(x, y, width, height)
@@ -89,6 +91,16 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
     }
 
+    public int FirstCharToDraw
+    {
+        get => _firstCharToDraw;
+        set
+        {
+            _firstCharToDraw = value;
+            _verticesChanged = true;
+        }
+    }
+
     public FontDefinition Font
     {
         get => _fontDef;
@@ -108,6 +120,16 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         set
         {
             _multiline = value;
+            _verticesChanged = true;
+        }
+    }
+
+    public int NumCharsToDraw
+    {
+        get => _numCharsToDraw;
+        set
+        {
+            _numCharsToDraw = value;
             _verticesChanged = true;
         }
     }
@@ -202,6 +224,9 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
             _ => throw new Exception($"TextGraphic/SetVerticesSimple: VAlignment {VAlignment} was not catered for."),
         });
 
+        int globalCharIndex = 0;
+        long visibleEnd = (long)_firstCharToDraw + _numCharsToDraw;
+
         foreach (LineInfo line in lines)
         {
             float lineWidth = TextLayout.MeasureLine(line.Content, _fontStruct, ScaleX, _extraSpaceWidth, _extraCharSpacing);
@@ -214,42 +239,51 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
                 _ => throw new Exception($"TextGraphic/SetVerticesSimple: HAlignment {HAlignment} was not catered for."),
             });
 
-            float xStart = x;
+            float? decXStart = null;
+            float decXEnd = 0f;
 
             foreach (char c in line.Content)
             {
                 var source = _fontStruct.GetCharPositionNormalised(c);
                 float w = _fontStruct.GetCharPosition(c).Size.X * ScaleX;
+                float advance = w + (c == ' ' ? _extraSpaceWidth : _extraCharSpacing);
 
-                vertices.Add(
-                    GeometryHelper.QuadToTris(
-                        new Vertex(x,     y,              colorTK, source.Min.X, source.Min.Y),
-                        new Vertex(x + w, y,              colorTK, source.Max.X, source.Min.Y),
-                        new Vertex(x,     y + lineHeight, colorTK, source.Min.X, source.Max.Y),
-                        new Vertex(x + w, y + lineHeight, colorTK, source.Max.X, source.Max.Y)
-                    ));
-
-                x += w;
-
-                if (c == ' ')
+                if (globalCharIndex >= _firstCharToDraw && globalCharIndex < visibleEnd)
                 {
-                    x += _extraSpaceWidth;
+                    if (!decXStart.HasValue)
+                    {
+                        decXStart = x;
+                    }
+
+                    decXEnd = x + advance;
+
+                    vertices.Add(
+                        GeometryHelper.QuadToTris(
+                            new Vertex(x,     y,              colorTK, source.Min.X, source.Min.Y),
+                            new Vertex(x + w, y,              colorTK, source.Max.X, source.Min.Y),
+                            new Vertex(x,     y + lineHeight, colorTK, source.Min.X, source.Max.Y),
+                            new Vertex(x + w, y + lineHeight, colorTK, source.Max.X, source.Max.Y)
+                        ));
                 }
-                else
-                {
-                    x += _extraCharSpacing;
-                }
+
+                x += advance;
+                globalCharIndex++;
             }
 
-            if (_underline is TextDecoration ul)
+            if (decXStart.HasValue)
             {
-                decorationVertices.Add(DecorationQuad(xStart, y + lineHeight, lineWidth, ul.Thickness, ul.Colour.ToOpenTK()));
-            }
+                float decWidth = decXEnd - decXStart.Value;
 
-            if (_strikethrough is TextDecoration st)
-            {
-                float stY = y + (lineHeight - st.Thickness) / 2f;
-                decorationVertices.Add(DecorationQuad(xStart, stY, lineWidth, st.Thickness, st.Colour.ToOpenTK()));
+                if (_underline is TextDecoration ul)
+                {
+                    decorationVertices.Add(DecorationQuad(decXStart.Value, y + lineHeight, decWidth, ul.Thickness, ul.Colour.ToOpenTK()));
+                }
+
+                if (_strikethrough is TextDecoration st)
+                {
+                    float stY = y + (lineHeight - st.Thickness) / 2f;
+                    decorationVertices.Add(DecorationQuad(decXStart.Value, stY, decWidth, st.Thickness, st.Colour.ToOpenTK()));
+                }
             }
 
             y += lineHeight + _extraLineSpacing;
