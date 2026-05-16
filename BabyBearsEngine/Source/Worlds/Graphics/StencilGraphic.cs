@@ -10,7 +10,16 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// alpha, producing soft edges when the stencil has intermediate alpha values.
 /// </summary>
 /// <param name="imageTexture">The texture to display. Not owned; not disposed with this graphic.</param>
-/// <param name="stencilTexture">The mask texture — only its alpha channel is used. Not owned.</param>
+/// <param name="stencilTexture">
+/// The mask texture. The effective mask value is <c>alpha × red</c>, so two conventions are
+/// supported: a PNG with transparency (alpha channel drives the mask, red is irrelevant where
+/// alpha = 0), or a lossless black-and-white image (red channel drives the mask, alpha = 1
+/// everywhere). Either way, white/opaque = show, black/transparent = discard.
+/// Prefer lossless formats (PNG) — lossy formats (JPEG) introduce compression artefacts in
+/// regions that should be fully masked. If you must use a lossy source, set
+/// <see cref="Threshold"/> to a value such as 0.5 to discard the artefacts.
+/// Not owned; not disposed with this graphic.
+/// </param>
 /// <param name="x">X position in the parent's local space.</param>
 /// <param name="y">Y position in the parent's local space.</param>
 /// <param name="width">Width in pixels.</param>
