@@ -29,6 +29,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
     private float _scaleY = 1f;
     private TextDecoration? _strikethrough = null;
     private TextDecoration? _underline = null;
+    private bool _useInlineTags = true;
     private bool _verticesChanged = true;
     private bool _wasTruncated = false;
     private float _extraCharSpacing = 0f;
@@ -179,6 +180,17 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
     }
 
+    /// <inheritdoc/>
+    public bool UseInlineTags
+    {
+        get => _useInlineTags;
+        set
+        {
+            _useInlineTags = value;
+            _verticesChanged = true;
+        }
+    }
+
     private VertexNoTexture[] DecorationVertices { get; set; } = [];
     private Vertex[] Vertices { get; set; } = [];
 
@@ -222,12 +234,13 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
             return MeasureString(_textToDisplay);
         }
 
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(_textToDisplay, _fontStruct, Width, ScaleX, _extraSpaceWidth, _extraCharSpacing);
+        StyledChar[] chars = InlineTagParser.Parse(_textToDisplay, _useInlineTags);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(chars, _fontStruct, Width, ScaleX, _extraSpaceWidth, _extraCharSpacing);
         float maxLineWidth = 0f;
 
         foreach (LineInfo line in lines)
         {
-            float lw = TextLayout.MeasureLine(line.Content, _fontStruct, ScaleX, _extraSpaceWidth, _extraCharSpacing);
+            float lw = TextLayout.MeasureLine(line.Chars, _fontStruct, ScaleX, _extraSpaceWidth, _extraCharSpacing);
             if (lw > maxLineWidth)
             {
                 maxLineWidth = lw;
@@ -245,12 +258,14 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
 
     private IReadOnlyList<LineInfo> GetLines()
     {
+        StyledChar[] chars = InlineTagParser.Parse(_textToDisplay, _useInlineTags);
+
         if (_multiline)
         {
-            return TextLayout.ComputeLines(_textToDisplay, _fontStruct, Width, ScaleX, _extraSpaceWidth, _extraCharSpacing);
+            return TextLayout.ComputeLines(chars, _fontStruct, Width, ScaleX, _extraSpaceWidth, _extraCharSpacing);
         }
 
-        return [new LineInfo(_textToDisplay, 0, _textToDisplay.Length)];
+        return [new LineInfo(chars, 0, chars.Length)];
     }
 
     /// <inheritdoc/>
@@ -300,7 +315,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
                 break;
             }
 
-            float lineWidth = TextLayout.MeasureLine(line.Content, _fontStruct, ScaleX, _extraSpaceWidth, _extraCharSpacing);
+            float lineWidth = TextLayout.MeasureLine(line.Chars, _fontStruct, ScaleX, _extraSpaceWidth, _extraCharSpacing);
 
             float charLeft = MathF.Round(HAlignment switch
             {
@@ -310,18 +325,31 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
                 _ => throw new Exception($"TextGraphic/SetVerticesSimple: HAlignment {HAlignment} was not catered for."),
             });
 
-            // Track the x-span of rendered characters on this line for decoration quads.
+            // Track the x-span of rendered characters on this line for whole-graphic decoration quads.
             float? decorationLeft = null;
             float decorationRight = 0f;
 
-            foreach (char c in line.Content)
+            // Track inline decoration spans (only used when the corresponding whole-graphic decoration is absent).
+            float? inlineUlLeft = null;
+            float inlineUlRight = 0f;
+            OpenTK.Mathematics.Color4 inlineUlColour = default;
+            float? inlineStLeft = null;
+            float inlineStRight = 0f;
+            OpenTK.Mathematics.Color4 inlineStColour = default;
+
+            foreach (StyledChar sc in line.Chars)
             {
+                char c = sc.Char;
                 var atlasUV = _fontStruct.GetCharPositionNormalised(c);
                 float glyphWidth = _fontStruct.GetCharPosition(c).Size.X * ScaleX;
                 float charAdvance = glyphWidth + (c == ' ' ? _extraSpaceWidth : _extraCharSpacing);
 
                 if (globalCharIndex >= _firstCharToDraw && globalCharIndex < visibleEnd)
                 {
+                    var charGlColour = sc.Style.ColourOverride.HasValue
+                        ? sc.Style.ColourOverride.Value.ToOpenTK()
+                        : glColour;
+
                     float quadLeft   = charLeft;
                     float quadTop    = lineTop;
                     float quadRight  = charLeft + glyphWidth;
@@ -365,20 +393,83 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
                         decorationRight = MathF.Min(charLeft + charAdvance, Width);
 
                         vertices.Add(GeometryHelper.QuadToTris(
-                            new Vertex(quadLeft,  quadTop,    glColour, uvLeft,  uvTop),
-                            new Vertex(quadRight, quadTop,    glColour, uvRight, uvTop),
-                            new Vertex(quadLeft,  quadBottom, glColour, uvLeft,  uvBottom),
-                            new Vertex(quadRight, quadBottom, glColour, uvRight, uvBottom)
+                            new Vertex(quadLeft,  quadTop,    charGlColour, uvLeft,  uvTop),
+                            new Vertex(quadRight, quadTop,    charGlColour, uvRight, uvTop),
+                            new Vertex(quadLeft,  quadBottom, charGlColour, uvLeft,  uvBottom),
+                            new Vertex(quadRight, quadBottom, charGlColour, uvRight, uvBottom)
                         ));
+
+                        // Extend inline underline span when no whole-graphic underline covers it.
+                        if (!_underline.HasValue && sc.Style.Underline)
+                        {
+                            if (!inlineUlLeft.HasValue)
+                            {
+                                inlineUlLeft = quadLeft;
+                                inlineUlColour = charGlColour;
+                            }
+
+                            inlineUlRight = MathF.Min(charLeft + charAdvance, Width);
+                        }
+
+                        // Extend inline strikethrough span when no whole-graphic strikethrough covers it.
+                        if (!_strikethrough.HasValue && sc.Style.Strikethrough)
+                        {
+                            if (!inlineStLeft.HasValue)
+                            {
+                                inlineStLeft = quadLeft;
+                                inlineStColour = charGlColour;
+                            }
+
+                            inlineStRight = MathF.Min(charLeft + charAdvance, Width);
+                        }
                     }
                     else if (glyphWidth > 0) // zero-width glyphs (pure spacing) don't count as truncation
                     {
                         truncated = true;
                     }
+
+                    // Close any inline decoration span when the style no longer requires it.
+                    if (!_underline.HasValue && !sc.Style.Underline && inlineUlLeft.HasValue)
+                    {
+                        EmitInlineUnderline(inlineUlLeft.Value, inlineUlRight, lineTop, lineHeight, inlineUlColour, decorationVertices);
+                        inlineUlLeft = null;
+                    }
+
+                    if (!_strikethrough.HasValue && !sc.Style.Strikethrough && inlineStLeft.HasValue)
+                    {
+                        EmitInlineStrikethrough(inlineStLeft.Value, inlineStRight, lineTop, lineHeight, inlineStColour, decorationVertices);
+                        inlineStLeft = null;
+                    }
+                }
+                else
+                {
+                    // Character is outside the visible range — close any open inline spans.
+                    if (inlineUlLeft.HasValue)
+                    {
+                        EmitInlineUnderline(inlineUlLeft.Value, inlineUlRight, lineTop, lineHeight, inlineUlColour, decorationVertices);
+                        inlineUlLeft = null;
+                    }
+
+                    if (inlineStLeft.HasValue)
+                    {
+                        EmitInlineStrikethrough(inlineStLeft.Value, inlineStRight, lineTop, lineHeight, inlineStColour, decorationVertices);
+                        inlineStLeft = null;
+                    }
                 }
 
                 charLeft += charAdvance;
                 globalCharIndex++;
+            }
+
+            // Close any inline decoration spans that were still open at end of line.
+            if (inlineUlLeft.HasValue)
+            {
+                EmitInlineUnderline(inlineUlLeft.Value, inlineUlRight, lineTop, lineHeight, inlineUlColour, decorationVertices);
+            }
+
+            if (inlineStLeft.HasValue)
+            {
+                EmitInlineStrikethrough(inlineStLeft.Value, inlineStRight, lineTop, lineHeight, inlineStColour, decorationVertices);
             }
 
             if (decorationLeft.HasValue)
@@ -418,6 +509,30 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
             Logger.Warning($"TextGraphic text is truncated ({Width}x{Height}px): \"{preview}\"");
         }
         _wasTruncated = truncated;
+    }
+
+    private void EmitInlineStrikethrough(float left, float right, float lineTop, float lineHeight, OpenTK.Mathematics.Color4 colour, List<VertexNoTexture> decorationVertices)
+    {
+        const float thickness = 1f;
+        float stTop    = lineTop + (lineHeight - thickness) / 2f;
+        float stBottom = stTop + thickness;
+
+        if (stTop < Height && stBottom > 0)
+        {
+            decorationVertices.Add(DecorationQuad(left, MathF.Max(stTop, 0f), right - left, MathF.Min(stBottom, Height) - MathF.Max(stTop, 0f), colour));
+        }
+    }
+
+    private void EmitInlineUnderline(float left, float right, float lineTop, float lineHeight, OpenTK.Mathematics.Color4 colour, List<VertexNoTexture> decorationVertices)
+    {
+        const float thickness = 1f;
+        float ulTop    = lineTop + lineHeight;
+        float ulBottom = ulTop + thickness;
+
+        if (ulTop < Height && ulBottom > 0)
+        {
+            decorationVertices.Add(DecorationQuad(left, MathF.Max(ulTop, 0f), right - left, MathF.Min(ulBottom, Height) - MathF.Max(ulTop, 0f), colour));
+        }
     }
 
     private static VertexNoTexture[] DecorationQuad(float x, float y, float width, float height, OpenTK.Mathematics.Color4 colour)

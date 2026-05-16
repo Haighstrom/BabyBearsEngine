@@ -5,7 +5,7 @@ namespace BabyBearsEngine.Worlds.Graphics.Text;
 internal static class TextLayout
 {
     public static IReadOnlyList<LineInfo> ComputeLines(
-        string text,
+        StyledChar[] chars,
         GeneratedFontStruct fontStruct,
         float maxWidth,
         float scaleX,
@@ -17,10 +17,10 @@ internal static class TextLayout
 
         while (true)
         {
-            int newlineIdx = text.IndexOf('\n', segStart);
-            int segEnd = newlineIdx >= 0 ? newlineIdx : text.Length;
+            int newlineIdx = FindNewline(chars, segStart);
+            int segEnd = newlineIdx >= 0 ? newlineIdx : chars.Length;
 
-            WrapSegment(text, segStart, segEnd, fontStruct, maxWidth, scaleX, extraSpaceWidth, extraCharSpacing, lines);
+            WrapSegment(chars, segStart, segEnd, fontStruct, maxWidth, scaleX, extraSpaceWidth, extraCharSpacing, lines);
 
             if (newlineIdx < 0)
             {
@@ -31,6 +31,25 @@ internal static class TextLayout
         }
 
         return lines;
+    }
+
+    public static float MeasureLine(
+        StyledChar[] chars,
+        GeneratedFontStruct fontStruct,
+        float scaleX,
+        float extraSpaceWidth,
+        float extraCharSpacing)
+    {
+        float width = 0f;
+
+        foreach (StyledChar sc in chars)
+        {
+            char c = sc.Char;
+            width += fontStruct.GetCharPosition(c).Size.X * scaleX;
+            width += c == ' ' ? extraSpaceWidth : extraCharSpacing;
+        }
+
+        return width;
     }
 
     public static float MeasureLine(
@@ -51,6 +70,19 @@ internal static class TextLayout
         return width;
     }
 
+    private static int FindNewline(StyledChar[] chars, int from)
+    {
+        for (int i = from; i < chars.Length; i++)
+        {
+            if (chars[i].Char == '\n')
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     private static float CharWidth(
         char c,
         GeneratedFontStruct fontStruct,
@@ -60,7 +92,7 @@ internal static class TextLayout
         => fontStruct.GetCharPosition(c).Size.X * scaleX + (c == ' ' ? extraSpaceWidth : extraCharSpacing);
 
     private static void WrapSegment(
-        string text,
+        StyledChar[] chars,
         int segStart,
         int segEnd,
         GeneratedFontStruct fontStruct,
@@ -72,7 +104,7 @@ internal static class TextLayout
     {
         if (segStart == segEnd)
         {
-            output.Add(new LineInfo("", segStart, segEnd));
+            output.Add(new LineInfo([], segStart, segEnd));
             return;
         }
 
@@ -86,7 +118,8 @@ internal static class TextLayout
 
             while (i < segEnd)
             {
-                float cw = CharWidth(text[i], fontStruct, scaleX, extraSpaceWidth, extraCharSpacing);
+                char c = chars[i].Char;
+                float cw = CharWidth(c, fontStruct, scaleX, extraSpaceWidth, extraCharSpacing);
 
                 if (lineWidth + cw > maxWidth && i > lineStart)
                 {
@@ -95,7 +128,7 @@ internal static class TextLayout
 
                 lineWidth += cw;
 
-                if (text[i] == ' ')
+                if (c == ' ')
                 {
                     lastSpaceIdx = i;
                 }
@@ -105,7 +138,7 @@ internal static class TextLayout
 
             if (i == segEnd)
             {
-                output.Add(new LineInfo(text[lineStart..segEnd], lineStart, segEnd));
+                output.Add(new LineInfo(chars[lineStart..segEnd], lineStart, segEnd));
                 break;
             }
 
@@ -117,20 +150,18 @@ internal static class TextLayout
                 breakAt = lastSpaceIdx;
                 nextLineStart = lastSpaceIdx + 1;
             }
-            else if (text[i] == ' ')
+            else if (chars[i].Char == ' ')
             {
-                // The overflowing character is a space — consume it as the break
                 breakAt = i;
                 nextLineStart = i + 1;
             }
             else
             {
-                // Character wrap — no space found before overflow
                 breakAt = i;
                 nextLineStart = i;
             }
 
-            output.Add(new LineInfo(text[lineStart..breakAt], lineStart, breakAt));
+            output.Add(new LineInfo(chars[lineStart..breakAt], lineStart, breakAt));
             lineStart = nextLineStart;
         }
     }

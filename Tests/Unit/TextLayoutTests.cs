@@ -9,6 +9,8 @@ public class TextLayoutTests
 {
     private const float Delta = 1e-4f;
 
+    private static StyledChar[] Chars(string s) => InlineTagParser.Parse(s, false);
+
     private static GeneratedFontStruct MakeFontStruct(string charsNeeded, int charWidth = 10, int charHeight = 20)
     {
         Dictionary<char, Box2i> positions = [];
@@ -32,7 +34,7 @@ public class TextLayoutTests
     public void ComputeLines_TextFitsOnOneLine_ReturnsSingleLine()
     {
         GeneratedFontStruct fs = MakeFontStruct("hello");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("hello", fs, 1000f, 1f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("hello"), fs, 1000f, 1f, 0f, 0f);
 
         Assert.HasCount(1, lines);
         Assert.AreEqual("hello", lines[0].Content);
@@ -44,7 +46,7 @@ public class TextLayoutTests
     public void ComputeLines_EmptyString_ReturnsSingleEmptyLine()
     {
         GeneratedFontStruct fs = MakeFontStruct("a");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("", fs, 100f, 1f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars(""), fs, 100f, 1f, 0f, 0f);
 
         Assert.HasCount(1, lines);
         Assert.AreEqual("", lines[0].Content);
@@ -57,7 +59,7 @@ public class TextLayoutTests
     {
         // "hello" = 5 chars × 10px = 50px = maxWidth exactly
         GeneratedFontStruct fs = MakeFontStruct("hello");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("hello", fs, 50f, 1f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("hello"), fs, 50f, 1f, 0f, 0f);
 
         Assert.HasCount(1, lines);
         Assert.AreEqual("hello", lines[0].Content);
@@ -70,7 +72,7 @@ public class TextLayoutTests
     {
         // "hello" = 50px, " " = 10px, "world" = 50px; maxWidth = 55 so only "hello" fits
         GeneratedFontStruct fs = MakeFontStruct("hello world");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("hello world", fs, 55f, 1f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("hello world"), fs, 55f, 1f, 0f, 0f);
 
         Assert.HasCount(2, lines);
         Assert.AreEqual("hello", lines[0].Content);
@@ -86,7 +88,7 @@ public class TextLayoutTests
     {
         // Each word = 30px; space = 10px; maxWidth = 35 — only one word fits per line
         GeneratedFontStruct fs = MakeFontStruct("foo bar baz");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("foo bar baz", fs, 35f, 1f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("foo bar baz"), fs, 35f, 1f, 0f, 0f);
 
         Assert.HasCount(3, lines);
         Assert.AreEqual("foo", lines[0].Content);
@@ -99,7 +101,7 @@ public class TextLayoutTests
     {
         // "hello" = 50px, " " = 10px → 60px = maxWidth exactly, 'w' pushes to 70 → break at space
         GeneratedFontStruct fs = MakeFontStruct("hello world");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("hello world", fs, 60f, 1f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("hello world"), fs, 60f, 1f, 0f, 0f);
 
         Assert.HasCount(2, lines);
         Assert.AreEqual("hello", lines[0].Content);
@@ -113,7 +115,7 @@ public class TextLayoutTests
     {
         // "toolongword" = 110px, maxWidth = 60 → breaks after 6 chars
         GeneratedFontStruct fs = MakeFontStruct("toolngwrd");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("toolongword", fs, 60f, 1f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("toolongword"), fs, 60f, 1f, 0f, 0f);
 
         Assert.HasCount(2, lines);
         Assert.AreEqual("toolon", lines[0].Content);
@@ -130,7 +132,7 @@ public class TextLayoutTests
         // "toolongword" char-wraps, then " and more" word-wraps
         // maxWidth = 60: "toolon"|"gword"|"and"|"more"
         GeneratedFontStruct fs = MakeFontStruct("toolngwrd a e m ");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("toolongword and more", fs, 60f, 1f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("toolongword and more"), fs, 60f, 1f, 0f, 0f);
 
         Assert.HasCount(4, lines);
         Assert.AreEqual("toolon", lines[0].Content);
@@ -145,7 +147,7 @@ public class TextLayoutTests
     public void ComputeLines_ExplicitNewline_ProducesHardBreak()
     {
         GeneratedFontStruct fs = MakeFontStruct("hello\nworld");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("hello\nworld", fs, 1000f, 1f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("hello\nworld"), fs, 1000f, 1f, 0f, 0f);
 
         Assert.HasCount(2, lines);
         Assert.AreEqual("hello", lines[0].Content);
@@ -160,7 +162,7 @@ public class TextLayoutTests
     public void ComputeLines_ExplicitNewlineAtStart_ProducesLeadingEmptyLine()
     {
         GeneratedFontStruct fs = MakeFontStruct("hello\n");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("\nhello", fs, 1000f, 1f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("\nhello"), fs, 1000f, 1f, 0f, 0f);
 
         Assert.HasCount(2, lines);
         Assert.AreEqual("", lines[0].Content);
@@ -171,7 +173,7 @@ public class TextLayoutTests
     public void ComputeLines_MultipleExplicitNewlines_EachProducesLine()
     {
         GeneratedFontStruct fs = MakeFontStruct("abc\n");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("a\nb\nc", fs, 1000f, 1f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("a\nb\nc"), fs, 1000f, 1f, 0f, 0f);
 
         Assert.HasCount(3, lines);
         Assert.AreEqual("a", lines[0].Content);
@@ -184,7 +186,7 @@ public class TextLayoutTests
     {
         // "hello world" on line 1 wraps, "foo" on line 2 fits
         GeneratedFontStruct fs = MakeFontStruct("hello world\nfo");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("hello world\nfoo", fs, 55f, 1f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("hello world\nfoo"), fs, 55f, 1f, 0f, 0f);
 
         Assert.HasCount(3, lines);
         Assert.AreEqual("hello", lines[0].Content);
@@ -201,7 +203,7 @@ public class TextLayoutTests
         // → "hel" (60px) | "lo" (40px) | ... actually "hel" = h(20)+e(20)+l(20)=60 exactly, then 'l' would be 80>60
         // So: "hel"|"lo" for "hello"
         GeneratedFontStruct fs = MakeFontStruct("helo");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("hello", fs, 60f, 2f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("hello"), fs, 60f, 2f, 0f, 0f);
 
         Assert.HasCount(2, lines);
         Assert.AreEqual("hel", lines[0].Content);
@@ -218,7 +220,7 @@ public class TextLayoutTests
         // With extra: "ab cd" = 20+15+20 = 55 ≤ 55 → still one line
         // Use maxWidth=34: "ab"=20 ≤ 34, " "=15 → total 35 > 34 → break before space
         GeneratedFontStruct fs = MakeFontStruct("ab cd");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("ab cd", fs, 34f, 1f, 5f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("ab cd"), fs, 34f, 1f, 5f, 0f);
 
         Assert.HasCount(2, lines);
         Assert.AreEqual("ab", lines[0].Content);
@@ -232,7 +234,7 @@ public class TextLayoutTests
         // Without extra: "ab cd" = 50px ≤ 55 → one line
         // With extraCharSpacing=2: 12+12+10+12+12 = 58 > 55 → breaks at space → "ab"|"cd"
         GeneratedFontStruct fs = MakeFontStruct("ab cd");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("ab cd", fs, 55f, 1f, 0f, 2f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("ab cd"), fs, 55f, 1f, 0f, 2f);
 
         Assert.HasCount(2, lines);
         Assert.AreEqual("ab", lines[0].Content);
@@ -246,7 +248,7 @@ public class TextLayoutTests
     {
         // "hello world" wraps at the space; the space becomes the break and is not in either line
         GeneratedFontStruct fs = MakeFontStruct("hello world");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("hello world", fs, 55f, 1f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("hello world"), fs, 55f, 1f, 0f, 0f);
 
         int totalRendered = 0;
         foreach (LineInfo line in lines) totalRendered += line.Content.Length;
@@ -259,7 +261,7 @@ public class TextLayoutTests
     {
         // "hello\nworld": newline is a separator, not rendered
         GeneratedFontStruct fs = MakeFontStruct("hello world");
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("hello\nworld", fs, 1000f, 1f, 0f, 0f);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("hello\nworld"), fs, 1000f, 1f, 0f, 0f);
 
         int totalRendered = 0;
         foreach (LineInfo line in lines) totalRendered += line.Content.Length;

@@ -49,6 +49,9 @@ public interface ITextGraphic : IRenderable
     /// <summary>Optional underline decoration drawn beneath rendered characters, or <see langword="null"/> for none.</summary>
     TextDecoration? Underline { get; set; }
 
+    /// <summary>When true, inline markup tags (e.g. <c>&lt;colour=#FF0000&gt;</c>, <c>&lt;u&gt;</c>, <c>&lt;s&gt;</c>) are parsed and applied during rendering. When false, tag characters are rendered literally.</summary>
+    bool UseInlineTags { get; set; }
+
     /// <summary>Returns the rendered size of <paramref name="text"/> in pixels at the current scale.</summary>
     Point MeasureString(string text);
 

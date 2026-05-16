@@ -37,9 +37,10 @@ Func<World> getGraphicsSubmenu = () => graphicsSubmenuFactory();
 
 textSubmenuFactory = () => new MenuWorld(
 [
-    new("Text Demo",       () => new TextDemoWorld(getTextSubmenu)),
-    new("Text Demo 2",     () => new TextDemoWorld2(getTextSubmenu)),
-    new("Typewriter Demo", () => new TypewriterDemoWorld(getTextSubmenu)),
+    new("Text Demo",        () => new TextDemoWorld(getTextSubmenu)),
+    new("Text Demo 2",      () => new TextDemoWorld2(getTextSubmenu)),
+    new("Typewriter Demo",  () => new TypewriterDemoWorld(getTextSubmenu)),
+    new("Inline Tags Demo", () => new InlineTagsDemoWorld(getTextSubmenu)),
 ], backFactory: getMainMenu);
 
 uiSubmenuFactory = () => new MenuWorld(
