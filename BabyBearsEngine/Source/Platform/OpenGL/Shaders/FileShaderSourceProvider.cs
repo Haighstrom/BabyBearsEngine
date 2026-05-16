@@ -15,12 +15,12 @@ internal sealed class FileShaderSourceProvider : IShaderSourceProvider
 
     private string GetSource(string shaderPath)
     {
-        if (_shaderSourceByPath.TryGetValue(shaderPath, out var cachedSource))
+        if (_shaderSourceByPath.TryGetValue(shaderPath, out string? cachedSource))
         {
             return cachedSource;
         }
-        
-        var loadedSource = File.ReadAllText(shaderPath);
+
+        string loadedSource = File.ReadAllText(shaderPath);
         _shaderSourceByPath.Add(shaderPath, loadedSource);
         return loadedSource;
     }

@@ -9,6 +9,7 @@ using BabyBearsEngine.Demos.Source.Demos.KeyboardDemo;
 using BabyBearsEngine.Demos.Source.Demos.MouseDemo;
 using BabyBearsEngine.Demos.Source.Demos.ShaderDemo;
 using BabyBearsEngine.Demos.Source.Demos.TextDemo;
+using BabyBearsEngine.Demos.Source.Demos.StencilDemo;
 using BabyBearsEngine.Demos.Source.Demos.UIDemo;
 using BabyBearsEngine.Demos.Source.Menu;
 
@@ -36,6 +37,7 @@ Func<World> getMenu = () => menuFactory();
     ("Keyboard Demo",     () => new KeyboardDemoWorld(getMenu)),
     ("Mouse Demo",        () => new MouseDemoWorld(getMenu)),
     ("Shader Demo",       () => new ShaderDemoWorld(getMenu)),
+    ("Stencil Demo",      () => new StencilDemoWorld(getMenu)),
     ("Text Demo",         () => new TextDemoWorld(getMenu)),
     ("UI Demo",           () => new UIDemoWorld(getMenu)),
     ("UI Demo 2",         () => new UIDemoWorld2(getMenu)),

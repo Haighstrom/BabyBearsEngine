@@ -14,4 +14,6 @@ public static class FragmentShaders
     public static FragmentShaderPath R8Texture { get; } = new(BasePath + "r8_texture.frag");
     public static FragmentShaderPath Shader { get; } = new(BasePath + "shader.frag");
     public static FragmentShaderPath SolidColour { get; } = new(BasePath + "solid_colour.frag");
+
+    public static FragmentShaderPath Stencil { get; } = new(BasePath + "stencil.frag");
 }
