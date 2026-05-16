@@ -17,7 +17,11 @@ public interface ITextGraphic : IRenderable
 
     bool Multiline { get; set; }
 
+    TextDecoration? Strikethrough { get; set; }
+
     string Text { get; set; }
+
+    TextDecoration? Underline { get; set; }
 
     Point MeasureString(string text);
 

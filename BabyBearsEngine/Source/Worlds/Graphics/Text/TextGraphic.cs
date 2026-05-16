@@ -10,7 +10,9 @@ namespace BabyBearsEngine.Worlds.Graphics.Text;
 public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
 {
     private readonly StandardMatrixShaderProgram _shader = new();
+    private readonly SolidColourShaderProgramMatrix _decorationShader = SolidColourShaderProgramMatrix.Instance;
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
+    private readonly VertexDataBuffer<VertexNoTexture> _decorationVertexDataBuffer = new();
     private ITexture _texture;
     private GeneratedFontStruct _fontStruct;
     private bool _disposedValue;
@@ -18,6 +20,8 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
     private string _textToDisplay;
     private Colour _colour;
     private bool _multiline = false;
+    private TextDecoration? _strikethrough = null;
+    private TextDecoration? _underline = null;
     private bool _verticesChanged = true;
     private float _extraCharSpacing = 0f;
     private float _extraLineSpacing = 0f;
@@ -108,6 +112,27 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
     }
 
+    public TextDecoration? Strikethrough
+    {
+        get => _strikethrough;
+        set
+        {
+            _strikethrough = value;
+            _verticesChanged = true;
+        }
+    }
+
+    public TextDecoration? Underline
+    {
+        get => _underline;
+        set
+        {
+            _underline = value;
+            _verticesChanged = true;
+        }
+    }
+
+    private VertexNoTexture[] DecorationVertices { get; set; } = [];
     private Vertex[] Vertices { get; set; } = [];
 
     public float ScaleX { get; set; } = 1;
@@ -162,6 +187,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
     private void SetVertices()
     {
         List<Vertex> vertices = [];
+        List<VertexNoTexture> decorationVertices = [];
 
         var colorTK = Colour.ToOpenTK();
         float lineHeight = ScaleY * _fontStruct.HighestChar;
@@ -188,6 +214,8 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
                 _ => throw new Exception($"TextGraphic/SetVerticesSimple: HAlignment {HAlignment} was not catered for."),
             });
 
+            float xStart = x;
+
             foreach (char c in line.Content)
             {
                 var source = _fontStruct.GetCharPositionNormalised(c);
@@ -213,35 +241,67 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
                 }
             }
 
+            if (_underline is TextDecoration ul)
+            {
+                decorationVertices.Add(DecorationQuad(xStart, y + lineHeight, lineWidth, ul.Thickness, ul.Colour.ToOpenTK()));
+            }
+
+            if (_strikethrough is TextDecoration st)
+            {
+                float stY = y + (lineHeight - st.Thickness) / 2f;
+                decorationVertices.Add(DecorationQuad(xStart, stY, lineWidth, st.Thickness, st.Colour.ToOpenTK()));
+            }
+
             y += lineHeight + _extraLineSpacing;
         }
 
         Vertices = vertices.ToArray();
+        DecorationVertices = decorationVertices.ToArray();
+    }
+
+    private static VertexNoTexture[] DecorationQuad(float x, float y, float width, float height, OpenTK.Mathematics.Color4 colour)
+    {
+        return
+        [
+            new(x,         y,          colour),
+            new(x + width, y,          colour),
+            new(x,         y + height, colour),
+            new(x + width, y,          colour),
+            new(x,         y + height, colour),
+            new(x + width, y + height, colour),
+        ];
     }
 
     public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
-        _shader.Bind();
-        _vertexDataBuffer.Bind();
-        _texture.Bind();
-
         if (_verticesChanged)
         {
             SetVertices();
-
             _vertexDataBuffer.SetNewVertices(Vertices);
-
+            _decorationVertexDataBuffer.SetNewVertices(DecorationVertices);
             _verticesChanged = false;
         }
 
         var mv = Matrix3.Translate(ref modelView, X, Y);
+
+        _shader.Bind();
+        _vertexDataBuffer.Bind();
+        _texture.Bind();
         if (_shader is IMVPShader mvpShader)
         {
             mvpShader.SetProjectionMatrix(ref projection);
             mvpShader.SetModelViewMatrix(ref mv);
         }
-
         GL.DrawArrays(PrimitiveType.Triangles, 0, Vertices.Length);
+
+        if (DecorationVertices.Length > 0)
+        {
+            _decorationShader.Bind();
+            _decorationVertexDataBuffer.Bind();
+            _decorationShader.SetProjectionMatrix(ref projection);
+            _decorationShader.SetModelViewMatrix(ref mv);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, DecorationVertices.Length);
+        }
     }
 
     private void Dispose(bool disposing)
@@ -251,6 +311,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
             if (disposing)
             {
                 _vertexDataBuffer.Dispose();
+                _decorationVertexDataBuffer.Dispose();
             }
 
             _disposedValue = true;

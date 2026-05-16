@@ -14,9 +14,11 @@ internal class TextDemoWorld : DemoWorld
     private const int Col3X = Col2X + ColW + ColGap;
     private const int LabelH = 16;
     private const int BoxH = 150;
+    private const int Row3BoxH = 80;
     private const int Padding = 4;
     private const int Row1Y = 55;
     private const int Row2Y = Row1Y + LabelH + BoxH + 30;
+    private const int Row3Y = Row2Y + LabelH + BoxH + 20;
 
     private const string ParagraphText =
         "The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.";
@@ -44,16 +46,29 @@ internal class TextDemoWorld : DemoWorld
                 HAlignment.Left));
         AddSection(Col3X, Row2Y, "Single line (no wrap)",
             MakeSingleLineBox(Col3X, Row2Y));
+
+        AddSection(Col1X, Row3Y, Row3BoxH, "Underline",
+            MakeDecorationBox(Col1X, Row3Y, Row3BoxH, "The quick brown fox jumps.",
+                underline: new TextDecoration(Colour.Black), strikethrough: null));
+        AddSection(Col2X, Row3Y, Row3BoxH, "Strikethrough",
+            MakeDecorationBox(Col2X, Row3Y, Row3BoxH, "The quick brown fox jumps.",
+                underline: null, strikethrough: new TextDecoration(Colour.Black)));
+        AddSection(Col3X, Row3Y, Row3BoxH, "Underline + strikethrough",
+            MakeDecorationBox(Col3X, Row3Y, Row3BoxH, "The quick brown fox jumps.",
+                underline: new TextDecoration(Colour.Black), strikethrough: new TextDecoration(Colour.Red, 2f)));
     }
 
-    private void AddSection(float x, float y, string label, TextGraphic textBox)
+    private void AddSection(float x, float y, string label, TextGraphic textBox) =>
+        AddSection(x, y, BoxH, label, textBox);
+
+    private void AddSection(float x, float y, float boxHeight, string label, TextGraphic textBox)
     {
         Add(new TextGraphic(new FontDefinition("Times New Roman", 12), label, Colour.Black, x, y, ColW, LabelH)
         {
             HAlignment = HAlignment.Left,
             VAlignment = VAlignment.Centred,
         });
-        Add(new ColourGraphic(Colour.White, x, y + LabelH, ColW, BoxH));
+        Add(new ColourGraphic(Colour.White, x, y + LabelH, ColW, boxHeight));
         Add(textBox);
     }
 
@@ -65,6 +80,19 @@ internal class TextDemoWorld : DemoWorld
             Multiline = true,
             HAlignment = hAlignment,
             VAlignment = VAlignment.Top,
+        };
+    }
+
+    private static TextGraphic MakeDecorationBox(float x, float y, float boxHeight, string text,
+        TextDecoration? underline, TextDecoration? strikethrough)
+    {
+        return new TextGraphic(new FontDefinition("Times New Roman", 14), text, Colour.Black,
+            x + Padding, y + LabelH + Padding, ColW - 2 * Padding, boxHeight - 2 * Padding)
+        {
+            HAlignment = HAlignment.Left,
+            VAlignment = VAlignment.Centred,
+            Underline = underline,
+            Strikethrough = strikethrough,
         };
     }
 
