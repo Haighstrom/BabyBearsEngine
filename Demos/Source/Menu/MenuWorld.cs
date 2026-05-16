@@ -15,18 +15,32 @@ internal class MenuWorld : World
 
     private int _buttonCount = 0;
 
-    public MenuWorld(IEnumerable<(string Name, Func<World> Factory)> demos)
+    public MenuWorld(IEnumerable<MenuEntry> entries, Func<World>? backFactory = null)
     {
-        foreach (var (name, factory) in demos)
+        foreach (MenuEntry entry in entries)
         {
-            AddDemoButton(name, factory);
+            AddEntryButton(entry);
+        }
+
+        if (backFactory is not null)
+        {
+            Add(new BackButton(Window.Width - 85, 5, backFactory));
         }
     }
 
-    private void AddDemoButton(string name, Func<World> factory)
+    private void AddEntryButton(MenuEntry entry)
     {
         var (x, y) = NextButtonPosition();
-        Add(new DemoButton(x, y, name, factory));
+
+        if (entry.Style == MenuEntryStyle.Submenu)
+        {
+            Add(new SubmenuButton(x, y, entry.Name, entry.Factory));
+        }
+        else
+        {
+            Add(new DemoButton(x, y, entry.Name, entry.Factory));
+        }
+
         _buttonCount++;
     }
 

@@ -17,6 +17,6 @@ internal abstract class DemoWorld : World
 
     protected void AddCommonControls()
     {
-        Add(new ReturnToMainMenuButton(_menuWorldFactory));
+        Add(new BackButton(5, 5, _menuWorldFactory));
     }
 }

@@ -26,24 +26,48 @@ var appSettings = new ApplicationSettings()
 Func<World> menuFactory = null!;
 Func<World> getMenu = () => menuFactory();
 
-(string Name, Func<World> Factory)[] demos =
+Func<World> textSubmenuFactory = null!;
+Func<World> getTextSubmenu = () => textSubmenuFactory();
+
+Func<World> uiSubmenuFactory = null!;
+Func<World> getUISubmenu = () => uiSubmenuFactory();
+
+Func<World> graphicsSubmenuFactory = null!;
+Func<World> getGraphicsSubmenu = () => graphicsSubmenuFactory();
+
+textSubmenuFactory = () => new MenuWorld(
 [
-    ("Animation Demo",    () => new AnimationDemoWorld(getMenu)),
-    ("Bear Spinner 3000", () => new BearSpinnerWorld(getMenu)),
-    ("Camera Demo",       () => new CameraDemoWorld(getMenu)),
-    ("Click Demo",        () => new ClickDemoWorld(getMenu)),
-    ("Click The Bear",    () => new ClickTheBearDemoWorld(getMenu)),
-    ("Graphic Demo",      () => new GraphicDemoWorld(getMenu)),
-    ("Keyboard Demo",     () => new KeyboardDemoWorld(getMenu)),
-    ("Mouse Demo",        () => new MouseDemoWorld(getMenu)),
-    ("Shader Demo",       () => new ShaderDemoWorld(getMenu)),
-    ("Stencil Demo",      () => new StencilDemoWorld(getMenu)),
-    ("Text Demo",         () => new TextDemoWorld(getMenu)),
-    ("Text Demo 2",       () => new TextDemoWorld2(getMenu)),
-    ("UI Demo",           () => new UIDemoWorld(getMenu)),
-    ("UI Demo 2",         () => new UIDemoWorld2(getMenu)),
+    new("Text Demo",   () => new TextDemoWorld(getTextSubmenu)),
+    new("Text Demo 2", () => new TextDemoWorld2(getTextSubmenu)),
+], backFactory: getMenu);
+
+uiSubmenuFactory = () => new MenuWorld(
+[
+    new("UI Demo",   () => new UIDemoWorld(getUISubmenu)),
+    new("UI Demo 2", () => new UIDemoWorld2(getUISubmenu)),
+], backFactory: getMenu);
+
+graphicsSubmenuFactory = () => new MenuWorld(
+[
+    new("Animation Demo",    () => new AnimationDemoWorld(getGraphicsSubmenu)),
+    new("Bear Spinner 3000", () => new BearSpinnerWorld(getGraphicsSubmenu)),
+    new("Graphic Demo",      () => new GraphicDemoWorld(getGraphicsSubmenu)),
+    new("Shader Demo",       () => new ShaderDemoWorld(getGraphicsSubmenu)),
+    new("Stencil Demo",      () => new StencilDemoWorld(getGraphicsSubmenu)),
+], backFactory: getMenu);
+
+MenuEntry[] mainMenuEntries =
+[
+    new("Camera Demo",    () => new CameraDemoWorld(getMenu)),
+    new("Click Demo",     () => new ClickDemoWorld(getMenu)),
+    new("Click The Bear", () => new ClickTheBearDemoWorld(getMenu)),
+    new("Keyboard Demo",  () => new KeyboardDemoWorld(getMenu)),
+    new("Mouse Demo",     () => new MouseDemoWorld(getMenu)),
+    new("Text",     getTextSubmenu,     MenuEntryStyle.Submenu),
+    new("UI",       getUISubmenu,       MenuEntryStyle.Submenu),
+    new("Graphics", getGraphicsSubmenu, MenuEntryStyle.Submenu),
 ];
 
-menuFactory = () => new MenuWorld(demos);
+menuFactory = () => new MenuWorld(mainMenuEntries);
 
 GameLauncher.Run(appSettings, menuFactory);
