@@ -4,6 +4,8 @@ using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Platform.OpenGL.Buffers;
 using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
+using BabyBearsEngine.Worlds;
+using BabyBearsEngine.Worlds.Cameras;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 
@@ -21,6 +23,8 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
     private Colour _colour;
     private bool _multiline = false;
     private int _numCharsToDraw = int.MaxValue;
+    private float _scaleX = 1f;
+    private float _scaleY = 1f;
     private TextDecoration? _strikethrough = null;
     private TextDecoration? _underline = null;
     private bool _verticesChanged = true;
@@ -41,6 +45,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         _texture = atlas.Texture;
     }
 
+    /// <inheritdoc/>
     public string Text
     {
         get => _textToDisplay;
@@ -51,6 +56,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
     }
 
+    /// <inheritdoc/>
     public Colour Colour
     {
         get => _colour;
@@ -61,6 +67,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
     }
 
+    /// <inheritdoc/>
     public float ExtraCharacterSpacing
     {
         get => _extraCharSpacing;
@@ -71,6 +78,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
     }
 
+    /// <inheritdoc/>
     public float ExtraLineSpacing
     {
         get => _extraLineSpacing;
@@ -81,6 +89,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
     }
 
+    /// <inheritdoc/>
     public float ExtraSpaceWidth
     {
         get => _extraSpaceWidth;
@@ -91,6 +100,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
     }
 
+    /// <inheritdoc/>
     public int FirstCharToDraw
     {
         get => _firstCharToDraw;
@@ -101,6 +111,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
     }
 
+    /// <inheritdoc/>
     public FontDefinition Font
     {
         get => _fontDef;
@@ -114,6 +125,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
     }
 
+    /// <inheritdoc/>
     public bool Multiline
     {
         get => _multiline;
@@ -124,6 +136,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
     }
 
+    /// <inheritdoc/>
     public int NumCharsToDraw
     {
         get => _numCharsToDraw;
@@ -134,6 +147,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
     }
 
+    /// <inheritdoc/>
     public TextDecoration? Strikethrough
     {
         get => _strikethrough;
@@ -144,6 +158,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
     }
 
+    /// <inheritdoc/>
     public TextDecoration? Underline
     {
         get => _underline;
@@ -157,17 +172,39 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
     private VertexNoTexture[] DecorationVertices { get; set; } = [];
     private Vertex[] Vertices { get; set; } = [];
 
-    public float ScaleX { get; set; } = 1;
-    public float ScaleY { get; set; } = 1;
+    /// <inheritdoc/>
+    public float ScaleX
+    {
+        get => _scaleX;
+        set
+        {
+            _scaleX = value;
+            _verticesChanged = true;
+        }
+    }
+
+    /// <inheritdoc/>
+    public float ScaleY
+    {
+        get => _scaleY;
+        set
+        {
+            _scaleY = value;
+            _verticesChanged = true;
+        }
+    }
+
     public HAlignment HAlignment { get; set; } = HAlignment.Centred;
     public VAlignment VAlignment { get; set; } = VAlignment.Centred;
 
+    /// <inheritdoc/>
     public Point MeasureString(string text)
     {
         var raw = _fontStruct.MeasureString(text);
         return new Point(raw.X * ScaleX, raw.Y * ScaleY);
     }
 
+    /// <inheritdoc/>
     public Point MeasureString()
     {
         if (!_multiline)
@@ -204,6 +241,16 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
 
         return [new LineInfo(_textToDisplay, 0, _textToDisplay.Length)];
+    }
+
+    /// <inheritdoc/>
+    public void ScaleForCamera(ICamera camera) => ScaleForCamera(camera.View);
+
+    /// <inheritdoc/>
+    public void ScaleForCamera(ICameraView view)
+    {
+        ScaleX = 1f / view.TileWidth;
+        ScaleY = 1f / view.TileHeight;
     }
 
     private void SetVertices()
