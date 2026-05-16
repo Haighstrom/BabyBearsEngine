@@ -7,6 +7,8 @@ public interface ITextGraphic : IRenderable
 {
     Colour Colour { get; set; }
 
+    bool Multiline { get; set; }
+
     string Text { get; set; }
 
     Point MeasureString(string text);

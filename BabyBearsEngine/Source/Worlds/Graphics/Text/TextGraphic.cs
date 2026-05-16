@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
@@ -16,6 +16,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
     private bool _disposedValue;
     private string _textToDisplay;
     private Colour _colour;
+    private bool _multiline = false;
     private bool _verticesChanged = true;
     private float _extraSpaceWidth = 0;
     private float _extraLineSpacing = 0;
@@ -51,10 +52,14 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         }
     }
 
-    protected override void OnSizeChanged()
+    public bool Multiline
     {
-        base.OnSizeChanged();
-        _verticesChanged = true;
+        get => _multiline;
+        set
+        {
+            _multiline = value;
+            _verticesChanged = true;
+        }
     }
 
     private Vertex[] Vertices { get; set; } = [];
@@ -70,67 +75,99 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         return new Point(raw.X * ScaleX, raw.Y * ScaleY);
     }
 
-    public Point MeasureString() => MeasureString(_textToDisplay);
-
-    private void SetVerticesSimple()
+    public Point MeasureString()
     {
-        //foreach (var sg in _vertGroups)
-        //{
-        //    sg.Dispose();
-        //}
+        if (!_multiline)
+        {
+            return MeasureString(_textToDisplay);
+        }
 
-        //_vertGroups.Clear();
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(_textToDisplay, _fontStruct, Width, ScaleX, _extraSpaceWidth, _extraLineSpacing);
+        float maxLineWidth = 0f;
 
+        foreach (LineInfo line in lines)
+        {
+            float lw = TextLayout.MeasureLine(line.Content, _fontStruct, ScaleX, _extraSpaceWidth, _extraLineSpacing);
+            if (lw > maxLineWidth)
+            {
+                maxLineWidth = lw;
+            }
+        }
+
+        return new Point(maxLineWidth, lines.Count * _fontStruct.HighestChar * ScaleY);
+    }
+
+    protected override void OnSizeChanged()
+    {
+        base.OnSizeChanged();
+        _verticesChanged = true;
+    }
+
+    private IReadOnlyList<LineInfo> GetLines()
+    {
+        if (_multiline)
+        {
+            return TextLayout.ComputeLines(_textToDisplay, _fontStruct, Width, ScaleX, _extraSpaceWidth, _extraLineSpacing);
+        }
+
+        return [new LineInfo(_textToDisplay, 0, _textToDisplay.Length)];
+    }
+
+    private void SetVertices()
+    {
         List<Vertex> vertices = [];
 
         var colorTK = Colour.ToOpenTK();
+        float lineHeight = ScaleY * _fontStruct.HighestChar;
+        IReadOnlyList<LineInfo> lines = GetLines();
+        float totalHeight = lines.Count * lineHeight;
 
-        var len = ScaleX * _fontStruct.MeasureString(_textToDisplay).X;
-
-        float h = ScaleY * _fontStruct.HighestChar;
-
-        float x = HAlignment switch //todo: was 'int'ed before to avoid looking shit with no AA - but buggers up text in cameras - complex if statement?
-        {
-            HAlignment.Left or HAlignment.Full => 0,
-            HAlignment.Centred => (Width - len) / 2,
-            HAlignment.Right => Width - len,
-            _ => throw new Exception($"HText/SetVertices: alignment {HAlignment} was not catered for."),
-        };
-        float y = VAlignment switch //todo: was 'int'ed before to avoid looking shit with no AA - but buggers up text in cameras - complex if statement?
+        float y = MathF.Round(VAlignment switch
         {
             VAlignment.Top or VAlignment.Full => 0,
-            VAlignment.Centred => (Height - h) / 2,
-            VAlignment.Bottom => Height - h,
-            _ => throw new Exception($"HText/SetVertices: alignment {VAlignment} was not catered for."),
-        };
-        //if (Underline)
-        //    _linesToDraw.Add(new Line(Colour, UnderlineThickness, true, dest.BottomLeft.Shift(0, UnderlineOffset), dest.BottomLeft.Shift(len, UnderlineOffset)));
-        //if (Strikethrough)
-        //    _linesToDraw.Add(new Line(Colour, StrikethroughThickness, true, dest.CentreLeft.Shift(0, StrikethroughOffset), dest.CentreLeft.Shift(len, StrikethroughOffset)));
-        
-        foreach (char c in _textToDisplay)
+            VAlignment.Centred => (Height - totalHeight) / 2,
+            VAlignment.Bottom => Height - totalHeight,
+            _ => throw new Exception($"TextGraphic/SetVerticesSimple: VAlignment {VAlignment} was not catered for."),
+        });
+
+        foreach (LineInfo line in lines)
         {
-            var source = _fontStruct.CharPositionsNormalised[c];
-            float w = _fontStruct.CharPositions[c].Size.X * ScaleX;
+            float lineWidth = TextLayout.MeasureLine(line.Content, _fontStruct, ScaleX, _extraSpaceWidth, _extraLineSpacing);
 
-            vertices.Add(
-                GeometryHelper.QuadToTris(
-                    new Vertex(x,     y,     colorTK, source.Min.X, source.Min.Y),
-                    new Vertex(x + w, y,     colorTK, source.Max.X, source.Min.Y),
-                    new Vertex(x,     y + h, colorTK, source.Min.X, source.Max.Y),
-                    new Vertex(x + w, y + h, colorTK, source.Max.X, source.Max.Y)
-            ));
-
-            x += w;
-
-            if (c == ' ')
+            float x = MathF.Round(HAlignment switch
             {
-                x += _extraSpaceWidth;
-            }
-            else
+                HAlignment.Left or HAlignment.Full => 0,
+                HAlignment.Centred => (Width - lineWidth) / 2,
+                HAlignment.Right => Width - lineWidth,
+                _ => throw new Exception($"TextGraphic/SetVerticesSimple: HAlignment {HAlignment} was not catered for."),
+            });
+
+            foreach (char c in line.Content)
             {
-                x += _extraLineSpacing;
+                var source = _fontStruct.CharPositionsNormalised[c];
+                float w = _fontStruct.CharPositions[c].Size.X * ScaleX;
+
+                vertices.Add(
+                    GeometryHelper.QuadToTris(
+                        new Vertex(x,     y,              colorTK, source.Min.X, source.Min.Y),
+                        new Vertex(x + w, y,              colorTK, source.Max.X, source.Min.Y),
+                        new Vertex(x,     y + lineHeight, colorTK, source.Min.X, source.Max.Y),
+                        new Vertex(x + w, y + lineHeight, colorTK, source.Max.X, source.Max.Y)
+                    ));
+
+                x += w;
+
+                if (c == ' ')
+                {
+                    x += _extraSpaceWidth;
+                }
+                else
+                {
+                    x += _extraLineSpacing;
+                }
             }
+
+            y += lineHeight;
         }
 
         Vertices = vertices.ToArray();
@@ -144,7 +181,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
 
         if (_verticesChanged)
         {
-            SetVerticesSimple();
+            SetVertices();
 
             _vertexDataBuffer.SetNewVertices(Vertices);
 
@@ -158,7 +195,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
             mvpShader.SetModelViewMatrix(ref mv);
         }
 
-        GL.DrawArrays(PrimitiveType.TriangleStrip, 0, Vertices.Length);
+        GL.DrawArrays(PrimitiveType.Triangles, 0, Vertices.Length);
     }
 
     private void Dispose(bool disposing)
@@ -167,26 +204,15 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         {
             if (disposing)
             {
-                // TODO: dispose managed state (managed objects)
                 _vertexDataBuffer.Dispose();
             }
 
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
             _disposedValue = true;
         }
     }
 
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~TextGraphic()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
-
     public void Dispose()
     {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
