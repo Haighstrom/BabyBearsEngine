@@ -91,7 +91,7 @@ public class WaypointControllerTests
 
         Update(elapsed: 0.5);
 
-        Assert.AreEqual(1, _controller.Waypoints.Count);
+        Assert.HasCount(1, _controller.Waypoints);
     }
 
     [TestMethod]
@@ -127,7 +127,7 @@ public class WaypointControllerTests
 
         Update(elapsed: 1.0);
 
-        Assert.AreEqual(0, _controller.Waypoints.Count);
+        Assert.IsEmpty(_controller.Waypoints);
     }
 
     [TestMethod]
@@ -155,7 +155,7 @@ public class WaypointControllerTests
         Update(elapsed: 1.0);
 
         Assert.AreEqual(100f, _target.X, 0.001f);
-        Assert.AreEqual(0, _controller.Waypoints.Count);
+        Assert.IsEmpty(_controller.Waypoints);
         Assert.IsTrue(_controller.ReachedDestination);
     }
 
@@ -179,7 +179,7 @@ public class WaypointControllerTests
 
         Update(elapsed: 0.1);
 
-        Assert.IsTrue(_events.Contains("DirectionChanged(->Right)"));
+        Assert.Contains("DirectionChanged(->Right)", _events);
     }
 
     [TestMethod]
@@ -191,7 +191,7 @@ public class WaypointControllerTests
 
         Update(elapsed: 0.1);
 
-        Assert.IsFalse(_events.Any(e => e.StartsWith("DirectionChanged")));
+        Assert.DoesNotContain<string>(e => e.StartsWith("DirectionChanged"), _events);
     }
 
     [TestMethod]
@@ -206,7 +206,7 @@ public class WaypointControllerTests
 
         Update(elapsed: 0.5);  // moves down
 
-        Assert.IsTrue(_events.Contains("DirectionChanged(Right->Down)"));
+        Assert.Contains("DirectionChanged(Right->Down)", _events);
     }
 
     [TestMethod]
@@ -221,7 +221,7 @@ public class WaypointControllerTests
         _controller.AddWaypoints(new Point(50, 100));
         Update(elapsed: 0.1);
 
-        Assert.IsTrue(_events.Contains("DirectionChanged(->Down)"));
+        Assert.Contains("DirectionChanged(->Down)", _events);
     }
 
     // Waypoint management
@@ -232,7 +232,7 @@ public class WaypointControllerTests
         _controller.AddWaypoints(new Point(100, 0));
         _controller.SetWaypoints(new Point(0, 50), new Point(0, 100));
 
-        Assert.AreEqual(2, _controller.Waypoints.Count);
+        Assert.HasCount(2, _controller.Waypoints);
         Assert.AreEqual(new Point(0, 50), _controller.Waypoints[0]);
     }
 
@@ -254,7 +254,7 @@ public class WaypointControllerTests
         IPosition next = _controller.GetNextWaypoint();
 
         Assert.AreEqual(new Point(100, 0), next);
-        Assert.AreEqual(2, _controller.Waypoints.Count);
+        Assert.HasCount(2, _controller.Waypoints);
     }
 
     [TestMethod]

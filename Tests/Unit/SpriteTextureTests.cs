@@ -111,7 +111,7 @@ public class SpriteTextureTests
         var (_, _, u2_0, _) = st.GetFrameUVs(0);
         var (u1_1, _, _, _) = st.GetFrameUVs(1);
 
-        Assert.IsTrue(u1_1 > u2_0, "Frame 1 UV start must come after frame 0 UV end.");
+        Assert.IsGreaterThan(u2_0, u1_1, "Frame 1 UV start must come after frame 0 UV end.");
     }
 
     [TestMethod]
@@ -121,8 +121,8 @@ public class SpriteTextureTests
 
         var (_, _, u2, v2) = st.GetFrameUVs(1);
 
-        Assert.IsTrue(u2 <= 1f + 1e-5f, "Last frame U2 must not exceed 1.");
-        Assert.IsTrue(v2 <= 1f + 1e-5f, "Last frame V2 must not exceed 1.");
+        Assert.IsLessThanOrEqualTo(1f + 1e-5f, u2, "Last frame U2 must not exceed 1.");
+        Assert.IsLessThanOrEqualTo(1f + 1e-5f, v2, "Last frame V2 must not exceed 1.");
     }
 
     [TestMethod]
@@ -139,6 +139,6 @@ public class SpriteTextureTests
     {
         SpriteTexture st = new(new StubTexture(106, 100), 2, 1, 2);
 
-        Assert.IsTrue(st.FrameU < 1f / 2f, "Padding must reduce FrameU below the unpadded value.");
+        Assert.IsLessThan(1f / 2f, st.FrameU, "Padding must reduce FrameU below the unpadded value.");
     }
 }

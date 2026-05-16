@@ -31,7 +31,7 @@ public class GridPathfinderTests
     {
         var grid = MakeGrid(3, 3);
         var centre = grid[1, 1];
-        Assert.AreEqual(4, centre.ConnectedNodes.Count);
+        Assert.HasCount(4, centre.ConnectedNodes);
     }
 
     [TestMethod]
@@ -39,7 +39,7 @@ public class GridPathfinderTests
     {
         var grid = MakeGrid(3, 3);
         var corner = grid[0, 0];
-        Assert.AreEqual(2, corner.ConnectedNodes.Count);
+        Assert.HasCount(2, corner.ConnectedNodes);
     }
 
     [TestMethod]
@@ -68,7 +68,7 @@ public class GridPathfinderTests
         var path = grid.FindPath(grid[0, 0], grid[2, 0], (_, _) => true);
 
         Assert.IsNotNull(path);
-        Assert.AreEqual(3, path.Count);
+        Assert.HasCount(3, path);
         Assert.AreSame(grid[0, 0], path[0]);
         Assert.AreSame(grid[2, 0], path[^1]);
     }
@@ -90,7 +90,7 @@ public class GridPathfinderTests
         var path = grid.FindPath(grid[1, 1], grid[1, 1], (_, _) => true);
 
         Assert.IsNotNull(path);
-        Assert.AreEqual(1, path.Count);
+        Assert.HasCount(1, path);
         Assert.AreSame(grid[1, 1], path[0]);
     }
 
@@ -101,7 +101,7 @@ public class GridPathfinderTests
         var path = grid.FindRandomPath(grid[2, 2], (_, _) => true, targetSteps: 3, canBacktrack: false);
 
         // Path includes start + targetSteps moves = targetSteps + 1 nodes.
-        Assert.AreEqual(4, path.Count);
+        Assert.HasCount(4, path);
         Assert.AreSame(grid[2, 2], path[0]);
         // Unique nodes when canBacktrack: false.
         Assert.AreEqual(path.Count, path.Distinct().Count());
