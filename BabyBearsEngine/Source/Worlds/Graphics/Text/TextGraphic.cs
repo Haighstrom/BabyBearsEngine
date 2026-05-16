@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
@@ -28,6 +29,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
     private TextDecoration? _strikethrough = null;
     private TextDecoration? _underline = null;
     private bool _verticesChanged = true;
+    private bool _wasTruncated = false;
     private float _extraCharSpacing = 0f;
     private float _extraLineSpacing = 0f;
     private float _extraSpaceWidth = 0f;
@@ -274,8 +276,20 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         int globalCharIndex = 0;
         long visibleEnd = (long)_firstCharToDraw + _numCharsToDraw;
 
+        bool truncated = false;
+
         foreach (LineInfo line in lines)
         {
+            if (y >= Height)
+            {
+                if (globalCharIndex < visibleEnd)
+                {
+                    truncated = true;
+                }
+
+                break;
+            }
+
             float lineWidth = TextLayout.MeasureLine(line.Content, _fontStruct, ScaleX, _extraSpaceWidth, _extraCharSpacing);
 
             float x = MathF.Round(HAlignment switch
@@ -297,20 +311,35 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
 
                 if (globalCharIndex >= _firstCharToDraw && globalCharIndex < visibleEnd)
                 {
-                    if (!decXStart.HasValue)
+                    float x1 = x, y1 = y, x2 = x + w, y2 = y + lineHeight;
+
+                    if (w > 0 && x2 > 0 && x1 < Width && y2 > 0 && y1 < Height)
                     {
-                        decXStart = x;
-                    }
+                        float u1 = source.Min.X, v1 = source.Min.Y, u2 = source.Max.X, v2 = source.Max.Y;
 
-                    decXEnd = x + advance;
+                        if (x1 < 0)      { truncated = true; u1 += (u2 - u1) * -x1 / (x2 - x1); x1 = 0; }
+                        if (x2 > Width)  { truncated = true; u2 -= (u2 - u1) * (x2 - Width) / (x2 - x1); x2 = Width; }
+                        if (y1 < 0)      { truncated = true; v1 += (v2 - v1) * -y1 / (y2 - y1); y1 = 0; }
+                        if (y2 > Height) { truncated = true; v2 -= (v2 - v1) * (y2 - Height) / (y2 - y1); y2 = Height; }
 
-                    vertices.Add(
-                        GeometryHelper.QuadToTris(
-                            new Vertex(x,     y,              colorTK, source.Min.X, source.Min.Y),
-                            new Vertex(x + w, y,              colorTK, source.Max.X, source.Min.Y),
-                            new Vertex(x,     y + lineHeight, colorTK, source.Min.X, source.Max.Y),
-                            new Vertex(x + w, y + lineHeight, colorTK, source.Max.X, source.Max.Y)
+                        if (!decXStart.HasValue)
+                        {
+                            decXStart = x1;
+                        }
+
+                        decXEnd = MathF.Min(x + advance, Width);
+
+                        vertices.Add(GeometryHelper.QuadToTris(
+                            new Vertex(x1, y1, colorTK, u1, v1),
+                            new Vertex(x2, y1, colorTK, u2, v1),
+                            new Vertex(x1, y2, colorTK, u1, v2),
+                            new Vertex(x2, y2, colorTK, u2, v2)
                         ));
+                    }
+                    else if (w > 0)
+                    {
+                        truncated = true;
+                    }
                 }
 
                 x += advance;
@@ -323,13 +352,22 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
 
                 if (_underline is TextDecoration ul)
                 {
-                    decorationVertices.Add(DecorationQuad(decXStart.Value, y + lineHeight, decWidth, ul.Thickness, ul.Colour.ToOpenTK()));
+                    float ulY1 = y + lineHeight;
+                    float ulY2 = ulY1 + ul.Thickness;
+                    if (ulY1 < Height && ulY2 > 0)
+                    {
+                        decorationVertices.Add(DecorationQuad(decXStart.Value, MathF.Max(ulY1, 0f), decWidth, MathF.Min(ulY2, Height) - MathF.Max(ulY1, 0f), ul.Colour.ToOpenTK()));
+                    }
                 }
 
                 if (_strikethrough is TextDecoration st)
                 {
-                    float stY = y + (lineHeight - st.Thickness) / 2f;
-                    decorationVertices.Add(DecorationQuad(decXStart.Value, stY, decWidth, st.Thickness, st.Colour.ToOpenTK()));
+                    float stY1 = y + (lineHeight - st.Thickness) / 2f;
+                    float stY2 = stY1 + st.Thickness;
+                    if (stY1 < Height && stY2 > 0)
+                    {
+                        decorationVertices.Add(DecorationQuad(decXStart.Value, MathF.Max(stY1, 0f), decWidth, MathF.Min(stY2, Height) - MathF.Max(stY1, 0f), st.Colour.ToOpenTK()));
+                    }
                 }
             }
 
@@ -338,6 +376,13 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
 
         Vertices = vertices.ToArray();
         DecorationVertices = decorationVertices.ToArray();
+
+        if (truncated && !_wasTruncated)
+        {
+            string preview = _textToDisplay.Length > 40 ? string.Concat(_textToDisplay.AsSpan(0, 40), "...") : _textToDisplay;
+            Logger.Warning($"TextGraphic text is truncated ({Width}x{Height}px): \"{preview}\"");
+        }
+        _wasTruncated = truncated;
     }
 
     private static VertexNoTexture[] DecorationQuad(float x, float y, float width, float height, OpenTK.Mathematics.Color4 colour)
