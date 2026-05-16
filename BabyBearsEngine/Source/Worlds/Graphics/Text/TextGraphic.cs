@@ -260,12 +260,12 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         List<Vertex> vertices = [];
         List<VertexNoTexture> decorationVertices = [];
 
-        var colorTK = Colour.ToOpenTK();
+        var glColour = Colour.ToOpenTK();
         float lineHeight = ScaleY * _fontStruct.HighestChar;
         IReadOnlyList<LineInfo> lines = GetLines();
         float totalHeight = lines.Count * (lineHeight + _extraLineSpacing);
 
-        float y = MathF.Round(VAlignment switch
+        float lineTop = MathF.Round(VAlignment switch
         {
             VAlignment.Top or VAlignment.Full => 0,
             VAlignment.Centred => (Height - totalHeight) / 2,
@@ -274,13 +274,15 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         });
 
         int globalCharIndex = 0;
+        // Cast to long: _firstCharToDraw + int.MaxValue would overflow int.
         long visibleEnd = (long)_firstCharToDraw + _numCharsToDraw;
 
         bool truncated = false;
 
         foreach (LineInfo line in lines)
         {
-            if (y >= Height)
+            // Lines beyond Height are cut off; flag truncation if visible chars remain.
+            if (lineTop >= Height)
             {
                 if (globalCharIndex < visibleEnd)
                 {
@@ -292,7 +294,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
 
             float lineWidth = TextLayout.MeasureLine(line.Content, _fontStruct, ScaleX, _extraSpaceWidth, _extraCharSpacing);
 
-            float x = MathF.Round(HAlignment switch
+            float charLeft = MathF.Round(HAlignment switch
             {
                 HAlignment.Left or HAlignment.Full => 0,
                 HAlignment.Centred => (Width - lineWidth) / 2,
@@ -300,78 +302,103 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
                 _ => throw new Exception($"TextGraphic/SetVerticesSimple: HAlignment {HAlignment} was not catered for."),
             });
 
-            float? decXStart = null;
-            float decXEnd = 0f;
+            // Track the x-span of rendered characters on this line for decoration quads.
+            float? decorationLeft = null;
+            float decorationRight = 0f;
 
             foreach (char c in line.Content)
             {
-                var source = _fontStruct.GetCharPositionNormalised(c);
-                float w = _fontStruct.GetCharPosition(c).Size.X * ScaleX;
-                float advance = w + (c == ' ' ? _extraSpaceWidth : _extraCharSpacing);
+                var atlasUV = _fontStruct.GetCharPositionNormalised(c);
+                float glyphWidth = _fontStruct.GetCharPosition(c).Size.X * ScaleX;
+                float charAdvance = glyphWidth + (c == ' ' ? _extraSpaceWidth : _extraCharSpacing);
 
                 if (globalCharIndex >= _firstCharToDraw && globalCharIndex < visibleEnd)
                 {
-                    float x1 = x, y1 = y, x2 = x + w, y2 = y + lineHeight;
+                    float quadLeft   = charLeft;
+                    float quadTop    = lineTop;
+                    float quadRight  = charLeft + glyphWidth;
+                    float quadBottom = lineTop + lineHeight;
 
-                    if (w > 0 && x2 > 0 && x1 < Width && y2 > 0 && y1 < Height)
+                    if (glyphWidth > 0 && quadRight > 0 && quadLeft < Width && quadBottom > 0 && quadTop < Height)
                     {
-                        float u1 = source.Min.X, v1 = source.Min.Y, u2 = source.Max.X, v2 = source.Max.Y;
+                        float uvLeft   = atlasUV.Min.X;
+                        float uvTop    = atlasUV.Min.Y;
+                        float uvRight  = atlasUV.Max.X;
+                        float uvBottom = atlasUV.Max.Y;
 
-                        if (x1 < 0)      { truncated = true; u1 += (u2 - u1) * -x1 / (x2 - x1); x1 = 0; }
-                        if (x2 > Width)  { truncated = true; u2 -= (u2 - u1) * (x2 - Width) / (x2 - x1); x2 = Width; }
-                        if (y1 < 0)      { truncated = true; v1 += (v2 - v1) * -y1 / (y2 - y1); y1 = 0; }
-                        if (y2 > Height) { truncated = true; v2 -= (v2 - v1) * (y2 - Height) / (y2 - y1); y2 = Height; }
-
-                        if (!decXStart.HasValue)
+                        // Clip the quad to graphic bounds, adjusting UVs proportionally to sample only the visible slice.
+                        if (quadLeft < 0)
                         {
-                            decXStart = x1;
+                            truncated = true;
+                            uvLeft += (uvRight - uvLeft) * -quadLeft / (quadRight - quadLeft);
+                            quadLeft = 0;
+                        }
+                        if (quadRight > Width)
+                        {
+                            truncated = true;
+                            uvRight -= (uvRight - uvLeft) * (quadRight - Width) / (quadRight - quadLeft);
+                            quadRight = Width;
+                        }
+                        if (quadTop < 0)
+                        {
+                            truncated = true;
+                            uvTop += (uvBottom - uvTop) * -quadTop / (quadBottom - quadTop);
+                            quadTop = 0;
+                        }
+                        if (quadBottom > Height)
+                        {
+                            truncated = true;
+                            uvBottom -= (uvBottom - uvTop) * (quadBottom - Height) / (quadBottom - quadTop);
+                            quadBottom = Height;
                         }
 
-                        decXEnd = MathF.Min(x + advance, Width);
+                        decorationLeft ??= quadLeft;
+                        // Advance covers spacing after the glyph; decorations span the full advance, not just glyph width.
+                        decorationRight = MathF.Min(charLeft + charAdvance, Width);
 
                         vertices.Add(GeometryHelper.QuadToTris(
-                            new Vertex(x1, y1, colorTK, u1, v1),
-                            new Vertex(x2, y1, colorTK, u2, v1),
-                            new Vertex(x1, y2, colorTK, u1, v2),
-                            new Vertex(x2, y2, colorTK, u2, v2)
+                            new Vertex(quadLeft,  quadTop,    glColour, uvLeft,  uvTop),
+                            new Vertex(quadRight, quadTop,    glColour, uvRight, uvTop),
+                            new Vertex(quadLeft,  quadBottom, glColour, uvLeft,  uvBottom),
+                            new Vertex(quadRight, quadBottom, glColour, uvRight, uvBottom)
                         ));
                     }
-                    else if (w > 0)
+                    else if (glyphWidth > 0) // zero-width glyphs (pure spacing) don't count as truncation
                     {
                         truncated = true;
                     }
                 }
 
-                x += advance;
+                charLeft += charAdvance;
                 globalCharIndex++;
             }
 
-            if (decXStart.HasValue)
+            if (decorationLeft.HasValue)
             {
-                float decWidth = decXEnd - decXStart.Value;
+                float decorationWidth = decorationRight - decorationLeft.Value;
 
-                if (_underline is TextDecoration ul)
+                if (_underline is TextDecoration underline)
                 {
-                    float ulY1 = y + lineHeight;
-                    float ulY2 = ulY1 + ul.Thickness;
-                    if (ulY1 < Height && ulY2 > 0)
+                    float underlineTop    = lineTop + lineHeight;
+                    float underlineBottom = underlineTop + underline.Thickness;
+                    if (underlineTop < Height && underlineBottom > 0)
                     {
-                        decorationVertices.Add(DecorationQuad(decXStart.Value, MathF.Max(ulY1, 0f), decWidth, MathF.Min(ulY2, Height) - MathF.Max(ulY1, 0f), ul.Colour.ToOpenTK()));
+                        decorationVertices.Add(DecorationQuad(decorationLeft.Value, MathF.Max(underlineTop, 0f), decorationWidth, MathF.Min(underlineBottom, Height) - MathF.Max(underlineTop, 0f), underline.Colour.ToOpenTK()));
                     }
                 }
 
-                if (_strikethrough is TextDecoration st)
+                if (_strikethrough is TextDecoration strikethrough)
                 {
-                    float stY1 = y + (lineHeight - st.Thickness) / 2f;
-                    float stY2 = stY1 + st.Thickness;
-                    if (stY1 < Height && stY2 > 0)
+                    float strikethroughTop    = lineTop + (lineHeight - strikethrough.Thickness) / 2f;
+                    float strikethroughBottom = strikethroughTop + strikethrough.Thickness;
+                    if (strikethroughTop < Height && strikethroughBottom > 0)
                     {
-                        decorationVertices.Add(DecorationQuad(decXStart.Value, MathF.Max(stY1, 0f), decWidth, MathF.Min(stY2, Height) - MathF.Max(stY1, 0f), st.Colour.ToOpenTK()));
+                        decorationVertices.Add(DecorationQuad(decorationLeft.Value, MathF.Max(strikethroughTop, 0f), decorationWidth, MathF.Min(strikethroughBottom, Height) - MathF.Max(strikethroughTop, 0f), strikethrough.Colour.ToOpenTK()));
                     }
                 }
             }
 
-            y += lineHeight + _extraLineSpacing;
+            lineTop += lineHeight + _extraLineSpacing;
         }
 
         Vertices = vertices.ToArray();
