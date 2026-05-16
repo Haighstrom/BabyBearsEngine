@@ -64,6 +64,14 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
     public HAlignment HAlignment { get; set; } = HAlignment.Centred;
     public VAlignment VAlignment { get; set; } = VAlignment.Centred;
 
+    public Point MeasureString(string text)
+    {
+        var raw = _fontStruct.MeasureString(text);
+        return new Point(raw.X * ScaleX, raw.Y * ScaleY);
+    }
+
+    public Point MeasureString() => MeasureString(_textToDisplay);
+
     private void SetVerticesSimple()
     {
         //foreach (var sg in _vertGroups)
