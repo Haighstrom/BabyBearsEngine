@@ -26,10 +26,12 @@ public class Entity : ContainerEntity, IMouseInteractable
             _clickController = new(this, HoverDelaySeconds);
             _clickController.HoverCancelled += OnStopMouseHovered;
             _clickController.Hovered += OnMouseHovered;
-            _clickController.LeftPressed += OnLeftPressed;
             _clickController.LeftClicked += OnLeftClicked;
+            _clickController.LeftPressed += OnLeftPressed;
             _clickController.MouseEntered += OnMouseEntered;
             _clickController.MouseExited += OnMouseExited;
+            _clickController.RightClicked += OnRightClicked;
+            _clickController.RightPressed += OnRightPressed;
             Add(_clickController);
         }
     }
@@ -80,11 +82,11 @@ public class Entity : ContainerEntity, IMouseInteractable
         base.Render(ref projection, ref mv);
     }
 
-    /// <summary>Raised when the left mouse button is pressed while the cursor is over this entity. Requires <c>clickable: true</c>.</summary>
-    public event EventHandler? LeftPressed;
-
     /// <summary>Raised when a left click completes on this entity (pressed and released while over it). Requires <c>clickable: true</c>.</summary>
     public event EventHandler? LeftClicked;
+
+    /// <summary>Raised when the left mouse button is pressed while the cursor is over this entity. Requires <c>clickable: true</c>.</summary>
+    public event EventHandler? LeftPressed;
 
     /// <summary>Raised when the cursor enters this entity's bounds. Requires <c>clickable: true</c>.</summary>
     public event EventHandler? MouseEntered;
@@ -98,16 +100,22 @@ public class Entity : ContainerEntity, IMouseInteractable
     /// <summary>Raised when the cursor moves off this entity after a hover. Requires <c>clickable: true</c>.</summary>
     public event EventHandler? MouseHoverStopped;
 
-    /// <summary>Raises <see cref="LeftPressed"/>. Override to customise without subscribing.</summary>
-    protected virtual void OnLeftPressed()
-    {
-        LeftPressed?.Invoke(this, EventArgs.Empty);
-    }
+    /// <summary>Raised when a right click completes on this entity (pressed and released while over it). Requires <c>clickable: true</c>.</summary>
+    public event EventHandler? RightClicked;
+
+    /// <summary>Raised when the right mouse button is pressed while the cursor is over this entity. Requires <c>clickable: true</c>.</summary>
+    public event EventHandler? RightPressed;
 
     /// <summary>Raises <see cref="LeftClicked"/>. Override to customise without subscribing.</summary>
     protected virtual void OnLeftClicked()
     {
         LeftClicked?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Raises <see cref="LeftPressed"/>. Override to customise without subscribing.</summary>
+    protected virtual void OnLeftPressed()
+    {
+        LeftPressed?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>Raises <see cref="MouseEntered"/>. Override to customise without subscribing.</summary>
@@ -126,6 +134,18 @@ public class Entity : ContainerEntity, IMouseInteractable
     protected virtual void OnMouseHovered()
     {
         MouseHovered?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Raises <see cref="RightClicked"/>. Override to customise without subscribing.</summary>
+    protected virtual void OnRightClicked()
+    {
+        RightClicked?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Raises <see cref="RightPressed"/>. Override to customise without subscribing.</summary>
+    protected virtual void OnRightPressed()
+    {
+        RightPressed?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>Raises <see cref="MouseHoverStopped"/>. Override to customise without subscribing.</summary>

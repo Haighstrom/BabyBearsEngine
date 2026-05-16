@@ -30,9 +30,17 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
         MouseDownOutside,
     }
 
+    private enum RightClickState
+    {
+        None,
+        DownInside,
+        DownOutside,
+    }
+
     private ClickState _clickState = ClickState.None;
     private double _hoverTimeElapsed = 0;
     private bool _mouseIsOver = false;
+    private RightClickState _rightClickState = RightClickState.None;
 
     public bool Active { get; set; } = true;
 
@@ -45,10 +53,12 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
 
     public event Action? HoverCancelled;
     public event Action? Hovered;
-    public event Action? LeftPressed;
     public event Action? LeftClicked;
+    public event Action? LeftPressed;
     public event Action? MouseEntered;
     public event Action? MouseExited;
+    public event Action? RightClicked;
+    public event Action? RightPressed;
 
     /// <summary>
     /// Called by <see cref="MouseSolver"/> to inform this controller whether it is
@@ -158,6 +168,50 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
 
             default:
                 throw new InvalidOperationException("Invalid click state: " + _clickState);
+        }
+
+        switch (_rightClickState)
+        {
+            case RightClickState.None:
+                if (_mouseIsOver && Mouse.RightPressed)
+                {
+                    _rightClickState = RightClickState.DownInside;
+                    RightPressed?.Invoke();
+                }
+                break;
+
+            case RightClickState.DownInside:
+                if (!_mouseIsOver)
+                {
+                    if (Mouse.RightReleased)
+                    {
+                        _rightClickState = RightClickState.None;
+                    }
+                    else
+                    {
+                        _rightClickState = RightClickState.DownOutside;
+                    }
+                }
+                else if (Mouse.RightReleased)
+                {
+                    _rightClickState = RightClickState.None;
+                    RightClicked?.Invoke();
+                }
+                break;
+
+            case RightClickState.DownOutside:
+                if (Mouse.RightReleased)
+                {
+                    _rightClickState = RightClickState.None;
+                }
+                else if (_mouseIsOver)
+                {
+                    _rightClickState = RightClickState.DownInside;
+                }
+                break;
+
+            default:
+                throw new InvalidOperationException("Invalid right click state: " + _rightClickState);
         }
     }
 }

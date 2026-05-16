@@ -65,12 +65,14 @@ public class ClickControllerTests
         _controller = new(new FakeTarget());
         _events = [];
 
+        _controller.HoverCancelled += () => _events.Add("HoverCancelled");
+        _controller.Hovered += () => _events.Add("Hovered");
+        _controller.LeftClicked += () => _events.Add("LeftClicked");
+        _controller.LeftPressed += () => _events.Add("LeftPressed");
         _controller.MouseEntered += () => _events.Add("MouseEntered");
         _controller.MouseExited += () => _events.Add("MouseExited");
-        _controller.LeftPressed += () => _events.Add("LeftPressed");
-        _controller.LeftClicked += () => _events.Add("LeftClicked");
-        _controller.Hovered += () => _events.Add("Hovered");
-        _controller.HoverCancelled += () => _events.Add("HoverCancelled");
+        _controller.RightClicked += () => _events.Add("RightClicked");
+        _controller.RightPressed += () => _events.Add("RightPressed");
     }
 
     [TestCleanup]
@@ -80,6 +82,14 @@ public class ClickControllerTests
     {
         _mouse.LeftPressed = leftPressed;
         _mouse.LeftReleased = leftReleased;
+        _controller.SetMouseOver(isOver);
+        _controller.Update(elapsed);
+    }
+
+    private void RightFrame(bool isOver, bool rightPressed = false, bool rightReleased = false, double elapsed = 0.016)
+    {
+        _mouse.RightPressed = rightPressed;
+        _mouse.RightReleased = rightReleased;
         _controller.SetMouseOver(isOver);
         _controller.Update(elapsed);
     }
@@ -303,5 +313,164 @@ public class ClickControllerTests
         Frame(isOver: false, leftReleased: true);
 
         CollectionAssert.AreEqual(new[] { "MouseEntered", "LeftPressed", "MouseExited" }, _events);
+    }
+
+    // Right button — None state
+
+    [TestMethod]
+    public void Update_FromNone_MouseOverWithRightPressed_RaisesMouseEnteredThenRightPressed()
+    {
+        RightFrame(isOver: true, rightPressed: true);
+
+        CollectionAssert.AreEqual(new[] { "MouseEntered", "RightPressed" }, _events);
+    }
+
+    // Right button — MouseOver state
+
+    [TestMethod]
+    public void Update_FromMouseOver_RightPressed_RaisesRightPressed()
+    {
+        RightFrame(isOver: true);
+        _events.Clear();
+
+        RightFrame(isOver: true, rightPressed: true);
+
+        CollectionAssert.AreEqual(new[] { "RightPressed" }, _events);
+    }
+
+    // Right button — Hovering state
+    // Note: the main state machine only transitions out of Hovering on LeftPressed,
+    // so a right press while hovering does not cancel the hover or raise HoverCancelled.
+
+    [TestMethod]
+    public void Update_FromHovering_RightPressed_RaisesRightPressed()
+    {
+        RightFrame(isOver: true);
+        RightFrame(isOver: true, elapsed: 0.5);
+        _events.Clear();
+
+        RightFrame(isOver: true, rightPressed: true);
+
+        CollectionAssert.AreEqual(new[] { "RightPressed" }, _events);
+    }
+
+    // Right button — RightDownInside state
+    // Note: the main state machine stays in MouseOver while only the right button is held,
+    // so cursor exit fires MouseExited immediately (it does not wait for button release).
+
+    [TestMethod]
+    public void Update_FromRightDownInside_RightReleasedWhileOver_RaisesRightClicked()
+    {
+        RightFrame(isOver: true);
+        RightFrame(isOver: true, rightPressed: true);
+        _events.Clear();
+
+        RightFrame(isOver: true, rightReleased: true);
+
+        CollectionAssert.AreEqual(new[] { "RightClicked" }, _events);
+    }
+
+    [TestMethod]
+    public void Update_FromRightDownInside_MouseExitedNoRelease_RaisesMouseExited()
+    {
+        RightFrame(isOver: true);
+        RightFrame(isOver: true, rightPressed: true);
+        _events.Clear();
+
+        RightFrame(isOver: false);
+
+        CollectionAssert.AreEqual(new[] { "MouseExited" }, _events);
+    }
+
+    [TestMethod]
+    public void Update_FromRightDownInside_RightReleasedAndMouseExited_SameFrame_RaisesMouseExited_NotRightClicked()
+    {
+        RightFrame(isOver: true);
+        RightFrame(isOver: true, rightPressed: true);
+        _events.Clear();
+
+        RightFrame(isOver: false, rightReleased: true);
+
+        CollectionAssert.AreEqual(new[] { "MouseExited" }, _events);
+    }
+
+    // Right button — RightDownOutside state
+
+    [TestMethod]
+    public void Update_FromRightDownOutside_RightReleasedOutside_RaisesNoEvents()
+    {
+        RightFrame(isOver: true);
+        RightFrame(isOver: true, rightPressed: true);
+        RightFrame(isOver: false);
+        _events.Clear();
+
+        RightFrame(isOver: false, rightReleased: true);
+
+        Assert.IsEmpty(_events);
+    }
+
+    [TestMethod]
+    public void Update_FromRightDownOutside_MouseReenteredNoRelease_RaisesMouseEntered()
+    {
+        RightFrame(isOver: true);
+        RightFrame(isOver: true, rightPressed: true);
+        RightFrame(isOver: false);
+        _events.Clear();
+
+        RightFrame(isOver: true);
+
+        CollectionAssert.AreEqual(new[] { "MouseEntered" }, _events);
+    }
+
+    [TestMethod]
+    public void Update_FromRightDownOutside_MouseReenteredThenRightReleased_RaisesRightClicked()
+    {
+        RightFrame(isOver: true);
+        RightFrame(isOver: true, rightPressed: true);
+        RightFrame(isOver: false);
+        RightFrame(isOver: true);
+        _events.Clear();
+
+        RightFrame(isOver: true, rightReleased: true);
+
+        CollectionAssert.AreEqual(new[] { "RightClicked" }, _events);
+    }
+
+    [TestMethod]
+    public void Update_FromRightDownOutside_MouseReenteredAndRightReleased_SameFrame_RaisesMouseEntered_NotRightClicked()
+    {
+        // Release takes priority over re-entry in the RightDownOutside state, so no RightClicked.
+        // The main state machine sees the re-entry from None and fires MouseEntered.
+        RightFrame(isOver: true);
+        RightFrame(isOver: true, rightPressed: true);
+        RightFrame(isOver: false);
+        _events.Clear();
+
+        RightFrame(isOver: true, rightReleased: true);
+
+        CollectionAssert.AreEqual(new[] { "MouseEntered" }, _events);
+    }
+
+    // Right button — full event-sequence tests
+
+    [TestMethod]
+    public void SuccessfulRightClick_RaisesExpectedEventSequence()
+    {
+        RightFrame(isOver: true);
+        RightFrame(isOver: true, rightPressed: true);
+        RightFrame(isOver: true, rightReleased: true);
+
+        CollectionAssert.AreEqual(new[] { "MouseEntered", "RightPressed", "RightClicked" }, _events);
+    }
+
+    [TestMethod]
+    public void DragAndCancelRightClick_RaisesExpectedEventSequence()
+    {
+        RightFrame(isOver: true);
+        RightFrame(isOver: true, rightPressed: true);
+        RightFrame(isOver: false);
+        RightFrame(isOver: false, rightReleased: true);
+
+        CollectionAssert.AreEqual(new[] { "MouseEntered", "RightPressed", "MouseExited" }, _events);
     }
 }
