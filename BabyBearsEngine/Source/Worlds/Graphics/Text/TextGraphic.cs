@@ -19,8 +19,9 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
     private Colour _colour;
     private bool _multiline = false;
     private bool _verticesChanged = true;
-    private float _extraSpaceWidth = 0;
-    private float _extraLineSpacing = 0;
+    private float _extraCharSpacing = 0f;
+    private float _extraLineSpacing = 0f;
+    private float _extraSpaceWidth = 0f;
 
     public TextGraphic(FontDefinition fontDef, string textToDisplay, Colour colour, float x, float y, float width, float height)
         : base(x, y, width, height)
@@ -50,6 +51,36 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         set
         {
             _colour = value;
+            _verticesChanged = true;
+        }
+    }
+
+    public float ExtraCharacterSpacing
+    {
+        get => _extraCharSpacing;
+        set
+        {
+            _extraCharSpacing = value;
+            _verticesChanged = true;
+        }
+    }
+
+    public float ExtraLineSpacing
+    {
+        get => _extraLineSpacing;
+        set
+        {
+            _extraLineSpacing = value;
+            _verticesChanged = true;
+        }
+    }
+
+    public float ExtraSpaceWidth
+    {
+        get => _extraSpaceWidth;
+        set
+        {
+            _extraSpaceWidth = value;
             _verticesChanged = true;
         }
     }
@@ -97,19 +128,19 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
             return MeasureString(_textToDisplay);
         }
 
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(_textToDisplay, _fontStruct, Width, ScaleX, _extraSpaceWidth, _extraLineSpacing);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(_textToDisplay, _fontStruct, Width, ScaleX, _extraSpaceWidth, _extraCharSpacing);
         float maxLineWidth = 0f;
 
         foreach (LineInfo line in lines)
         {
-            float lw = TextLayout.MeasureLine(line.Content, _fontStruct, ScaleX, _extraSpaceWidth, _extraLineSpacing);
+            float lw = TextLayout.MeasureLine(line.Content, _fontStruct, ScaleX, _extraSpaceWidth, _extraCharSpacing);
             if (lw > maxLineWidth)
             {
                 maxLineWidth = lw;
             }
         }
 
-        return new Point(maxLineWidth, lines.Count * _fontStruct.HighestChar * ScaleY);
+        return new Point(maxLineWidth, lines.Count * (_fontStruct.HighestChar * ScaleY + _extraLineSpacing));
     }
 
     protected override void OnSizeChanged()
@@ -122,7 +153,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
     {
         if (_multiline)
         {
-            return TextLayout.ComputeLines(_textToDisplay, _fontStruct, Width, ScaleX, _extraSpaceWidth, _extraLineSpacing);
+            return TextLayout.ComputeLines(_textToDisplay, _fontStruct, Width, ScaleX, _extraSpaceWidth, _extraCharSpacing);
         }
 
         return [new LineInfo(_textToDisplay, 0, _textToDisplay.Length)];
@@ -135,7 +166,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
         var colorTK = Colour.ToOpenTK();
         float lineHeight = ScaleY * _fontStruct.HighestChar;
         IReadOnlyList<LineInfo> lines = GetLines();
-        float totalHeight = lines.Count * lineHeight;
+        float totalHeight = lines.Count * (lineHeight + _extraLineSpacing);
 
         float y = MathF.Round(VAlignment switch
         {
@@ -147,7 +178,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
 
         foreach (LineInfo line in lines)
         {
-            float lineWidth = TextLayout.MeasureLine(line.Content, _fontStruct, ScaleX, _extraSpaceWidth, _extraLineSpacing);
+            float lineWidth = TextLayout.MeasureLine(line.Content, _fontStruct, ScaleX, _extraSpaceWidth, _extraCharSpacing);
 
             float x = MathF.Round(HAlignment switch
             {
@@ -178,11 +209,11 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
                 }
                 else
                 {
-                    x += _extraLineSpacing;
+                    x += _extraCharSpacing;
                 }
             }
 
-            y += lineHeight;
+            y += lineHeight + _extraLineSpacing;
         }
 
         Vertices = vertices.ToArray();

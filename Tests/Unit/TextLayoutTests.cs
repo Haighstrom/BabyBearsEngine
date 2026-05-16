@@ -225,6 +225,20 @@ public class TextLayoutTests
         Assert.AreEqual("cd", lines[1].Content);
     }
 
+    [TestMethod]
+    public void ComputeLines_ExtraCharSpacing_AffectsWrapPoint()
+    {
+        // "ab cd": each non-space char = 10+2 = 12px, space = 10px
+        // Without extra: "ab cd" = 50px ≤ 55 → one line
+        // With extraCharSpacing=2: 12+12+10+12+12 = 58 > 55 → breaks at space → "ab"|"cd"
+        GeneratedFontStruct fs = MakeFontStruct("ab cd");
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines("ab cd", fs, 55f, 1f, 0f, 2f);
+
+        Assert.HasCount(2, lines);
+        Assert.AreEqual("ab", lines[0].Content);
+        Assert.AreEqual("cd", lines[1].Content);
+    }
+
     // MeasureLine
 
     [TestMethod]

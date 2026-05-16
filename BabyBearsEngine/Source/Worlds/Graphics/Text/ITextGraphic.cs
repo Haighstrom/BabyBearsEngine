@@ -7,6 +7,12 @@ public interface ITextGraphic : IRenderable
 {
     Colour Colour { get; set; }
 
+    float ExtraCharacterSpacing { get; set; }
+
+    float ExtraLineSpacing { get; set; }
+
+    float ExtraSpaceWidth { get; set; }
+
     FontDefinition Font { get; set; }
 
     bool Multiline { get; set; }
