@@ -401,8 +401,8 @@ public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
             lineTop += lineHeight + _extraLineSpacing;
         }
 
-        Vertices = vertices.ToArray();
-        DecorationVertices = decorationVertices.ToArray();
+        Vertices = [..vertices];
+        DecorationVertices = [..decorationVertices];
 
         if (truncated && !_wasTruncated)
         {
