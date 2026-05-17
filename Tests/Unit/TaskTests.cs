@@ -98,4 +98,38 @@ public class TaskTests
     {
         Assert.IsTrue(Task.DoNothing.IsComplete);
     }
+
+    [TestMethod]
+    public void Reset_CallsOnReset()
+    {
+        bool onResetCalled = false;
+        var task = new Task();
+        // Use a subclass to verify the hook fires.
+        var hookTask = new OnResetHookTask(() => onResetCalled = true);
+
+        hookTask.Reset();
+
+        Assert.IsTrue(onResetCalled);
+    }
+
+    [TestMethod]
+    public void Reset_ClearsStartedState_AndCallsOnReset()
+    {
+        int starts = 0;
+        int resets = 0;
+        var task = new OnResetHookTask(() => resets++);
+        task.TaskStarted += (_, _) => starts++;
+
+        task.Update(0.016);
+        task.Reset();
+        task.Update(0.016);
+
+        Assert.AreEqual(2, starts);
+        Assert.AreEqual(1, resets);
+    }
+
+    private sealed class OnResetHookTask(Action onReset) : Task
+    {
+        protected override void OnReset() => onReset();
+    }
 }

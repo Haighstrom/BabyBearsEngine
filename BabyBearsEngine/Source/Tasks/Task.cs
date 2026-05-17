@@ -57,11 +57,19 @@ public class Task : UpdateableBase, ITask
     }
 
     /// <inheritdoc/>
-    public virtual void Reset()
+    public void Reset()
     {
         _isCompleted = false;
         _isStarted = false;
+        OnReset();
     }
+
+    /// <summary>
+    /// Called by <see cref="Reset"/> after clearing internal state. Override to reset
+    /// subclass-specific state (timers, counters, flags) without needing to call
+    /// <c>base.Reset()</c>.
+    /// </summary>
+    protected virtual void OnReset() { }
 
     /// <inheritdoc/>
     public virtual void Start()

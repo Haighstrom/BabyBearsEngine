@@ -11,9 +11,8 @@ public class WaitTask(double duration) : Task
     public override bool IsComplete => _elapsed >= duration;
 
     /// <inheritdoc/>
-    public override void Reset()
+    protected override void OnReset()
     {
-        base.Reset();
         _elapsed = 0.0;
     }
 
