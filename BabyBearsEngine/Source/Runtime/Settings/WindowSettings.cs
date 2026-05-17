@@ -4,6 +4,11 @@ using Rect = BabyBearsEngine.Geometry.Rect;
 
 namespace BabyBearsEngine;
 
+/// <summary>
+/// Configuration for the game window: size, position, title, border style, cursor behaviour,
+/// VSync, and the OpenGL version to request. Set only the properties you want to change —
+/// all others have sensible defaults.
+/// </summary>
 public record class WindowSettings()
 {
     /// <summary>

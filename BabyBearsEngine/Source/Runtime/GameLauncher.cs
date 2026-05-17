@@ -6,10 +6,22 @@ using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine;
 
+/// <summary>
+/// Entry point for running a BabyBearsEngine game. Call <see cref="Run"/> once per process
+/// lifetime; it blocks the calling thread until the window closes. Sequential calls (after
+/// the previous run has returned) are supported.
+/// </summary>
 public static class GameLauncher
 {
     private static bool s_running = false;
 
+    /// <summary>
+    /// Initialises the engine, opens the game window, and runs the main loop until the window
+    /// is closed. Blocks the calling thread for the lifetime of the game.
+    /// </summary>
+    /// <param name="appSettings">Configuration for the window, rendering, input, logging, and other subsystems.</param>
+    /// <param name="worldFactory">Factory that produces the initial <see cref="IWorld"/> to load on startup.</param>
+    /// <exception cref="InvalidOperationException">Thrown if called while the engine is already running. Nested and concurrent calls are not supported.</exception>
     public static void Run(ApplicationSettings appSettings, Func<IWorld> worldFactory)
     {
         if (s_running)

@@ -8,8 +8,10 @@ namespace BabyBearsEngine;
 /// </summary>
 public record class ConsoleSettings()
 {
-    // Wide enough to fit the 70-character section headers/banners that the Logger emits, with
-    // margin for the scrollbar and window chrome at typical Windows console font sizes.
+    /// <summary>
+    /// Default console window width in pixels. Wide enough for the 70-character section headers
+    /// the Logger emits, with margin for the scrollbar and window chrome.
+    /// </summary>
     public const int DefaultWidth = 550;
 
     /// <summary>

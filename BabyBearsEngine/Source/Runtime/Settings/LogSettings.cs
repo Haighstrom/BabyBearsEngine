@@ -1,7 +1,13 @@
 namespace BabyBearsEngine;
 
+/// <summary>
+/// Configuration for the logging subsystem: which severities flow to the console, the main
+/// log file, and the dedicated error file; file-handling modes; metadata formatting; and
+/// GL-error deduplication.
+/// </summary>
 public record class LogSettings()
 {
+    /// <summary>The default log settings: all levels to console, "log.log" as the main file, "errors.log" for errors.</summary>
     public static LogSettings Default => new();
 
     /// <summary>
