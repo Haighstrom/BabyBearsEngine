@@ -1,16 +1,52 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading;
 
 namespace BabyBearsEngine.IO;
 
+/// <summary>
+/// Static facade for file and directory operations. All file reads and writes are retried on
+/// <see cref="IOException"/> according to <see cref="Settings"/>, which guards against transient
+/// file locks from antivirus software, sync tools, etc.
+/// </summary>
 public static class Files
 {
-    public static void CopyFile(string sourceFile, string destinationFile)
-    {
-        File.Copy(sourceFile, destinationFile);
-    }
+    /// <summary>
+    /// Controls how many times a failed IO operation is retried and how long to wait between attempts.
+    /// Set this at startup; defaults to <see cref="IoSettings.Default"/>.
+    /// </summary>
+    public static IoSettings Settings { get; set; } = IoSettings.Default;
 
+    // Path helpers
+
+    /// <summary>
+    /// Returns the path to a per-application folder inside the current user's roaming AppData directory,
+    /// e.g. <c>%APPDATA%\MyGame</c>. The directory is not created automatically.
+    /// </summary>
+    public static string AppDataDirectory(string appName) =>
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), appName);
+
+    // Append
+
+    /// <summary>Appends each line to <paramref name="path"/>, creating the file if it does not exist.</summary>
+    public static void AppendLines(string path, IEnumerable<string> lines) =>
+        Retry(() => File.AppendAllLines(path, lines));
+
+    /// <summary>Appends <paramref name="text"/> to <paramref name="path"/>, creating the file if it does not exist.</summary>
+    public static void AppendText(string path, string text) =>
+        Retry(() => File.AppendAllText(path, text));
+
+    // Copy
+
+    /// <summary>Copies a single file. Throws if the destination already exists.</summary>
+    public static void CopyFile(string sourceFile, string destinationFile) =>
+        Retry(() => File.Copy(sourceFile, destinationFile));
+
+    /// <summary>Copies files from <paramref name="sourceDirectory"/> to <paramref name="destinationDirectory"/> according to <paramref name="options"/>.</summary>
     public static void CopyFiles(string sourceDirectory, string destinationDirectory, CopyOptions options)
     {
         if (!Directory.Exists(destinationDirectory))
@@ -20,7 +56,7 @@ public static class Files
 
         if (sourceDirectory.Last() == '/')
         {
-            sourceDirectory = sourceDirectory.Remove(sourceDirectory.Length - 1);
+            sourceDirectory = sourceDirectory[..^1];
         }
 
         if (destinationDirectory.Last() != '/')
@@ -28,9 +64,8 @@ public static class Files
             destinationDirectory += '/';
         }
 
-        var so = (options & CopyOptions.BringAll) > 0 ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+        SearchOption so = (options & CopyOptions.BringAll) > 0 ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
 
-        //copy subfolders first (if applicable)
         if ((options & CopyOptions.BringFolders) > 0)
         {
             foreach (string dir in Directory.GetDirectories(sourceDirectory, "*", so))
@@ -39,13 +74,15 @@ public static class Files
             }
         }
 
-        //copy files
         foreach (string file in Directory.GetFiles(sourceDirectory, "*", so))
         {
-            File.Copy(file, Path.Combine(destinationDirectory, file[(sourceDirectory.Length + 1)..]), (options & CopyOptions.Overwrite) > 0);
+            Retry(() => File.Copy(file, Path.Combine(destinationDirectory, file[(sourceDirectory.Length + 1)..]), (options & CopyOptions.Overwrite) > 0));
         }
     }
 
+    // Create / Delete
+
+    /// <summary>Creates a directory. Returns <c>false</c> if it already exists.</summary>
     public static bool CreateDirectory(string path)
     {
         if (Directory.Exists(path))
@@ -57,6 +94,7 @@ public static class Files
         return true;
     }
 
+    /// <summary>Deletes a directory and all its contents. No-ops if the directory does not exist.</summary>
     public static void DeleteDirectory(string path)
     {
         if (!Directory.Exists(path))
@@ -67,6 +105,7 @@ public static class Files
         Directory.Delete(path, true);
     }
 
+    /// <summary>Deletes a file. No-ops if the file does not exist.</summary>
     public static void DeleteFile(string path)
     {
         if (!File.Exists(path))
@@ -74,35 +113,41 @@ public static class Files
             return;
         }
 
-        File.Delete(path);
+        Retry(() => File.Delete(path));
     }
 
-    public static bool DirectoryExists(string path)
-    {
-        return Directory.Exists(path);
-    }
+    // Exists
 
-    public static bool FileExists(string path)
-    {
-        return File.Exists(path);
-    }
+    /// <summary>Returns <c>true</c> if the directory exists.</summary>
+    public static bool DirectoryExists(string path) =>
+        Directory.Exists(path);
 
-    public static List<string> GetDirectories(string path, bool includeSubDirectories)
-    {
-        return GetDirectories(path, includeSubDirectories, "*");
-    }
+    // ExecutingDirectory
 
+    /// <summary>Returns the directory containing the currently executing assembly.</summary>
+    public static string ExecutingDirectory() =>
+        AppContext.BaseDirectory;
+
+    // FileExists
+
+    /// <summary>Returns <c>true</c> if the file exists.</summary>
+    public static bool FileExists(string path) =>
+        File.Exists(path);
+
+    // Get
+
+    /// <summary>Returns the absolute paths of all directories under <paramref name="path"/>.</summary>
+    public static List<string> GetDirectories(string path, bool includeSubDirectories) =>
+        GetDirectories(path, includeSubDirectories, "*");
+
+    /// <summary>Returns the absolute paths of all directories under <paramref name="path"/> that match <paramref name="searchPattern"/>.</summary>
     public static List<string> GetDirectories(string path, bool includeSubDirectories, string searchPattern)
     {
-        var searchOption = includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-
-        var directories = Directory.GetDirectories(path, searchPattern, searchOption)
-            .Select(d => Path.GetFullPath(d))
-            .ToList();
-
-        return directories;
+        SearchOption searchOption = includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+        return [.. Directory.GetDirectories(path, searchPattern, searchOption).Select(Path.GetFullPath)];
     }
 
+    /// <summary>Extracts the directory component from a file path. Returns <c>null</c> if the path is a root.</summary>
     public static string? GetDirectoryFromFilePath(string path)
     {
         Ensure.ArgumentNotNullOrEmpty(path, "path");
@@ -116,4 +161,212 @@ public static class Files
             throw new ArgumentException($"Invalid path: {path}", nameof(path), ex);
         }
     }
+
+    /// <summary>Returns the absolute paths of all files under <paramref name="path"/>.</summary>
+    public static List<string> GetFiles(string path, bool includeSubDirectories, string searchPattern = "*")
+    {
+        SearchOption searchOption = includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+        return [.. Directory.GetFiles(path, searchPattern, searchOption).Select(Path.GetFullPath)];
+    }
+
+    // Read CSV
+
+    /// <summary>
+    /// Reads a CSV file and returns its contents as a 2D array of <typeparamref name="T"/>.
+    /// Values are converted using <see cref="CultureInfo.InvariantCulture"/>.
+    /// </summary>
+    public static T[,] ReadCsvFile<T>(string path, char separator = ',') where T : IConvertible
+    {
+        string[] lines = ReadLines(path);
+        if (lines.Length == 0)
+        {
+            return new T[0, 0];
+        }
+
+        string[][] cells = [.. lines.Select(l => l.Split(separator))];
+        int rowCount = cells.Length;
+        int colCount = cells.Max(c => c.Length);
+
+        T[,] result = new T[rowCount, colCount];
+        for (int row = 0; row < rowCount; row++)
+        {
+            for (int col = 0; col < cells[row].Length; col++)
+            {
+                result[row, col] = (T)Convert.ChangeType(cells[row][col], typeof(T), CultureInfo.InvariantCulture);
+            }
+        }
+        return result;
+    }
+
+    // Read JSON
+
+    /// <summary>
+    /// Reads a JSON file and deserializes it to <typeparamref name="T"/> using <see cref="Json.DefaultOptions"/>.
+    /// Throws if the file does not exist or the content is malformed.
+    /// </summary>
+    public static T ReadJsonFile<T>(string path) =>
+        Json.Deserialize<T>(ReadText(path));
+
+    // Read Lines
+
+    /// <summary>Reads all lines from <paramref name="path"/> and returns them as an array.</summary>
+    public static string[] ReadLines(string path) =>
+        Retry(() => File.ReadAllLines(path));
+
+    // Read Text
+
+    /// <summary>Reads the full text content of <paramref name="path"/>.</summary>
+    public static string ReadText(string path) =>
+        Retry(() => File.ReadAllText(path));
+
+    // Read XML
+
+    /// <summary>
+    /// Reads an XML file and deserializes it to <typeparamref name="T"/>.
+    /// Throws if the file does not exist or the content is malformed.
+    /// </summary>
+    public static T ReadXmlFile<T>(string path) =>
+        Xml.Deserialize<T>(ReadText(path));
+
+    // Retry (private)
+
+    private static void Retry(Action action)
+    {
+        int remaining = Settings.RetryCount;
+        while (true)
+        {
+            try
+            {
+                action();
+                return;
+            }
+            catch (IOException) when (remaining-- > 0)
+            {
+                Thread.Sleep(Settings.RetryDelay);
+            }
+        }
+    }
+
+    private static T Retry<T>(Func<T> action)
+    {
+        int remaining = Settings.RetryCount;
+        while (true)
+        {
+            try
+            {
+                return action();
+            }
+            catch (IOException) when (remaining-- > 0)
+            {
+                Thread.Sleep(Settings.RetryDelay);
+            }
+        }
+    }
+
+    // Try Read
+
+    /// <summary>
+    /// Attempts to deserialize a JSON file to <typeparamref name="T"/>.
+    /// Returns <c>default</c> if the file does not exist or the content cannot be deserialized.
+    /// </summary>
+    public static T? TryReadJsonFile<T>(string path)
+    {
+        try
+        {
+            return ReadJsonFile<T>(path);
+        }
+        catch (Exception)
+        {
+            return default;
+        }
+    }
+
+    /// <summary>
+    /// Attempts to read the full text content of <paramref name="path"/>.
+    /// Returns <c>null</c> if the file does not exist or cannot be read.
+    /// </summary>
+    public static string? TryReadText(string path)
+    {
+        try
+        {
+            return ReadText(path);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Attempts to deserialize an XML file to <typeparamref name="T"/>.
+    /// Returns <c>default</c> if the file does not exist or the content cannot be deserialized.
+    /// </summary>
+    public static T? TryReadXmlFile<T>(string path)
+    {
+        try
+        {
+            return ReadXmlFile<T>(path);
+        }
+        catch (Exception)
+        {
+            return default;
+        }
+    }
+
+    // Write CSV
+
+    /// <summary>
+    /// Writes a 2D array to a CSV file. Values are formatted using <see cref="CultureInfo.InvariantCulture"/>.
+    /// </summary>
+    public static void WriteCsvFile<T>(string path, T[,] data, char separator = ',') where T : IConvertible
+    {
+        int rowCount = data.GetLength(0);
+        int colCount = data.GetLength(1);
+        StringBuilder sb = new();
+
+        for (int row = 0; row < rowCount; row++)
+        {
+            if (row > 0)
+            {
+                sb.AppendLine();
+            }
+
+            for (int col = 0; col < colCount; col++)
+            {
+                if (col > 0)
+                {
+                    sb.Append(separator);
+                }
+
+                sb.Append(((IConvertible)data[row, col]).ToString(CultureInfo.InvariantCulture));
+            }
+        }
+
+        WriteText(path, sb.ToString());
+    }
+
+    // Write JSON
+
+    /// <summary>
+    /// Serializes <paramref name="data"/> to JSON using <see cref="Json.DefaultOptions"/> and writes it to <paramref name="path"/>.</summary>
+    public static void WriteJsonFile<T>(string path, T data) =>
+        WriteText(path, Json.Serialize(data));
+
+    // Write Lines
+
+    /// <summary>Writes <paramref name="lines"/> to <paramref name="path"/>, overwriting any existing content.</summary>
+    public static void WriteLines(string path, IEnumerable<string> lines) =>
+        Retry(() => File.WriteAllLines(path, lines));
+
+    // Write Text
+
+    /// <summary>Writes <paramref name="text"/> to <paramref name="path"/>, overwriting any existing content.</summary>
+    public static void WriteText(string path, string text) =>
+        Retry(() => File.WriteAllText(path, text));
+
+    // Write XML
+
+    /// <summary>Serializes <paramref name="data"/> to XML and writes it to <paramref name="path"/>.</summary>
+    public static void WriteXmlFile<T>(string path, T data) =>
+        WriteText(path, Xml.Serialize(data));
 }

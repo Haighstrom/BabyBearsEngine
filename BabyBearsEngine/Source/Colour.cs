@@ -78,6 +78,16 @@ public partial record struct Colour(byte R, byte G, byte B, byte A = 255) : IEqu
             (byte)Math.Clamp((int)Math.Round(from.B + (to.B - from.B) * t), 0, 255),
             (byte)Math.Clamp((int)Math.Round(from.A + (to.A - from.A) * t), 0, 255));
 
+    private static string NormaliseHex(string hex)
+    {
+        string s = hex.StartsWith('#') ? hex[1..] : hex;
+        if (s.Length is not (6 or 8))
+        {
+            throw new ArgumentException($"Invalid hex colour '{hex}'. Expected #RRGGBB or #RRGGBBAA.", nameof(hex));
+        }
+        return s;
+    }
+
     private static void RgbToHsl(float r, float g, float b, out float h, out float s, out float l)
     {
         float max = Math.Max(r, Math.Max(g, b));
@@ -138,6 +148,21 @@ public partial record struct Colour(byte R, byte G, byte B, byte A = 255) : IEqu
     {
     }
 
+    /// <summary>
+    /// Creates a colour from a hex string. Accepts <c>#RRGGBB</c> (A defaults to 255) or <c>#RRGGBBAA</c>.
+    /// The leading <c>#</c> is optional.
+    /// </summary>
+    /// <param name="hex">Hex string in the form <c>#RRGGBB</c> or <c>#RRGGBBAA</c>.</param>
+    /// <exception cref="ArgumentException">Thrown when the string is not a recognised hex colour format.</exception>
+    public Colour(string hex)
+        : this(
+            Convert.ToByte(NormaliseHex(hex)[0..2], 16),
+            Convert.ToByte(NormaliseHex(hex)[2..4], 16),
+            Convert.ToByte(NormaliseHex(hex)[4..6], 16),
+            NormaliseHex(hex).Length == 8 ? Convert.ToByte(NormaliseHex(hex)[6..8], 16) : (byte)255)
+    {
+    }
+
     /// <summary>Gets the red component as a normalised value in [0, 1].</summary>
     public readonly float NormalisedR => R / 255f;
     /// <summary>Gets the green component as a normalised value in [0, 1].</summary>
@@ -178,6 +203,9 @@ public partial record struct Colour(byte R, byte G, byte B, byte A = 255) : IEqu
 
     /// <summary>Returns this colour as a <see cref="System.Drawing.Color"/>.</summary>
     public readonly System.Drawing.Color ToColor => System.Drawing.Color.FromArgb(A, R, G, B);
+
+    /// <summary>Returns this colour as a hex string of the form <c>#RRGGBBAA</c>, always including the alpha channel.</summary>
+    public readonly string ToHex() => $"#{R:X2}{G:X2}{B:X2}{A:X2}";
 
     /// <summary>Returns this colour as an OpenTK <see cref="OpenTK.Mathematics.Color4"/>. Internal bridge for the platform layer.</summary>
     internal readonly OpenTK.Mathematics.Color4 ToOpenTK() => new(NormalisedR, NormalisedG, NormalisedB, NormalisedA);

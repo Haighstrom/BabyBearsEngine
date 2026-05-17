@@ -4,6 +4,7 @@ using BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
 using BabyBearsEngine.Demos.Source.Demos.CameraDemo;
 using BabyBearsEngine.Demos.Source.Demos.ClickDemo;
 using BabyBearsEngine.Demos.Source.Demos.ClickTheBearDemo;
+using BabyBearsEngine.Demos.Source.Demos.IODemo;
 using BabyBearsEngine.Demos.Source.Demos.GraphicDemo;
 using BabyBearsEngine.Demos.Source.Demos.KeyboardDemo;
 using BabyBearsEngine.Demos.Source.Demos.MouseDemo;
@@ -64,6 +65,7 @@ MenuEntry[] mainMenuEntries =
     new("Camera Demo",    () => new CameraDemoWorld(getMainMenu)),
     new("Click Demo",     () => new ClickDemoWorld(getMainMenu)),
     new("Click The Bear", () => new ClickTheBearDemoWorld(getMainMenu)),
+    new("IO Demo",        () => new IODemoWorld(getMainMenu)),
     new("Keyboard Demo",  () => new KeyboardDemoWorld(getMainMenu)),
     new("Mouse Demo",     () => new MouseDemoWorld(getMainMenu)),
     new("Tween Demo",    () => new TweenDemoWorld(getMainMenu)),
