@@ -1,36 +1,30 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text;
 
 namespace BabyBearsEngine;
 
+/// <summary>
+/// Static helpers for generating random values, selecting from collections, and shuffling or
+/// rotating lists. All methods share a single <see cref="Random"/> instance.
+/// </summary>
 public static class Randomisation
 {
     private static readonly Random s_random = new();
 
-    /// <summary>
-    /// returns true with probability (chanceOutOfAHundred)%
-    /// </summary>
+    /// <summary>Returns <c>true</c> with probability <paramref name="chanceOutOfAHundred"/>%.</summary>
     public static bool Chance(float chanceOutOfAHundred) => Rand(0, 100) < chanceOutOfAHundred;
 
-
-    /// <summary>
-    /// Returns one of a list of things, at random
-    /// </summary>
+    /// <summary>Returns a randomly selected element from <paramref name="things"/>.</summary>
     public static T Choose<T>(params T[] things) => things[Rand(things.Length)];
-    /// <summary>
-    /// Returns one of a list of things, at random
-    /// </summary>
+
+    /// <summary>Returns a randomly selected element from <paramref name="things"/>.</summary>
     public static T Choose<T>(List<T> things) => things[Rand(things.Count)];
 
-
-    /// <summary>
-    /// Returns a double [0,max)
-    /// </summary>
+    /// <summary>Returns a random <c>double</c> in [0, <paramref name="max"/>).</summary>
     public static double RandD(double max) => s_random.NextDouble() * max;
 
-    /// <summary>
-    /// returns an int [min,max)
-    /// </summary>
+    /// <summary>Returns a random <c>int</c> in [<paramref name="min"/>, <paramref name="max"/>).</summary>
+    /// <exception cref="Exception">Thrown when <paramref name="max"/> is less than <paramref name="min"/>.</exception>
     public static int Rand(int min, int max)
     {
         if (max < min)
@@ -40,9 +34,8 @@ public static class Randomisation
 
         return min + s_random.Next(max - min);
     }
-    /// <summary>
-    /// returns an int [0,max)
-    /// </summary>
+
+    /// <summary>Returns a random <c>int</c> in [0, <paramref name="max"/>). Returns 0 when <paramref name="max"/> is 0 or less.</summary>
     public static int Rand(int max)
     {
         if (max <= 0)
@@ -53,6 +46,8 @@ public static class Randomisation
         return s_random.Next(max);
     }
 
+    /// <summary>Returns a randomly selected enum value of type <typeparamref name="T"/>.</summary>
+    /// <exception cref="InvalidOperationException">Thrown when <typeparamref name="T"/> is not an enum type.</exception>
     public static T RandEnum<T>()
         where T : struct, IConvertible
     {
@@ -65,23 +60,18 @@ public static class Randomisation
         return (T)values.GetValue(s_random.Next(values.Length))!;
     }
 
-
+    /// <summary>Returns a random <see cref="Colour"/> with random R, G, B components and full opacity.</summary>
     public static Colour RandColour() => new((byte)Rand(255), (byte)Rand(255), (byte)Rand(255), 255);
 
-    //public static Point RandPoint() => new(RandF(2) - 1, RandF(2) - 1);
-
-    //public static Direction RandDirection()
-    //{
-    //    return Choose(Direction.Up, Direction.Right, Direction.Down, Direction.Left);
-    //}
-
-
+    /// <summary>Returns a random <c>float</c> in [0, <paramref name="max"/>).</summary>
     public static float RandF(int max) => (float)(s_random.NextDouble() * max);
 
+    /// <summary>Returns a random <c>float</c> in [0, <paramref name="max"/>).</summary>
     public static float RandF(float max) => (float)(s_random.NextDouble() * max);
 
     /// <summary>
-    /// returns a float in range [min,max]
+    /// Returns a random <c>float</c> in [<paramref name="min"/>, <paramref name="max"/>].
+    /// Returns <paramref name="max"/> when <paramref name="max"/> ≤ <paramref name="min"/>.
     /// </summary>
     public static float RandF(int min, int max)
     {
@@ -92,8 +82,10 @@ public static class Randomisation
         return
             min + (float)s_random.NextDouble() * (max - min);
     }
+
     /// <summary>
-    /// returns a float in range [min,max]
+    /// Returns a random <c>float</c> in [<paramref name="min"/>, <paramref name="max"/>].
+    /// Returns <paramref name="max"/> when <paramref name="max"/> ≤ <paramref name="min"/>.
     /// </summary>
     public static float RandF(float min, float max)
     {
@@ -104,6 +96,11 @@ public static class Randomisation
         return min + (float)s_random.NextDouble() * (max - min);
     }
 
+    /// <summary>
+    /// Returns a random <c>float</c> in [<paramref name="min"/>, <paramref name="max"/>] using an
+    /// approximate Gaussian distribution (cosine-based bell curve centred on the midpoint).
+    /// Returns <paramref name="max"/> when <paramref name="max"/> ≤ <paramref name="min"/>.
+    /// </summary>
     public static float RandGaussianApprox(float min, float max)
     {
         if (max <= min)
@@ -111,7 +108,7 @@ public static class Randomisation
             return max;
         }
 
-        //guassian = approx (1 + cos x)/2PI [SD = 1] 
+        //guassian = approx (1 + cos x)/2PI [SD = 1]
         //therefore (x+sinx)/2PI is integral, x from 0 to 2 PI gives 0-1 with normal distribution ish results
 
         double zeroTo2PI = 2 * Math.PI * s_random.NextDouble();
@@ -119,6 +116,7 @@ public static class Randomisation
         return min + (float)(zeroToOne * (max - min));
     }
 
+    /// <summary>Returns a random uppercase ASCII string of <paramref name="chars"/> characters.</summary>
     public static string RandUpperCaseString(int chars)
     {
         string def = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -130,22 +128,7 @@ public static class Randomisation
         return ret.ToString();
     }
 
-    //public static Colour RandSystemColour()
-    //{
-    //    List<Colour> colours = new();
-    //    foreach (PropertyInfo i in typeof(Colour).GetProperties(
-    //        BindingFlags.Static | BindingFlags.Public))
-    //    {
-    //        var v = i.GetValue(null);
-    //        if (v is Colour colour)
-    //            colours.Add(colour);
-    //    }
-    //    return Choose(colours);
-    //}
-
-    /// <summary>
-    /// Shuffle an array containing Ts
-    /// </summary>
+    /// <summary>Shuffles <paramref name="array"/> in-place using Fisher–Yates and returns it.</summary>
     public static T[] Shuffle<T>(T[] array)
     {
         for (int i = array.Length; i > 1; i--)
@@ -157,6 +140,8 @@ public static class Randomisation
         }
         return array;
     }
+
+    /// <summary>Shuffles <paramref name="list"/> in-place using Fisher–Yates and returns it.</summary>
     public static List<T> Shuffle<T>(List<T> list)
     {
         for (int i = list.Count; i > 1; i--)
@@ -168,11 +153,14 @@ public static class Randomisation
         }
         return list;
     }
+
+    /// <summary>Returns a randomly selected element from <paramref name="list"/>.</summary>
     public static T RandomElement<T>(this IList<T> list)
     {
         return list[Rand(list.Count)];
     }
 
+    /// <summary>Shuffles <paramref name="list"/> in-place using Fisher–Yates.</summary>
     public static void Shuffle<T>(this IList<T> list)
     {
         int n = list.Count;
@@ -184,6 +172,12 @@ public static class Randomisation
         }
     }
 
+    /// <summary>
+    /// Left-rotates <paramref name="list"/> in-place by <paramref name="amountShifted"/> positions:
+    /// the first <paramref name="amountShifted"/> elements move to the end and later elements shift
+    /// forward by the same amount.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="amountShifted"/> is ≤ 0.</exception>
     public static void Rotate<T>(this IList<T> list, int amountShifted = 1)
     {
         Ensure.ArgumentPositive(amountShifted, nameof(amountShifted));

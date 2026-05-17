@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace BabyBearsEngine;
 
+/// <summary>Guard helpers that throw on violated preconditions. Decorated with <see cref="DebuggerStepThroughAttribute"/> so the debugger steps into the caller rather than into the guard.</summary>
 public static class Ensure
 {
     /// <summary>
@@ -13,7 +14,7 @@ public static class Ensure
     /// </summary>
     /// <param name="argument">The argument.</param>
     /// <param name="argumentName">Name of the argument.</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="argument"/> is 0 or negative.</exception>
     [DebuggerStepThrough]
     public static void ArgumentPositive(float argument, string argumentName)
     {
@@ -28,7 +29,7 @@ public static class Ensure
     /// </summary>
     /// <param name="argument">The argument.</param>
     /// <param name="argumentName">Name of the argument.</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="argument"/> is negative.</exception>
     [DebuggerStepThrough]
     public static void ArgumentNotNegative(float argument, string argumentName)
     {
