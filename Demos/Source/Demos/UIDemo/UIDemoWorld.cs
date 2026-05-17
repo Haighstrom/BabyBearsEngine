@@ -40,12 +40,25 @@ internal class UIDemoWorld : DemoWorld
         fillButton.MouseExited += (_, _) => _filling = false;
         Add(fillButton);
 
-        Add(MakeLabel(LabelLeft, FirstRowY + 3 * RowHeight, 180, 50, "Tooltip:"));
-        Button tooltipTarget = new(WidgetLeft, FirstRowY + 3 * RowHeight, 180, 50,
+        Add(MakeLabel(LabelLeft, FirstRowY + 3 * RowHeight, 180, 50, "TextLabel:"));
+        TextLabel textLabel = new(WidgetLeft, FirstRowY + 3 * RowHeight, 200, 50,
+            new TextTheme(new FontDefinition("Times New Roman", 18), Colour.Black),
+            "Hello from TextLabel!",
+            backgroundColour: new Colour(240, 240, 240),
+            borderColour: Colour.Black);
+        Add(textLabel);
+        Button changeText = new(WidgetLeft + 210, FirstRowY + 3 * RowHeight + 10, 120, 30,
+            ButtonTheme.FromColour(new Colour(160, 200, 255)), "Change text");
+        changeText.LeftClicked += (_, _) =>
+            textLabel.Text = textLabel.Text == "Hello from TextLabel!" ? "Text changed!" : "Hello from TextLabel!";
+        Add(changeText);
+
+        Add(MakeLabel(LabelLeft, FirstRowY + 4 * RowHeight, 180, 50, "Tooltip:"));
+        Button tooltipTarget = new(WidgetLeft, FirstRowY + 4 * RowHeight, 180, 50,
             ButtonTheme.FromColour(new Colour(255, 200, 160)), "Hover for tooltip");
         Add(tooltipTarget);
 
-        SimpleToolTip tooltip = new(WidgetLeft, FirstRowY + 3 * RowHeight + 60, 180, 30,
+        SimpleToolTip tooltip = new(WidgetLeft, FirstRowY + 4 * RowHeight + 60, 180, 30,
             TooltipTheme.Default, "Hello from the tooltip!");
         Overlay.Add(tooltip);
 

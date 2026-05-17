@@ -5,7 +5,7 @@ using BabyBearsEngine.Worlds.Graphics;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 
-public interface ITextGraphic : IRenderable
+public interface ITextGraphic : IRenderable, IAddable
 {
     /// <summary>Rotation angle in degrees, applied around the graphic's centre.</summary>
     float Angle { get; set; }

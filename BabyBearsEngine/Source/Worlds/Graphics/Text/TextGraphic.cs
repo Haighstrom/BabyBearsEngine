@@ -10,7 +10,7 @@ using BabyBearsEngine.Worlds.Cameras;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 
-public sealed class TextGraphic : GraphicBase, IGraphic, IDisposable
+public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposable
 {
     private readonly StandardMatrixShaderProgram _shader = new();
     private readonly SolidColourShaderProgramMatrix _decorationShader = SolidColourShaderProgramMatrix.Instance;

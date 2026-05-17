@@ -6,7 +6,7 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// The <see cref="BorderPosition"/> controls whether the border draws inside, outside,
 /// or centred on the graphic's stated rectangle.
 /// </summary>
-public class BorderedRectangleGraphic : Entity
+public class BorderedRectangleGraphic : Entity, IBorderGraphic
 {
     private readonly ColourGraphic _border;
     private BorderPosition _borderPosition;

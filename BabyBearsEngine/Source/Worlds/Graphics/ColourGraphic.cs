@@ -8,7 +8,7 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// must be created on the engine thread after the GL context exists. Implements <see cref="IDisposable"/>
 /// to release those resources.
 /// </summary>
-public sealed class ColourGraphic : GraphicBase, IGraphic, IDisposable
+public sealed class ColourGraphic : GraphicBase, IGraphic, IColourGraphic, IDisposable
 {
     private readonly SolidColourShaderProgramMatrix _shader = SolidColourShaderProgramMatrix.Instance;
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
