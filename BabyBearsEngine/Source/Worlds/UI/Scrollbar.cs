@@ -32,6 +32,7 @@ public class Scrollbar : Entity
     /// <param name="theme">Visual styling.</param>
     /// <param name="thumbProportion">Thumb size as a fraction of the track length (along the scroll axis), in [0.05, 1]. Defaults to 0.2 (20%).</param>
     /// <param name="amountFilled">Initial scroll position in [0, 1]. Defaults to 0.</param>
+    /// <param name="scrollOnMouseWheel">When true, scroll wheel movement over this scrollbar adjusts <see cref="AmountFilled"/> by <see cref="WheelScrollStep"/> per notch and consumes the wheel event. Defaults to true.</param>
     public Scrollbar(
         float x,
         float y,
@@ -40,12 +41,18 @@ public class Scrollbar : Entity
         ScrollbarDirection direction,
         ScrollbarTheme theme,
         float thumbProportion = 0.2f,
-        float amountFilled = 0f)
-        : base(x, y, width, height)
+        float amountFilled = 0f,
+        bool scrollOnMouseWheel = true)
+        : base(x, y, width, height, clickable: scrollOnMouseWheel)
     {
         _direction = direction;
         _thumbProportion = Math.Clamp(thumbProportion, MinThumbProportion, 1f);
         _amountFilled = Math.Clamp(amountFilled, 0f, 1f);
+
+        if (scrollOnMouseWheel)
+        {
+            InterceptsMouseScroll = true;
+        }
 
         Add(theme.TrackFactory(new Rect(0, 0, width, height)));
 
@@ -68,12 +75,17 @@ public class Scrollbar : Entity
         Add(controller);
     }
 
-    internal Scrollbar(float width, float height, ScrollbarDirection direction, float thumbProportion = 0.2f, float amountFilled = 0f)
-        : base(0, 0, width, height)
+    internal Scrollbar(float width, float height, ScrollbarDirection direction, float thumbProportion = 0.2f, float amountFilled = 0f, bool scrollOnMouseWheel = false)
+        : base(0, 0, width, height, clickable: scrollOnMouseWheel)
     {
         _direction = direction;
         _thumbProportion = Math.Clamp(thumbProportion, MinThumbProportion, 1f);
         _amountFilled = Math.Clamp(amountFilled, 0f, 1f);
+
+        if (scrollOnMouseWheel)
+        {
+            InterceptsMouseScroll = true;
+        }
 
         (float tx, float ty, float tw, float th) = ComputeThumbRect(_amountFilled);
         _thumb = new Button(tx, ty, tw, th);
@@ -117,8 +129,22 @@ public class Scrollbar : Entity
         }
     }
 
+    /// <summary>
+    /// How much <see cref="AmountFilled"/> changes per scroll wheel notch when
+    /// <see cref="Entity.InterceptsMouseScroll"/> is true. Defaults to 0.1 (10% of the track).
+    /// Scrolling up decreases <see cref="AmountFilled"/>; scrolling down increases it.
+    /// </summary>
+    public float WheelScrollStep { get; set; } = 0.1f;
+
     /// <summary>Raised after <see cref="AmountFilled"/> changes — by user drag or direct assignment.</summary>
     public event EventHandler<ScrollChangedEventArgs>? ScrollChanged;
+
+    /// <inheritdoc/>
+    protected override void OnMouseScrolled(float delta)
+    {
+        base.OnMouseScrolled(delta);
+        AmountFilled -= Math.Sign(delta) * WheelScrollStep;
+    }
 
     private (float X, float Y, float W, float H) ComputeThumbRect(float amountFilled)
     {

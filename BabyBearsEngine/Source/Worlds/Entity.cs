@@ -31,6 +31,7 @@ public class Entity : ContainerEntity, IMouseInteractable
             _clickController.MouseExited += OnMouseExited;
             _clickController.RightClicked += OnRightClicked;
             _clickController.RightPressed += OnRightPressed;
+            _clickController.ScrollWheelMoved += OnMouseScrolled;
             Add(_clickController);
         }
     }
@@ -79,6 +80,24 @@ public class Entity : ContainerEntity, IMouseInteractable
             if (_clickController is not null)
             {
                 _clickController.DoubleClickWindow = value;
+            }
+        }
+    }
+
+    /// <summary>
+    /// When true and the mouse is over this entity, scroll wheel movement fires
+    /// <see cref="MouseScrolled"/> and sets <see cref="MouseSolver.WheelScrollConsumed"/>,
+    /// preventing world-level scroll handlers from also reacting to the wheel that frame.
+    /// Requires <c>clickable: true</c>.
+    /// </summary>
+    public bool InterceptsMouseScroll
+    {
+        get => _clickController?.InterceptsMouseScroll ?? false;
+        set
+        {
+            if (_clickController is not null)
+            {
+                _clickController.InterceptsMouseScroll = value;
             }
         }
     }
@@ -150,6 +169,9 @@ public class Entity : ContainerEntity, IMouseInteractable
     /// <summary>Raised when the cursor moves off this entity after a hover. Requires <c>clickable: true</c>.</summary>
     public event EventHandler? MouseHoverStopped;
 
+    /// <summary>Raised when the scroll wheel moves while the cursor is over this entity and <see cref="InterceptsMouseScroll"/> is true. Requires <c>clickable: true</c>.</summary>
+    public event EventHandler<MouseScrolledEventArgs>? MouseScrolled;
+
     /// <summary>Raised when a right click completes on this entity (pressed and released while over it). Requires <c>clickable: true</c>.</summary>
     public event EventHandler? RightClicked;
 
@@ -190,6 +212,12 @@ public class Entity : ContainerEntity, IMouseInteractable
     protected virtual void OnMouseHovered()
     {
         MouseHovered?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Raises <see cref="MouseScrolled"/>. Override to customise without subscribing.</summary>
+    protected virtual void OnMouseScrolled(float delta)
+    {
+        MouseScrolled?.Invoke(this, new MouseScrolledEventArgs(delta));
     }
 
     /// <summary>Raises <see cref="RightClicked"/>. Override to customise without subscribing.</summary>

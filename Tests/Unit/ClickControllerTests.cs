@@ -76,7 +76,11 @@ public class ClickControllerTests
     }
 
     [TestCleanup]
-    public void Cleanup() => EngineConfiguration.Reset();
+    public void Cleanup()
+    {
+        EngineConfiguration.Reset();
+        MouseSolver.Reset();
+    }
 
     private void Frame(bool isOver, bool leftPressed = false, bool leftReleased = false, double elapsed = 0.016)
     {
@@ -472,5 +476,90 @@ public class ClickControllerTests
         RightFrame(isOver: false, rightReleased: true);
 
         CollectionAssert.AreEqual(new[] { "MouseEntered", "RightPressed", "MouseExited" }, _events);
+    }
+
+    // -------------------------------------------------------------------------
+    // InterceptsMouseScroll
+
+    [TestMethod]
+    public void InterceptsMouseScroll_DefaultIsFalse()
+    {
+        Assert.IsFalse(_controller.InterceptsMouseScroll);
+    }
+
+    [TestMethod]
+    public void ScrollWheelMoved_WhenIntercepting_MouseOver_WheelMoved_Fires()
+    {
+        _controller.InterceptsMouseScroll = true;
+        float? received = null;
+        _controller.ScrollWheelMoved += d => received = d;
+
+        Frame(isOver: true);
+        _mouse.WheelDelta = 3f;
+        Frame(isOver: true);
+
+        Assert.AreEqual(3f, received);
+    }
+
+    [TestMethod]
+    public void ScrollWheelMoved_WhenNotIntercepting_DoesNotFire()
+    {
+        float? received = null;
+        _controller.ScrollWheelMoved += d => received = d;
+
+        Frame(isOver: true);
+        _mouse.WheelDelta = 3f;
+        Frame(isOver: true);
+
+        Assert.IsNull(received);
+    }
+
+    [TestMethod]
+    public void ScrollWheelMoved_WhenIntercepting_MouseNotOver_DoesNotFire()
+    {
+        _controller.InterceptsMouseScroll = true;
+        float? received = null;
+        _controller.ScrollWheelMoved += d => received = d;
+
+        _mouse.WheelDelta = 3f;
+        Frame(isOver: false);
+
+        Assert.IsNull(received);
+    }
+
+    [TestMethod]
+    public void ScrollWheelMoved_WheelDeltaZero_DoesNotFire()
+    {
+        _controller.InterceptsMouseScroll = true;
+        float? received = null;
+        _controller.ScrollWheelMoved += d => received = d;
+
+        Frame(isOver: true);
+        _mouse.WheelDelta = 0f;
+        Frame(isOver: true);
+
+        Assert.IsNull(received);
+    }
+
+    [TestMethod]
+    public void WheelScrollConsumed_SetWhenScrollIntercepted()
+    {
+        _controller.InterceptsMouseScroll = true;
+
+        Frame(isOver: true);
+        _mouse.WheelDelta = 1f;
+        Frame(isOver: true);
+
+        Assert.IsTrue(MouseSolver.WheelScrollConsumed);
+    }
+
+    [TestMethod]
+    public void WheelScrollConsumed_NotSetWhenNotIntercepting()
+    {
+        Frame(isOver: true);
+        _mouse.WheelDelta = 1f;
+        Frame(isOver: true);
+
+        Assert.IsFalse(MouseSolver.WheelScrollConsumed);
     }
 }

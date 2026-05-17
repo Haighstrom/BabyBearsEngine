@@ -14,6 +14,15 @@ internal static class MouseSolver
     // receiving hover events while the user is dragging.
     private static List<IClickController> s_lockedSet = [];
 
+    /// <summary>
+    /// True when an entity with <see cref="ClickController.InterceptsMouseScroll"/> consumed the
+    /// scroll wheel this frame. World-level scroll handlers (e.g. camera) should check this flag
+    /// after calling <c>base.Update()</c> and skip their scroll logic when it is set.
+    /// </summary>
+    public static bool WheelScrollConsumed { get; private set; } = false;
+
+    internal static void ConsumeWheelScroll() => WheelScrollConsumed = true;
+
     public static void RegisterMouseOver(IClickController clickController)
     {
         s_currentMousedOver.Add(clickController);
@@ -59,6 +68,7 @@ internal static class MouseSolver
 
         s_prevMousedOver = [.. s_currentMousedOver];
         s_currentMousedOver.Clear();
+        WheelScrollConsumed = false;
     }
 
     internal static void Reset()
@@ -66,5 +76,6 @@ internal static class MouseSolver
         s_prevMousedOver.Clear();
         s_currentMousedOver.Clear();
         s_lockedSet = [];
+        WheelScrollConsumed = false;
     }
 }

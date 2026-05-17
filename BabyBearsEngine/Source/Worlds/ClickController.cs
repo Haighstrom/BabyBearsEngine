@@ -59,6 +59,13 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
     public bool ClickThrough { get; set; } = false;
 
     /// <summary>
+    /// When true and the mouse is over this entity, scroll wheel movement fires
+    /// <see cref="ScrollWheelMoved"/> and marks <see cref="MouseSolver.WheelScrollConsumed"/>,
+    /// preventing world-level scroll handlers from also reacting to the wheel that frame.
+    /// </summary>
+    public bool InterceptsMouseScroll { get; set; } = false;
+
+    /// <summary>
     /// When true, a double-click also fires <see cref="LeftClicked"/> for the second click
     /// in addition to <see cref="LeftDoubleClicked"/>. Default is true. Set to false only
     /// when a double-click should suppress the single-click (e.g. double-click opens a dialog,
@@ -74,6 +81,7 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
 
     public event Action? HoverCancelled;
     public event Action? Hovered;
+    internal event Action<float>? ScrollWheelMoved;
     public event Action? LeftClicked;
     public event Action? LeftDoubleClicked;
     public event Action? LeftPressed;
@@ -251,6 +259,12 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
 
             default:
                 throw new InvalidOperationException("Invalid right click state: " + _rightClickState);
+        }
+
+        if (_mouseIsOver && InterceptsMouseScroll && Mouse.WheelDelta != 0f)
+        {
+            ScrollWheelMoved?.Invoke(Mouse.WheelDelta);
+            MouseSolver.ConsumeWheelScroll();
         }
     }
 }
