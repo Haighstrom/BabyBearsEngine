@@ -57,10 +57,18 @@ public class World : IWorld
     {
         foreach (var updateable in _container.GetUpdatables())
         {
+            if (!updateable.Active)
+            {
+                continue;
+            }
             updateable.Update(elapsed);
         }
         foreach (var updateable in _overlay.GetUpdatables())
         {
+            if (!updateable.Active)
+            {
+                continue;
+            }
             updateable.Update(elapsed);
         }
     }

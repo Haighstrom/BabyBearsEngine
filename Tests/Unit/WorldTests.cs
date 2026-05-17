@@ -141,10 +141,8 @@ public class WorldTests
         world.Update(0.016);
     }
 
-    // Note: World.Update does NOT skip inactive children (unlike ContainerEntity.Update).
-    // This is current behaviour — flag for follow-up if you want consistency.
     [TestMethod]
-    public void Update_DoesNotSkipInactiveChildren_CurrentBehaviour()
+    public void Update_SkipsInactiveChildren()
     {
         var world = new World();
         var inactive = new StubUpdateable { Active = false };
@@ -152,7 +150,7 @@ public class WorldTests
 
         world.Update(0.016);
 
-        Assert.AreEqual(1, inactive.UpdateCalls);
+        Assert.AreEqual(0, inactive.UpdateCalls);
     }
 
     // Overlay — a second container rendered/updated as a separate pass after the main scene.
