@@ -41,6 +41,7 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
     private double _hoverTimeElapsed = 0;
     private bool _mouseIsOver = false;
     private RightClickState _rightClickState = RightClickState.None;
+    private double _timeSinceLastClick = double.MaxValue;
 
     public bool Active { get; set; } = true;
 
@@ -51,9 +52,22 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
     /// </summary>
     public bool ClickThrough { get; set; } = false;
 
+    /// <summary>
+    /// When true, a double-click also fires <see cref="LeftClicked"/> for the second click
+    /// in addition to <see cref="LeftDoubleClicked"/>. Default is false.
+    /// </summary>
+    public bool DoubleClickTriggersSingleClick { get; set; } = false;
+
+    /// <summary>
+    /// Maximum time in seconds between two left-clicks for them to count as a double-click.
+    /// Default is 0.5 seconds.
+    /// </summary>
+    public double DoubleClickWindow { get; set; } = 0.5;
+
     public event Action? HoverCancelled;
     public event Action? Hovered;
     public event Action? LeftClicked;
+    public event Action? LeftDoubleClicked;
     public event Action? LeftPressed;
     public event Action? MouseEntered;
     public event Action? MouseExited;
@@ -72,6 +86,8 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
     /// <summary>Advance the controller state by <paramref name="elapsed"/> seconds.</summary>
     public void Update(double elapsed)
     {
+        _timeSinceLastClick += elapsed;
+
         if (target.HitRect.Contains(Mouse.ClientX, Mouse.ClientY))
         {
             MouseSolver.RegisterMouseOver(this);
@@ -150,7 +166,22 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
                 {
                     _clickState = ClickState.MouseOver;
                     _hoverTimeElapsed = 0;
-                    LeftClicked?.Invoke();
+
+                    if (_timeSinceLastClick <= DoubleClickWindow)
+                    {
+                        if (DoubleClickTriggersSingleClick)
+                        {
+                            LeftClicked?.Invoke();
+                        }
+
+                        LeftDoubleClicked?.Invoke();
+                    }
+                    else
+                    {
+                        LeftClicked?.Invoke();
+                    }
+
+                    _timeSinceLastClick = 0;
                 }
                 break;
 

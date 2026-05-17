@@ -27,6 +27,7 @@ public class Entity : ContainerEntity, IMouseInteractable
             _clickController.HoverCancelled += OnStopMouseHovered;
             _clickController.Hovered += OnMouseHovered;
             _clickController.LeftClicked += OnLeftClicked;
+            _clickController.LeftDoubleClicked += OnLeftDoubleClicked;
             _clickController.LeftPressed += OnLeftPressed;
             _clickController.MouseEntered += OnMouseEntered;
             _clickController.MouseExited += OnMouseExited;
@@ -48,6 +49,38 @@ public class Entity : ContainerEntity, IMouseInteractable
             if (_clickController is not null)
             {
                 _clickController.ClickThrough = value;
+            }
+        }
+    }
+
+    /// <summary>
+    /// When true, a double-click also fires <see cref="LeftClicked"/> for the second click
+    /// in addition to <see cref="LeftDoubleClicked"/>. Requires <c>clickable: true</c>.
+    /// </summary>
+    public bool DoubleClickTriggersSingleClick
+    {
+        get => _clickController?.DoubleClickTriggersSingleClick ?? false;
+        set
+        {
+            if (_clickController is not null)
+            {
+                _clickController.DoubleClickTriggersSingleClick = value;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Maximum time in seconds between two left-clicks for them to count as a double-click.
+    /// Default is 0.5 seconds. Requires <c>clickable: true</c>.
+    /// </summary>
+    public double DoubleClickWindow
+    {
+        get => _clickController?.DoubleClickWindow ?? 0.5;
+        set
+        {
+            if (_clickController is not null)
+            {
+                _clickController.DoubleClickWindow = value;
             }
         }
     }
@@ -85,6 +118,9 @@ public class Entity : ContainerEntity, IMouseInteractable
     /// <summary>Raised when a left click completes on this entity (pressed and released while over it). Requires <c>clickable: true</c>.</summary>
     public event EventHandler? LeftClicked;
 
+    /// <summary>Raised when two left-clicks occur within <see cref="DoubleClickWindow"/> seconds of each other. Requires <c>clickable: true</c>.</summary>
+    public event EventHandler? LeftDoubleClicked;
+
     /// <summary>Raised when the left mouse button is pressed while the cursor is over this entity. Requires <c>clickable: true</c>.</summary>
     public event EventHandler? LeftPressed;
 
@@ -110,6 +146,12 @@ public class Entity : ContainerEntity, IMouseInteractable
     protected virtual void OnLeftClicked()
     {
         LeftClicked?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Raises <see cref="LeftDoubleClicked"/>. Override to customise without subscribing.</summary>
+    protected virtual void OnLeftDoubleClicked()
+    {
+        LeftDoubleClicked?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>Raises <see cref="LeftPressed"/>. Override to customise without subscribing.</summary>

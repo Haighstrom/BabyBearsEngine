@@ -46,12 +46,13 @@ internal class ClickDemoWorld : DemoWorld
         Add(MakeHeader(x, y, "Click Events"));
 
         Button button = new(x + 70, y + 35, 210, 110, ButtonTheme.FromColour(new Colour(100, 160, 255)), "Click me!");
-        TextGraphic status = MakeLabel(x, y + 160, SectionW, 35, "- hover, click, or drag off -", 16);
+        TextGraphic status = MakeLabel(x, y + 160, SectionW, 35, "- hover, click, double-click -", 16);
 
         button.MouseEntered += (_, _) => status.Text = "MouseEntered";
         button.MouseExited += (_, _) => status.Text = "MouseExited";
         button.LeftPressed += (_, _) => status.Text = "LeftPressed";
         button.LeftClicked += (_, _) => status.Text = "LeftClicked";
+        button.LeftDoubleClicked += (_, _) => status.Text = "LeftDoubleClicked";
         button.MouseHovered += (_, _) => status.Text = "MouseHovered  (0.5 s dwell)";
         button.MouseHoverStopped += (_, _) => status.Text = "MouseHoverStopped";
 
