@@ -48,6 +48,18 @@ public class Button : Entity
         set => _textImage.Text = value;
     }
 
+    protected override void OnSizeChanged()
+    {
+        base.OnSizeChanged();
+        if (_background is not null)
+        {
+            _background.Width = Width;
+            _background.Height = Height;
+            _textImage.Width = Width;
+            _textImage.Height = Height;
+        }
+    }
+
     private void ApplyState()
     {
         _background.Colour = _pressed ? _theme.Pressed

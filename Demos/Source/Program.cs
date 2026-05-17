@@ -13,6 +13,7 @@ using BabyBearsEngine.Demos.Source.Demos.ShaderDemo;
 using BabyBearsEngine.Demos.Source.Demos.TextDemo;
 using BabyBearsEngine.Demos.Source.Demos.StencilDemo;
 using BabyBearsEngine.Demos.Source.Demos.TweenDemo;
+using BabyBearsEngine.Demos.Source.Demos.ScrollListDemo;
 using BabyBearsEngine.Demos.Source.Demos.UIDemo;
 using BabyBearsEngine.Demos.Source.Menu;
 
@@ -48,8 +49,9 @@ textSubmenuFactory = () => new MenuWorld(
 
 uiSubmenuFactory = () => new MenuWorld(
 [
-    new("UI Demo",   () => new UIDemoWorld(getUISubmenu)),
-    new("UI Demo 2", () => new UIDemoWorld2(getUISubmenu)),
+    new("UI Demo",        () => new UIDemoWorld(getUISubmenu)),
+    new("UI Demo 2",      () => new UIDemoWorld2(getUISubmenu)),
+    new("Scroll List",    () => new ScrollListDemoWorld(getUISubmenu)),
 ], backFactory: getMainMenu);
 
 graphicsSubmenuFactory = () => new MenuWorld(

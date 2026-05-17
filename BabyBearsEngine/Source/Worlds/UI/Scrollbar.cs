@@ -21,7 +21,7 @@ public class Scrollbar : Entity
 
     private readonly ScrollbarDirection _direction;
     private readonly Button _thumb;
-    private readonly float _thumbProportion;
+    private float _thumbProportion;
     private float _amountFilled = 0f;
 
     /// <param name="x">X position relative to the parent container.</param>
@@ -91,6 +91,20 @@ public class Scrollbar : Entity
         }
     }
 
+    /// <summary>
+    /// The thumb's size as a fraction of the track length, in [<see cref="MinThumbProportion"/>, 1].
+    /// Setting this resizes and repositions the thumb.
+    /// </summary>
+    public float ThumbProportion
+    {
+        get => _thumbProportion;
+        set
+        {
+            _thumbProportion = Math.Clamp(value, MinThumbProportion, 1f);
+            UpdateThumb();
+        }
+    }
+
     /// <summary>Raised after <see cref="AmountFilled"/> changes — by user drag or direct assignment.</summary>
     public event EventHandler<ScrollChangedEventArgs>? ScrollChanged;
 
@@ -137,6 +151,22 @@ public class Scrollbar : Entity
             float newLocalY = newWindowY - scrollbarWY;
             float clamped = Math.Clamp(newLocalY, 0, maxThumbY);
             AmountFilled = clamped / maxThumbY;
+        }
+    }
+
+    private void UpdateThumb()
+    {
+        if (_direction == ScrollbarDirection.Horizontal)
+        {
+            float thumbW = Width * _thumbProportion;
+            _thumb.Width = thumbW;
+            _thumb.X = (Width - thumbW) * _amountFilled;
+        }
+        else
+        {
+            float thumbH = Height * _thumbProportion;
+            _thumb.Height = thumbH;
+            _thumb.Y = (Height - thumbH) * _amountFilled;
         }
     }
 
