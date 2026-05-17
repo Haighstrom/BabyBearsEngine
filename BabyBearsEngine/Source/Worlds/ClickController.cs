@@ -46,6 +46,12 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
     public bool Active { get; set; } = true;
 
     /// <summary>
+    /// Seconds the cursor must remain over this region before <see cref="Hovered"/> fires.
+    /// Defaults to 0.5. Set to 0 to fire immediately on mouse enter.
+    /// </summary>
+    public double HoverDelay { get; set; } = timeToTriggerHover;
+
+    /// <summary>
     /// When true, <see cref="MouseSolver"/> continues propagating mouse-over state to
     /// overlapping controllers beneath this one instead of stopping here. Useful for
     /// transparent overlays that should not block clicks on entities below them.
@@ -127,7 +133,7 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
                 {
                     _hoverTimeElapsed += elapsed;
 
-                    if (_hoverTimeElapsed >= timeToTriggerHover)
+                    if (_hoverTimeElapsed >= HoverDelay)
                     {
                         _clickState = ClickState.Hovering;
                         Hovered?.Invoke();

@@ -9,8 +9,6 @@ namespace BabyBearsEngine.Worlds;
 /// </summary>
 public class Entity : ContainerEntity, IMouseInteractable
 {
-    private const double HoverDelaySeconds = 0.5;
-
     private readonly ClickController? _clickController = null;
 
     /// <param name="x">X position relative to parent.</param>
@@ -23,7 +21,7 @@ public class Entity : ContainerEntity, IMouseInteractable
     {
         if (clickable)
         {
-            _clickController = new(this, HoverDelaySeconds);
+            _clickController = new(this);
             _clickController.HoverCancelled += OnStopMouseHovered;
             _clickController.Hovered += OnMouseHovered;
             _clickController.LeftClicked += OnLeftClicked;
@@ -85,6 +83,22 @@ public class Entity : ContainerEntity, IMouseInteractable
         }
     }
 
+    /// <summary>
+    /// Seconds the cursor must rest over this entity before <see cref="MouseHovered"/> fires.
+    /// Default is 0.5. Set to 0 to fire immediately on mouse enter. Requires <c>clickable: true</c>.
+    /// </summary>
+    public double HoverDelay
+    {
+        get => _clickController?.HoverDelay ?? throw new InvalidOperationException("HoverDelay requires clickable: true.");
+        set
+        {
+            if (_clickController is not null)
+            {
+                _clickController.HoverDelay = value;
+            }
+        }
+    }
+
     /// <inheritdoc/>
     public Rect PositionOnScreen
     {
@@ -130,7 +144,7 @@ public class Entity : ContainerEntity, IMouseInteractable
     /// <summary>Raised when the cursor leaves this entity's bounds. Requires <c>clickable: true</c>.</summary>
     public event EventHandler? MouseExited;
 
-    /// <summary>Raised when the cursor has rested over this entity for the hover delay (~0.5 s). Requires <c>clickable: true</c>.</summary>
+    /// <summary>Raised when the cursor has rested over this entity for <see cref="HoverDelay"/> seconds. Requires <c>clickable: true</c>.</summary>
     public event EventHandler? MouseHovered;
 
     /// <summary>Raised when the cursor moves off this entity after a hover. Requires <c>clickable: true</c>.</summary>
