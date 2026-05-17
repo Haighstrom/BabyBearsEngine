@@ -68,6 +68,18 @@ public class Scrollbar : Entity
         Add(controller);
     }
 
+    internal Scrollbar(float width, float height, ScrollbarDirection direction, float thumbProportion = 0.2f, float amountFilled = 0f)
+        : base(0, 0, width, height)
+    {
+        _direction = direction;
+        _thumbProportion = Math.Clamp(thumbProportion, MinThumbProportion, 1f);
+        _amountFilled = Math.Clamp(amountFilled, 0f, 1f);
+
+        (float tx, float ty, float tw, float th) = ComputeThumbRect(_amountFilled);
+        _thumb = new Button(tx, ty, tw, th);
+        Add(_thumb);
+    }
+
     /// <summary>
     /// The thumb's position along the track, in [0, 1]. Values outside the range are clamped.
     /// Setting this raises <see cref="ScrollChanged"/> if the value changes.

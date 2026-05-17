@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using BabyBearsEngine.Geometry;
@@ -16,7 +16,7 @@ public class Tab : Entity
 {
     private readonly IGraphic _activeGraphic;
     private readonly IGraphic _inactiveGraphic;
-    private readonly TextGraphic _titleGraphic;
+    private readonly TextGraphic? _titleGraphic;
     private readonly List<IAddable> _content = [];
     private Entity? _contentPanel = null;
     private bool _isActive = false;
@@ -43,6 +43,17 @@ public class Tab : Entity
         Add(_titleGraphic);
     }
 
+    internal Tab(float width, float height, IGraphic activeGraphic, IGraphic inactiveGraphic)
+        : base(0, 0, width, height, clickable: true)
+    {
+        _activeGraphic = activeGraphic;
+        _activeGraphic.Visible = false;
+        Add(_activeGraphic);
+
+        _inactiveGraphic = inactiveGraphic;
+        Add(_inactiveGraphic);
+    }
+
     /// <summary>The content items owned by this tab.</summary>
     public ReadOnlyCollection<IAddable> Content => _content.AsReadOnly();
 
@@ -52,8 +63,8 @@ public class Tab : Entity
     /// <summary>The tab's label text.</summary>
     public string Title
     {
-        get => _titleGraphic.Text;
-        set => _titleGraphic.Text = value;
+        get => _titleGraphic?.Text ?? string.Empty;
+        set { _titleGraphic?.Text = value; }
     }
 
     /// <summary>

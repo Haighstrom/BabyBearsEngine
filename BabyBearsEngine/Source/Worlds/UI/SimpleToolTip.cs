@@ -20,8 +20,8 @@ namespace BabyBearsEngine.Worlds.UI;
 /// </remarks>
 public sealed class SimpleToolTip : Entity
 {
-    private readonly IGraphic _background;
-    private readonly TextGraphic _text;
+    private readonly IGraphic? _background;
+    private readonly TextGraphic? _text;
 
     /// <param name="x">Initial X position relative to the parent container.</param>
     /// <param name="y">Initial Y position relative to the parent container.</param>
@@ -45,11 +45,17 @@ public sealed class SimpleToolTip : Entity
         Add(_text);
     }
 
+    internal SimpleToolTip(float x, float y, float width, float height)
+        : base(x, y, width, height)
+    {
+        Visible = false;
+    }
+
     /// <summary>The tooltip's label text. Mutating this updates the rendered glyphs on the next frame.</summary>
     public string Text
     {
-        get => _text.Text;
-        set => _text.Text = value;
+        get => _text?.Text ?? string.Empty;
+        set { _text?.Text = value; }
     }
 
     /// <summary>Make the tooltip visible.</summary>

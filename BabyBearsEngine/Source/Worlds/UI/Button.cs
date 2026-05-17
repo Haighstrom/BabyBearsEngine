@@ -12,11 +12,11 @@ namespace BabyBearsEngine.Worlds.UI;
 /// </summary>
 public class Button : Entity
 {
-    private readonly IGraphic _background;
+    private readonly IGraphic? _background;
     private bool _hovered = false;
     private bool _pressed = false;
-    private readonly TextGraphic _textImage;
-    private readonly ButtonTheme _theme;
+    private readonly TextGraphic? _textImage;
+    private readonly ButtonTheme? _theme;
 
     /// <param name="x">X position relative to the parent container.</param>
     /// <param name="y">Y position relative to the parent container.</param>
@@ -41,11 +41,14 @@ public class Button : Entity
         Add(_textImage);
     }
 
+    internal Button(float x, float y, float width, float height)
+        : base(x, y, width, height, clickable: true) { }
+
     /// <summary>The button's label text. Mutating this updates the rendered glyphs on the next frame.</summary>
     public string Text
     {
-        get => _textImage.Text;
-        set => _textImage.Text = value;
+        get => _textImage?.Text ?? string.Empty;
+        set { _textImage?.Text = value; }
     }
 
     protected override void OnSizeChanged()
@@ -55,13 +58,21 @@ public class Button : Entity
         {
             _background.Width = Width;
             _background.Height = Height;
-            _textImage.Width = Width;
-            _textImage.Height = Height;
+            if (_textImage is not null)
+            {
+                _textImage.Width = Width;
+                _textImage.Height = Height;
+            }
         }
     }
 
     private void ApplyState()
     {
+        if (_background is null || _theme is null)
+        {
+            return;
+        }
+
         _background.Colour = _pressed ? _theme.Pressed
                            : _hovered ? _theme.Hover
                            : _theme.Idle;

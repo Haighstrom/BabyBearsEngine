@@ -12,7 +12,7 @@ namespace BabyBearsEngine.Worlds.UI;
 /// </summary>
 public class Checkbox : Button
 {
-    private readonly IGraphic _tick;
+    private readonly IGraphic? _tick;
     private bool _isChecked = false;
 
     /// <param name="x">X position relative to the parent container.</param>
@@ -31,6 +31,12 @@ public class Checkbox : Button
         Add(_tick);
     }
 
+    internal Checkbox(float x, float y, float width, float height, bool isChecked = false)
+        : base(x, y, width, height)
+    {
+        _isChecked = isChecked;
+    }
+
     /// <summary>True when the tick is shown. Setting this raises <see cref="Checked"/> or <see cref="Unchecked"/> if the value changes.</summary>
     public bool IsChecked
     {
@@ -43,7 +49,7 @@ public class Checkbox : Button
             }
 
             _isChecked = value;
-            _tick.Visible = value;
+            _tick?.Visible = value;
 
             if (value)
             {

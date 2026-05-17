@@ -50,6 +50,14 @@ public class CyclingValueButton<T> : Button
         Text = _formatter(CurrentValue);
     }
 
+    internal CyclingValueButton(IReadOnlyList<T> values, int initialIndex = 0)
+        : base(0, 0, 100, 30)
+    {
+        _values = values;
+        _formatter = v => v?.ToString() ?? string.Empty;
+        _currentIndex = initialIndex;
+    }
+
     /// <summary>The currently selected value.</summary>
     public T CurrentValue => _values[_currentIndex];
 
