@@ -51,6 +51,7 @@ uiSubmenuFactory = () => new MenuWorld(
 [
     new("UI Demo",        () => new UIDemoWorld(getUISubmenu)),
     new("UI Demo 2",      () => new UIDemoWorld2(getUISubmenu)),
+    new("Dropdown Demo",  () => new DropdownDemoWorld(getUISubmenu)),
     new("Scroll List",    () => new ScrollListDemoWorld(getUISubmenu)),
 ], backFactory: getMainMenu);
 
