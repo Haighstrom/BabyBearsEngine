@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using BabyBearsEngine.Input;
 using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Tests.Unit;
@@ -16,8 +18,58 @@ public class MouseSolverTests
         }
     }
 
+    private sealed class FakeMouse : IMouse
+    {
+        public bool LeftDown { get; set; } = false;
+        public bool MiddleDown { get; set; } = false;
+        public bool RightDown { get; set; } = false;
+        public bool LeftUp { get; set; } = false;
+        public bool MiddleUp { get; set; } = false;
+        public bool RightUp { get; set; } = false;
+        public bool LeftPressed { get; set; } = false;
+        public bool MiddlePressed { get; set; } = false;
+        public bool RightPressed { get; set; } = false;
+        public bool LeftReleased { get; set; } = false;
+        public bool MiddleReleased { get; set; } = false;
+        public bool RightReleased { get; set; } = false;
+        public int ClientX { get; set; } = 0;
+        public int ClientY { get; set; } = 0;
+        public float WheelDelta { get; set; } = 0f;
+        public int XDelta { get; set; } = 0;
+        public int YDelta { get; set; } = 0;
+
+        public bool ButtonDown(MouseButton button) => false;
+        public bool ButtonPressed(MouseButton button) => false;
+        public bool ButtonReleased(MouseButton button) => false;
+        public bool AnyButtonDown(IEnumerable<MouseButton> buttons) => false;
+        public bool AnyButtonDown(params MouseButton[] buttons) => false;
+        public bool AnyButtonPressed(IEnumerable<MouseButton> buttons) => false;
+        public bool AnyButtonPressed(params MouseButton[] buttons) => false;
+        public bool AnyButtonReleased(IEnumerable<MouseButton> buttons) => false;
+        public bool AnyButtonReleased(params MouseButton[] buttons) => false;
+        public bool AllButtonsDown(IEnumerable<MouseButton> buttons) => false;
+        public bool AllButtonsDown(params MouseButton[] buttons) => false;
+        public bool AllButtonsPressed(IEnumerable<MouseButton> buttons) => false;
+        public bool AllButtonsPressed(params MouseButton[] buttons) => false;
+        public bool AllButtonsReleased(IEnumerable<MouseButton> buttons) => false;
+        public bool AllButtonsReleased(params MouseButton[] buttons) => false;
+    }
+
+    private FakeMouse _mouse = null!;
+
+    [TestInitialize]
+    public void Setup()
+    {
+        _mouse = new();
+        EngineConfiguration.MouseService = _mouse;
+    }
+
     [TestCleanup]
-    public void Cleanup() => MouseSolver.Reset();
+    public void Cleanup()
+    {
+        MouseSolver.Reset();
+        EngineConfiguration.Reset();
+    }
 
     // Single controller
 
@@ -134,5 +186,87 @@ public class MouseSolverTests
 
         Assert.IsFalse(prev.MouseIsOver);
         Assert.IsTrue(current.MouseIsOver);
+    }
+
+    // Locking behavior (left button held)
+
+    [TestMethod]
+    public void Update_WhileLeftHeld_LockedControllerStillReceivesMouseOver()
+    {
+        FakeController locked = new();
+
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+        MouseSolver.RegisterMouseOver(locked);
+        MouseSolver.Update();
+
+        _mouse.LeftPressed = false;
+        MouseSolver.RegisterMouseOver(locked);
+        MouseSolver.Update();
+
+        Assert.IsTrue(locked.MouseIsOver);
+    }
+
+    [TestMethod]
+    public void Update_WhileLeftHeld_ControllerNotInLockedSetIsSuppressed()
+    {
+        FakeController locked = new();
+        FakeController unlocked = new();
+
+        // Frame 1: press while only 'locked' is under cursor.
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+        MouseSolver.RegisterMouseOver(locked);
+        MouseSolver.Update();
+
+        // Frame 2: cursor now over both, but button still held.
+        _mouse.LeftPressed = false;
+        MouseSolver.RegisterMouseOver(locked);
+        MouseSolver.RegisterMouseOver(unlocked);
+        MouseSolver.Update();
+
+        Assert.IsTrue(locked.MouseIsOver);
+        Assert.IsFalse(unlocked.MouseIsOver);
+    }
+
+    [TestMethod]
+    public void Update_AfterLeftReleased_PreviouslySuppressedControllerCanReceiveMouseOver()
+    {
+        FakeController first = new();
+        FakeController second = new();
+
+        // Frame 1: press over 'first'.
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+        MouseSolver.RegisterMouseOver(first);
+        MouseSolver.Update();
+
+        // Frame 2: button released; 'second' is now the only controller under cursor.
+        _mouse.LeftPressed = false;
+        _mouse.LeftDown = false;
+        MouseSolver.RegisterMouseOver(second);
+        MouseSolver.Update();
+
+        Assert.IsFalse(first.MouseIsOver);
+        Assert.IsTrue(second.MouseIsOver);
+    }
+
+    [TestMethod]
+    public void Update_PressOnEmptySpace_DoesNotSuppressSubsequentHovers()
+    {
+        FakeController controller = new();
+
+        // Frame 1: press with nothing under cursor — locked set will be empty.
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+        MouseSolver.Update();
+
+        // Frame 2: button still held, controller now under cursor.
+        _mouse.LeftPressed = false;
+        MouseSolver.RegisterMouseOver(controller);
+        MouseSolver.Update();
+
+        // Empty locked set means no lock is active, so the controller is not suppressed.
+        Assert.IsTrue(controller.MouseIsOver);
     }
 }
