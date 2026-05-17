@@ -4,9 +4,9 @@ using BabyBearsEngine.Worlds.Graphics.Text;
 
 namespace BabyBearsEngine.Demos.Source.Demos.TextDemo;
 
-internal class TextDemoWorld2 : DemoWorld
+internal class FontSwappingDemoWorld : DemoWorld
 {
-    private static readonly FontDefinition[] Fonts =
+    private static readonly FontDefinition[] s_fonts =
     [
         new("Times New Roman", 12),
         new("Times New Roman", 16),
@@ -36,15 +36,15 @@ internal class TextDemoWorld2 : DemoWorld
     private readonly TextGraphic _sample;
     private readonly TextGraphic _fontInfo;
 
-    public override string Name => "Text Demo 2";
+    public override string Name => "Font Swapping";
 
-    public TextDemoWorld2(Func<World> menuWorldFactory) : base(menuWorldFactory)
+    public FontSwappingDemoWorld(Func<World> menuWorldFactory) : base(menuWorldFactory)
     {
         BackgroundColour = new Colour(180, 180, 180);
 
         Add(new ColourGraphic(Colour.White, BoxX, BoxY, BoxW, BoxH));
 
-        _sample = new TextGraphic(Fonts[0], SampleText, Colour.Black,
+        _sample = new TextGraphic(s_fonts[0], SampleText, Colour.Black,
             BoxX + Padding, BoxY + Padding, BoxW - 2 * Padding, BoxH - 2 * Padding)
         {
             Multiline = true,
@@ -72,15 +72,15 @@ internal class TextDemoWorld2 : DemoWorld
 
     private void CycleFont(int direction)
     {
-        _fontIndex = (_fontIndex + direction + Fonts.Length) % Fonts.Length;
-        _sample.Font = Fonts[_fontIndex];
+        _fontIndex = (_fontIndex + direction + s_fonts.Length) % s_fonts.Length;
+        _sample.Font = s_fonts[_fontIndex];
         _fontInfo.Text = BuildInfoText();
     }
 
     private string BuildInfoText()
     {
-        FontDefinition f = Fonts[_fontIndex];
+        FontDefinition f = s_fonts[_fontIndex];
         string style = f.FontStyle == FontStyle.Regular ? "" : $" {f.FontStyle}";
-        return $"Font: {f.FontName} {f.FontSize}pt{style}   ({_fontIndex + 1} / {Fonts.Length})";
+        return $"Font: {f.FontName} {f.FontSize}pt{style}   ({_fontIndex + 1} / {s_fonts.Length})";
     }
 }

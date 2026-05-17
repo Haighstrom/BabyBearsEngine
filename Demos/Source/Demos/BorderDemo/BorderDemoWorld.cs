@@ -122,7 +122,7 @@ internal class BorderDemoWorld : DemoWorld
         Add(cycleFill);
     }
 
-    public override string Name => "Border Demo";
+    public override string Name => "Border";
 
     private void AddColumnLabel(float x, float y, string text)
     {

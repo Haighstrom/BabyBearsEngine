@@ -17,7 +17,7 @@ internal class StencilDemoWorld : DemoWorld
     private const int TextureSize = 256;
     private const int TileSize = 32;
 
-    public override string Name => "Stencil Demo";
+    public override string Name => "Stencil";
 
     public StencilDemoWorld(Func<World> menuWorldFactory) : base(menuWorldFactory)
     {

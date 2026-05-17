@@ -18,21 +18,21 @@ internal class ScrollListDemoWorld : DemoWorld
 
     private static readonly (string Label, Colour Bg, Colour Fg)[] s_items =
     [
-        ("Apple",      new Colour(220, 80,  80),  Colour.White),
-        ("Banana",     new Colour(220, 200, 60),  Colour.Black),
-        ("Cherry",     new Colour(180, 40,  80),  Colour.White),
-        ("Dragonfruit",new Colour(230, 80,  160), Colour.White),
-        ("Elderberry", new Colour(90,  40,  120), Colour.White),
-        ("Fig",        new Colour(100, 70,  50),  Colour.White),
-        ("Grape",      new Colour(100, 60,  160), Colour.White),
-        ("Honeydew",   new Colour(160, 210, 120), Colour.Black),
-        ("Ita Palm",   new Colour(50,  130, 80),  Colour.White),
-        ("Jackfruit",  new Colour(210, 150, 40),  Colour.Black),
-        ("Kiwi",       new Colour(110, 160, 60),  Colour.Black),
-        ("Lemon",      new Colour(240, 230, 60),  Colour.Black),
-        ("Mango",      new Colour(230, 140, 50),  Colour.Black),
-        ("Nectarine",  new Colour(220, 100, 60),  Colour.White),
-        ("Orange",     new Colour(230, 130, 30),  Colour.Black),
+        ("Albatross",    new Colour(200, 210, 220), Colour.Black),
+        ("Blue Jay",     new Colour(60,  110, 190), Colour.White),
+        ("Canary",       new Colour(240, 220, 50),  Colour.Black),
+        ("Dove",         new Colour(210, 200, 195), Colour.Black),
+        ("Eagle",        new Colour(100, 70,  30),  Colour.White),
+        ("Flamingo",     new Colour(240, 130, 160), Colour.White),
+        ("Goldfinch",    new Colour(210, 185, 40),  Colour.Black),
+        ("Hummingbird",  new Colour(60,  170, 130), Colour.White),
+        ("Ibis",         new Colour(230, 90,  80),  Colour.White),
+        ("Jay",          new Colour(80,  120, 200), Colour.White),
+        ("Kingfisher",   new Colour(40,  130, 170), Colour.White),
+        ("Lark",         new Colour(160, 140, 90),  Colour.White),
+        ("Magpie",       new Colour(40,  40,  40),  Colour.White),
+        ("Nightingale",  new Colour(130, 105, 70),  Colour.White),
+        ("Owl",          new Colour(100, 85,  55),  Colour.White),
     ];
 
     public ScrollListDemoWorld(Func<World> menuWorldFactory) : base(menuWorldFactory)

@@ -5,7 +5,7 @@ namespace BabyBearsEngine.Demos.Source.Demos.AnimationDemo;
 
 internal class AnimationDemoWorld : DemoWorld
 {
-    public override string Name => "Animation Demo";
+    public override string Name => "Animation";
 
     public AnimationDemoWorld(Func<World> menuWorldFactory) : base(menuWorldFactory)
     {
