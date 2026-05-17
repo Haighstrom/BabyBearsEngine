@@ -62,6 +62,22 @@ public partial record struct Colour(byte R, byte G, byte B, byte A = 255) : IEqu
         return p;
     }
 
+    /// <summary>
+    /// Linearly interpolates between two colours, channel-wise (R, G, B, A each blended independently).
+    /// </summary>
+    /// <param name="from">The colour when <paramref name="t"/> is 0.</param>
+    /// <param name="to">The colour when <paramref name="t"/> is 1.</param>
+    /// <param name="t">
+    /// Interpolation factor in [0, 1]. Values outside this range are clamped, so passing
+    /// an easing function that briefly exceeds [0, 1] will not produce out-of-range colours.
+    /// </param>
+    public static Colour Lerp(Colour from, Colour to, double t) =>
+        new(
+            (byte)Math.Clamp((int)Math.Round(from.R + (to.R - from.R) * t), 0, 255),
+            (byte)Math.Clamp((int)Math.Round(from.G + (to.G - from.G) * t), 0, 255),
+            (byte)Math.Clamp((int)Math.Round(from.B + (to.B - from.B) * t), 0, 255),
+            (byte)Math.Clamp((int)Math.Round(from.A + (to.A - from.A) * t), 0, 255));
+
     private static void RgbToHsl(float r, float g, float b, out float h, out float s, out float l)
     {
         float max = Math.Max(r, Math.Max(g, b));

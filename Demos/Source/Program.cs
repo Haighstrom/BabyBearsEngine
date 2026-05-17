@@ -10,6 +10,7 @@ using BabyBearsEngine.Demos.Source.Demos.MouseDemo;
 using BabyBearsEngine.Demos.Source.Demos.ShaderDemo;
 using BabyBearsEngine.Demos.Source.Demos.TextDemo;
 using BabyBearsEngine.Demos.Source.Demos.StencilDemo;
+using BabyBearsEngine.Demos.Source.Demos.TweenDemo;
 using BabyBearsEngine.Demos.Source.Demos.UIDemo;
 using BabyBearsEngine.Demos.Source.Menu;
 
@@ -65,6 +66,7 @@ MenuEntry[] mainMenuEntries =
     new("Click The Bear", () => new ClickTheBearDemoWorld(getMainMenu)),
     new("Keyboard Demo",  () => new KeyboardDemoWorld(getMainMenu)),
     new("Mouse Demo",     () => new MouseDemoWorld(getMainMenu)),
+    new("Tween Demo",    () => new TweenDemoWorld(getMainMenu)),
     new("Text",     getTextSubmenu,     MenuEntryStyle.Submenu),
     new("UI",       getUISubmenu,       MenuEntryStyle.Submenu),
     new("Graphics", getGraphicsSubmenu, MenuEntryStyle.Submenu),

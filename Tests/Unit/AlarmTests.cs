@@ -1,6 +1,6 @@
-﻿using System;
 using System.Collections.Generic;
 using BabyBearsEngine.Worlds;
+using BabyBearsEngine.Worlds.Tweens;
 
 namespace BabyBearsEngine.Tests.Unit;
 
@@ -31,11 +31,11 @@ public class AlarmTests
     }
 
     [TestMethod]
-    public void Update_BeforeDurationElapsed_DoesNotFireElapsed()
+    public void Update_BeforeDurationElapsed_DoesNotFireCompleted()
     {
         int fired = 0;
         var alarm = InContainer(new Alarm(1.0));
-        alarm.Elapsed += () => fired++;
+        alarm.Completed += () => fired++;
 
         alarm.Update(0.5);
 
@@ -43,11 +43,11 @@ public class AlarmTests
     }
 
     [TestMethod]
-    public void Update_AtDurationElapsed_FiresElapsed()
+    public void Update_AtDurationElapsed_FiresCompleted()
     {
         int fired = 0;
         var alarm = InContainer(new Alarm(1.0));
-        alarm.Elapsed += () => fired++;
+        alarm.Completed += () => fired++;
 
         alarm.Update(1.0);
 
@@ -55,11 +55,11 @@ public class AlarmTests
     }
 
     [TestMethod]
-    public void Update_BeyondDurationElapsed_FiresElapsed()
+    public void Update_BeyondDurationElapsed_FiresCompleted()
     {
         int fired = 0;
         var alarm = InContainer(new Alarm(1.0));
-        alarm.Elapsed += () => fired++;
+        alarm.Completed += () => fired++;
 
         alarm.Update(2.0);
 
@@ -80,10 +80,10 @@ public class AlarmTests
     }
 
     [TestMethod]
-    public void Update_Repeating_DoesNotRemoveAfterFiring()
+    public void Update_Looping_DoesNotRemoveAfterFiring()
     {
         var container = new FakeContainer();
-        var alarm = new Alarm(1.0, repeating: true) { Parent = container };
+        var alarm = new Alarm(1.0, loop: true) { Parent = container };
 
         alarm.Update(1.0);
 
@@ -92,11 +92,11 @@ public class AlarmTests
     }
 
     [TestMethod]
-    public void Update_Repeating_FiresMultipleTimesOverMultipleUpdates()
+    public void Update_Looping_FiresMultipleTimesOverMultipleUpdates()
     {
         int fired = 0;
-        var alarm = InContainer(new Alarm(1.0, repeating: true));
-        alarm.Elapsed += () => fired++;
+        var alarm = InContainer(new Alarm(1.0, loop: true));
+        alarm.Completed += () => fired++;
 
         alarm.Update(1.0);
         alarm.Update(1.0);
@@ -106,11 +106,11 @@ public class AlarmTests
     }
 
     [TestMethod]
-    public void Update_Repeating_CarriesOvershootIntoNextInterval()
+    public void Update_Looping_CarriesOvershootIntoNextInterval()
     {
         int fired = 0;
-        var alarm = InContainer(new Alarm(1.0, repeating: true));
-        alarm.Elapsed += () => fired++;
+        var alarm = InContainer(new Alarm(1.0, loop: true));
+        alarm.Completed += () => fired++;
 
         alarm.Update(1.5);
         alarm.Update(0.5);
@@ -119,11 +119,11 @@ public class AlarmTests
     }
 
     [TestMethod]
-    public void Update_WhenInactive_DoesNotFireElapsed()
+    public void Update_WhenInactive_DoesNotFireCompleted()
     {
         int fired = 0;
         var alarm = InContainer(new Alarm(1.0) { Active = false });
-        alarm.Elapsed += () => fired++;
+        alarm.Completed += () => fired++;
 
         alarm.Update(2.0);
 
@@ -131,10 +131,10 @@ public class AlarmTests
     }
 
     [TestMethod]
-    public void Constructor_WithCallback_WiresElapsedEvent()
+    public void Constructor_WithCallback_WiresCompletedEvent()
     {
         int fired = 0;
-        var alarm = InContainer(new Alarm(1.0, onElapsed: () => fired++));
+        var alarm = InContainer(new Alarm(1.0, onCompleted: () => fired++));
 
         alarm.Update(1.0);
 
