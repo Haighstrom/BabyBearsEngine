@@ -77,8 +77,6 @@ public class TaskController : AddableBase, ITaskController
             // our parent from the world.
             if (CurrentTask is not null && CurrentTask.IsComplete)
             {
-                CurrentTask.Complete();
-
                 if (Parent is IAddable parentAsAddable && parentAsAddable.Parent is null)
                 {
                     return;

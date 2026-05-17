@@ -41,6 +41,31 @@ public class TaskTests
     }
 
     [TestMethod]
+    public void Update_WhenIsCompleteOnFirstTick_AutoCallsComplete()
+    {
+        var task = new Task();
+        bool completed = false;
+        task.TaskCompleted += (_, _) => completed = true;
+
+        task.Update(0.016);
+
+        Assert.IsTrue(completed);
+    }
+
+    [TestMethod]
+    public void Update_AfterAutoComplete_DoesNotRestartTask()
+    {
+        var task = new Task();
+        int starts = 0;
+        task.TaskStarted += (_, _) => starts++;
+
+        task.Update(0.016);
+        task.Update(0.016);
+
+        Assert.AreEqual(1, starts);
+    }
+
+    [TestMethod]
     public void Complete_RunsActionOnCompleteAndFiresEvent()
     {
         bool ran = false;

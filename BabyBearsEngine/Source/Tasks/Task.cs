@@ -16,6 +16,7 @@ public class Task : UpdateableBase, ITask
     /// <summary>A no-op task that completes immediately.</summary>
     public static ITask DoNothing => new Task();
 
+    private bool _isCompleted = false;
     private bool _isStarted = false;
 
     /// <summary>Actions invoked when <see cref="Start"/> runs.</summary>
@@ -47,6 +48,7 @@ public class Task : UpdateableBase, ITask
     /// <inheritdoc/>
     public virtual void Complete()
     {
+        _isCompleted = true;
         ActionsOnComplete.ForEach(a => a());
 
         TaskCompleted?.Invoke(this, EventArgs.Empty);
@@ -57,6 +59,7 @@ public class Task : UpdateableBase, ITask
     /// <inheritdoc/>
     public virtual void Reset()
     {
+        _isCompleted = false;
         _isStarted = false;
     }
 
@@ -73,10 +76,19 @@ public class Task : UpdateableBase, ITask
     /// <inheritdoc/>
     public override void Update(double elapsed)
     {
+        if (_isCompleted)
+        {
+            return;
+        }
+
         if (!_isStarted)
         {
             Start();
-            _isStarted = true;
+        }
+
+        if (IsComplete)
+        {
+            Complete();
         }
     }
 
