@@ -1,3 +1,5 @@
+using BabyBearsEngine.Worlds;
+
 namespace BabyBearsEngine;
 
 /// <summary>
@@ -24,6 +26,14 @@ public record class ApplicationSettings()
 
     /// <summary>Configuration for the logging subsystem: sinks, severity levels, file paths, and metadata formatting.</summary>
     public LogSettings LogSettings { get; init; } = LogSettings.Default;
+
+    /// <summary>
+    /// Default MSAA sample count applied to any <see cref="Camera"/> or <see cref="Worlds.UICamera"/> that does not
+    /// specify its own sample count. The GPU's actual maximum is queried at runtime and the count
+    /// is clamped automatically if the requested level is not supported.
+    /// Defaults to <see cref="MsaaSamples.Disabled"/>.
+    /// </summary>
+    public MsaaSamples DefaultCameraMsaa { get; init; } = MsaaSamples.Disabled;
 
     /// <summary>Configuration for the game window: size, title, border style, cursor, VSync, and OpenGL version.</summary>
     public WindowSettings WindowSettings { get; init; } = WindowSettings.Default;

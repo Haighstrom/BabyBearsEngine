@@ -63,7 +63,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
-    public ITexture GenTexture(System.Drawing.Bitmap bmp)
+    public ITexture GenTexture(System.Drawing.Bitmap bmp, bool linearFilter = true)
     {
         bmp = BitmapTools.PremultiplyAlpha(bmp);
 
@@ -74,8 +74,10 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
 
         GL.BindTexture(TextureTarget.Texture2D, t.Handle);
 
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+        var minFilter = linearFilter ? TextureMinFilter.Linear : TextureMinFilter.Nearest;
+        var magFilter = linearFilter ? TextureMagFilter.Linear : TextureMagFilter.Nearest;
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)minFilter);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)magFilter);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
@@ -89,7 +91,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
-    public ITexture GenTexture(Colour[,] pixels)
+    public ITexture GenTexture(Colour[,] pixels, bool linearFilter = true)
     {
         int width = pixels.GetLength(0);
         int height = pixels.GetLength(1);
@@ -118,7 +120,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
         }
 
         bmp.UnlockBits(bmpd);
-        return GenTexture(bmp);
+        return GenTexture(bmp, linearFilter);
     }
 
     private static Rgba8ImageData CreatePaddedSpriteSheet(Rgba8ImageData orig, int columns, int rows, int padding)

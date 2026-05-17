@@ -21,13 +21,19 @@ internal sealed class CameraRenderer : IDisposable
 
     public CameraRenderer(float width, float height, MsaaSamples samples)
     {
-        _samples = samples;
         _shader = new();
 
         if (samples != MsaaSamples.Disabled)
         {
-            _msaaFBO = new((int)width, (int)height, (int)samples);
-            _mSAAShader = new CameraMSAAShader(samples);
+            samples = ClampToGpuMax(samples);
+        }
+
+        _samples = samples;
+
+        if (_samples != MsaaSamples.Disabled)
+        {
+            _msaaFBO = new((int)width, (int)height, (int)_samples);
+            _mSAAShader = new CameraMSAAShader(_samples);
         }
 
         _outputFBO = new((int)width, (int)height);
@@ -39,6 +45,28 @@ internal sealed class CameraRenderer : IDisposable
         {
             Logger.GLError($"OpenGL error! (CameraRenderer) {err}");
         }
+    }
+
+    private static MsaaSamples ClampToGpuMax(MsaaSamples requested)
+    {
+        int maxSamples = GL.GetInteger(GetPName.MaxSamples);
+        if ((int)requested <= maxSamples)
+        {
+            return requested;
+        }
+
+        MsaaSamples best = MsaaSamples.Disabled;
+        foreach (MsaaSamples s in Enum.GetValues<MsaaSamples>())
+        {
+            if ((int)s <= maxSamples && (int)s > (int)best)
+            {
+                best = s;
+            }
+        }
+
+        string bestLabel = best == MsaaSamples.Disabled ? "disabled" : $"{(int)best}×";
+        Logger.Warning($"Requested MSAA {(int)requested}× exceeds GPU maximum of {maxSamples}×; reducing to {bestLabel}.");
+        return best;
     }
 
     public void Dispose()

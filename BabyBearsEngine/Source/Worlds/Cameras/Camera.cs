@@ -15,13 +15,14 @@ public sealed class Camera : ContainerEntity, ICamera
     private readonly CameraView _cameraView;
     private readonly CameraRenderer _renderer;
 
-    private Camera(float x, float y, float width, float height, Func<Func<float>, Func<float>, CameraView> createView, MsaaSamples samples = MsaaSamples.Disabled)
+    private Camera(float x, float y, float width, float height, Func<Func<float>, Func<float>, CameraView> createView, MsaaSamples? samples = null)
         : base(x, y, width, height)
     {
-        MSAASamples = samples;
+        MsaaSamples effectiveSamples = samples ?? EngineConfiguration.DefaultCameraMsaa;
+        MSAASamples = effectiveSamples;
 
         _cameraView = createView(() => Width, () => Height);
-        _renderer = new CameraRenderer(width, height, samples);
+        _renderer = new CameraRenderer(width, height, effectiveSamples);
     }
 
     /// <summary>
@@ -34,8 +35,8 @@ public sealed class Camera : ContainerEntity, ICamera
     /// <param name="height">Camera viewport height in pixels.</param>
     /// <param name="tileW">Width of one world tile in pixels.</param>
     /// <param name="tileH">Height of one world tile in pixels.</param>
-    /// <param name="samples">MSAA sample count for the render target. Defaults to disabled.</param>
-    public static Camera WithTileSize(float x, float y, float width, float height, float tileW, float tileH, MsaaSamples samples = MsaaSamples.Disabled)
+    /// <param name="samples">MSAA sample count for the render target. When omitted, uses <see cref="ApplicationSettings.DefaultCameraMsaa"/>.</param>
+    public static Camera WithTileSize(float x, float y, float width, float height, float tileW, float tileH, MsaaSamples? samples = null)
         => new(x, y, width, height, (getW, getH) => new FixedTileSizeCameraView(tileW, tileH, getW, getH), samples);
 
     /// <summary>
@@ -50,8 +51,8 @@ public sealed class Camera : ContainerEntity, ICamera
     /// <param name="viewY">World-space Y coordinate of the top edge of the view.</param>
     /// <param name="viewW">Width of the world region to display.</param>
     /// <param name="viewH">Height of the world region to display.</param>
-    /// <param name="samples">MSAA sample count for the render target. Defaults to disabled.</param>
-    public static Camera WithView(float x, float y, float width, float height, float viewX, float viewY, float viewW, float viewH, MsaaSamples samples = MsaaSamples.Disabled)
+    /// <param name="samples">MSAA sample count for the render target. When omitted, uses <see cref="ApplicationSettings.DefaultCameraMsaa"/>.</param>
+    public static Camera WithView(float x, float y, float width, float height, float viewX, float viewY, float viewW, float viewH, MsaaSamples? samples = null)
         => new(x, y, width, height, (getW, getH) => new FreeCameraView(viewX, viewY, viewW, viewH, getW, getH), samples);
 
     public Colour BackgroundColour { get; set; } = Colour.White;

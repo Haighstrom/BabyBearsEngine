@@ -13,12 +13,18 @@ public sealed class UICamera : ContainerEntity, ICamera
     private readonly Cameras.CameraRenderer _renderer;
     private readonly Cameras.FixedTileSizeCameraView _view;
 
-    public UICamera(float x, float y, float width, float height, MsaaSamples samples = MsaaSamples.Disabled)
+    /// <param name="x">Camera X position in screen space.</param>
+    /// <param name="y">Camera Y position in screen space.</param>
+    /// <param name="width">Viewport width in pixels.</param>
+    /// <param name="height">Viewport height in pixels.</param>
+    /// <param name="samples">MSAA sample count for the render target. When omitted, uses <see cref="ApplicationSettings.DefaultCameraMsaa"/>.</param>
+    public UICamera(float x, float y, float width, float height, MsaaSamples? samples = null)
         : base(x, y, width, height)
     {
-        MSAASamples = samples;
+        MsaaSamples effectiveSamples = samples ?? EngineConfiguration.DefaultCameraMsaa;
+        MSAASamples = effectiveSamples;
         _view = new Cameras.FixedTileSizeCameraView(1, 1, () => Width, () => Height);
-        _renderer = new Cameras.CameraRenderer(width, height, samples);
+        _renderer = new Cameras.CameraRenderer(width, height, effectiveSamples);
     }
 
     /// <inheritdoc/>

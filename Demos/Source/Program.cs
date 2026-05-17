@@ -51,6 +51,7 @@ textSubmenuFactory = () => new MenuWorld(
     new("Font Swapping",    () => new FontSwappingDemoWorld(getTextSubmenu)),
     new("Typewriter Demo",  () => new TypewriterDemoWorld(getTextSubmenu)),
     new("Inline Tags Demo", () => new InlineTagsDemoWorld(getTextSubmenu)),
+    new("Rendering Quality", () => new TextRenderingQualityDemoWorld(getTextSubmenu)),
 ], backFactory: getMainMenu);
 
 uiSubmenuFactory = () => new MenuWorld(

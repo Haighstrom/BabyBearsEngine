@@ -1,5 +1,6 @@
 using BabyBearsEngine.Input;
 using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine;
 
@@ -19,6 +20,13 @@ internal static class EngineConfiguration
     private static ITextureFactory? s_textureFactory = null;
     private static IWindow? s_window = null;
     private static IWorldSwitcher? s_worldSwitcher = null;
+
+    /// <summary>
+    /// Default MSAA sample count used by <see cref="Worlds.Camera"/> and <see cref="Worlds.UICamera"/> when no
+    /// explicit sample count is provided. Set by <see cref="GameLauncher"/> from
+    /// <see cref="ApplicationSettings.DefaultCameraMsaa"/> before the engine starts.
+    /// </summary>
+    public static MsaaSamples DefaultCameraMsaa { get; set; } = MsaaSamples.Disabled;
 
     public static IGPUResourceDeletionService GPUResourceDeletionService
     {
@@ -98,6 +106,7 @@ internal static class EngineConfiguration
 
     public static void Reset()
     {
+        DefaultCameraMsaa = MsaaSamples.Disabled;
         s_gpuResourceDeletionService = null;
         s_keyboard = null;
         s_mouse = null;

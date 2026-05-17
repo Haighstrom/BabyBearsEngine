@@ -47,6 +47,8 @@ public static class GameLauncher
 
         s_running = true;
 
+        EngineConfiguration.DefaultCameraMsaa = appSettings.DefaultCameraMsaa;
+
         try
         {
             var engine = new OpenTKGameEngine(appSettings);
