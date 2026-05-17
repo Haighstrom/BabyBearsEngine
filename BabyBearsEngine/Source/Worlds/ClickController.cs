@@ -54,9 +54,11 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
 
     /// <summary>
     /// When true, a double-click also fires <see cref="LeftClicked"/> for the second click
-    /// in addition to <see cref="LeftDoubleClicked"/>. Default is false.
+    /// in addition to <see cref="LeftDoubleClicked"/>. Default is true. Set to false only
+    /// when a double-click should suppress the single-click (e.g. double-click opens a dialog,
+    /// single click selects — where triggering both would be wrong).
     /// </summary>
-    public bool DoubleClickTriggersSingleClick { get; set; } = false;
+    public bool DoubleClickTriggersSingleClick { get; set; } = true;
 
     /// <summary>
     /// Maximum time in seconds between two left-clicks for them to count as a double-click.

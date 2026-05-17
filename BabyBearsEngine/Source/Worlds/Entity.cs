@@ -59,7 +59,7 @@ public class Entity : ContainerEntity, IMouseInteractable
     /// </summary>
     public bool DoubleClickTriggersSingleClick
     {
-        get => _clickController?.DoubleClickTriggersSingleClick ?? false;
+        get => _clickController?.DoubleClickTriggersSingleClick ?? true;
         set
         {
             if (_clickController is not null)

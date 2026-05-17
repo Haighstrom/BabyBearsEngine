@@ -110,22 +110,8 @@ public class ClickControllerDoubleClickTests
     }
 
     [TestMethod]
-    public void TwoClicksWithinWindow_DefaultFlag_SecondClickDoesNotRaiseLeftClicked()
+    public void TwoClicksWithinWindow_DefaultFlag_SecondClickRaisesBothEvents()
     {
-        Frame(isOver: true);
-        Click();
-        Frame(isOver: true, elapsed: 0.3);
-        _events.Clear();
-
-        Click();
-
-        Assert.DoesNotContain("LeftClicked", _events);
-    }
-
-    [TestMethod]
-    public void TwoClicksWithinWindow_FlagSet_SecondClickRaisesBothEvents()
-    {
-        _controller.DoubleClickTriggersSingleClick = true;
         Frame(isOver: true);
         Click();
         Frame(isOver: true, elapsed: 0.3);
@@ -134,6 +120,21 @@ public class ClickControllerDoubleClickTests
         Click();
 
         Assert.Contains("LeftClicked", _events);
+        Assert.Contains("LeftDoubleClicked", _events);
+    }
+
+    [TestMethod]
+    public void TwoClicksWithinWindow_FlagFalse_SecondClickRaisesOnlyDoubleClicked()
+    {
+        _controller.DoubleClickTriggersSingleClick = false;
+        Frame(isOver: true);
+        Click();
+        Frame(isOver: true, elapsed: 0.3);
+        _events.Clear();
+
+        Click();
+
+        Assert.DoesNotContain("LeftClicked", _events);
         Assert.Contains("LeftDoubleClicked", _events);
     }
 

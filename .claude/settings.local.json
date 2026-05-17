@@ -18,7 +18,8 @@
       "Bash(grep -rn --include=\"*.cs\" -P \"^\\\\s+\\(if|while|for|foreach|else if\\)\\\\s*\\\\\\(.+\\\\\\)\\\\s*$\" BabyBearsEngine/ Tests/ Demos/)",
       "Bash(grep -v \"^\\\\s*//\")",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\simon\\\\Dropbox\\\\Programming\\\\.NET\\\\BearsEngine\" -Directory)",
-      "Bash(Select-Object Name)"
+      "Bash(Select-Object Name)",
+      "Bash(xargs ls -la)"
     ]
   },
   "spinnerVerbs": {

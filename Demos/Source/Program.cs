@@ -1,5 +1,6 @@
 ﻿using System;
 using BabyBearsEngine.Demos.Source.Demos.AnimationDemo;
+using BabyBearsEngine.Demos.Source.Demos.BorderDemo;
 using BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
 using BabyBearsEngine.Demos.Source.Demos.CameraDemo;
 using BabyBearsEngine.Demos.Source.Demos.ClickDemo;
@@ -55,6 +56,7 @@ graphicsSubmenuFactory = () => new MenuWorld(
 [
     new("Animation Demo",    () => new AnimationDemoWorld(getGraphicsSubmenu)),
     new("Bear Spinner 3000", () => new BearSpinnerWorld(getGraphicsSubmenu)),
+    new("Border Demo",       () => new BorderDemoWorld(getGraphicsSubmenu)),
     new("Graphic Demo",      () => new GraphicDemoWorld(getGraphicsSubmenu)),
     new("Shader Demo",       () => new ShaderDemoWorld(getGraphicsSubmenu)),
     new("Stencil Demo",      () => new StencilDemoWorld(getGraphicsSubmenu)),
