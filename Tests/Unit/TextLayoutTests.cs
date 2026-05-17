@@ -251,7 +251,10 @@ public class TextLayoutTests
         IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("hello world"), fs, 55f, 1f, 0f, 0f);
 
         int totalRendered = 0;
-        foreach (LineInfo line in lines) totalRendered += line.Content.Length;
+        foreach (LineInfo line in lines)
+        {
+            totalRendered += line.Content.Length;
+        }
 
         Assert.AreEqual(10, totalRendered); // "hello"(5) + "world"(5), space excluded
     }
@@ -264,7 +267,10 @@ public class TextLayoutTests
         IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("hello\nworld"), fs, 1000f, 1f, 0f, 0f);
 
         int totalRendered = 0;
-        foreach (LineInfo line in lines) totalRendered += line.Content.Length;
+        foreach (LineInfo line in lines)
+        {
+            totalRendered += line.Content.Length;
+        }
 
         Assert.AreEqual(10, totalRendered); // "hello"(5) + "world"(5), newline excluded
     }
