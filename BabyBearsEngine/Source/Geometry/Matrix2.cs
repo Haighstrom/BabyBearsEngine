@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace BabyBearsEngine.Geometry;
@@ -37,23 +36,28 @@ public struct Matrix2
     /// <summary>Returns a new matrix whose elements are the component-wise sum of <paramref name="mat1"/> and <paramref name="mat2"/>.</summary>
     public static Matrix2 Add(ref Matrix2 mat1, ref Matrix2 mat2)
     {
-        float[] values = mat1._values.Zip(mat2._values, (a, b) => a + b).ToArray();
-        return new Matrix2(values);
+        return new Matrix2(
+            mat1._m0 + mat2._m0, mat1._m1 + mat2._m1,
+            mat1._m2 + mat2._m2, mat1._m3 + mat2._m3);
     }
 
     /// <summary>Returns a new matrix whose elements are the component-wise difference of <paramref name="mat1"/> and <paramref name="mat2"/>.</summary>
-    public static Matrix2 Subtract(ref Matrix2 mat1, ref Matrix2 mat2) => new(mat1._values.Zip(mat2._values, (a, b) => a - b).ToArray());
+    public static Matrix2 Subtract(ref Matrix2 mat1, ref Matrix2 mat2)
+    {
+        return new Matrix2(
+            mat1._m0 - mat2._m0, mat1._m1 - mat2._m1,
+            mat1._m2 - mat2._m2, mat1._m3 - mat2._m3);
+    }
 
     /// <summary>Returns the matrix product <paramref name="mat1"/> × <paramref name="mat2"/>. Composition order: <paramref name="mat2"/> is applied first.</summary>
     public static Matrix2 Multiply(ref Matrix2 mat1, ref Matrix2 mat2)
     {
         return new Matrix2
             (
-                mat1._values[0] * mat2._values[0] + mat1._values[2] * mat2._values[1],
-                mat1._values[1] * mat2._values[0] + mat1._values[3] * mat2._values[1],
-                mat1._values[0] * mat2._values[2] + mat1._values[2] * mat2._values[3],
-                mat1._values[1] * mat2._values[2] + mat1._values[3] * mat2._values[3]
-
+                mat1._m0 * mat2._m0 + mat1._m2 * mat2._m1,
+                mat1._m1 * mat2._m0 + mat1._m3 * mat2._m1,
+                mat1._m0 * mat2._m2 + mat1._m2 * mat2._m3,
+                mat1._m1 * mat2._m2 + mat1._m3 * mat2._m3
             );
     }
 
@@ -62,10 +66,8 @@ public struct Matrix2
     {
         return new Matrix2
             (
-                mat._values[0] * f,
-                mat._values[1] * f,
-                mat._values[2] * f,
-                mat._values[3] * f
+                mat._m0 * f, mat._m1 * f,
+                mat._m2 * f, mat._m3 * f
             );
     }
 
@@ -74,8 +76,8 @@ public struct Matrix2
     {
         return new Point
             (
-                p.X * mat._values[0] + p.Y * mat._values[2],
-                p.X * mat._values[1] + p.Y * mat._values[3]
+                p.X * mat._m0 + p.Y * mat._m2,
+                p.X * mat._m1 + p.Y * mat._m3
             );
     }
 
@@ -109,16 +111,18 @@ public struct Matrix2
 
         return new Matrix2
             (
-                mat._values[3] * invDet,
-                -mat._values[1] * invDet,
-                -mat._values[2] * invDet,
-                mat._values[0] * invDet
+                mat._m3 * invDet,
+                -mat._m1 * invDet,
+                -mat._m2 * invDet,
+                mat._m0 * invDet
             );
     }
 
 
-    private float[] _values;
-
+    private float _m0 = 0f;
+    private float _m1 = 0f;
+    private float _m2 = 0f;
+    private float _m3 = 0f;
 
     /// <summary>Initialises a new <see cref="Matrix2"/> with individual column-major element values.</summary>
     /// <param name="m0">Element [0,0]</param>
@@ -127,10 +131,11 @@ public struct Matrix2
     /// <param name="m3">Element [1,1]</param>
     public Matrix2(float m0, float m1, float m2, float m3)
     {
-        _values = new float[4] { m0, m1, m2, m3 };
+        _m0 = m0; _m1 = m1;
+        _m2 = m2; _m3 = m3;
     }
 
-    /// <summary>Initialises a new <see cref="Matrix2"/> from a 4-element column-major array. The array is used directly — callers should clone if needed.</summary>
+    /// <summary>Initialises a new <see cref="Matrix2"/> from a 4-element column-major array. Each element is copied — mutations to the array after construction do not affect this matrix.</summary>
     /// <param name="values">Array of 4 floats in column-major order.</param>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is null.</exception>
     /// <exception cref="ArgumentException">Thrown when <paramref name="values"/> does not have exactly 4 elements.</exception>
@@ -146,7 +151,8 @@ public struct Matrix2
             throw new ArgumentException($"Did not supply 4 values, but {values.Length}.", nameof(values));
         }
 
-        _values = values;
+        _m0 = values[0]; _m1 = values[1];
+        _m2 = values[2]; _m3 = values[3];
     }
 
 
@@ -163,7 +169,12 @@ public struct Matrix2
                 throw new Exception($"Requested an invalid Matrix2 index:{x},{y}");
             }
 
-            return _values[x * 2 + y];
+            return (x * 2 + y) switch
+            {
+                0 => _m0, 1 => _m1,
+                2 => _m2, 3 => _m3,
+                _ => throw new Exception($"Requested an invalid Matrix2 index:{x},{y}")
+            };
         }
         set
         {
@@ -172,34 +183,35 @@ public struct Matrix2
                 throw new Exception($"Requested an invalid Matrix2 index:{x},{y}");
             }
 
-            _values[x * 2 + y] = value;
+            switch (x * 2 + y)
+            {
+                case 0: _m0 = value; break;
+                case 1: _m1 = value; break;
+                case 2: _m2 = value; break;
+                case 3: _m3 = value; break;
+            }
         }
     }
 
 
     /// <summary>
-    /// Matrix elements, a 4 element array indexed as
+    /// Returns the matrix elements as a new array in column-major order, indexed as
     /// (0 2)
     /// (1 3)
+    /// A new array is allocated on each access; the caller may freely mutate it.
     /// </summary>
-    public float[] Values
-    {
-        get => _values;
-        set => _values = value;
-    }
+    public float[] Values => new float[] { _m0, _m1, _m2, _m3 };
 
     /// <summary>Gets the determinant of this matrix.</summary>
-    public float Determinant => _values[0] * _values[3] - _values[1] * _values[2];
+    public float Determinant => _m0 * _m3 - _m1 * _m2;
 
     /// <summary>Returns the transpose of this matrix — elements mirrored across the main diagonal. Does not modify this instance.</summary>
     public Matrix2 Transpose()
     {
         return new Matrix2
             (
-                _values[0],
-                _values[2],
-                _values[1],
-                _values[3]
+                _m0, _m2,
+                _m1, _m3
             );
     }
 

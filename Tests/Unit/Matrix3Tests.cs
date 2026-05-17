@@ -375,4 +375,36 @@ public class Matrix3Tests
         var b = new Matrix3(1, 2, 3, 4, 5, 6, 7, 8, 9);
         AssertMatricesEqual(new Matrix3(9, 8, 7, 6, 5, 4, 3, 2, 1), a - b);
     }
+
+    // Struct-copy aliasing regression
+
+    [TestMethod]
+    public void StructCopy_IndexerMutation_DoesNotAliasOriginal()
+    {
+        var original = Matrix3.Identity;
+        var copy = original;
+        copy[0, 0] = 99f;
+
+        Assert.AreEqual(1f, original[0, 0]);
+    }
+
+    [TestMethod]
+    public void StructCopy_ValuesArray_IsIndependent()
+    {
+        var original = Matrix3.Identity;
+        float[] arr = original.Values;
+        arr[0] = 99f;
+
+        Assert.AreEqual(1f, original[0, 0]);
+    }
+
+    [TestMethod]
+    public void ArrayConstructor_MutatingSourceArray_DoesNotAffectMatrix()
+    {
+        float[] arr = new float[] { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
+        var m = new Matrix3(arr);
+        arr[0] = 99f;
+
+        Assert.AreEqual(1f, m[0, 0]);
+    }
 }

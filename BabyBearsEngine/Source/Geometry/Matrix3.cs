@@ -1,5 +1,3 @@
-using System.Linq;
-
 namespace BabyBearsEngine.Geometry;
 
 /// <summary>
@@ -65,25 +63,37 @@ public struct Matrix3
     }
 
     /// <summary>Returns a new matrix whose elements are the component-wise sum of <paramref name="mat1"/> and <paramref name="mat2"/>.</summary>
-    public static Matrix3 Add(ref Matrix3 mat1, ref Matrix3 mat2) => new(mat1._values.Zip(mat2._values, (a, b) => a + b).ToArray());
+    public static Matrix3 Add(ref Matrix3 mat1, ref Matrix3 mat2)
+    {
+        return new Matrix3(
+            mat1._m0 + mat2._m0, mat1._m1 + mat2._m1, mat1._m2 + mat2._m2,
+            mat1._m3 + mat2._m3, mat1._m4 + mat2._m4, mat1._m5 + mat2._m5,
+            mat1._m6 + mat2._m6, mat1._m7 + mat2._m7, mat1._m8 + mat2._m8);
+    }
 
     /// <summary>Returns a new matrix whose elements are the component-wise difference of <paramref name="mat1"/> and <paramref name="mat2"/>.</summary>
-    public static Matrix3 Subtract(ref Matrix3 mat1, ref Matrix3 mat2) => new(mat1._values.Zip(mat2._values, (a, b) => a - b).ToArray());
+    public static Matrix3 Subtract(ref Matrix3 mat1, ref Matrix3 mat2)
+    {
+        return new Matrix3(
+            mat1._m0 - mat2._m0, mat1._m1 - mat2._m1, mat1._m2 - mat2._m2,
+            mat1._m3 - mat2._m3, mat1._m4 - mat2._m4, mat1._m5 - mat2._m5,
+            mat1._m6 - mat2._m6, mat1._m7 - mat2._m7, mat1._m8 - mat2._m8);
+    }
 
     /// <summary>Returns the matrix product <paramref name="mat1"/> × <paramref name="mat2"/>. Composition order: <paramref name="mat2"/> is applied first.</summary>
     public static Matrix3 Multiply(ref Matrix3 mat1, ref Matrix3 mat2)
     {
         return new Matrix3
             (
-                mat1._values[0] * mat2._values[0] + mat1._values[3] * mat2._values[1] + mat1._values[6] * mat2._values[2],
-                mat1._values[1] * mat2._values[0] + mat1._values[4] * mat2._values[1] + mat1._values[7] * mat2._values[2],
-                mat1._values[2] * mat2._values[0] + mat1._values[5] * mat2._values[1] + mat1._values[8] * mat2._values[2],
-                mat1._values[0] * mat2._values[3] + mat1._values[3] * mat2._values[4] + mat1._values[6] * mat2._values[5],
-                mat1._values[1] * mat2._values[3] + mat1._values[4] * mat2._values[4] + mat1._values[7] * mat2._values[5],
-                mat1._values[2] * mat2._values[3] + mat1._values[5] * mat2._values[4] + mat1._values[8] * mat2._values[5],
-                mat1._values[0] * mat2._values[6] + mat1._values[3] * mat2._values[7] + mat1._values[6] * mat2._values[8],
-                mat1._values[1] * mat2._values[6] + mat1._values[4] * mat2._values[7] + mat1._values[7] * mat2._values[8],
-                mat1._values[2] * mat2._values[6] + mat1._values[5] * mat2._values[7] + mat1._values[8] * mat2._values[8]
+                mat1._m0 * mat2._m0 + mat1._m3 * mat2._m1 + mat1._m6 * mat2._m2,
+                mat1._m1 * mat2._m0 + mat1._m4 * mat2._m1 + mat1._m7 * mat2._m2,
+                mat1._m2 * mat2._m0 + mat1._m5 * mat2._m1 + mat1._m8 * mat2._m2,
+                mat1._m0 * mat2._m3 + mat1._m3 * mat2._m4 + mat1._m6 * mat2._m5,
+                mat1._m1 * mat2._m3 + mat1._m4 * mat2._m4 + mat1._m7 * mat2._m5,
+                mat1._m2 * mat2._m3 + mat1._m5 * mat2._m4 + mat1._m8 * mat2._m5,
+                mat1._m0 * mat2._m6 + mat1._m3 * mat2._m7 + mat1._m6 * mat2._m8,
+                mat1._m1 * mat2._m6 + mat1._m4 * mat2._m7 + mat1._m7 * mat2._m8,
+                mat1._m2 * mat2._m6 + mat1._m5 * mat2._m7 + mat1._m8 * mat2._m8
             );
     }
 
@@ -95,8 +105,8 @@ public struct Matrix3
     {
         return new Point
             (
-                mat._values[0] * p.X + mat._values[3] * p.Y + mat._values[6],
-                mat._values[1] * p.X + mat._values[4] * p.Y + mat._values[7]
+                mat._m0 * p.X + mat._m3 * p.Y + mat._m6,
+                mat._m1 * p.X + mat._m4 * p.Y + mat._m7
             );
     }
 
@@ -105,9 +115,9 @@ public struct Matrix3
     {
         return new Point3
             (
-                mat._values[0] * p.X + mat._values[3] * p.Y + mat._values[6] * p.Z,
-                mat._values[1] * p.X + mat._values[4] * p.Y + mat._values[7] * p.Z,
-                mat._values[2] * p.X + mat._values[5] * p.Y + mat._values[8] * p.Z
+                mat._m0 * p.X + mat._m3 * p.Y + mat._m6 * p.Z,
+                mat._m1 * p.X + mat._m4 * p.Y + mat._m7 * p.Z,
+                mat._m2 * p.X + mat._m5 * p.Y + mat._m8 * p.Z
             );
     }
 
@@ -116,18 +126,11 @@ public struct Matrix3
     {
         return new Matrix3
             (
-                mat._values[0] * f,
-                mat._values[1] * f,
-                mat._values[2] * f,
-                mat._values[3] * f,
-                mat._values[4] * f,
-                mat._values[5] * f,
-                mat._values[6] * f,
-                mat._values[7] * f,
-                mat._values[8] * f
+                mat._m0 * f, mat._m1 * f, mat._m2 * f,
+                mat._m3 * f, mat._m4 * f, mat._m5 * f,
+                mat._m6 * f, mat._m7 * f, mat._m8 * f
             );
     }
-
 
     /// <summary>Returns <paramref name="mat"/> composed with a translation by (<paramref name="x"/>, <paramref name="y"/>).</summary>
     public static Matrix3 Translate(ref Matrix3 mat, float x, float y)
@@ -200,9 +203,9 @@ public struct Matrix3
         int[] rowIdx = { 0, 0, 0 };
         int[] pivotIdx = { -1, -1, -1 };
 
-        float[,] inverse = {{mat._values[0], mat._values[3], mat._values[6]},
-                            {mat._values[1], mat._values[4], mat._values[7]},
-                            {mat._values[2], mat._values[5], mat._values[8]}};
+        float[,] inverse = {{mat._m0, mat._m3, mat._m6},
+                            {mat._m1, mat._m4, mat._m7},
+                            {mat._m2, mat._m5, mat._m8}};
 
         int icol = 0;
         int irow = 0;
@@ -310,9 +313,9 @@ public struct Matrix3
         int[] rowIdx = { 0, 0, 0 };
         int[] pivotIdx = { -1, -1, -1 };
 
-        float[,] inverse = {{mat._values[0], mat._values[3], mat._values[6]},
-                            {mat._values[1], mat._values[4], mat._values[7]},
-                            {mat._values[2], mat._values[5], mat._values[8]}};
+        float[,] inverse = {{mat._m0, mat._m3, mat._m6},
+                            {mat._m1, mat._m4, mat._m7},
+                            {mat._m2, mat._m5, mat._m8}};
 
         int icol = 0;
         int irow = 0;
@@ -412,18 +415,30 @@ public struct Matrix3
             );
     }
 
-    private float[] _values;
+    private float _m0 = 0f;
+    private float _m1 = 0f;
+    private float _m2 = 0f;
+    private float _m3 = 0f;
+    private float _m4 = 0f;
+    private float _m5 = 0f;
+    private float _m6 = 0f;
+    private float _m7 = 0f;
+    private float _m8 = 0f;
 
     /// <summary>Creates a matrix from 9 elements in column-major order (see <see cref="Matrix3"/> for layout).</summary>
     public Matrix3(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8)
     {
-        _values = new float[9] { m0, m1, m2, m3, m4, m5, m6, m7, m8 };
+        _m0 = m0; _m1 = m1; _m2 = m2;
+        _m3 = m3; _m4 = m4; _m5 = m5;
+        _m6 = m6; _m7 = m7; _m8 = m8;
     }
 
-    /// <summary>Creates a matrix from a 9-element array in column-major order. The array is captured by reference (not copied).</summary>
+    /// <summary>Creates a matrix from a 9-element array in column-major order. Each element is copied — mutations to the array after construction do not affect this matrix.</summary>
     public Matrix3(float[] values)
     {
-        _values = values;
+        _m0 = values[0]; _m1 = values[1]; _m2 = values[2];
+        _m3 = values[3]; _m4 = values[4]; _m5 = values[5];
+        _m6 = values[6]; _m7 = values[7]; _m8 = values[8];
     }
 
     /// <summary>Indexer accessing element at column <paramref name="x"/>, row <paramref name="y"/> (0..2 for both).</summary>
@@ -437,7 +452,13 @@ public struct Matrix3
                 throw new ArgumentException($"Requested an invalid Matrix3 index:{x},{y}");
             }
 
-            return _values[x * 3 + y];
+            return (x * 3 + y) switch
+            {
+                0 => _m0, 1 => _m1, 2 => _m2,
+                3 => _m3, 4 => _m4, 5 => _m5,
+                6 => _m6, 7 => _m7, 8 => _m8,
+                _ => throw new ArgumentException($"Requested an invalid Matrix3 index:{x},{y}")
+            };
         }
         set
         {
@@ -446,17 +467,29 @@ public struct Matrix3
                 throw new ArgumentException($"Requested an invalid Matrix3 index:{x},{y}");
             }
 
-            _values[x * 3 + y] = value;
+            switch (x * 3 + y)
+            {
+                case 0: _m0 = value; break;
+                case 1: _m1 = value; break;
+                case 2: _m2 = value; break;
+                case 3: _m3 = value; break;
+                case 4: _m4 = value; break;
+                case 5: _m5 = value; break;
+                case 6: _m6 = value; break;
+                case 7: _m7 = value; break;
+                case 8: _m8 = value; break;
+            }
         }
     }
 
     /// <summary>
-    /// Exposes the 1D array of matrix elements that make up this matrix, indexed as
+    /// Returns the matrix elements as a new array in column-major order, indexed as
     /// (0 3 6)
     /// (1 4 7)
     /// (2 5 8)
+    /// A new array is allocated on each access; the caller may freely mutate it.
     /// </summary>
-    public float[] Values { get { return _values; } set { _values = value; } }
+    public float[] Values => new float[] { _m0, _m1, _m2, _m3, _m4, _m5, _m6, _m7, _m8 };
 
     /// <summary>
     /// Gets the determinant of this matrix
@@ -465,8 +498,8 @@ public struct Matrix3
     {
         get
         {
-            return _values[0] * _values[4] * _values[8] + _values[3] * _values[7] * _values[2] + _values[6] * _values[1] * _values[5]
-                 - _values[6] * _values[4] * _values[2] - _values[0] * _values[7] * _values[5] - _values[3] * _values[1] * _values[8];
+            return _m0 * _m4 * _m8 + _m3 * _m7 * _m2 + _m6 * _m1 * _m5
+                 - _m6 * _m4 * _m2 - _m0 * _m7 * _m5 - _m3 * _m1 * _m8;
         }
     }
 
@@ -478,15 +511,9 @@ public struct Matrix3
     {
         return new Matrix3
             (
-                _values[0],
-                _values[3],
-                _values[6],
-                _values[1],
-                _values[4],
-                _values[7],
-                _values[2],
-                _values[5],
-                _values[8]
+                _m0, _m3, _m6,
+                _m1, _m4, _m7,
+                _m2, _m5, _m8
             );
     }
 

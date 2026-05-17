@@ -389,4 +389,26 @@ public class Matrix4Tests
 
         Assert.IsTrue(s.Contains('1'));
     }
+
+    // Struct-copy aliasing regression
+
+    [TestMethod]
+    public void StructCopy_IndexerMutation_DoesNotAliasOriginal()
+    {
+        Matrix4 original = Matrix4.Identity;
+        Matrix4 copy = original;
+        copy[0, 0] = 99f;
+
+        Assert.AreEqual(1f, original[0, 0], Delta);
+    }
+
+    [TestMethod]
+    public void StructCopy_ValuesArray_IsIndependent()
+    {
+        Matrix4 original = Matrix4.Identity;
+        float[] arr = original.Values;
+        arr[0] = 99f;
+
+        Assert.AreEqual(1f, original[0, 0], Delta);
+    }
 }

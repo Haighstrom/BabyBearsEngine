@@ -292,4 +292,36 @@ public class Matrix2Tests
         Assert.AreEqual(2f, transformed.X, Delta);
         Assert.AreEqual(3f, transformed.Y, Delta);
     }
+
+    // Struct-copy aliasing regression
+
+    [TestMethod]
+    public void StructCopy_IndexerMutation_DoesNotAliasOriginal()
+    {
+        Matrix2 original = Matrix2.Identity;
+        Matrix2 copy = original;
+        copy[0, 0] = 99f;
+
+        Assert.AreEqual(1f, original[0, 0], Delta);
+    }
+
+    [TestMethod]
+    public void StructCopy_ValuesArray_IsIndependent()
+    {
+        Matrix2 original = Matrix2.Identity;
+        float[] arr = original.Values;
+        arr[0] = 99f;
+
+        Assert.AreEqual(1f, original[0, 0], Delta);
+    }
+
+    [TestMethod]
+    public void ArrayConstructor_MutatingSourceArray_DoesNotAffectMatrix()
+    {
+        float[] arr = new float[] { 1, 0, 0, 1 };
+        Matrix2 m = new(arr);
+        arr[0] = 99f;
+
+        Assert.AreEqual(1f, m[0, 0], Delta);
+    }
 }

@@ -1,5 +1,3 @@
-using System.Linq;
-
 namespace BabyBearsEngine.Geometry;
 
 /// <summary>
@@ -84,39 +82,44 @@ public struct Matrix4
     /// <summary>Returns a new matrix whose elements are the component-wise sum of <paramref name="mat1"/> and <paramref name="mat2"/>.</summary>
     public static Matrix4 Add(ref Matrix4 mat1, ref Matrix4 mat2)
     {
-        float[] values = mat1._values.Zip(mat2._values, (a, b) => a + b).ToArray();
-        return new Matrix4(values);
+        return new Matrix4(
+            mat1._m0  + mat2._m0,  mat1._m1  + mat2._m1,  mat1._m2  + mat2._m2,  mat1._m3  + mat2._m3,
+            mat1._m4  + mat2._m4,  mat1._m5  + mat2._m5,  mat1._m6  + mat2._m6,  mat1._m7  + mat2._m7,
+            mat1._m8  + mat2._m8,  mat1._m9  + mat2._m9,  mat1._m10 + mat2._m10, mat1._m11 + mat2._m11,
+            mat1._m12 + mat2._m12, mat1._m13 + mat2._m13, mat1._m14 + mat2._m14, mat1._m15 + mat2._m15);
     }
 
     /// <summary>Returns a new matrix whose elements are the component-wise difference of <paramref name="mat1"/> and <paramref name="mat2"/>.</summary>
     public static Matrix4 Subtract(ref Matrix4 mat1, ref Matrix4 mat2)
     {
-        float[] values = mat1._values.Zip(mat2._values, (a, b) => a - b).ToArray();
-        return new Matrix4(values);
+        return new Matrix4(
+            mat1._m0  - mat2._m0,  mat1._m1  - mat2._m1,  mat1._m2  - mat2._m2,  mat1._m3  - mat2._m3,
+            mat1._m4  - mat2._m4,  mat1._m5  - mat2._m5,  mat1._m6  - mat2._m6,  mat1._m7  - mat2._m7,
+            mat1._m8  - mat2._m8,  mat1._m9  - mat2._m9,  mat1._m10 - mat2._m10, mat1._m11 - mat2._m11,
+            mat1._m12 - mat2._m12, mat1._m13 - mat2._m13, mat1._m14 - mat2._m14, mat1._m15 - mat2._m15);
     }
 
     /// <summary>Returns the matrix product <paramref name="mat1"/> × <paramref name="mat2"/>. Composition order: <paramref name="mat2"/> is applied first.</summary>
     public static Matrix4 Multiply(ref Matrix4 mat1, ref Matrix4 mat2)
     {
-        float[] values = new float[16] {
-     /*0*/  mat1._values[0]*mat2._values[0]+mat1._values[4]*mat2._values[1]+mat1._values[8]*mat2._values[2]+mat1._values[12]*mat2._values[3],
-     /*1*/  mat1._values[1]*mat2._values[0]+mat1._values[5]*mat2._values[1]+mat1._values[9]*mat2._values[2]+mat1._values[13]*mat2._values[3],
-     /*2*/  mat1._values[2]*mat2._values[0]+mat1._values[6]*mat2._values[1]+mat1._values[10]*mat2._values[2]+mat1._values[14]*mat2._values[3],
-     /*3*/  mat1._values[3]*mat2._values[0]+mat1._values[7]*mat2._values[1]+mat1._values[11]*mat2._values[2]+mat1._values[15]*mat2._values[3],
-     /*4*/  mat1._values[0]*mat2._values[4]+mat1._values[4]*mat2._values[5]+mat1._values[8]*mat2._values[6]+mat1._values[12]*mat2._values[7],
-     /*5*/  mat1._values[1]*mat2._values[4]+mat1._values[5]*mat2._values[5]+mat1._values[9]*mat2._values[6]+mat1._values[13]*mat2._values[7],
-     /*6*/  mat1._values[2]*mat2._values[4]+mat1._values[6]*mat2._values[5]+mat1._values[10]*mat2._values[6]+mat1._values[14]*mat2._values[7],
-     /*7*/  mat1._values[3]*mat2._values[4]+mat1._values[7]*mat2._values[5]+mat1._values[11]*mat2._values[6]+mat1._values[15]*mat2._values[7],
-     /*8*/  mat1._values[0]*mat2._values[8]+mat1._values[4]*mat2._values[9]+mat1._values[8]*mat2._values[10]+mat1._values[12]*mat2._values[11],
-     /*9*/  mat1._values[1]*mat2._values[8]+mat1._values[5]*mat2._values[9]+mat1._values[9]*mat2._values[10]+mat1._values[13]*mat2._values[11],
-    /*10*/  mat1._values[2]*mat2._values[8]+mat1._values[6]*mat2._values[9]+mat1._values[10]*mat2._values[10]+mat1._values[14]*mat2._values[11],
-    /*11*/  mat1._values[3]*mat2._values[8]+mat1._values[7]*mat2._values[9]+mat1._values[11]*mat2._values[10]+mat1._values[15]*mat2._values[11],
-    /*12*/  mat1._values[0]*mat2._values[12]+mat1._values[4]*mat2._values[13]+mat1._values[8]*mat2._values[14]+mat1._values[12]*mat2._values[15],
-    /*13*/  mat1._values[1]*mat2._values[12]+mat1._values[5]*mat2._values[13]+mat1._values[9]*mat2._values[14]+mat1._values[13]*mat2._values[15],
-    /*14*/  mat1._values[2]*mat2._values[12]+mat1._values[6]*mat2._values[13]+mat1._values[10]*mat2._values[14]+mat1._values[14]*mat2._values[15],
-    /*15*/  mat1._values[3]*mat2._values[12]+mat1._values[7]*mat2._values[13]+mat1._values[11]*mat2._values[14]+mat1._values[15]*mat2._values[15]
-        };
-        return new Matrix4(values);
+        return new Matrix4(
+     /*0*/  mat1._m0*mat2._m0+mat1._m4*mat2._m1+mat1._m8*mat2._m2+mat1._m12*mat2._m3,
+     /*1*/  mat1._m1*mat2._m0+mat1._m5*mat2._m1+mat1._m9*mat2._m2+mat1._m13*mat2._m3,
+     /*2*/  mat1._m2*mat2._m0+mat1._m6*mat2._m1+mat1._m10*mat2._m2+mat1._m14*mat2._m3,
+     /*3*/  mat1._m3*mat2._m0+mat1._m7*mat2._m1+mat1._m11*mat2._m2+mat1._m15*mat2._m3,
+     /*4*/  mat1._m0*mat2._m4+mat1._m4*mat2._m5+mat1._m8*mat2._m6+mat1._m12*mat2._m7,
+     /*5*/  mat1._m1*mat2._m4+mat1._m5*mat2._m5+mat1._m9*mat2._m6+mat1._m13*mat2._m7,
+     /*6*/  mat1._m2*mat2._m4+mat1._m6*mat2._m5+mat1._m10*mat2._m6+mat1._m14*mat2._m7,
+     /*7*/  mat1._m3*mat2._m4+mat1._m7*mat2._m5+mat1._m11*mat2._m6+mat1._m15*mat2._m7,
+     /*8*/  mat1._m0*mat2._m8+mat1._m4*mat2._m9+mat1._m8*mat2._m10+mat1._m12*mat2._m11,
+     /*9*/  mat1._m1*mat2._m8+mat1._m5*mat2._m9+mat1._m9*mat2._m10+mat1._m13*mat2._m11,
+    /*10*/  mat1._m2*mat2._m8+mat1._m6*mat2._m9+mat1._m10*mat2._m10+mat1._m14*mat2._m11,
+    /*11*/  mat1._m3*mat2._m8+mat1._m7*mat2._m9+mat1._m11*mat2._m10+mat1._m15*mat2._m11,
+    /*12*/  mat1._m0*mat2._m12+mat1._m4*mat2._m13+mat1._m8*mat2._m14+mat1._m12*mat2._m15,
+    /*13*/  mat1._m1*mat2._m12+mat1._m5*mat2._m13+mat1._m9*mat2._m14+mat1._m13*mat2._m15,
+    /*14*/  mat1._m2*mat2._m12+mat1._m6*mat2._m13+mat1._m10*mat2._m14+mat1._m14*mat2._m15,
+    /*15*/  mat1._m3*mat2._m12+mat1._m7*mat2._m13+mat1._m11*mat2._m14+mat1._m15*mat2._m15
+        );
     }
 
     /// <summary>Returns a new matrix with every element of <paramref name="mat"/> multiplied by the scalar <paramref name="f"/>.</summary>
@@ -124,22 +127,10 @@ public struct Matrix4
     {
         return new Matrix4
             (
-                mat._values[0] * f,
-                mat._values[1] * f,
-                mat._values[2] * f,
-                mat._values[3] * f,
-                mat._values[4] * f,
-                mat._values[5] * f,
-                mat._values[6] * f,
-                mat._values[7] * f,
-                mat._values[8] * f,
-                mat._values[9] * f,
-                mat._values[10] * f,
-                mat._values[11] * f,
-                mat._values[12] * f,
-                mat._values[13] * f,
-                mat._values[14] * f,
-                mat._values[15] * f
+                mat._m0  * f, mat._m1  * f, mat._m2  * f, mat._m3  * f,
+                mat._m4  * f, mat._m5  * f, mat._m6  * f, mat._m7  * f,
+                mat._m8  * f, mat._m9  * f, mat._m10 * f, mat._m11 * f,
+                mat._m12 * f, mat._m13 * f, mat._m14 * f, mat._m15 * f
             );
     }
 
@@ -148,10 +139,10 @@ public struct Matrix4
     {
         return new Point4
             (
-                mat._values[0] * p.x + mat._values[4] * p.y + mat._values[8] * p.z + mat._values[12] * p.w,
-                mat._values[1] * p.x + mat._values[5] * p.y + mat._values[9] * p.z + mat._values[13] * p.w,
-                mat._values[2] * p.x + mat._values[6] * p.y + mat._values[10] * p.z + mat._values[14] * p.w,
-                mat._values[3] * p.x + mat._values[7] * p.y + mat._values[11] * p.z + mat._values[15] * p.w
+                mat._m0 * p.x + mat._m4 * p.y + mat._m8  * p.z + mat._m12 * p.w,
+                mat._m1 * p.x + mat._m5 * p.y + mat._m9  * p.z + mat._m13 * p.w,
+                mat._m2 * p.x + mat._m6 * p.y + mat._m10 * p.z + mat._m14 * p.w,
+                mat._m3 * p.x + mat._m7 * p.y + mat._m11 * p.z + mat._m15 * p.w
             );
     }
 
@@ -163,8 +154,8 @@ public struct Matrix4
     {
         return new Point
             (
-                mat._values[0] * p.X + mat._values[4] * p.Y + mat._values[12],
-                mat._values[1] * p.X + mat._values[5] * p.Y + mat._values[13]
+                mat._m0 * p.X + mat._m4 * p.Y + mat._m12,
+                mat._m1 * p.X + mat._m5 * p.Y + mat._m13
             );
     }
 
@@ -254,10 +245,10 @@ public struct Matrix4
         int[] pivotIdx = { -1, -1, -1, -1 };
 
         // convert the matrix to an array for easy looping
-        float[,] inverse = {{mat._values[0], mat._values[4], mat._values[8], mat._values[12]},
-                            {mat._values[1], mat._values[5], mat._values[9], mat._values[13]},
-                            {mat._values[2], mat._values[6], mat._values[10], mat._values[14]},
-                            {mat._values[3], mat._values[7], mat._values[11], mat._values[15]} };
+        float[,] inverse = {{mat._m0, mat._m4, mat._m8,  mat._m12},
+                            {mat._m1, mat._m5, mat._m9,  mat._m13},
+                            {mat._m2, mat._m6, mat._m10, mat._m14},
+                            {mat._m3, mat._m7, mat._m11, mat._m15}};
         int icol = 0;
         int irow = 0;
         for (int i = 0; i < 4; i++)
@@ -368,25 +359,48 @@ public struct Matrix4
     }
 
 
-    private float[] _values;
+    private float _m0  = 0f;
+    private float _m1  = 0f;
+    private float _m2  = 0f;
+    private float _m3  = 0f;
+    private float _m4  = 0f;
+    private float _m5  = 0f;
+    private float _m6  = 0f;
+    private float _m7  = 0f;
+    private float _m8  = 0f;
+    private float _m9  = 0f;
+    private float _m10 = 0f;
+    private float _m11 = 0f;
+    private float _m12 = 0f;
+    private float _m13 = 0f;
+    private float _m14 = 0f;
+    private float _m15 = 0f;
 
     /// <summary>Initialises a new <see cref="Matrix4"/> with individual column-major element values.</summary>
     public Matrix4(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8, float m9, float m10, float m11, float m12, float m13, float m14, float m15)
     {
-        _values = new float[16] { m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15 };
+        _m0  = m0;  _m1  = m1;  _m2  = m2;  _m3  = m3;
+        _m4  = m4;  _m5  = m5;  _m6  = m6;  _m7  = m7;
+        _m8  = m8;  _m9  = m9;  _m10 = m10; _m11 = m11;
+        _m12 = m12; _m13 = m13; _m14 = m14; _m15 = m15;
     }
 
-    /// <summary>Initialises a new <see cref="Matrix4"/> from a 16-element column-major array. The array is used directly — callers should clone if needed.</summary>
+    /// <summary>Initialises a new <see cref="Matrix4"/> from a 16-element column-major array. Each element is copied — mutations to the array after construction do not affect this matrix.</summary>
     public Matrix4(float[] values)
     {
-        _values = values;
+        _m0  = values[0];  _m1  = values[1];  _m2  = values[2];  _m3  = values[3];
+        _m4  = values[4];  _m5  = values[5];  _m6  = values[6];  _m7  = values[7];
+        _m8  = values[8];  _m9  = values[9];  _m10 = values[10]; _m11 = values[11];
+        _m12 = values[12]; _m13 = values[13]; _m14 = values[14]; _m15 = values[15];
     }
 
-    /// <summary>Initialises a new <see cref="Matrix4"/> as a deep copy of <paramref name="matrix"/>. The underlying element array is cloned so mutations to one instance do not affect the other.</summary>
+    /// <summary>Initialises a new <see cref="Matrix4"/> as a copy of <paramref name="matrix"/>. Named fields are value types — no aliasing is possible.</summary>
     public Matrix4(Matrix4 matrix)
-        : this()
     {
-        _values = (float[])matrix.Values.Clone();
+        _m0  = matrix._m0;  _m1  = matrix._m1;  _m2  = matrix._m2;  _m3  = matrix._m3;
+        _m4  = matrix._m4;  _m5  = matrix._m5;  _m6  = matrix._m6;  _m7  = matrix._m7;
+        _m8  = matrix._m8;  _m9  = matrix._m9;  _m10 = matrix._m10; _m11 = matrix._m11;
+        _m12 = matrix._m12; _m13 = matrix._m13; _m14 = matrix._m14; _m15 = matrix._m15;
     }
 
     /// <summary>
@@ -402,7 +416,14 @@ public struct Matrix4
                 throw new Exception($"Requested an invalid Matrix4 index:{x},{y}");
             }
 
-            return _values[x * 4 + y];
+            return (x * 4 + y) switch
+            {
+                0  => _m0,  1  => _m1,  2  => _m2,  3  => _m3,
+                4  => _m4,  5  => _m5,  6  => _m6,  7  => _m7,
+                8  => _m8,  9  => _m9,  10 => _m10, 11 => _m11,
+                12 => _m12, 13 => _m13, 14 => _m14, 15 => _m15,
+                _ => throw new Exception($"Requested an invalid Matrix4 index:{x},{y}")
+            };
         }
         set
         {
@@ -411,18 +432,43 @@ public struct Matrix4
                 throw new Exception($"Requested an invalid Matrix4 index:{x},{y}");
             }
 
-            _values[x * 4 + y] = value;
+            switch (x * 4 + y)
+            {
+                case 0:  _m0  = value; break;
+                case 1:  _m1  = value; break;
+                case 2:  _m2  = value; break;
+                case 3:  _m3  = value; break;
+                case 4:  _m4  = value; break;
+                case 5:  _m5  = value; break;
+                case 6:  _m6  = value; break;
+                case 7:  _m7  = value; break;
+                case 8:  _m8  = value; break;
+                case 9:  _m9  = value; break;
+                case 10: _m10 = value; break;
+                case 11: _m11 = value; break;
+                case 12: _m12 = value; break;
+                case 13: _m13 = value; break;
+                case 14: _m14 = value; break;
+                case 15: _m15 = value; break;
+            }
         }
     }
 
     /// <summary>
-    /// Underlying array of matrix elements held by this matrix. Indexed as
+    /// Returns the matrix elements as a new array in column-major order, indexed as
     /// (0 4 8 12)
     /// (1 5 9 13)
     /// (2 6 10 14)
     /// (3 7 11 15)
+    /// A new array is allocated on each access; the caller may freely mutate it.
     /// </summary>
-    public float[] Values { get { return _values; } set { _values = value; } }
+    public float[] Values => new float[]
+    {
+        _m0,  _m1,  _m2,  _m3,
+        _m4,  _m5,  _m6,  _m7,
+        _m8,  _m9,  _m10, _m11,
+        _m12, _m13, _m14, _m15
+    };
 
     /// <summary>Gets the determinant of this matrix.</summary>
     public float Determinant
@@ -430,12 +476,12 @@ public struct Matrix4
         get
         {
             return
-                _values[0] * _values[5] * _values[10] * _values[15] - _values[0] * _values[5] * _values[14] * _values[11] + _values[0] * _values[9] * _values[14] * _values[7] - _values[0] * _values[9] * _values[6] * _values[15]
-              + _values[0] * _values[13] * _values[6] * _values[11] - _values[0] * _values[13] * _values[10] * _values[7] - _values[4] * _values[9] * _values[14] * _values[3] + _values[4] * _values[9] * _values[2] * _values[15]
-              - _values[4] * _values[13] * _values[2] * _values[11] + _values[4] * _values[13] * _values[10] * _values[3] - _values[4] * _values[1] * _values[10] * _values[15] + _values[4] * _values[1] * _values[14] * _values[11]
-              + _values[8] * _values[13] * _values[2] * _values[7] - _values[8] * _values[13] * _values[6] * _values[3] + _values[8] * _values[1] * _values[6] * _values[15] - _values[8] * _values[1] * _values[14] * _values[7]
-              + _values[8] * _values[5] * _values[14] * _values[3] - _values[8] * _values[5] * _values[2] * _values[15] - _values[12] * _values[1] * _values[6] * _values[11] + _values[12] * _values[1] * _values[10] * _values[7]
-              - _values[12] * _values[5] * _values[10] * _values[3] + _values[12] * _values[5] * _values[2] * _values[11] - _values[12] * _values[9] * _values[2] * _values[7] + _values[12] * _values[9] * _values[6] * _values[3];
+                _m0 * _m5 * _m10 * _m15 - _m0 * _m5 * _m14 * _m11 + _m0 * _m9 * _m14 * _m7 - _m0 * _m9 * _m6 * _m15
+              + _m0 * _m13 * _m6 * _m11 - _m0 * _m13 * _m10 * _m7 - _m4 * _m9 * _m14 * _m3 + _m4 * _m9 * _m2 * _m15
+              - _m4 * _m13 * _m2 * _m11 + _m4 * _m13 * _m10 * _m3 - _m4 * _m1 * _m10 * _m15 + _m4 * _m1 * _m14 * _m11
+              + _m8 * _m13 * _m2 * _m7  - _m8 * _m13 * _m6 * _m3  + _m8 * _m1 * _m6 * _m15  - _m8 * _m1 * _m14 * _m7
+              + _m8 * _m5 * _m14 * _m3  - _m8 * _m5 * _m2 * _m15  - _m12 * _m1 * _m6 * _m11 + _m12 * _m1 * _m10 * _m7
+              - _m12 * _m5 * _m10 * _m3 + _m12 * _m5 * _m2 * _m11 - _m12 * _m9 * _m2 * _m7  + _m12 * _m9 * _m6 * _m3;
         }
     }
 
@@ -444,22 +490,10 @@ public struct Matrix4
     {
         return new Matrix4
             (
-                _values[0],
-                _values[4],
-                _values[8],
-                _values[12],
-                _values[1],
-                _values[5],
-                _values[9],
-                _values[13],
-                _values[2],
-                _values[6],
-                _values[10],
-                _values[14],
-                _values[3],
-                _values[7],
-                _values[11],
-                _values[15]
+                _m0,  _m4,  _m8,  _m12,
+                _m1,  _m5,  _m9,  _m13,
+                _m2,  _m6,  _m10, _m14,
+                _m3,  _m7,  _m11, _m15
             );
     }
 
@@ -518,7 +552,7 @@ public struct Matrix4
     /// <summary>Returns a human-readable representation of this matrix with one row per line.</summary>
     public override string ToString()
     {
-        return string.Format("({0} {4} {8} {12})\n({1} {5} {9} {13})\n({2} {6} {10} {14})\n({3} {7} {11} {15})\n", _values[0], _values[1], _values[2], _values[3], _values[4], _values[5], _values[6], _values[7], _values[8], _values[9], _values[10], _values[11], _values[12], _values[13], _values[14], _values[15]);
+        return $"({_m0} {_m4} {_m8} {_m12})\n({_m1} {_m5} {_m9} {_m13})\n({_m2} {_m6} {_m10} {_m14})\n({_m3} {_m7} {_m11} {_m15})\n";
     }
 
 }
