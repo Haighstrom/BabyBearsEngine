@@ -64,6 +64,7 @@ uiSubmenuFactory = () => new MenuWorld(
     new("Tabbed Panel",      () => new TabbedPanelDemoWorld(getUISubmenu)),
     new("Dropdown",          () => new DropdownDemoWorld(getUISubmenu)),
     new("Scroll List",       () => new ScrollListDemoWorld(getUISubmenu)),
+    new("Grid Layout",       () => new GridLayoutDemoWorld(getUISubmenu)),
 ], backFactory: getMainMenu);
 
 graphicsSubmenuFactory = () => new MenuWorld(
