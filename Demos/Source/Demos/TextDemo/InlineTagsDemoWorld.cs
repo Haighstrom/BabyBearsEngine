@@ -12,7 +12,6 @@ internal class InlineTagsDemoWorld : DemoWorld
     private const int Col1X    = Margin;
     private const int Col2X    = Col1X + ColW + ColGap;
     private const int Col3X    = Col2X + ColW + ColGap;
-    private const int WideW    = ColW * 3 + ColGap * 2;
     private const int LabelH   = 14;
     private const int SmallH   = 45;
     private const int MultiH   = 90;
