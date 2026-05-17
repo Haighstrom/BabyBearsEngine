@@ -2,27 +2,36 @@ using System.Linq;
 
 namespace BabyBearsEngine.Geometry;
 
+/// <summary>
+/// A 4×4 matrix used for 3D affine transformations (translation, rotation, scale) and projection.
+/// Elements are stored column-major in <see cref="Values"/>:
+/// <code>
+/// (0   4   8  12)
+/// (1   5   9  13)
+/// (2   6  10  14)
+/// (3   7  11  15)
+/// </code>
+/// Multiplication composes transforms: <c>a * b</c> applies <c>b</c> first then <c>a</c>.
+/// Most static helpers take <c>ref Matrix4</c> for performance — they return new matrices and never mutate the inputs.
+/// </summary>
 public struct Matrix4
 {
-    //Matrix Layout
-    //(0  4  8  12)
-    //(1  5  9  13)
-    //(2  6  10 14)
-    //(3  7  11 15)
-
+    /// <summary>The identity matrix — leaves any vector or matrix unchanged when multiplied. Returns a fresh instance per access.</summary>
     public static Matrix4 Identity => new(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-    public static Matrix4 Zero => new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    public static Matrix4 FlipXMatrix = new(-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-    public static Matrix4 FlipYMatrix = new(1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-    public static Matrix4 FlipZMatrix = new(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1);
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <param name="z"></param>
-    /// <returns></returns>
+    /// <summary>The zero matrix — all elements are zero. Returns a fresh instance per access.</summary>
+    public static Matrix4 Zero => new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+    /// <summary>A reflection across the Y axis (negates X). Returns a fresh instance per access (the underlying array is not shared).</summary>
+    public static Matrix4 FlipXMatrix => new(-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+
+    /// <summary>A reflection across the X axis (negates Y). Returns a fresh instance per access (the underlying array is not shared).</summary>
+    public static Matrix4 FlipYMatrix => new(1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+
+    /// <summary>A reflection across the Z axis (negates Z). Returns a fresh instance per access (the underlying array is not shared).</summary>
+    public static Matrix4 FlipZMatrix => new(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1);
+
+    /// <summary>Returns a translation matrix that moves points by (<paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>).</summary>
     public static Matrix4 CreateTranslation(float x, float y, float z)
     {
         return new Matrix4(1, 0, 0, 0,
@@ -30,25 +39,27 @@ public struct Matrix4
                             0, 0, 1, 0,
                             x, y, z, 1);
     }
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+
+    /// <summary>Returns a translation matrix that moves points by (<paramref name="x"/>, <paramref name="y"/>, 0).</summary>
     public static Matrix4 CreateTranslation(float x, float y)
     {
         return new Matrix4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, 0, 1);
     }
 
+    /// <summary>Returns a rotation matrix that rotates points around the Z axis by <paramref name="angleInDegrees"/> (counter-clockwise in a right-handed coordinate system).</summary>
     public static Matrix4 CreateRotationAroundZAxis(float angleInDegrees)
     {
         double radians = Math.PI * angleInDegrees / 180.0;
         return new Matrix4((float)Math.Cos(radians), (float)Math.Sin(radians), 0, 0, -(float)Math.Sin(radians), (float)Math.Cos(radians), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     }
 
+    /// <summary>Returns a scale matrix that scales X by <paramref name="scaleX"/>, Y by <paramref name="scaleY"/>, and Z by <paramref name="scaleZ"/> (default 1).</summary>
     public static Matrix4 CreateScale(float scaleX, float scaleY, float scaleZ = 1) => new(scaleX, 0, 0, 0, 0, scaleY, 0, 0, 0, 0, scaleZ, 0, 0, 0, 0, 1);
 
+    /// <summary>
+    /// Returns an orthographic projection matrix mapping a (<paramref name="width"/>, <paramref name="height"/>) screen-space rectangle
+    /// (top-left origin, Y down) onto NDC (-1..1, Y up). Use this when rendering directly to the screen.
+    /// </summary>
     public static Matrix4 CreateOrtho(float width, float height)
     {
         var mat = Identity;
@@ -58,6 +69,10 @@ public struct Matrix4
         return mat;
     }
 
+    /// <summary>
+    /// Same as <see cref="CreateOrtho"/> but without the Y flip. Use this when rendering to a framebuffer texture
+    /// rather than directly to the screen, since the framebuffer's Y axis already matches OpenGL's convention.
+    /// </summary>
     public static Matrix4 CreateFBOOrtho(float width, float height)
     {
         var mat = Identity;
@@ -66,18 +81,21 @@ public struct Matrix4
         return mat;
     }
 
+    /// <summary>Returns a new matrix whose elements are the component-wise sum of <paramref name="mat1"/> and <paramref name="mat2"/>.</summary>
     public static Matrix4 Add(ref Matrix4 mat1, ref Matrix4 mat2)
     {
         float[] values = mat1._values.Zip(mat2._values, (a, b) => a + b).ToArray();
         return new Matrix4(values);
     }
 
+    /// <summary>Returns a new matrix whose elements are the component-wise difference of <paramref name="mat1"/> and <paramref name="mat2"/>.</summary>
     public static Matrix4 Subtract(ref Matrix4 mat1, ref Matrix4 mat2)
     {
         float[] values = mat1._values.Zip(mat2._values, (a, b) => a - b).ToArray();
         return new Matrix4(values);
     }
 
+    /// <summary>Returns the matrix product <paramref name="mat1"/> × <paramref name="mat2"/>. Composition order: <paramref name="mat2"/> is applied first.</summary>
     public static Matrix4 Multiply(ref Matrix4 mat1, ref Matrix4 mat2)
     {
         float[] values = new float[16] {
@@ -101,12 +119,7 @@ public struct Matrix4
         return new Matrix4(values);
     }
 
-    /// <summary>
-    /// Scalar multiplication
-    /// </summary>
-    /// <param name="mat"></param>
-    /// <param name="f"></param>
-    /// <returns></returns>
+    /// <summary>Returns a new matrix with every element of <paramref name="mat"/> multiplied by the scalar <paramref name="f"/>.</summary>
     public static Matrix4 Multiply(ref Matrix4 mat, float f)
     {
         return new Matrix4
@@ -130,12 +143,7 @@ public struct Matrix4
             );
     }
 
-    /// <summary>
-    /// Apply matrix mat to Point4 p, which returns a transformed Point4 p
-    /// </summary>
-    /// <param name="mat"></param>
-    /// <param name="p"></param>
-    /// <returns></returns>
+    /// <summary>Transforms <paramref name="p"/> by <paramref name="mat"/>, returning a new <see cref="Point4"/>.</summary>
     public static Point4 Multiply(ref Matrix4 mat, Point4 p)
     {
         return new Point4
@@ -148,11 +156,9 @@ public struct Matrix4
     }
 
     /// <summary>
-    /// Applies Matrix4 mat to a Point4 (p.x, p.y, 0, 1) to result in a transformed Point4, then returns the x,y of that Point4 as a Point - ie transforms the Point using the Matrix4
+    /// Transforms <paramref name="p"/> by <paramref name="mat"/>. The point is padded to <c>(x, y, 0, 1)</c> before multiplication;
+    /// only the first two components of the result are returned as a <see cref="Point"/>.
     /// </summary>
-    /// <param name="mat"></param>
-    /// <param name="p"></param>
-    /// <returns></returns>
     public static Point Multiply(ref Matrix4 mat, Point p)
     {
         return new Point
@@ -162,18 +168,24 @@ public struct Matrix4
             );
     }
 
+    /// <summary>Returns <paramref name="mat"/> composed with a translation by (<paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>).</summary>
     public static Matrix4 Translate(ref Matrix4 mat, float x, float y, float z)
     {
         var transMat = CreateTranslation(x, y, z);
         return Multiply(ref mat, ref transMat);
     }
 
+    /// <summary>Returns <paramref name="mat"/> composed with a rotation around the Z axis by <paramref name="angleInDegrees"/>.</summary>
     public static Matrix4 RotateAroundZ(ref Matrix4 mat, float angleInDegrees)
     {
         var rotMat = CreateRotationAroundZAxis(angleInDegrees);
         return Multiply(ref mat, ref rotMat);
     }
+
+    /// <summary>Returns <paramref name="mat"/> composed with a rotation by <paramref name="angleInDegrees"/> centred on <paramref name="p"/>.</summary>
     public static Matrix4 RotateAroundPoint(ref Matrix4 mat, float angleInDegrees, Point p) => RotateAroundPoint(ref mat, angleInDegrees, p.X, p.Y);
+
+    /// <summary>Returns <paramref name="mat"/> composed with a rotation by <paramref name="angleInDegrees"/> centred on (<paramref name="x"/>, <paramref name="y"/>).</summary>
     public static Matrix4 RotateAroundPoint(ref Matrix4 mat, float angleInDegrees, float x, float y)
     {
         var translate1 = CreateTranslation(x, y, 0);
@@ -187,11 +199,14 @@ public struct Matrix4
         return result;
     }
 
+    /// <summary>Returns <paramref name="mat"/> composed with a scale around the origin by (<paramref name="scaleX"/>, <paramref name="scaleY"/>, <paramref name="scaleZ"/>).</summary>
     public static Matrix4 ScaleAroundOrigin(ref Matrix4 mat, float scaleX, float scaleY, float scaleZ)
     {
         var scaleMat = CreateScale(scaleX, scaleY, scaleZ);
         return Multiply(ref mat, ref scaleMat);
     }
+
+    /// <summary>Returns <paramref name="mat"/> composed with a scale centred on (<paramref name="x"/>, <paramref name="y"/>).</summary>
     public static Matrix4 ScaleAroundPoint(ref Matrix4 mat, float scaleX, float scaleY, float x, float y)
     {
         var translate1 = CreateTranslation(x, y, 0);
@@ -205,19 +220,33 @@ public struct Matrix4
         return result;
     }
 
+    /// <summary>Returns <paramref name="mat"/> composed with a reflection across the Y axis (negates X).</summary>
     public static Matrix4 FlipX(ref Matrix4 mat)
     {
-        return Multiply(ref mat, ref FlipXMatrix);
-    }
-    public static Matrix4 FlipY(ref Matrix4 mat)
-    {
-        return Multiply(ref mat, ref FlipYMatrix);
-    }
-    public static Matrix4 FlipZ(ref Matrix4 mat)
-    {
-        return Multiply(ref mat, ref FlipZMatrix);
+        var flip = FlipXMatrix;
+        return Multiply(ref mat, ref flip);
     }
 
+    /// <summary>Returns <paramref name="mat"/> composed with a reflection across the X axis (negates Y).</summary>
+    public static Matrix4 FlipY(ref Matrix4 mat)
+    {
+        var flip = FlipYMatrix;
+        return Multiply(ref mat, ref flip);
+    }
+
+    /// <summary>Returns <paramref name="mat"/> composed with a reflection across the Z axis (negates Z).</summary>
+    public static Matrix4 FlipZ(ref Matrix4 mat)
+    {
+        var flip = FlipZMatrix;
+        return Multiply(ref mat, ref flip);
+    }
+
+    /// <summary>
+    /// Returns the inverse of <paramref name="mat"/> using Gauss-Jordan elimination.
+    /// If the matrix is singular, returns <paramref name="mat"/> unchanged where singular detection succeeds,
+    /// or throws if a zero pivot is encountered.
+    /// </summary>
+    /// <exception cref="Exception">Thrown when the matrix is singular and cannot be inverted.</exception>
     public static Matrix4 Invert(Matrix4 mat)
     {
         int[] colIdx = { 0, 0, 0, 0 };
@@ -341,20 +370,29 @@ public struct Matrix4
 
     private float[] _values;
 
+    /// <summary>Initialises a new <see cref="Matrix4"/> with individual column-major element values.</summary>
     public Matrix4(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8, float m9, float m10, float m11, float m12, float m13, float m14, float m15)
     {
         _values = new float[16] { m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15 };
     }
+
+    /// <summary>Initialises a new <see cref="Matrix4"/> from a 16-element column-major array. The array is used directly — callers should clone if needed.</summary>
     public Matrix4(float[] values)
     {
         _values = values;
     }
+
+    /// <summary>Initialises a new <see cref="Matrix4"/> as a deep copy of <paramref name="matrix"/>. The underlying element array is cloned so mutations to one instance do not affect the other.</summary>
     public Matrix4(Matrix4 matrix)
         : this()
     {
-        _values = matrix.Values;
+        _values = (float[])matrix.Values.Clone();
     }
 
+    /// <summary>
+    /// Gets or sets a matrix element by column (<paramref name="x"/>) and row (<paramref name="y"/>), both in the range [0, 3].
+    /// </summary>
+    /// <exception cref="Exception">Thrown when either index is out of range.</exception>
     public float this[int x, int y]
     {
         get
@@ -386,9 +424,7 @@ public struct Matrix4
     /// </summary>
     public float[] Values { get { return _values; } set { _values = value; } }
 
-    /// <summary>
-    /// Gets the determinant of this matrix
-    /// </summary>
+    /// <summary>Gets the determinant of this matrix.</summary>
     public float Determinant
     {
         get
@@ -403,10 +439,7 @@ public struct Matrix4
         }
     }
 
-    /// <summary>
-    /// Returns the transpose of this Matrix4 - all elements mirrored in [1 1] diagonal. The values of this instance will not be altered, returns a new matrix.
-    /// </summary>
-    /// <returns></returns>
+    /// <summary>Returns the transpose of this matrix — elements mirrored across the main diagonal. Does not modify this instance.</summary>
     public Matrix4 Transpose()
     {
         return new Matrix4
@@ -430,78 +463,59 @@ public struct Matrix4
             );
     }
 
-    /// <summary>
-    /// Return a new Matrix that is the inverse of this matrix- singular matrices will throw an exception
-    /// </summary>
-    /// <returns></returns>
+    /// <summary>Returns the inverse of this matrix. Singular matrices throw an exception.</summary>
+    /// <exception cref="Exception">Thrown when the matrix is singular and cannot be inverted.</exception>
     public Matrix4 Inverse()
     {
         return Invert(this);
     }
 
-    /// <summary>
-    /// Scalar multiplication.
-    /// </summary>
-    /// <param name="left">left-hand operand</param>
-    /// <param name="right">right-hand operand</param>
-    /// <returns>A new Matrix2 which holds the result of the multiplication</returns>
+    /// <summary>Scalar multiplication.</summary>
+    /// <param name="left">The scalar.</param>
+    /// <param name="right">The matrix.</param>
+    /// <returns>A new <see cref="Matrix4"/> with every element multiplied by <paramref name="left"/>.</returns>
     public static Matrix4 operator *(float left, Matrix4 right)
     {
         return Multiply(ref right, left);
     }
 
-    /// <summary>
-    /// Scalar multiplication.
-    /// </summary>
-    /// <param name="left">left-hand operand</param>
-    /// <param name="right">right-hand operand</param>
-    /// <returns>A new Matrix4 which holds the result of the multiplication</returns>
+    /// <summary>Scalar multiplication.</summary>
+    /// <param name="left">The matrix.</param>
+    /// <param name="right">The scalar.</param>
+    /// <returns>A new <see cref="Matrix4"/> with every element multiplied by <paramref name="right"/>.</returns>
     public static Matrix4 operator *(Matrix4 left, float right) => Multiply(ref left, right);
 
-    /// <summary>
-    /// Matrix multiplication
-    /// </summary>
-    /// <param name="left">left-hand operand</param>
-    /// <param name="right">right-hand operand</param>
-    /// <returns>A new Matrix4 which holds the result of the multiplication</returns>
+    /// <summary>Matrix multiplication.</summary>
+    /// <param name="left">Left-hand operand.</param>
+    /// <param name="right">Right-hand operand.</param>
+    /// <returns>A new <see cref="Matrix4"/> holding the result of the multiplication.</returns>
     public static Matrix4 operator *(Matrix4 left, Matrix4 right)
     {
         return Multiply(ref left, ref right);
-        //return Multiply(ref right, ref left);   //this needs to be changed back
     }
 
-    /// <summary>
-    /// Multiplying a matrix onto a Point, to return a point
-    /// </summary>
-    /// <param name="left"></param>
-    /// <param name="right"></param>
-    /// <returns></returns>
+    /// <summary>Transforms <paramref name="right"/> by <paramref name="left"/>.</summary>
     public static Point4 operator *(Matrix4 left, Point4 right) => Multiply(ref left, right);
 
     /// <summary>
-    ///  Multiplying a matrix onto a Point - it will be padded to (x, y, 0, 1) to allow multiplying with a Point4 then the xy taken, to return a point
+    /// Transforms <paramref name="right"/> by <paramref name="left"/>. The point is padded to <c>(x, y, 0, 1)</c>;
+    /// only the first two components of the result are returned as a <see cref="Point"/>.
     /// </summary>
-    /// <param name="left"></param>
-    /// <param name="right"></param>
-    /// <returns></returns>
     public static Point operator *(Matrix4 left, Point right) => Multiply(ref left, right);
 
-    /// <summary>
-    /// Matrix addition
-    /// </summary>
-    /// <param name="left">left-hand operand</param>
-    /// <param name="right">right-hand operand</param>
-    /// <returns>A new Matrix4 which holds the result of the addition</returns>
+    /// <summary>Matrix addition.</summary>
+    /// <param name="left">Left-hand operand.</param>
+    /// <param name="right">Right-hand operand.</param>
+    /// <returns>A new <see cref="Matrix4"/> holding the component-wise sum.</returns>
     public static Matrix4 operator +(Matrix4 left, Matrix4 right) => Add(ref left, ref right);
 
-    /// <summary>
-    /// Matrix subtraction
-    /// </summary>
-    /// <param name="left">left-hand operand</param>
-    /// <param name="right">right-hand operand</param>
-    /// <returns>A new Matrix4 which holds the result of the subtraction</returns>
+    /// <summary>Matrix subtraction.</summary>
+    /// <param name="left">Left-hand operand.</param>
+    /// <param name="right">Right-hand operand.</param>
+    /// <returns>A new <see cref="Matrix4"/> holding the component-wise difference.</returns>
     public static Matrix4 operator -(Matrix4 left, Matrix4 right) => Subtract(ref left, ref right);
 
+    /// <summary>Returns a human-readable representation of this matrix with one row per line.</summary>
     public override string ToString()
     {
         return string.Format("({0} {4} {8} {12})\n({1} {5} {9} {13})\n({2} {6} {10} {14})\n({3} {7} {11} {15})\n", _values[0], _values[1], _values[2], _values[3], _values[4], _values[5], _values[6], _values[7], _values[8], _values[9], _values[10], _values[11], _values[12], _values[13], _values[14], _values[15]);
