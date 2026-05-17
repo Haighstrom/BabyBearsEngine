@@ -64,7 +64,7 @@ public class TaskController : AddableBase, ITaskController
     /// <inheritdoc/>
     public virtual void Update(double elapsed)
     {
-        if (Parent is null)
+        if (Parent is null || (Parent is IAddable addable && addable.Parent is null))
         {
             return;
         }
@@ -73,22 +73,10 @@ public class TaskController : AddableBase, ITaskController
         {
             CurrentTask.Update(elapsed);
 
-            // Null check after Update — the task itself may have called ClearTask, or detached
-            // our parent from the world.
             if (CurrentTask is not null && CurrentTask.IsComplete)
             {
-                if (Parent is IAddable parentAsAddable && parentAsAddable.Parent is null)
-                {
-                    return;
-                }
-
                 CurrentTask = CurrentTask.NextTask;
             }
-        }
-
-        if (Parent is IAddable a && a.Parent is null)
-        {
-            return;
         }
 
         if (CurrentTask is null && GetNextTask is not null)

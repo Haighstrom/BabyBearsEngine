@@ -34,6 +34,18 @@ public class TaskControllerTests
         public (float x, float y) GetWindowCoordinates(float x, float y) => (x, y);
     }
 
+    // An entity-like object that sits inside a world (Parent != null = in world).
+    private sealed class FakeAddableContainer : IContainer, IAddable
+    {
+        public IContainer? Parent { get; set; }
+        public bool Exists => Parent is not null;
+        public void Remove() => Parent = null;
+        public void Add(IAddable entity) { }
+        public void Remove(IAddable entity) { }
+        public void RemoveAll() { }
+        public (float x, float y) GetWindowCoordinates(float x, float y) => (x, y);
+    }
+
     [TestMethod]
     public void Update_WhenNoParent_DoesNothing()
     {
@@ -106,5 +118,19 @@ public class TaskControllerTests
         controller.ClearTask();
 
         Assert.IsNull(controller.CurrentTask);
+    }
+
+    [TestMethod]
+    public void Update_WhenParentDetachedFromWorld_DoesNotDriveTask()
+    {
+        var task = new ControllableTask();
+        var world = new FakeContainer();
+        var entity = new FakeAddableContainer { Parent = world };
+        var controller = new TaskController(task) { Parent = entity };
+
+        entity.Parent = null; // simulate removal from world mid-frame
+        controller.Update(0.016);
+
+        Assert.AreEqual(0, task.UpdateCalls);
     }
 }
