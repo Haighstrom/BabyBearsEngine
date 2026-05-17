@@ -7,7 +7,7 @@ namespace BabyBearsEngine.Worlds.Cameras;
 /// <summary>
 /// Shader used with the multisample FBO for the MSAA antialiasing pass only
 /// </summary>
-public sealed class CameraMSAAShader : ShaderProgramBase, IMVPShader
+internal sealed class CameraMSAAShader : ShaderProgramBase, IMVPShader
 {
     private readonly int _mvMatrixLocation;
     private readonly int _pMatrixLocation;
