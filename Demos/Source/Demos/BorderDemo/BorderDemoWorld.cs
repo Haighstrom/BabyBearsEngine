@@ -32,6 +32,7 @@ internal class BorderDemoWorld : DemoWorld
 
     private int _borderColourIndex = 0;
     private int _fillColourIndex = 0;
+    private readonly ColourGraphic[] _fills = new ColourGraphic[3];
     private readonly BorderedRectangleGraphic[] _rects = new BorderedRectangleGraphic[3];
     private float _thickness = 10f;
     private readonly TextGraphic _thicknessLabel;
@@ -51,14 +52,22 @@ internal class BorderDemoWorld : DemoWorld
         AddColumnLabel(Col3X, 100f, "Centred");
 
         // Explanatory notes
-        AddNote(Col1X, 120f, "border shrinks fill");
-        AddNote(Col2X, 120f, "fill fills stated rect");
-        AddNote(Col3X, 120f, "border straddles edge");
+        AddNote(Col1X, 120f, "border draws inside bounds");
+        AddNote(Col2X, 120f, "border extends beyond bounds");
+        AddNote(Col3X, 120f, "border straddles the edge");
 
-        // Bordered rectangles — same stated rect, different BorderPosition
-        _rects[0] = new BorderedRectangleGraphic(Col1X, RectY, RectW, RectH, _thickness, s_fillPalette[0], s_borderPalette[0], BorderPosition.Inside);
-        _rects[1] = new BorderedRectangleGraphic(Col2X, RectY, RectW, RectH, _thickness, s_fillPalette[0], s_borderPalette[0], BorderPosition.Outside);
-        _rects[2] = new BorderedRectangleGraphic(Col3X, RectY, RectW, RectH, _thickness, s_fillPalette[0], s_borderPalette[0], BorderPosition.Centred);
+        // Fill backgrounds (added first so they render behind the border frames)
+        float[] colXs = [Col1X, Col2X, Col3X];
+        for (int i = 0; i < 3; i++)
+        {
+            _fills[i] = new ColourGraphic(s_fillPalette[0], colXs[i], RectY, RectW, RectH);
+            Add(_fills[i]);
+        }
+
+        // Border frames — no fill, independent of the ColourGraphic backgrounds
+        _rects[0] = new BorderedRectangleGraphic(Col1X, RectY, RectW, RectH, _thickness, s_borderPalette[0], BorderPosition.Inside);
+        _rects[1] = new BorderedRectangleGraphic(Col2X, RectY, RectW, RectH, _thickness, s_borderPalette[0], BorderPosition.Outside);
+        _rects[2] = new BorderedRectangleGraphic(Col3X, RectY, RectW, RectH, _thickness, s_borderPalette[0], BorderPosition.Centred);
         Add(_rects[0]);
         Add(_rects[1]);
         Add(_rects[2]);
@@ -94,7 +103,9 @@ internal class BorderDemoWorld : DemoWorld
             _borderColourIndex = (_borderColourIndex + 1) % s_borderPalette.Length;
             Colour c = s_borderPalette[_borderColourIndex];
             foreach (BorderedRectangleGraphic r in _rects)
+            {
                 r.BorderColour = c;
+            }
         };
         Add(cycleBorder);
 
@@ -103,8 +114,10 @@ internal class BorderDemoWorld : DemoWorld
         {
             _fillColourIndex = (_fillColourIndex + 1) % s_fillPalette.Length;
             Colour c = s_fillPalette[_fillColourIndex];
-            foreach (BorderedRectangleGraphic r in _rects)
-                r.FillColour = c;
+            foreach (ColourGraphic f in _fills)
+            {
+                f.Colour = c;
+            }
         };
         Add(cycleFill);
     }
@@ -131,7 +144,10 @@ internal class BorderDemoWorld : DemoWorld
     {
         _thickness = Math.Clamp(_thickness + delta, MinThickness, MaxThickness);
         foreach (BorderedRectangleGraphic r in _rects)
+        {
             r.BorderThickness = _thickness;
+        }
+
         _thicknessLabel.Text = FormatThickness();
     }
 

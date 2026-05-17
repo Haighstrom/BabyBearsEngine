@@ -49,7 +49,6 @@ public class TextLabelTests
         public Colour BorderColour { get; set; } = Colour.Black;
         public BorderPosition BorderPosition { get; set; } = BorderPosition.Inside;
         public float BorderThickness { get; set; } = 1f;
-        public Colour FillColour { get; set; } = Colour.Black;
         public bool Visible { get; set; } = true;
 
         public void Render(ref Matrix3 projection, ref Matrix3 modelView) { }

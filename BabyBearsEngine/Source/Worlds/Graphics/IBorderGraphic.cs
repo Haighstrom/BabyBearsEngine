@@ -1,6 +1,6 @@
 namespace BabyBearsEngine.Worlds.Graphics;
 
-/// <summary>A bordered rectangle renderable that can be added to a container.</summary>
+/// <summary>A border-frame renderable that can be added to a container.</summary>
 internal interface IBorderGraphic : IRenderable
 {
     /// <summary>Colour of the border.</summary>
@@ -11,7 +11,4 @@ internal interface IBorderGraphic : IRenderable
 
     /// <summary>Border width in pixels on each side.</summary>
     float BorderThickness { get; set; }
-
-    /// <summary>Colour of the interior fill.</summary>
-    Colour FillColour { get; set; }
 }

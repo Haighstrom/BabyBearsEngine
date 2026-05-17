@@ -30,22 +30,12 @@ public class TextLabel : Entity
         BorderPosition borderPosition = BorderPosition.Inside)
         : base(x, y, width, height)
     {
-        if (borderColour.HasValue)
-        {
-            // Border's own fill carries the background colour — no separate ColourGraphic needed,
-            // and no transparent quad that would render as black on pipelines without alpha blend.
-            Colour fill = backgroundColour ?? new Colour(0, 0, 0, 0);
-            _border = new BorderedRectangleGraphic(0f, 0f, width, height, borderThickness, fill, borderColour.Value, borderPosition);
-            _background = null;
-        }
-        else
-        {
-            _border = null;
-            _background = backgroundColour.HasValue
-                ? new ColourGraphic(backgroundColour.Value, 0f, 0f, width, height)
-                : null;
-        }
-
+        _background = backgroundColour.HasValue
+            ? new ColourGraphic(backgroundColour.Value, 0f, 0f, width, height)
+            : null;
+        _border = borderColour.HasValue
+            ? new BorderedRectangleGraphic(0f, 0f, width, height, borderThickness, borderColour.Value, borderPosition)
+            : null;
         _text = new TextGraphic(theme.Font, text, theme.Colour, 0, 0, width, height)
         {
             HAlignment = theme.HAlignment,
@@ -87,34 +77,13 @@ public class TextLabel : Entity
     /// <summary>
     /// Background fill colour, or <see langword="null"/> if no background is shown.
     /// Setting to <see langword="null"/> hides the background; setting to a colour shows it.
-    /// Has no effect if no background or border was provided at construction.
+    /// Has no effect if no background was provided at construction.
     /// </summary>
     public Colour? BackgroundColour
     {
-        get
-        {
-            if (_border is { Visible: true })
-            {
-                return _border.FillColour;
-            }
-
-            return _background is { Visible: true } ? _background.Colour : null;
-        }
+        get => _background is { Visible: true } ? _background.Colour : null;
         set
         {
-            if (_border is not null)
-            {
-                if (value is null)
-                {
-                    _border.Visible = false;
-                    return;
-                }
-
-                _border.FillColour = value.Value;
-                _border.Visible = true;
-                return;
-            }
-
             if (_background is null)
             {
                 return;

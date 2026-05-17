@@ -1,48 +1,63 @@
 namespace BabyBearsEngine.Worlds.Graphics;
 
 /// <summary>
-/// A solid rectangle with a coloured border drawn around its perimeter. Composes two
-/// <see cref="ColourGraphic"/> children: one for the border and one for the fill.
-/// The <see cref="BorderPosition"/> controls whether the border draws inside, outside,
-/// or centred on the graphic's stated rectangle.
+/// A rectangular border frame drawn as four solid strips — top, bottom, left, and right.
+/// The interior is empty; place a <see cref="ColourGraphic"/> or other graphic behind this
+/// entity if a fill is needed. The <see cref="BorderPosition"/> controls whether the strips
+/// draw inside, outside, or centred on the graphic's stated rectangle.
 /// </summary>
 public class BorderedRectangleGraphic : Entity, IBorderGraphic
 {
-    private readonly ColourGraphic _border;
+    private readonly ColourGraphic _bottom;
+    private Colour _borderColour;
     private BorderPosition _borderPosition;
     private float _borderThickness;
-    private readonly ColourGraphic _fill;
+    private readonly ColourGraphic _left;
+    private readonly ColourGraphic _right;
+    private readonly ColourGraphic _top;
 
     /// <param name="x">X position relative to the parent container.</param>
     /// <param name="y">Y position relative to the parent container.</param>
     /// <param name="width">Width in pixels.</param>
     /// <param name="height">Height in pixels.</param>
-    /// <param name="borderThickness">Border width in pixels on each side.</param>
-    /// <param name="fillColour">Colour of the interior.</param>
+    /// <param name="borderThickness">Width of each border strip in pixels.</param>
     /// <param name="borderColour">Colour of the border.</param>
     /// <param name="borderPosition">Controls whether the border draws inside, outside, or centred on the stated bounds. Defaults to <see cref="BorderPosition.Inside"/>.</param>
-    public BorderedRectangleGraphic(float x, float y, float width, float height, float borderThickness, Colour fillColour, Colour borderColour, BorderPosition borderPosition = BorderPosition.Inside)
+    public BorderedRectangleGraphic(float x, float y, float width, float height, float borderThickness,
+        Colour borderColour, BorderPosition borderPosition = BorderPosition.Inside)
         : base(x, y, width, height)
     {
         _borderThickness = borderThickness;
+        _borderColour = borderColour;
         _borderPosition = borderPosition;
-        _border = new ColourGraphic(borderColour, 0f, 0f, 0f, 0f);
-        _fill = new ColourGraphic(fillColour, 0f, 0f, 0f, 0f);
-        Add(_border);
-        Add(_fill);
+        _top = new ColourGraphic(borderColour, 0f, 0f, 0f, 0f);
+        _bottom = new ColourGraphic(borderColour, 0f, 0f, 0f, 0f);
+        _left = new ColourGraphic(borderColour, 0f, 0f, 0f, 0f);
+        _right = new ColourGraphic(borderColour, 0f, 0f, 0f, 0f);
+        Add(_top);
+        Add(_bottom);
+        Add(_left);
+        Add(_right);
         UpdateLayout();
     }
 
-    /// <summary>Colour of the border.</summary>
+    /// <summary>Colour of the border strips.</summary>
     public Colour BorderColour
     {
-        get => _border.Colour;
-        set => _border.Colour = value;
+        get => _borderColour;
+        set
+        {
+            _borderColour = value;
+            _top.Colour = value;
+            _bottom.Colour = value;
+            _left.Colour = value;
+            _right.Colour = value;
+        }
     }
 
     /// <summary>
     /// Controls whether the border draws inside, outside, or centred on the stated bounds.
-    /// Changing this recomputes the child layout.
+    /// Changing this recomputes the strip layout.
     /// </summary>
     public BorderPosition BorderPosition
     {
@@ -54,9 +69,7 @@ public class BorderedRectangleGraphic : Entity, IBorderGraphic
         }
     }
 
-    /// <summary>
-    /// Border width in pixels on each side. Changing this recomputes the child layout.
-    /// </summary>
+    /// <summary>Width of each border strip in pixels. Changing this recomputes the strip layout.</summary>
     public float BorderThickness
     {
         get => _borderThickness;
@@ -67,33 +80,14 @@ public class BorderedRectangleGraphic : Entity, IBorderGraphic
         }
     }
 
-    /// <summary>
-    /// Sets the colour of both the border and the fill simultaneously. Getting returns the border colour.
-    /// Useful for tinting the whole graphic; if the fill is transparent the setter has no visible effect on it.
-    /// </summary>
-    public Colour Colour
-    {
-        get => _border.Colour;
-        set
-        {
-            _border.Colour = value;
-            _fill.Colour = value;
-        }
-    }
-
-    /// <summary>Colour of the interior fill.</summary>
-    public Colour FillColour
-    {
-        get => _fill.Colour;
-        set => _fill.Colour = value;
-    }
-
     /// <inheritdoc/>
     protected override void OnSizeChanged()
     {
         base.OnSizeChanged();
-        if (_border is not null)
+        if (_top is not null)
+        {
             UpdateLayout();
+        }
     }
 
     private void UpdateLayout()
@@ -105,37 +99,25 @@ public class BorderedRectangleGraphic : Entity, IBorderGraphic
         switch (_borderPosition)
         {
             case BorderPosition.Inside:
-                _border.X = 0f;
-                _border.Y = 0f;
-                _border.Width = w;
-                _border.Height = h;
-                _fill.X = t;
-                _fill.Y = t;
-                _fill.Width = w - 2f * t;
-                _fill.Height = h - 2f * t;
+                _top.X = 0f;     _top.Y = 0f;     _top.Width = w;     _top.Height = t;
+                _bottom.X = 0f;  _bottom.Y = h - t; _bottom.Width = w; _bottom.Height = t;
+                _left.X = 0f;    _left.Y = t;       _left.Width = t;   _left.Height = h - 2f * t;
+                _right.X = w - t; _right.Y = t;     _right.Width = t;  _right.Height = h - 2f * t;
                 break;
 
             case BorderPosition.Outside:
-                _border.X = -t;
-                _border.Y = -t;
-                _border.Width = w + 2f * t;
-                _border.Height = h + 2f * t;
-                _fill.X = 0f;
-                _fill.Y = 0f;
-                _fill.Width = w;
-                _fill.Height = h;
+                _top.X = -t;    _top.Y = -t;    _top.Width = w + 2f * t;    _top.Height = t;
+                _bottom.X = -t; _bottom.Y = h;  _bottom.Width = w + 2f * t; _bottom.Height = t;
+                _left.X = -t;   _left.Y = 0f;   _left.Width = t;            _left.Height = h;
+                _right.X = w;   _right.Y = 0f;  _right.Width = t;           _right.Height = h;
                 break;
 
             case BorderPosition.Centred:
                 float half = t / 2f;
-                _border.X = -half;
-                _border.Y = -half;
-                _border.Width = w + t;
-                _border.Height = h + t;
-                _fill.X = half;
-                _fill.Y = half;
-                _fill.Width = w - t;
-                _fill.Height = h - t;
+                _top.X = -half;    _top.Y = -half;    _top.Width = w + t;    _top.Height = t;
+                _bottom.X = -half; _bottom.Y = h - half; _bottom.Width = w + t; _bottom.Height = t;
+                _left.X = -half;   _left.Y = half;    _left.Width = t;       _left.Height = h - t;
+                _right.X = w - half; _right.Y = half; _right.Width = t;      _right.Height = h - t;
                 break;
         }
     }
