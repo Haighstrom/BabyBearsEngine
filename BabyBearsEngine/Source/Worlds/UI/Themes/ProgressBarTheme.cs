@@ -37,6 +37,20 @@ public sealed record ProgressBarTheme
         FillFactory = r => new ColourGraphic(fill, r.X, r.Y, r.W, r.H),
     };
 
+    /// <summary>Builds a theme with a transparent background and a fill loaded from a path string.</summary>
+    public static ProgressBarTheme FromFillTexturePath(string fillPath) => new()
+    {
+        BackgroundFactory = r => new ColourGraphic(new Colour(0, 0, 0, 0), r.X, r.Y, r.W, r.H),
+        FillFactory = r => new TextureGraphic(Textures.CreateFromFile(fillPath), r.X, r.Y, r.W, r.H),
+    };
+
+    /// <summary>Builds a theme with background and fill both loaded from path strings.</summary>
+    public static ProgressBarTheme FromTexturePaths(string backgroundPath, string fillPath) => new()
+    {
+        BackgroundFactory = r => new TextureGraphic(Textures.CreateFromFile(backgroundPath), r.X, r.Y, r.W, r.H),
+        FillFactory = r => new TextureGraphic(Textures.CreateFromFile(fillPath), r.X, r.Y, r.W, r.H),
+    };
+
     /// <summary>Builds a theme with textured background and fill.</summary>
     public static ProgressBarTheme FromTextures(ITexture background, ITexture fill) => new()
     {
