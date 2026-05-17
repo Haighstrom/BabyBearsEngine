@@ -4,6 +4,12 @@ using BabyBearsEngine.Worlds.Cameras;
 
 namespace BabyBearsEngine.Worlds;
 
+/// <summary>
+/// A world-space camera that renders its child entities onto a viewport on screen. The camera
+/// applies a <see cref="CameraView"/> transform so world coordinates map to pixels within its
+/// bounds. Use <see cref="WithTileSize"/> for a fixed pixel-per-tile scale or
+/// <see cref="WithView"/> to show a fixed world-space region.
+/// </summary>
 public sealed class Camera : ContainerEntity, ICamera
 {
     private readonly CameraView _cameraView;
@@ -18,9 +24,33 @@ public sealed class Camera : ContainerEntity, ICamera
         _renderer = new CameraRenderer(width, height, samples);
     }
 
+    /// <summary>
+    /// Creates a camera with a fixed world-to-pixel tile size. The number of world tiles
+    /// visible changes when the camera is resized.
+    /// </summary>
+    /// <param name="x">Camera X position in the parent's coordinate space.</param>
+    /// <param name="y">Camera Y position in the parent's coordinate space.</param>
+    /// <param name="width">Camera viewport width in pixels.</param>
+    /// <param name="height">Camera viewport height in pixels.</param>
+    /// <param name="tileW">Width of one world tile in pixels.</param>
+    /// <param name="tileH">Height of one world tile in pixels.</param>
+    /// <param name="samples">MSAA sample count for the render target. Defaults to disabled.</param>
     public static Camera WithTileSize(float x, float y, float width, float height, float tileW, float tileH, MsaaSamples samples = MsaaSamples.Disabled)
         => new(x, y, width, height, (getW, getH) => new FixedTileSizeCameraView(tileW, tileH, getW, getH), samples);
 
+    /// <summary>
+    /// Creates a camera that shows a fixed region of world space. The tile size scales
+    /// automatically so the chosen world region always fills the viewport.
+    /// </summary>
+    /// <param name="x">Camera X position in the parent's coordinate space.</param>
+    /// <param name="y">Camera Y position in the parent's coordinate space.</param>
+    /// <param name="width">Camera viewport width in pixels.</param>
+    /// <param name="height">Camera viewport height in pixels.</param>
+    /// <param name="viewX">World-space X coordinate of the left edge of the view.</param>
+    /// <param name="viewY">World-space Y coordinate of the top edge of the view.</param>
+    /// <param name="viewW">Width of the world region to display.</param>
+    /// <param name="viewH">Height of the world region to display.</param>
+    /// <param name="samples">MSAA sample count for the render target. Defaults to disabled.</param>
     public static Camera WithView(float x, float y, float width, float height, float viewX, float viewY, float viewW, float viewH, MsaaSamples samples = MsaaSamples.Disabled)
         => new(x, y, width, height, (getW, getH) => new FreeCameraView(viewX, viewY, viewW, viewH, getW, getH), samples);
 
@@ -48,6 +78,10 @@ public sealed class Camera : ContainerEntity, ICamera
         remove => _cameraView.ViewChanged -= value;
     }
 
+    /// <summary>
+    /// Converts a world-space point to screen (window) coordinates by applying the camera's
+    /// view transform and then this camera's position within the entity hierarchy.
+    /// </summary>
     public override (float x, float y) GetWindowCoordinates(float x, float y)
     {
         var (lx, ly) = _cameraView.WorldToLocal(x, y);

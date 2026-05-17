@@ -1,5 +1,11 @@
 ﻿namespace BabyBearsEngine.Worlds.Cameras;
 
+/// <summary>
+/// Base class for camera view transforms. Manages the scroll position (<see cref="ICameraView.X"/>,
+/// <see cref="ICameraView.Y"/>) and implements <see cref="WorldToLocal"/> to convert world-space
+/// coordinates to camera-local pixel coordinates. Subclasses define the tile-to-pixel scale via
+/// <see cref="ICameraView.TileWidth"/> and <see cref="ICameraView.TileHeight"/>.
+/// </summary>
 public abstract class CameraView(Func<float> getCameraWidth, Func<float> getCameraHeight) : ICameraView
 {
     protected readonly Func<float> _getCameraHeight = getCameraHeight;
