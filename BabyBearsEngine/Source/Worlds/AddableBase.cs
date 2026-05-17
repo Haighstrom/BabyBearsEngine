@@ -21,22 +21,30 @@ public abstract class AddableBase : IAddable
             if (value is null)
             {
                 Ensure.NotNull(_parent);
+                _parent = null;
+                OnRemoved();
             }
             else
             {
                 Ensure.IsNull(_parent);
+                _parent = value;
             }
-
-            _parent = value;
         }
     }
 
     /// <inheritdoc/>
     public bool Exists => _parent is not null;
 
+    /// <summary>
+    /// Called immediately after this object has been removed from its parent. Override to react
+    /// to removal without needing to override <see cref="Remove"/> and remember to call
+    /// <c>base.Remove()</c>.
+    /// </summary>
+    protected virtual void OnRemoved() { }
+
     /// <inheritdoc/>
     /// <exception cref="NullReferenceException">Thrown when this addable has no parent to remove from.</exception>
-    public virtual void Remove()
+    public void Remove()
     {
         Ensure.NotNull(_parent);
 
