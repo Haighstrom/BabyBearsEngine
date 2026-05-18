@@ -26,11 +26,12 @@ public class NumberInputBox : TextInputBox
     /// <param name="allowDecimals">When true, a single <c>.</c> character is permitted.</param>
     /// <param name="allowNegative">When true, a leading <c>-</c> at position 0 is permitted.</param>
     /// <param name="initialText">Initial content. Must be a valid numeric string for the given settings, or empty.</param>
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
     public NumberInputBox(float x, float y, float width, float height,
                           InputBoxTheme theme,
                           bool allowDecimals = true, bool allowNegative = false,
-                          string initialText = "")
-        : base(x, y, width, height, theme, initialText)
+                          string initialText = "", int layer = 0)
+        : base(x, y, width, height, theme, initialText, layer)
     {
         _allowDecimals = allowDecimals;
         _allowNegative = allowNegative;
@@ -41,10 +42,11 @@ public class NumberInputBox : TextInputBox
     /// <param name="allowDecimals">When true, a single <c>.</c> character is permitted.</param>
     /// <param name="allowNegative">When true, a leading <c>-</c> at position 0 is permitted.</param>
     /// <param name="initialText">Initial content. Must be a valid numeric string for the given settings, or empty.</param>
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
     public NumberInputBox(Rect rect, InputBoxTheme theme,
                           bool allowDecimals = true, bool allowNegative = false,
-                          string initialText = "")
-        : this(rect.X, rect.Y, rect.W, rect.H, theme, allowDecimals, allowNegative, initialText)
+                          string initialText = "", int layer = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, allowDecimals, allowNegative, initialText, layer)
     {
     }
 

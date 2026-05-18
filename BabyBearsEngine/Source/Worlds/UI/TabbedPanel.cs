@@ -21,8 +21,9 @@ public class TabbedPanel : Entity
     /// <param name="tabHeight">Height of the tab button row in pixels.</param>
     /// <param name="theme">Visual styling.</param>
     /// <param name="tabSpacing">Horizontal gap between adjacent tab buttons. Defaults to 0.</param>
-    public TabbedPanel(float x, float y, float width, float height, float tabHeight, TabbedPanelTheme theme, float tabSpacing = 0)
-        : base(x, y, width, height)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public TabbedPanel(float x, float y, float width, float height, float tabHeight, TabbedPanelTheme theme, float tabSpacing = 0, int layer = 0)
+        : base(x, y, width, height, layer: layer)
     {
         _tabSpacing = tabSpacing;
 
@@ -36,8 +37,9 @@ public class TabbedPanel : Entity
     /// <param name="tabHeight">Height of the tab button row in pixels.</param>
     /// <param name="theme">Visual styling.</param>
     /// <param name="tabSpacing">Horizontal gap between adjacent tab buttons. Defaults to 0.</param>
-    public TabbedPanel(Rect rect, float tabHeight, TabbedPanelTheme theme, float tabSpacing = 0)
-        : this(rect.X, rect.Y, rect.W, rect.H, tabHeight, theme, tabSpacing)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public TabbedPanel(Rect rect, float tabHeight, TabbedPanelTheme theme, float tabSpacing = 0, int layer = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, tabHeight, theme, tabSpacing, layer)
     {
     }
 

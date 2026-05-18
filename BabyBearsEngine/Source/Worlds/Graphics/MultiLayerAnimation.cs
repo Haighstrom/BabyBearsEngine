@@ -18,7 +18,8 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// <param name="width">Width in pixels.</param>
 /// <param name="height">Height in pixels.</param>
 /// <param name="frameDuration">Seconds per frame.</param>
-public class MultiLayerAnimation(float x, float y, float width, float height, double frameDuration = MultiLayerAnimation.DefaultFrameDuration) : GraphicBase(x, y, width, height), IGraphic, IUpdateable, IDisposable
+/// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+public class MultiLayerAnimation(float x, float y, float width, float height, double frameDuration = MultiLayerAnimation.DefaultFrameDuration, int layer = 0) : GraphicBase(x, y, width, height, layer), IGraphic, IUpdateable, IDisposable
 {
     private const double DefaultFrameDuration = 0.2;
 

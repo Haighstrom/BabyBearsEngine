@@ -29,8 +29,9 @@ public class ScrollingListPanel : Entity
     /// <param name="width">Width in pixels (includes the scrollbar).</param>
     /// <param name="height">Height in pixels (the visible viewport height).</param>
     /// <param name="theme">Visual styling.</param>
-    public ScrollingListPanel(float x, float y, float width, float height, ScrollingListPanelTheme theme)
-        : base(x, y, width, height)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public ScrollingListPanel(float x, float y, float width, float height, ScrollingListPanelTheme theme, int layer = 0)
+        : base(x, y, width, height, layer: layer)
     {
         float paneWidth = width - ScrollbarWidth;
 
@@ -49,8 +50,9 @@ public class ScrollingListPanel : Entity
 
     /// <param name="rect">Position and size relative to the parent container. Width includes the scrollbar; height is the visible viewport height.</param>
     /// <param name="theme">Visual styling.</param>
-    public ScrollingListPanel(Rect rect, ScrollingListPanelTheme theme)
-        : this(rect.X, rect.Y, rect.W, rect.H, theme)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public ScrollingListPanel(Rect rect, ScrollingListPanelTheme theme, int layer = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, layer)
     {
     }
 

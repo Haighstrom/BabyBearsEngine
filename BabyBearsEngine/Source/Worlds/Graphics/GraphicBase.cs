@@ -13,14 +13,20 @@ public abstract class GraphicBase : AddableRectBase, IRenderable, ILayered
     private int _layer = 0;
 
     /// <summary>Creates a graphic at the origin with zero size.</summary>
-    protected GraphicBase()
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    protected GraphicBase(int layer = 0)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(layer);
+        _layer = layer;
     }
 
     /// <summary>Creates a graphic at (<paramref name="x"/>, <paramref name="y"/>) with the given size.</summary>
-    protected GraphicBase(float x, float y, float width, float height)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    protected GraphicBase(float x, float y, float width, float height, int layer = 0)
         : base(x, y, width, height)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(layer);
+        _layer = layer;
     }
 
     /// <inheritdoc/>

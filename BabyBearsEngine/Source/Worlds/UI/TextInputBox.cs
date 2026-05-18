@@ -47,9 +47,10 @@ public class TextInputBox : Entity
     /// <param name="height">Height in pixels.</param>
     /// <param name="theme">Visual styling.</param>
     /// <param name="initialText">Initial content. Defaults to empty.</param>
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
     public TextInputBox(float x, float y, float width, float height,
-                        InputBoxTheme theme, string initialText = "")
-        : base(x, y, width, height, clickable: true)
+                        InputBoxTheme theme, string initialText = "", int layer = 0)
+        : base(x, y, width, height, clickable: true, layer: layer)
     {
         _backgroundGraphic = theme.BackgroundFactory(new Rect(0, 0, width, height));
         Add(_backgroundGraphic);
@@ -87,8 +88,9 @@ public class TextInputBox : Entity
     /// <param name="rect">Position and size relative to the parent container.</param>
     /// <param name="theme">Visual styling.</param>
     /// <param name="initialText">Initial content. Defaults to empty.</param>
-    public TextInputBox(Rect rect, InputBoxTheme theme, string initialText = "")
-        : this(rect.X, rect.Y, rect.W, rect.H, theme, initialText)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public TextInputBox(Rect rect, InputBoxTheme theme, string initialText = "", int layer = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, initialText, layer)
     {
     }
 

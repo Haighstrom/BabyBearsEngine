@@ -25,21 +25,17 @@ public class ContainerTests
         public void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
     }
 
-    private sealed class StubLayeredRenderable : AddableBase, IRenderable, ILayered
+    private sealed class StubLayeredRenderable(int initialLayer = 0) : AddableBase, IRenderable, ILayered
     {
-        private int _layer;
-
-        public StubLayeredRenderable(int initialLayer = 0) => _layer = initialLayer;
-
         public bool Visible { get; set; } = true;
 
         public int Layer
         {
-            get => _layer;
+            get => initialLayer;
             set
             {
-                int old = _layer;
-                _layer = value;
+                int old = initialLayer;
+                initialLayer = value;
                 if (old != value)
                 {
                     LayerChanged?.Invoke(this, new LayerChangedEventArgs(old, value));

@@ -22,8 +22,9 @@ public class ProgressBar : Entity
     /// <param name="height">Height in pixels.</param>
     /// <param name="theme">Visual styling for the bar.</param>
     /// <param name="amountFilled">Initial fill amount in [0, 1]. Defaults to 0.</param>
-    public ProgressBar(float x, float y, float width, float height, ProgressBarTheme theme, float amountFilled = 0f)
-        : base(x, y, width, height)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public ProgressBar(float x, float y, float width, float height, ProgressBarTheme theme, float amountFilled = 0f, int layer = 0)
+        : base(x, y, width, height, layer: layer)
     {
         _fullWidth = width;
 
@@ -39,8 +40,9 @@ public class ProgressBar : Entity
     /// <param name="rect">Position and size relative to the parent container. The rect's width is the bar width at <see cref="AmountFilled"/> = 1.</param>
     /// <param name="theme">Visual styling for the bar.</param>
     /// <param name="amountFilled">Initial fill amount in [0, 1]. Defaults to 0.</param>
-    public ProgressBar(Rect rect, ProgressBarTheme theme, float amountFilled = 0f)
-        : this(rect.X, rect.Y, rect.W, rect.H, theme, amountFilled)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public ProgressBar(Rect rect, ProgressBarTheme theme, float amountFilled = 0f, int layer = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, amountFilled, layer)
     {
     }
 

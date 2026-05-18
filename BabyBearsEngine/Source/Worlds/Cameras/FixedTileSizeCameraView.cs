@@ -1,4 +1,4 @@
-namespace BabyBearsEngine.Worlds.Cameras;
+﻿namespace BabyBearsEngine.Worlds.Cameras;
 
 /// <summary>
 /// A camera view with a fixed world-to-pixel tile size. The region of world space visible
@@ -6,25 +6,16 @@ namespace BabyBearsEngine.Worlds.Cameras;
 /// more or fewer tiles rather than stretching the image. Use <see cref="ViewWidth"/> and
 /// <see cref="ViewHeight"/> to read the currently visible world region.
 /// </summary>
-public sealed class FixedTileSizeCameraView : CameraView
+public sealed class FixedTileSizeCameraView(float tileWidth, float tileHeight, Func<float> getCameraWidth, Func<float> getCameraHeight) : CameraView(getCameraWidth, getCameraHeight)
 {
-    private float _tileHeight = 0f;
-    private float _tileWidth = 0f;
-
-    public FixedTileSizeCameraView(float tileWidth, float tileHeight, Func<float> getCameraWidth, Func<float> getCameraHeight)
-        : base(getCameraWidth, getCameraHeight)
-    {
-        _tileWidth = tileWidth;
-        _tileHeight = tileHeight;
-    }
 
     /// <inheritdoc/>
     public override float TileHeight
     {
-        get => _tileHeight;
+        get => tileHeight;
         set
         {
-            _tileHeight = value;
+            tileHeight = value;
             RaiseViewChanged();
         }
     }
@@ -32,17 +23,17 @@ public sealed class FixedTileSizeCameraView : CameraView
     /// <inheritdoc/>
     public override float TileWidth
     {
-        get => _tileWidth;
+        get => tileWidth;
         set
         {
-            _tileWidth = value;
+            tileWidth = value;
             RaiseViewChanged();
         }
     }
 
     /// <summary>Height of the world region currently visible through the camera, in world units.</summary>
-    public float ViewHeight => _getCameraHeight() / _tileHeight;
+    public float ViewHeight => _getCameraHeight() / tileHeight;
 
     /// <summary>Width of the world region currently visible through the camera, in world units.</summary>
-    public float ViewWidth => _getCameraWidth() / _tileWidth;
+    public float ViewWidth => _getCameraWidth() / tileWidth;
 }

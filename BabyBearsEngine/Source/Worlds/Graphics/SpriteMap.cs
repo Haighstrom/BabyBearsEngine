@@ -20,8 +20,9 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// <param name="texture">Sprite sheet texture (not owned; not disposed with this map).</param>
 /// <param name="x">X position in the parent's local space.</param>
 /// <param name="y">Y position in the parent's local space.</param>
-public class SpriteMap(int[,] tiles, float tileW, float tileH, ISpriteTexture texture, float x = 0, float y = 0) 
-    : GraphicBase(x, y, tiles.GetLength(0) * tileW, tiles.GetLength(1) * tileH), IGraphic, IDisposable
+/// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+public class SpriteMap(int[,] tiles, float tileW, float tileH, ISpriteTexture texture, float x = 0, float y = 0, int layer = 0)
+    : GraphicBase(x, y, tiles.GetLength(0) * tileW, tiles.GetLength(1) * tileH, layer), IGraphic, IDisposable
 {
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
     private readonly StandardMatrixShaderProgram _shader = new();

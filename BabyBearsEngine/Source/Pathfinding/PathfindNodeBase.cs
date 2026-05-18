@@ -1,4 +1,4 @@
-using BabyBearsEngine.Geometry;
+﻿using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Pathfinding;
 
@@ -7,26 +7,20 @@ namespace BabyBearsEngine.Pathfinding;
 /// (e.g. <see cref="PathfindNode"/>, <see cref="PathfindNode{TEnum}"/>) add the connection
 /// list and any per-node payload.
 /// </summary>
-public abstract class PathfindNodeBase : IPosition
+/// <param name="x">X coordinate.</param>
+/// <param name="y">Y coordinate.</param>
+/// <param name="distanceBetweenConnectedNodes">Cost of moving to any directly-connected neighbour. Defaults to 1.</param>
+public abstract class PathfindNodeBase(float x, float y, float distanceBetweenConnectedNodes = 1f) : IPosition
 {
-    /// <param name="x">X coordinate.</param>
-    /// <param name="y">Y coordinate.</param>
-    /// <param name="distanceBetweenConnectedNodes">Cost of moving to any directly-connected neighbour. Defaults to 1.</param>
-    protected PathfindNodeBase(float x, float y, float distanceBetweenConnectedNodes = 1f)
-    {
-        X = x;
-        Y = y;
-        DistanceBetweenConnectedNodes = distanceBetweenConnectedNodes;
-    }
 
     /// <inheritdoc/>
-    public float X { get; }
+    public float X { get; } = x;
 
     /// <inheritdoc/>
-    public float Y { get; }
+    public float Y { get; } = y;
 
     /// <summary>The cost of moving from this node to any directly-connected neighbour.</summary>
-    public virtual float DistanceBetweenConnectedNodes { get; }
+    public virtual float DistanceBetweenConnectedNodes { get; } = distanceBetweenConnectedNodes;
 
     /// <summary>Algorithm scratch data (e.g. A* uses this for F/G scores).</summary>
     public object? GraphSearchData { get; set; }

@@ -31,6 +31,7 @@ public class DropdownList<T> : Entity
     /// <param name="theme">Visual styling for the header and option buttons.</param>
     /// <param name="formatter">Optional label formatter. Defaults to <see cref="object.ToString"/>.</param>
     /// <param name="initialIndex">Index of the initially selected item. Defaults to 0.</param>
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
     public DropdownList(
         float x,
         float y,
@@ -39,8 +40,9 @@ public class DropdownList<T> : Entity
         IReadOnlyList<T> items,
         DropdownListTheme theme,
         Func<T, string>? formatter = null,
-        int initialIndex = 0)
-        : base(x, y, width, height)
+        int initialIndex = 0,
+        int layer = 0)
+        : base(x, y, width, height, layer: layer)
     {
         ValidateArgs(items, initialIndex);
 
@@ -61,13 +63,15 @@ public class DropdownList<T> : Entity
     /// <param name="theme">Visual styling for the header and option buttons.</param>
     /// <param name="formatter">Optional label formatter. Defaults to <see cref="object.ToString"/>.</param>
     /// <param name="initialIndex">Index of the initially selected item. Defaults to 0.</param>
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
     public DropdownList(
         Rect rect,
         IReadOnlyList<T> items,
         DropdownListTheme theme,
         Func<T, string>? formatter = null,
-        int initialIndex = 0)
-        : this(rect.X, rect.Y, rect.W, rect.H, items, theme, formatter, initialIndex)
+        int initialIndex = 0,
+        int layer = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, items, theme, formatter, initialIndex, layer)
     {
     }
 

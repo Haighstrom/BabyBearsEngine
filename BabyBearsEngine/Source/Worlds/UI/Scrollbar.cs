@@ -33,6 +33,7 @@ public class Scrollbar : Entity
     /// <param name="thumbProportion">Thumb size as a fraction of the track length (along the scroll axis), in [0.05, 1]. Defaults to 0.2 (20%).</param>
     /// <param name="amountFilled">Initial scroll position in [0, 1]. Defaults to 0.</param>
     /// <param name="scrollOnMouseWheel">When true, scroll wheel movement over this scrollbar adjusts <see cref="AmountFilled"/> by <see cref="WheelScrollStep"/> per notch and consumes the wheel event. Defaults to true.</param>
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
     public Scrollbar(
         float x,
         float y,
@@ -42,8 +43,9 @@ public class Scrollbar : Entity
         ScrollbarTheme theme,
         float thumbProportion = 0.2f,
         float amountFilled = 0f,
-        bool scrollOnMouseWheel = true)
-        : base(x, y, width, height, clickable: scrollOnMouseWheel)
+        bool scrollOnMouseWheel = true,
+        int layer = 0)
+        : base(x, y, width, height, clickable: scrollOnMouseWheel, layer: layer)
     {
         _direction = direction;
         _thumbProportion = Math.Clamp(thumbProportion, MinThumbProportion, 1f);
@@ -81,14 +83,16 @@ public class Scrollbar : Entity
     /// <param name="thumbProportion">Thumb size as a fraction of the track length (along the scroll axis), in [0.05, 1]. Defaults to 0.2 (20%).</param>
     /// <param name="amountFilled">Initial scroll position in [0, 1]. Defaults to 0.</param>
     /// <param name="scrollOnMouseWheel">When true, scroll wheel movement over this scrollbar adjusts <see cref="AmountFilled"/> by <see cref="WheelScrollStep"/> per notch and consumes the wheel event. Defaults to true.</param>
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
     public Scrollbar(
         Rect rect,
         ScrollbarDirection direction,
         ScrollbarTheme theme,
         float thumbProportion = 0.2f,
         float amountFilled = 0f,
-        bool scrollOnMouseWheel = true)
-        : this(rect.X, rect.Y, rect.W, rect.H, direction, theme, thumbProportion, amountFilled, scrollOnMouseWheel)
+        bool scrollOnMouseWheel = true,
+        int layer = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, direction, theme, thumbProportion, amountFilled, scrollOnMouseWheel, layer)
     {
     }
 

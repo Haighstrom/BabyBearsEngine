@@ -4,20 +4,14 @@ using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 
-public sealed class StbTrueTypeTextGraphic : GraphicBase, IDisposable
+public sealed class StbTrueTypeTextGraphic(float x, float y, float width, float height, string text, int layer = 0) : GraphicBase(x, y, width, height, layer), IDisposable
 {
     private readonly R8ChannelShaderProgram _shader = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
-    private readonly Texture _texture;
+    private readonly Texture _texture = FontTexture.GetStbFontTexture("Assets/Fonts/Times.ttf", text);
 
     private Colour _colour = Colour.White;
     private bool _verticesChanged = true;
-
-    public StbTrueTypeTextGraphic(float x, float y, float width, float height, string text)
-        : base(x, y, width, height)
-    {
-        _texture = FontTexture.GetStbFontTexture("Assets/Fonts/Times.ttf", text);
-    }
 
     public Colour Colour
     {

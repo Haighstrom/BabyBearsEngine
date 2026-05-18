@@ -8,32 +8,26 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// must be created on the engine thread after the GL context exists. Implements <see cref="IDisposable"/>
 /// to release those resources.
 /// </summary>
-public sealed class ColourGraphic : GraphicBase, IGraphic, IColourGraphic, IDisposable
+/// <param name="colour">Fill colour.</param>
+/// <param name="x">X position in the parent's local space.</param>
+/// <param name="y">Y position in the parent's local space.</param>
+/// <param name="width">Width in pixels.</param>
+/// <param name="height">Height in pixels.</param>
+/// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+public sealed class ColourGraphic(Colour colour, float x, float y, float width, float height, int layer = 0) : GraphicBase(x, y, width, height, layer), IGraphic, IColourGraphic, IDisposable
 {
     private readonly SolidColourShaderProgramMatrix _shader = SolidColourShaderProgramMatrix.Instance;
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
-    private Colour _colour;
     private bool _verticesChanged = true;
     private bool _disposed = false;
-
-    /// <param name="colour">Fill colour.</param>
-    /// <param name="x">X position in the parent's local space.</param>
-    /// <param name="y">Y position in the parent's local space.</param>
-    /// <param name="width">Width in pixels.</param>
-    /// <param name="height">Height in pixels.</param>
-    public ColourGraphic(Colour colour, float x, float y, float width, float height)
-        : base(x, y, width, height)
-    {
-        _colour = colour;
-    }
 
     /// <summary>Fill colour.</summary>
     public Colour Colour
     {
-        get => _colour;
+        get => colour;
         set
         {
-            _colour = value;
+            colour = value;
             _verticesChanged = true;
         }
     }
@@ -42,7 +36,7 @@ public sealed class ColourGraphic : GraphicBase, IGraphic, IColourGraphic, IDisp
     {
         get
         {
-            var colorTK = _colour.ToOpenTK();
+            var colorTK = colour.ToOpenTK();
 
             return
             [

@@ -16,8 +16,9 @@ public class Entity : ContainerEntity, IMouseInteractable
     /// <param name="width">Width in pixels.</param>
     /// <param name="height">Height in pixels.</param>
     /// <param name="clickable">When true, adds an internal click controller that raises the mouse interaction events (<see cref="LeftPressed"/>, <see cref="MouseEntered"/>, <see cref="MouseHovered"/>, etc.).</param>
-    public Entity(float x, float y, float width, float height, bool clickable = false)
-        : base(x, y, width, height)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public Entity(float x, float y, float width, float height, bool clickable = false, int layer = 0)
+        : base(x, y, width, height, layer)
     {
         if (clickable)
         {
@@ -38,8 +39,9 @@ public class Entity : ContainerEntity, IMouseInteractable
 
     /// <param name="rect">Position and size relative to parent.</param>
     /// <param name="clickable">When true, adds an internal click controller that raises the mouse interaction events (<see cref="LeftPressed"/>, <see cref="MouseEntered"/>, <see cref="MouseHovered"/>, etc.).</param>
-    public Entity(Rect rect, bool clickable = false)
-        : this(rect.X, rect.Y, rect.W, rect.H, clickable)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public Entity(Rect rect, bool clickable = false, int layer = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, clickable, layer)
     {
     }
 

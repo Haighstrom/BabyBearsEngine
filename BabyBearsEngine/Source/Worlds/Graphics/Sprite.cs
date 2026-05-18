@@ -15,8 +15,9 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// <param name="width">Width in pixels.</param>
 /// <param name="height">Height in pixels.</param>
 /// <param name="initialFrame">Zero-based frame index to display initially.</param>
-public class Sprite(ISpriteTexture texture, float x, float y, float width, float height, int initialFrame = 0) 
-    : GraphicBase(x, y, width, height), ISprite, IDisposable
+/// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+public class Sprite(ISpriteTexture texture, float x, float y, float width, float height, int initialFrame = 0, int layer = 0)
+    : GraphicBase(x, y, width, height, layer), ISprite, IDisposable
 {
     private readonly GraphicRenderer _renderer = new GraphicRenderer(texture);
     private Colour _colour = Colour.White;

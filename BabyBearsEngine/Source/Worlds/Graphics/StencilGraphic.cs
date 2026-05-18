@@ -24,8 +24,9 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// <param name="y">Y position in the parent's local space.</param>
 /// <param name="width">Width in pixels.</param>
 /// <param name="height">Height in pixels.</param>
-public sealed class StencilGraphic(ITexture imageTexture, ITexture stencilTexture, float x, float y, float width, float height)
-    : GraphicBase(x, y, width, height), IGraphic, IDisposable
+/// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+public sealed class StencilGraphic(ITexture imageTexture, ITexture stencilTexture, float x, float y, float width, float height, int layer = 0)
+    : GraphicBase(x, y, width, height, layer), IGraphic, IDisposable
 {
     private readonly StencilRenderer _stencilRenderer = new(imageTexture, stencilTexture);
     private Colour _colour = Colour.White;

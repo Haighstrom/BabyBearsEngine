@@ -18,16 +18,22 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
     private readonly Container _container;
     private int _layer = 0;
 
-    /// <summary>Creates a container entity at the origin with zero size and no children, layer 0, and active+visible defaults.</summary>
-    protected ContainerEntity()
+    /// <summary>Creates a container entity at the origin with zero size and no children, active+visible defaults.</summary>
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    protected ContainerEntity(int layer = 0)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(layer);
+        _layer = layer;
         _container = new Container(this);
     }
 
     /// <summary>Creates a container entity at (<paramref name="x"/>, <paramref name="y"/>) with the given size.</summary>
-    protected ContainerEntity(float x, float y, float width, float height)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    protected ContainerEntity(float x, float y, float width, float height, int layer = 0)
         : base(x, y, width, height)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(layer);
+        _layer = layer;
         _container = new Container(this);
     }
 

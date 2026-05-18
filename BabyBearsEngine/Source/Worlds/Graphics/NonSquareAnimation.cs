@@ -31,8 +31,9 @@ public class NonSquareAnimation : GraphicBase, IGraphic, IUpdateable, IDisposabl
     /// <param name="frames">Frame definitions in display order.</param>
     /// <param name="frameDuration">Seconds per frame.</param>
     /// <param name="initialFrame">Zero-based index of the first frame to display.</param>
-    public NonSquareAnimation(ITexture texture, float x, float y, IList<SpriteFrame> frames, double frameDuration = DefaultFrameDuration, int initialFrame = 0)
-        : base(x, y, frames[initialFrame].OutputWidth, frames[initialFrame].OutputHeight)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public NonSquareAnimation(ITexture texture, float x, float y, IList<SpriteFrame> frames, double frameDuration = DefaultFrameDuration, int initialFrame = 0, int layer = 0)
+        : base(x, y, frames[initialFrame].OutputWidth, frames[initialFrame].OutputHeight, layer)
     {
         _frames = frames;
         _renderer = new GraphicRenderer(texture);

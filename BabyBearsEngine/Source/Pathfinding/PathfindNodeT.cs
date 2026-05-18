@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Pathfinding;
@@ -8,24 +8,18 @@ namespace BabyBearsEngine.Pathfinding;
 /// for terrain categories (Grass, Water, Wall, …) that the passable-test can dispatch on.
 /// </summary>
 /// <typeparam name="TEnum">Enum type identifying the node's terrain or category.</typeparam>
-public class PathfindNode<TEnum> : IPathfindNode<PathfindNode<TEnum>>, IPosition
+/// <param name="x">X coordinate.</param>
+/// <param name="y">Y coordinate.</param>
+/// <param name="passType">The node's terrain/category, used by passable-tests.</param>
+public class PathfindNode<TEnum>(float x, float y, TEnum passType) : IPathfindNode<PathfindNode<TEnum>>, IPosition
     where TEnum : Enum
 {
-    /// <param name="x">X coordinate.</param>
-    /// <param name="y">Y coordinate.</param>
-    /// <param name="passType">The node's terrain/category, used by passable-tests.</param>
-    public PathfindNode(float x, float y, TEnum passType)
-    {
-        X = x;
-        Y = y;
-        PassType = passType;
-    }
 
     /// <inheritdoc/>
-    public float X { get; }
+    public float X { get; } = x;
 
     /// <inheritdoc/>
-    public float Y { get; }
+    public float Y { get; } = y;
 
     /// <inheritdoc/>
     public IList<PathfindNode<TEnum>> ConnectedNodes { get; } = [];
@@ -40,7 +34,7 @@ public class PathfindNode<TEnum> : IPathfindNode<PathfindNode<TEnum>>, IPosition
     public PathfindNode<TEnum>? ParentNode { get; set; }
 
     /// <summary>The node's terrain/category. Mutable so the world can change terrain at runtime.</summary>
-    public TEnum PassType { get; set; }
+    public TEnum PassType { get; set; } = passType;
 
     /// <inheritdoc/>
     public bool Equals(IPosition? other)

@@ -25,8 +25,9 @@ public class Tab : Entity
     /// <param name="height">Height of the tab button in pixels.</param>
     /// <param name="title">Label text displayed on the tab.</param>
     /// <param name="theme">Visual styling. Factories are invoked once per tab.</param>
-    public Tab(float width, float height, string title, TabbedPanelTheme theme)
-        : base(0, 0, width, height, clickable: true)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public Tab(float width, float height, string title, TabbedPanelTheme theme, int layer = 0)
+        : base(0, 0, width, height, clickable: true, layer: layer)
     {
         _activeGraphic = theme.ActiveTabFactory(new Rect(0, 0, width, height));
         _activeGraphic.Visible = false;

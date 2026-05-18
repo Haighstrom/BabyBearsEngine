@@ -24,9 +24,10 @@ namespace BabyBearsEngine.Worlds.UI;
 /// <param name="rows">Size specification for each row, top to bottom.</param>
 /// <param name="padding">Uniform inset from all four edges in pixels.</param>
 /// <param name="gap">Space between adjacent columns and between adjacent rows in pixels.</param>
+/// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
 public class GridLayout(float x, float y, float width, float height,
                   GridCellSize[] columns, GridCellSize[] rows,
-                  float padding = 0f, float gap = 0f) : Entity(x, y, width, height)
+                  float padding = 0f, float gap = 0f, int layer = 0) : Entity(x, y, width, height, layer: layer)
 {
     private readonly List<GridEntry> _entries = new();
     private int _autoCol = 0;

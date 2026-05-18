@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
 
@@ -9,8 +9,9 @@ namespace BabyBearsEngine.Geometry;
 /// Floating-point components are exposed as lowercase <c>x</c>/<c>y</c>/<c>z</c>/<c>w</c> properties;
 /// integer-truncating aliases are exposed as uppercase <c>X</c>/<c>Y</c>/<c>Z</c>/<c>W</c>.
 /// </summary>
+/// <remarks>Initialises a new <see cref="Point4"/> with the given components.</remarks>
 [StructLayout(LayoutKind.Sequential)]
-public struct Point4 : IEquatable<Point4>
+public struct Point4(float x, float y, float z, float w) : IEquatable<Point4>
 {
     /// <summary>A <see cref="Point4"/> with all components set to zero.</summary>
     public static readonly Point4 Zero = new();
@@ -22,17 +23,7 @@ public struct Point4 : IEquatable<Point4>
     }
 
 
-    private float _x, _y, _z, _w;
-
-
-    /// <summary>Initialises a new <see cref="Point4"/> with the given components.</summary>
-    public Point4(float x, float y, float z, float w)
-    {
-        _x = x;
-        _y = y;
-        _z = z;
-        _w = w;
-    }
+    private float _x = x, _y = y, _z = z, _w = w;
 
 
     /// <summary>Gets or sets the X component as a <see langword="float"/>.</summary>

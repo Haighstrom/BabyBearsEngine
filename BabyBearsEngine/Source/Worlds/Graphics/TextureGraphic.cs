@@ -14,7 +14,8 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// <param name="y">Y position in the parent's local space.</param>
 /// <param name="width">Width in pixels.</param>
 /// <param name="height">Height in pixels.</param>
-public sealed class TextureGraphic(ITexture texture, float x, float y, float width, float height) : GraphicBase(x, y, width, height), IGraphic, IDisposable
+/// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+public sealed class TextureGraphic(ITexture texture, float x, float y, float width, float height, int layer = 0) : GraphicBase(x, y, width, height, layer), IGraphic, IDisposable
 {
     private readonly GraphicRenderer _graphicRenderer = new(texture);
     private float _angle = 0;
@@ -23,8 +24,9 @@ public sealed class TextureGraphic(ITexture texture, float x, float y, float wid
 
     /// <param name="texture">The texture to sample. Not owned by this graphic; not disposed when the graphic is disposed.</param>
     /// <param name="rect">Position and size in the parent's local space.</param>
-    public TextureGraphic(ITexture texture, Rect rect)
-        : this(texture, rect.X, rect.Y, rect.W, rect.H)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public TextureGraphic(ITexture texture, Rect rect, int layer = 0)
+        : this(texture, rect.X, rect.Y, rect.W, rect.H, layer)
     {
     }
 

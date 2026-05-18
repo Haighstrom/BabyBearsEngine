@@ -24,8 +24,9 @@ public class Button : Entity
     /// <param name="height">Height in pixels.</param>
     /// <param name="theme">Visual styling for the button. Use <see cref="ButtonTheme.Default"/> for prototype work.</param>
     /// <param name="text">Optional label text. Defaults to empty; can also be changed at runtime via <see cref="Text"/>.</param>
-    public Button(float x, float y, float width, float height, ButtonTheme theme, string text = "")
-        : base(x, y, width, height, clickable: true)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public Button(float x, float y, float width, float height, ButtonTheme theme, string text = "", int layer = 0)
+        : base(x, y, width, height, clickable: true, layer: layer)
     {
         _theme = theme;
 
@@ -40,8 +41,9 @@ public class Button : Entity
     /// <param name="rect">Position and size relative to the parent container.</param>
     /// <param name="theme">Visual styling for the button. Use <see cref="ButtonTheme.Default"/> for prototype work.</param>
     /// <param name="text">Optional label text. Defaults to empty; can also be changed at runtime via <see cref="Text"/>.</param>
-    public Button(Rect rect, ButtonTheme theme, string text = "")
-        : this(rect.X, rect.Y, rect.W, rect.H, theme, text)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public Button(Rect rect, ButtonTheme theme, string text = "", int layer = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, text, layer)
     {
     }
 

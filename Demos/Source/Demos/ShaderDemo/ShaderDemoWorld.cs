@@ -1,13 +1,9 @@
-using System;
+﻿using System;
 using BabyBearsEngine.Demos.Source;
 
 namespace BabyBearsEngine.Demos.Source.Demos.ShaderDemo;
 
-internal class ShaderDemoWorld : DemoWorld
+internal class ShaderDemoWorld(Func<World> menuWorldFactory) : DemoWorld(menuWorldFactory)
 {
     public override string Name => "Shader";
-
-    public ShaderDemoWorld(Func<World> menuWorldFactory) : base(menuWorldFactory)
-    {
-    }
 }

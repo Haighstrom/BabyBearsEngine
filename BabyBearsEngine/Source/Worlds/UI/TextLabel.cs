@@ -26,10 +26,11 @@ public class TextLabel : Entity
     /// <param name="borderColour">Optional border colour. Pass <see langword="null"/> for no border.</param>
     /// <param name="borderThickness">Border width in pixels on each side when <paramref name="borderColour"/> is not <see langword="null"/>.</param>
     /// <param name="borderPosition">Controls where the border draws relative to the stated bounds when <paramref name="borderColour"/> is not <see langword="null"/>.</param>
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
     public TextLabel(float x, float y, float width, float height, TextTheme theme, string text,
         Colour? backgroundColour = null, Colour? borderColour = null, float borderThickness = 2f,
-        BorderPosition borderPosition = BorderPosition.Inside)
-        : base(x, y, width, height)
+        BorderPosition borderPosition = BorderPosition.Inside, int layer = 0)
+        : base(x, y, width, height, layer: layer)
     {
         _background = backgroundColour.HasValue
             ? new ColourGraphic(backgroundColour.Value, 0f, 0f, width, height)
@@ -62,10 +63,11 @@ public class TextLabel : Entity
     /// <param name="borderColour">Optional border colour. Pass <see langword="null"/> for no border.</param>
     /// <param name="borderThickness">Border width in pixels on each side when <paramref name="borderColour"/> is not <see langword="null"/>.</param>
     /// <param name="borderPosition">Controls where the border draws relative to the stated bounds when <paramref name="borderColour"/> is not <see langword="null"/>.</param>
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
     public TextLabel(Rect rect, TextTheme theme, string text,
         Colour? backgroundColour = null, Colour? borderColour = null, float borderThickness = 2f,
-        BorderPosition borderPosition = BorderPosition.Inside)
-        : this(rect.X, rect.Y, rect.W, rect.H, theme, text, backgroundColour, borderColour, borderThickness, borderPosition)
+        BorderPosition borderPosition = BorderPosition.Inside, int layer = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, text, backgroundColour, borderColour, borderThickness, borderPosition, layer)
     {
     }
 

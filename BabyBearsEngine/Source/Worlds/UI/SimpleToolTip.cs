@@ -29,8 +29,9 @@ public sealed class SimpleToolTip : Entity
     /// <param name="height">Height in pixels.</param>
     /// <param name="theme">Visual styling.</param>
     /// <param name="text">The tooltip's label text.</param>
-    public SimpleToolTip(float x, float y, float width, float height, TooltipTheme theme, string text)
-        : base(x, y, width, height)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public SimpleToolTip(float x, float y, float width, float height, TooltipTheme theme, string text, int layer = 0)
+        : base(x, y, width, height, layer: layer)
     {
         Visible = false;
 
@@ -48,8 +49,9 @@ public sealed class SimpleToolTip : Entity
     /// <param name="rect">Initial position and size relative to the parent container.</param>
     /// <param name="theme">Visual styling.</param>
     /// <param name="text">The tooltip's label text.</param>
-    public SimpleToolTip(Rect rect, TooltipTheme theme, string text)
-        : this(rect.X, rect.Y, rect.W, rect.H, theme, text)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public SimpleToolTip(Rect rect, TooltipTheme theme, string text, int layer = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, text, layer)
     {
     }
 

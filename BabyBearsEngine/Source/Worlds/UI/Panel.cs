@@ -11,16 +11,18 @@ public class Panel : Entity
     /// <param name="width">Width in pixels.</param>
     /// <param name="height">Height in pixels.</param>
     /// <param name="colour">Background fill colour.</param>
-    public Panel(float x, float y, float width, float height, Colour colour)
-        : base(x, y, width, height)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public Panel(float x, float y, float width, float height, Colour colour, int layer = 0)
+        : base(x, y, width, height, layer: layer)
     {
         Add(new ColourGraphic(colour, 0, 0, width, height));
     }
 
     /// <param name="rect">Position and size relative to the parent container.</param>
     /// <param name="colour">Background fill colour.</param>
-    public Panel(Rect rect, Colour colour)
-        : this(rect.X, rect.Y, rect.W, rect.H, colour)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    public Panel(Rect rect, Colour colour, int layer = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, colour, layer)
     {
     }
 }
