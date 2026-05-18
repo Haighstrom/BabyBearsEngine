@@ -1,4 +1,4 @@
-using BabyBearsEngine.Geometry;
+﻿using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Worlds.UI;
@@ -73,6 +73,23 @@ public class Scrollbar : Entity
             });
         controller.PositionChanged += OnDragPositionChanged;
         Add(controller);
+    }
+
+    /// <param name="rect">Position and size relative to the parent container.</param>
+    /// <param name="direction">Whether the thumb travels horizontally or vertically.</param>
+    /// <param name="theme">Visual styling.</param>
+    /// <param name="thumbProportion">Thumb size as a fraction of the track length (along the scroll axis), in [0.05, 1]. Defaults to 0.2 (20%).</param>
+    /// <param name="amountFilled">Initial scroll position in [0, 1]. Defaults to 0.</param>
+    /// <param name="scrollOnMouseWheel">When true, scroll wheel movement over this scrollbar adjusts <see cref="AmountFilled"/> by <see cref="WheelScrollStep"/> per notch and consumes the wheel event. Defaults to true.</param>
+    public Scrollbar(
+        Rect rect,
+        ScrollbarDirection direction,
+        ScrollbarTheme theme,
+        float thumbProportion = 0.2f,
+        float amountFilled = 0f,
+        bool scrollOnMouseWheel = true)
+        : this(rect.X, rect.Y, rect.W, rect.H, direction, theme, thumbProportion, amountFilled, scrollOnMouseWheel)
+    {
     }
 
     internal Scrollbar(float width, float height, ScrollbarDirection direction, float thumbProportion = 0.2f, float amountFilled = 0f, bool scrollOnMouseWheel = false)

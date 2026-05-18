@@ -1,3 +1,4 @@
+﻿using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Worlds.Graphics.Text;
 using BabyBearsEngine.Worlds.UI.Themes;
@@ -52,6 +53,20 @@ public class TextLabel : Entity
         }
 
         Add(_text);
+    }
+
+    /// <param name="rect">Position and size relative to the parent container.</param>
+    /// <param name="theme">Visual styling — font, colour, and alignment.</param>
+    /// <param name="text">The text to display.</param>
+    /// <param name="backgroundColour">Optional background fill colour. Pass <see langword="null"/> for no background.</param>
+    /// <param name="borderColour">Optional border colour. Pass <see langword="null"/> for no border.</param>
+    /// <param name="borderThickness">Border width in pixels on each side when <paramref name="borderColour"/> is not <see langword="null"/>.</param>
+    /// <param name="borderPosition">Controls where the border draws relative to the stated bounds when <paramref name="borderColour"/> is not <see langword="null"/>.</param>
+    public TextLabel(Rect rect, TextTheme theme, string text,
+        Colour? backgroundColour = null, Colour? borderColour = null, float borderThickness = 2f,
+        BorderPosition borderPosition = BorderPosition.Inside)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, text, backgroundColour, borderColour, borderThickness, borderPosition)
+    {
     }
 
     internal TextLabel(float x, float y, float width, float height, ITextGraphic textGraphic,

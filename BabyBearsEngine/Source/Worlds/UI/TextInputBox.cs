@@ -84,6 +84,14 @@ public class TextInputBox : Entity
         _anchorIndex = 0;
     }
 
+    /// <param name="rect">Position and size relative to the parent container.</param>
+    /// <param name="theme">Visual styling.</param>
+    /// <param name="initialText">Initial content. Defaults to empty.</param>
+    public TextInputBox(Rect rect, InputBoxTheme theme, string initialText = "")
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, initialText)
+    {
+    }
+
     internal TextInputBox(float x, float y, float width, float height)
         : base(x, y, width, height, clickable: true) 
     { 

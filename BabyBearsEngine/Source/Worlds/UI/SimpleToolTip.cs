@@ -45,6 +45,14 @@ public sealed class SimpleToolTip : Entity
         Add(_text);
     }
 
+    /// <param name="rect">Initial position and size relative to the parent container.</param>
+    /// <param name="theme">Visual styling.</param>
+    /// <param name="text">The tooltip's label text.</param>
+    public SimpleToolTip(Rect rect, TooltipTheme theme, string text)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, text)
+    {
+    }
+
     internal SimpleToolTip(float x, float y, float width, float height)
         : base(x, y, width, height)
     {

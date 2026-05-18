@@ -29,6 +29,13 @@ public sealed class DraggablePanel : Panel
         Add(controller);
     }
 
+    /// <param name="rect">Position and size relative to the parent container.</param>
+    /// <param name="colour">Background fill colour.</param>
+    public DraggablePanel(Rect rect, Colour colour)
+        : this(rect.X, rect.Y, rect.W, rect.H, colour)
+    {
+    }
+
     /// <summary>When <c>false</c>, the drag grab strip is disabled and the panel cannot be moved.</summary>
     public bool Draggable { get; set; } = true;
 

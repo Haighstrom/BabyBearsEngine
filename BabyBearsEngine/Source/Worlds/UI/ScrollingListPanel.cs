@@ -47,6 +47,13 @@ public class ScrollingListPanel : Entity
         Add(_scrollbar);
     }
 
+    /// <param name="rect">Position and size relative to the parent container. Width includes the scrollbar; height is the visible viewport height.</param>
+    /// <param name="theme">Visual styling.</param>
+    public ScrollingListPanel(Rect rect, ScrollingListPanelTheme theme)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme)
+    {
+    }
+
     /// <summary>
     /// Total height of all content items in pixels. Setting this resizes the scrollbar thumb
     /// proportionally and adjusts the scroll offset. When <see cref="ContentHeight"/> is less

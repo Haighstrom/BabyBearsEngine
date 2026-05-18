@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Worlds.UI.Themes;
 
@@ -53,6 +54,21 @@ public class DropdownList<T> : Entity
         Add(header);
         _setHeaderText = t => header.Text = t;
         _optionFactory = (i, label) => new Button(0f, i * height, width, height, theme.Option, label);
+    }
+
+    /// <param name="rect">Position and size relative to the parent container. The rect's height is also used as the height of each option row.</param>
+    /// <param name="items">The values to choose from. Must contain at least one element.</param>
+    /// <param name="theme">Visual styling for the header and option buttons.</param>
+    /// <param name="formatter">Optional label formatter. Defaults to <see cref="object.ToString"/>.</param>
+    /// <param name="initialIndex">Index of the initially selected item. Defaults to 0.</param>
+    public DropdownList(
+        Rect rect,
+        IReadOnlyList<T> items,
+        DropdownListTheme theme,
+        Func<T, string>? formatter = null,
+        int initialIndex = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, items, theme, formatter, initialIndex)
+    {
     }
 
     /// <summary>

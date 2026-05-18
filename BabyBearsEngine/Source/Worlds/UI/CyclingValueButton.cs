@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Worlds.UI;
@@ -48,6 +49,22 @@ public class CyclingValueButton<T> : Button
         _currentIndex = initialIndex;
 
         Text = _formatter(CurrentValue);
+    }
+
+
+    /// <param name="rect">Position and size relative to the parent container.</param>
+    /// <param name="theme">Visual styling for the button.</param>
+    /// <param name="values">The values to cycle through. Must contain at least one element.</param>
+    /// <param name="formatter">Optional formatter producing the label for each value. Defaults to <see cref="object.ToString"/>.</param>
+    /// <param name="initialIndex">Index of the initially-selected value. Defaults to 0.</param>
+    public CyclingValueButton(
+        Rect rect,
+        ButtonTheme theme,
+        IReadOnlyList<T> values,
+        Func<T, string>? formatter = null,
+        int initialIndex = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, values, formatter, initialIndex)
+    {
     }
 
     internal CyclingValueButton(IReadOnlyList<T> values, int initialIndex = 0)

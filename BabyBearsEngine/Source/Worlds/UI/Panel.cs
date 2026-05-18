@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Worlds.Graphics;
+﻿using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Worlds.Graphics;
 
 namespace BabyBearsEngine.Worlds.UI;
 
@@ -14,5 +15,12 @@ public class Panel : Entity
         : base(x, y, width, height)
     {
         Add(new ColourGraphic(colour, 0, 0, width, height));
+    }
+
+    /// <param name="rect">Position and size relative to the parent container.</param>
+    /// <param name="colour">Background fill colour.</param>
+    public Panel(Rect rect, Colour colour)
+        : this(rect.X, rect.Y, rect.W, rect.H, colour)
+    {
     }
 }

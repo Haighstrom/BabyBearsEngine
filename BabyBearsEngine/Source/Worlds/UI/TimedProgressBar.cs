@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Worlds.UI.Themes;
+﻿using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Worlds.UI;
 
@@ -12,10 +13,18 @@ namespace BabyBearsEngine.Worlds.UI;
 /// <param name="height">Height in pixels.</param>
 /// <param name="theme">Visual styling for the bar.</param>
 /// <param name="duration">Seconds to go from empty to full.</param>
-public class TimedProgressBar(float x, float y, float width, float height, ProgressBarTheme theme, double duration) 
+public class TimedProgressBar(float x, float y, float width, float height, ProgressBarTheme theme, double duration)
     : ProgressBar(x, y, width, height, theme)
 {
     private double _elapsed = 0.0;
+
+    /// <param name="rect">Position and size relative to the parent container. The rect's width is the bar width at full fill.</param>
+    /// <param name="theme">Visual styling for the bar.</param>
+    /// <param name="duration">Seconds to go from empty to full.</param>
+    public TimedProgressBar(Rect rect, ProgressBarTheme theme, double duration)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, duration)
+    {
+    }
 
     /// <summary>
     /// Restarts the timer from empty, optionally with a new duration.

@@ -32,6 +32,15 @@ public class TabbedPanel : Entity
         Add(ContentPanel);
     }
 
+    /// <param name="rect">Total position and size relative to the parent container (tab bar + content area).</param>
+    /// <param name="tabHeight">Height of the tab button row in pixels.</param>
+    /// <param name="theme">Visual styling.</param>
+    /// <param name="tabSpacing">Horizontal gap between adjacent tab buttons. Defaults to 0.</param>
+    public TabbedPanel(Rect rect, float tabHeight, TabbedPanelTheme theme, float tabSpacing = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, tabHeight, theme, tabSpacing)
+    {
+    }
+
     /// <summary>The content area entity. Add non-tab content here directly if needed.</summary>
     public Entity ContentPanel { get; }
 

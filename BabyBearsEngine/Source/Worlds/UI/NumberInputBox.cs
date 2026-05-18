@@ -1,3 +1,4 @@
+using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Worlds.UI;
@@ -33,6 +34,18 @@ public class NumberInputBox : TextInputBox
     {
         _allowDecimals = allowDecimals;
         _allowNegative = allowNegative;
+    }
+
+    /// <param name="rect">Position and size relative to the parent container.</param>
+    /// <param name="theme">Visual styling.</param>
+    /// <param name="allowDecimals">When true, a single <c>.</c> character is permitted.</param>
+    /// <param name="allowNegative">When true, a leading <c>-</c> at position 0 is permitted.</param>
+    /// <param name="initialText">Initial content. Must be a valid numeric string for the given settings, or empty.</param>
+    public NumberInputBox(Rect rect, InputBoxTheme theme,
+                          bool allowDecimals = true, bool allowNegative = false,
+                          string initialText = "")
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, allowDecimals, allowNegative, initialText)
+    {
     }
 
     internal NumberInputBox(float x, float y, float width, float height,

@@ -31,6 +31,14 @@ public class Checkbox : Button
         Add(_tick);
     }
 
+    /// <param name="rect">Position and size relative to the parent container.</param>
+    /// <param name="theme">Visual styling for the checkbox.</param>
+    /// <param name="isChecked">Initial check state. Defaults to <c>false</c>.</param>
+    public Checkbox(Rect rect, CheckboxTheme theme, bool isChecked = false)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, isChecked)
+    {
+    }
+
     internal Checkbox(float x, float y, float width, float height, bool isChecked = false)
         : base(x, y, width, height)
     {

@@ -36,6 +36,14 @@ public class ProgressBar : Entity
         AmountFilled = amountFilled;
     }
 
+    /// <param name="rect">Position and size relative to the parent container. The rect's width is the bar width at <see cref="AmountFilled"/> = 1.</param>
+    /// <param name="theme">Visual styling for the bar.</param>
+    /// <param name="amountFilled">Initial fill amount in [0, 1]. Defaults to 0.</param>
+    public ProgressBar(Rect rect, ProgressBarTheme theme, float amountFilled = 0f)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, amountFilled)
+    {
+    }
+
     /// <summary>
     /// How full the bar is, in [0, 1]. Values outside the range are clamped. Setting this
     /// to 1 (from a smaller value) raises <see cref="BarFilled"/>.
