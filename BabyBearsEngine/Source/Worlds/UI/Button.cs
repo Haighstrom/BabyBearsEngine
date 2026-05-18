@@ -33,12 +33,16 @@ public class Button : Entity
         _background.Colour = theme.Idle;
         Add(_background);
 
-        _textImage = new TextGraphic(theme.Text.Font, text, theme.Text.Colour, 0, 0, width, height)
-        {
-            HAlignment = theme.Text.HAlignment,
-            VAlignment = theme.Text.VAlignment,
-        };
+        _textImage = new TextGraphic(theme.Text, text, 0, 0, width, height);
         Add(_textImage);
+    }
+
+    /// <param name="rect">Position and size relative to the parent container.</param>
+    /// <param name="theme">Visual styling for the button. Use <see cref="ButtonTheme.Default"/> for prototype work.</param>
+    /// <param name="text">Optional label text. Defaults to empty; can also be changed at runtime via <see cref="Text"/>.</param>
+    public Button(Rect rect, ButtonTheme theme, string text = "")
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, text)
+    {
     }
 
     internal Button(float x, float y, float width, float height)

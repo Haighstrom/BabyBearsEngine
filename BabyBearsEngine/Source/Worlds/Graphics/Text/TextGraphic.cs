@@ -7,6 +7,7 @@ using BabyBearsEngine.Platform.OpenGL.Buffers;
 using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using BabyBearsEngine.Worlds;
 using BabyBearsEngine.Worlds.Cameras;
+using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 
@@ -47,6 +48,27 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         _fontDef = fontDef;
         _fontStruct = atlas.FontStruct;
         _texture = atlas.Texture;
+    }
+
+    /// <param name="theme">Visual styling — font, colour, and alignment.</param>
+    /// <param name="textToDisplay">The text string to render.</param>
+    /// <param name="x">X position relative to the parent container.</param>
+    /// <param name="y">Y position relative to the parent container.</param>
+    /// <param name="width">Width in pixels.</param>
+    /// <param name="height">Height in pixels.</param>
+    public TextGraphic(TextTheme theme, string textToDisplay, float x, float y, float width, float height)
+        : this(theme.Font, textToDisplay, theme.Colour, x, y, width, height)
+    {
+        HAlignment = theme.HAlignment;
+        VAlignment = theme.VAlignment;
+    }
+
+    /// <param name="theme">Visual styling — font, colour, and alignment.</param>
+    /// <param name="textToDisplay">The text string to render.</param>
+    /// <param name="rect">Position and size relative to the parent container.</param>
+    public TextGraphic(TextTheme theme, string textToDisplay, Rect rect)
+        : this(theme, textToDisplay, rect.X, rect.Y, rect.W, rect.H)
+    {
     }
 
     /// <inheritdoc/>

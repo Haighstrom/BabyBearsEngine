@@ -21,6 +21,13 @@ public sealed class TextureGraphic(ITexture texture, float x, float y, float wid
     private Colour _colour = Colour.White;
     private bool _verticesChanged = true;
 
+    /// <param name="texture">The texture to sample. Not owned by this graphic; not disposed when the graphic is disposed.</param>
+    /// <param name="rect">Position and size in the parent's local space.</param>
+    public TextureGraphic(ITexture texture, Rect rect)
+        : this(texture, rect.X, rect.Y, rect.W, rect.H)
+    {
+    }
+
     /// <summary>Tint colour multiplied with the texture sample. Defaults to <see cref="Colour.White"/> (no tint).</summary>
     public Colour Colour
     {

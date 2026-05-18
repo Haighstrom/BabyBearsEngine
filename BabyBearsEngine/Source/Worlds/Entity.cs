@@ -36,6 +36,13 @@ public class Entity : ContainerEntity, IMouseInteractable
         }
     }
 
+    /// <param name="rect">Position and size relative to parent.</param>
+    /// <param name="clickable">When true, adds an internal click controller that raises the mouse interaction events (<see cref="LeftPressed"/>, <see cref="MouseEntered"/>, <see cref="MouseHovered"/>, etc.).</param>
+    public Entity(Rect rect, bool clickable = false)
+        : this(rect.X, rect.Y, rect.W, rect.H, clickable)
+    {
+    }
+
     /// <summary>
     /// When true, mouse-over state propagates through this entity to overlapping clickable
     /// entities beneath it rather than stopping here. Only meaningful when clickable.
