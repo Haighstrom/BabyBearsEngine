@@ -527,14 +527,13 @@ public class TextInputBox : Entity
 
         float availableWidth = Width - 2f * ContentPadding;
 
-        string visibleBeforeCursor = _text.Substring(_scrollOffset,
-            _cursorIndex - _scrollOffset);
+        string visibleBeforeCursor = _text[_scrollOffset.._cursorIndex];
         float cursorX = _textGraphic.MeasureString(visibleBeforeCursor).X;
 
         while (cursorX > availableWidth && _scrollOffset < _cursorIndex)
         {
             _scrollOffset++;
-            visibleBeforeCursor = _text.Substring(_scrollOffset, _cursorIndex - _scrollOffset);
+            visibleBeforeCursor = _text[_scrollOffset.._cursorIndex];
             cursorX = _textGraphic.MeasureString(visibleBeforeCursor).X;
         }
     }
