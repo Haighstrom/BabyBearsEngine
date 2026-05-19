@@ -52,6 +52,9 @@ public abstract class Tween : UpdateableBase
     /// </summary>
     public double Progress { get; private set; } = 0.0;
 
+    /// <summary>Seconds remaining in the current cycle. Equivalent to <c>Duration * (1 - LinearProgress)</c>.</summary>
+    public double TimeRemaining => Duration * (1.0 - LinearProgress);
+
     /// <summary>
     /// Fires at the end of every cycle — once for a non-looping tween (just before it removes
     /// itself), or once per iteration for a looping tween. <see cref="Progress"/> is 1 when

@@ -202,4 +202,35 @@ public class TweenTests
         Assert.AreEqual(0.0, tween.Progress);
         Assert.AreEqual(0, tween.ProgressUpdateCount);
     }
+
+    // TimeRemaining
+
+    [TestMethod]
+    public void TimeRemaining_AtStart_EqualsDuration()
+    {
+        var tween = new CapturingTween(4.0);
+
+        Assert.AreEqual(4.0, tween.TimeRemaining, delta: 1e-10);
+    }
+
+    [TestMethod]
+    public void TimeRemaining_Midway_IsHalfDuration()
+    {
+        var tween = InContainer(new CapturingTween(4.0));
+
+        tween.Update(2.0);
+
+        Assert.AreEqual(2.0, tween.TimeRemaining, delta: 1e-10);
+    }
+
+    [TestMethod]
+    public void TimeRemaining_AtCompletion_IsZero()
+    {
+        var tween = InContainer(new CapturingTween(1.0));
+
+        tween.Update(1.0);
+
+        Assert.AreEqual(0.0, tween.TimeRemaining, delta: 1e-10);
+    }
+
 }
