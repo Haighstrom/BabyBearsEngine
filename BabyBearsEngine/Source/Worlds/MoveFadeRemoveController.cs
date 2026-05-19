@@ -1,7 +1,9 @@
+using BabyBearsEngine.Worlds.Graphics;
+
 namespace BabyBearsEngine.Worlds;
 
 /// <summary>
-/// Translates an <see cref="IMoveFadeable"/> target along a straight path while fading its
+/// Translates an <see cref="IGraphic"/> target along a straight path while fading its
 /// alpha to zero, then removes it from the world when the effect lifetime expires.
 /// </summary>
 /// <remarks>
@@ -9,11 +11,11 @@ namespace BabyBearsEngine.Worlds;
 /// <see cref="Update"/> calls each frame. The controller raises <see cref="Completed"/> when
 /// it removes the target; subscribe to clean up the controller itself at that point.
 /// </remarks>
-/// <param name="target">The entity or graphic to move, fade, and remove.</param>
+/// <param name="target">The graphic to move, fade, and remove.</param>
 /// <param name="velocityX">Horizontal speed in pixels per second.</param>
 /// <param name="velocityY">Vertical speed in pixels per second.</param>
 /// <param name="duration">Total effect lifetime in seconds.</param>
-public class MoveFadeRemoveController(IMoveFadeable target, float velocityX, float velocityY, double duration) : UpdateableBase
+public class MoveFadeRemoveController(IGraphic target, float velocityX, float velocityY, double duration) : UpdateableBase
 {
     private readonly byte _initialAlpha = target.Colour.A;
     private bool _done = false;
