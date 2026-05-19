@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Worlds;
+﻿using System;
+using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Worlds.Graphics;
 
@@ -17,4 +18,14 @@ public interface IGraphic : IRenderable, ILayered, IRectAddable
     /// it multiplies the texture sample (so <see cref="Colour.White"/> means "no tint").
     /// </summary>
     Colour Colour { get; set; }
+
+    /// <summary>
+    /// Convenience accessor for the alpha component of <see cref="Colour"/>, expressed as a
+    /// normalised float (0–1) on set; raw byte (0–255) on get.
+    /// </summary>
+    float Alpha
+    {
+        get => Colour.A;
+        set => Colour = new(Colour.R, Colour.G, Colour.B, (byte)Math.Round(value * 255f));
+    }
 }
