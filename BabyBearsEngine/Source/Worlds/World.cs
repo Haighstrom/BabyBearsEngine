@@ -41,6 +41,9 @@ public class World : IWorld
     }
 
     /// <inheritdoc/>
+    public void Add(params IAddable[] children) => _container.Add(children);
+
+    /// <inheritdoc/>
     public void Add(IAddable entity) => _container.Add(entity);
 
     /// <inheritdoc/>

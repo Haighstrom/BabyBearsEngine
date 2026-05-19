@@ -104,6 +104,9 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
     }
 
     /// <inheritdoc/>
+    public void Add(params IAddable[] children) => _container.Add(children);
+
+    /// <inheritdoc/>
     public void Add(IAddable entity) => _container.Add(entity);
 
     /// <inheritdoc/>

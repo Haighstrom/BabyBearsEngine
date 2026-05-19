@@ -25,6 +25,14 @@ internal class Container(IContainer realParent) : IContainer
     public (float x, float y) GetWindowCoordinates(float x, float y) =>
         realParent.GetWindowCoordinates(x, y);
 
+    public void Add(params IAddable[] children)
+    {
+        foreach (var child in children)
+        {
+            Add(child);
+        }
+    }
+
     public void Add(IAddable entity)
     {
         ArgumentNullException.ThrowIfNull(entity);

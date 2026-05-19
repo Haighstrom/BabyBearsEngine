@@ -12,6 +12,15 @@ public interface IContainer
     /// <exception cref="InvalidOperationException">Thrown when <paramref name="entity"/> is already a child of this container.</exception>
     void Add(IAddable entity);
 
+    /// <summary>Adds each element of <paramref name="children"/> to this container in order.</summary>
+    void Add(params IAddable[] children)
+    {
+        foreach (var child in children)
+        {
+            Add(child);
+        }
+    }
+
     /// <summary>Removes <paramref name="entity"/> from this container and clears its parent.</summary>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="entity"/> is null.</exception>
     /// <exception cref="InvalidOperationException">Thrown when <paramref name="entity"/> is not a child of this container.</exception>

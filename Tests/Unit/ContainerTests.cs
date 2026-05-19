@@ -70,7 +70,7 @@ public class ContainerTests
     public void Add_NullEntity_Throws()
     {
         var container = CreateContainer(out _);
-        Assert.ThrowsExactly<ArgumentNullException>(() => container.Add(null!));
+        Assert.ThrowsExactly<ArgumentNullException>(() => container.Add((IAddable)null!));
     }
 
     [TestMethod]
@@ -92,6 +92,49 @@ public class ContainerTests
         container.Add(entity);
 
         Assert.ThrowsExactly<InvalidOperationException>(() => container.Add(entity));
+    }
+
+    [TestMethod]
+    public void Add_ParamsOverload_AddsAllChildren()
+    {
+        var container = CreateContainer(out var realParent);
+        var a = new StubAddable();
+        var b = new StubAddable();
+        var c = new StubAddable();
+
+        container.Add(a, b, c);
+
+        Assert.AreSame(realParent, a.Parent);
+        Assert.AreSame(realParent, b.Parent);
+        Assert.AreSame(realParent, c.Parent);
+    }
+
+    [TestMethod]
+    public void Add_ParamsOverload_PreservesOrder()
+    {
+        var container = CreateContainer(out _);
+        var a = new StubUpdateable();
+        var b = new StubUpdateable();
+        var c = new StubUpdateable();
+
+        container.Add(a, b, c);
+
+        var updatables = container.GetUpdatables();
+        Assert.AreEqual(3, updatables.Count);
+        Assert.AreSame(a, updatables[0]);
+        Assert.AreSame(b, updatables[1]);
+        Assert.AreSame(c, updatables[2]);
+    }
+
+    [TestMethod]
+    public void Add_ParamsOverload_DuplicateChild_Throws()
+    {
+        var container = CreateContainer(out _);
+        var a = new StubAddable();
+        var b = new StubAddable();
+        container.Add(a);
+
+        Assert.ThrowsExactly<InvalidOperationException>(() => container.Add(b, a));
     }
 
     [TestMethod]
