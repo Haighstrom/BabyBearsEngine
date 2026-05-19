@@ -12,11 +12,14 @@ namespace BabyBearsEngine;
 internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
     : GameWindow(appSettings.GameLoopSettings.ToOpenTK(), appSettings.WindowSettings.ToOpenTK()), IWorldSwitcher, IGameEngine
 {
+    private readonly EngineInfo _engineInfo = new();
     private Func<IWorld>? _pendingWorldFactory;
     internal bool _programmaticClose;
     private IWorld _world = new World();
 
     public bool CloseOnXButton { get; set; } = appSettings.WindowSettings.CloseOnXButton;
+
+    internal EngineInfo EngineInfo => _engineInfo;
 
     private void ApplyPendingWorldChangeIfAny()
     {
@@ -76,6 +79,8 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
     protected override void OnRenderFrame(FrameEventArgs args)
     {
         base.OnRenderFrame(args);
+
+        _engineInfo.Tick(args.Time);
 
         GL.Clear(ClearBufferMask.ColorBufferBit);
 

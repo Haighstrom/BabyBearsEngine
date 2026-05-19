@@ -13,6 +13,7 @@ internal static class EngineConfiguration
     private const string NotInitialisedMessage = "The platform context has not been initialized. Please call Initialise() before accessing the platform context.";
     private const string ScreenCaptureNotEnabledMessage = "Screen capture is not enabled. Set ApplicationSettings.DiagnosticsSettings.CaptureFrames = true to enable.";
 
+    private static IEngineInfo? s_engineInfo = null;
     private static IGPUResourceDeletionService? s_gpuResourceDeletionService = null;
     private static IKeyboard? s_keyboard = null;
     private static IMouse? s_mouse = null;
@@ -27,6 +28,12 @@ internal static class EngineConfiguration
     /// <see cref="ApplicationSettings.DefaultCameraMsaa"/> before the engine starts.
     /// </summary>
     public static MsaaSamples DefaultCameraMsaa { get; set; } = MsaaSamples.Disabled;
+
+    public static IEngineInfo EngineInfo
+    {
+        get => s_engineInfo ?? throw new InvalidOperationException(NotInitialisedMessage);
+        set => s_engineInfo = value ?? throw new ArgumentNullException(nameof(value));
+    }
 
     public static IGPUResourceDeletionService GPUResourceDeletionService
     {
@@ -75,6 +82,7 @@ internal static class EngineConfiguration
         IKeyboard keyboard,
         IMouse mouse,
         IWorldSwitcher worldSwitcher,
+        IEngineInfo engineInfo,
         IScreenCapture? screenCapture,
         IGPUResourceDeletionService? gpuResourceDeletion = null,
         ITextureFactory? textureFactory = null)
@@ -83,11 +91,13 @@ internal static class EngineConfiguration
         ArgumentNullException.ThrowIfNull(keyboard, nameof(keyboard));
         ArgumentNullException.ThrowIfNull(mouse, nameof(mouse));
         ArgumentNullException.ThrowIfNull(worldSwitcher, nameof(worldSwitcher));
+        ArgumentNullException.ThrowIfNull(engineInfo, nameof(engineInfo));
 
         if (s_window is not null
             || s_keyboard is not null
             || s_mouse is not null
             || s_worldSwitcher is not null
+            || s_engineInfo is not null
             || s_screenCapture is not null
             || s_gpuResourceDeletionService is not null
             || s_textureFactory is not null)
@@ -99,6 +109,7 @@ internal static class EngineConfiguration
         s_keyboard = keyboard;
         s_mouse = mouse;
         s_worldSwitcher = worldSwitcher;
+        s_engineInfo = engineInfo;
         s_screenCapture = screenCapture;
         s_gpuResourceDeletionService = gpuResourceDeletion ?? new DefaultGPUResourceDeletionService();
         s_textureFactory = textureFactory ?? new DefaultTextureFactory();
@@ -107,6 +118,7 @@ internal static class EngineConfiguration
     public static void Reset()
     {
         DefaultCameraMsaa = MsaaSamples.Disabled;
+        s_engineInfo = null;
         s_gpuResourceDeletionService = null;
         s_keyboard = null;
         s_mouse = null;

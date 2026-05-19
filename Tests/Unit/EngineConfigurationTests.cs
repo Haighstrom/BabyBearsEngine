@@ -14,6 +14,11 @@ public class EngineConfigurationTests
         public void RequestWorldChange(Func<IWorld> createWorld) => LastRequestedWorld = createWorld();
     }
 
+    private sealed class FakeEngineInfo : IEngineInfo
+    {
+        public double Fps { get; set; }
+    }
+
     [TestCleanup]
     public void Cleanup() => EngineConfiguration.Reset();
 
@@ -27,5 +32,13 @@ public class EngineConfigurationTests
         Engine.ChangeWorld(world);
 
         Assert.AreSame(world, fake.LastRequestedWorld);
+    }
+
+    [TestMethod]
+    public void Engine_Fps_DelegatesToInstalledEngineInfo()
+    {
+        EngineConfiguration.EngineInfo = new FakeEngineInfo { Fps = 42.5 };
+
+        Assert.AreEqual(42.5, Engine.Fps);
     }
 }

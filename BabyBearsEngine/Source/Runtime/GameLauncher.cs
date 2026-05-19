@@ -58,6 +58,7 @@ public static class GameLauncher
                 keyboard: new OpenTKKeyboardAdapter(engine.KeyboardState),
                 mouse: new OpenTKMouseAdapter(engine.MouseState),
                 worldSwitcher: engine,
+                engineInfo: engine.EngineInfo,
                 screenCapture: appSettings.DiagnosticsSettings.CaptureFrames ? new OpenTKScreenCaptureAdapter(engine) : null);
 
             engine.Run(worldFactory());
