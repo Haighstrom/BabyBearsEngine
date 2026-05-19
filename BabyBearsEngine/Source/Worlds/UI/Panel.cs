@@ -25,4 +25,10 @@ public class Panel : Entity
         : this(rect.X, rect.Y, rect.W, rect.H, colour, layer)
     {
     }
+
+    // Skips ColourGraphic creation for unit tests that run without an OpenGL context.
+    internal Panel(float x, float y, float width, float height)
+        : base(x, y, width, height)
+    {
+    }
 }
