@@ -10,7 +10,8 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// <summary>
 /// An animated graphic that renders multiple sprite-sheet textures in sync, composited as
 /// layers on a single quad. All textures must share the same frame count and UV grid. Layers
-/// with a higher <c>subLayer</c> value are drawn on top.
+/// with a higher <c>subLayer</c> value are drawn further behind (matching the higher-is-behind
+/// convention used by the camera and <see cref="ContainerEntity"/>).
 /// Construction allocates GL resources — must be created on the engine thread.
 /// </summary>
 /// <param name="x">X position in the parent's local space.</param>
@@ -74,7 +75,7 @@ public class MultiLayerAnimation(float x, float y, float width, float height, do
     public event EventHandler? AnimationComplete;
 
     /// <summary>
-    /// Adds a sprite-sheet texture at the given sub-layer. Higher sub-layers render on top.
+    /// Adds a sprite-sheet texture at the given sub-layer. Higher sub-layers render further behind.
     /// All textures must have the same frame count and UV layout as the first one added.
     /// </summary>
     public void AddTexture(ISpriteTexture texture, int subLayer = 0)
@@ -88,7 +89,8 @@ public class MultiLayerAnimation(float x, float y, float width, float height, do
         }
 
         _layers.Add((texture, subLayer));
-        _layers.Sort((a, b) => a.SubLayer.CompareTo(b.SubLayer));
+        // Render order is the list order: highest sub-layer first (drawn behind), lowest last (on top).
+        _layers.Sort((a, b) => b.SubLayer.CompareTo(a.SubLayer));
     }
 
     /// <summary>Removes a previously added texture.</summary>
