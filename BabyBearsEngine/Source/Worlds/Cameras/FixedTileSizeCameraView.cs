@@ -6,7 +6,7 @@
 /// more or fewer tiles rather than stretching the image. Use <see cref="ViewWidth"/> and
 /// <see cref="ViewHeight"/> to read the currently visible world region.
 /// </summary>
-public sealed class FixedTileSizeCameraView(float tileWidth, float tileHeight, Func<float> getCameraWidth, Func<float> getCameraHeight) : CameraView(getCameraWidth, getCameraHeight)
+public sealed class FixedTileSizeCameraView(float tileWidth, float tileHeight, Func<float> getCameraWidth, Func<float> getCameraHeight) : CameraView(getCameraWidth, getCameraHeight), ICameraView
 {
 
     /// <inheritdoc/>

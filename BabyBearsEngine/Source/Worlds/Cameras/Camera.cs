@@ -12,10 +12,10 @@ namespace BabyBearsEngine.Worlds;
 /// </summary>
 public class Camera : ContainerEntity, ICamera
 {
-    private readonly CameraView _cameraView;
+    private readonly ICameraView _cameraView;
     private readonly CameraRenderer _renderer;
 
-    protected Camera(float x, float y, float width, float height, Func<Func<float>, Func<float>, CameraView> createView, MsaaSamples? samples = null)
+    protected Camera(float x, float y, float width, float height, Func<Func<float>, Func<float>, ICameraView> createView, MsaaSamples? samples = null)
         : base(x, y, width, height)
     {
         MsaaSamples effectiveSamples = samples ?? EngineConfiguration.DefaultCameraMsaa;

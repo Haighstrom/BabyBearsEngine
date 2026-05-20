@@ -12,6 +12,12 @@ public interface ICameraView
     /// <summary>Width of one world tile in pixels.</summary>
     float TileWidth { get; set; }
 
+    /// <summary>Height of the world region currently visible through the camera, in world units.</summary>
+    float ViewHeight { get; }
+
+    /// <summary>Width of the world region currently visible through the camera, in world units.</summary>
+    float ViewWidth { get; }
+
     /// <summary>World-space X origin of the view (left edge of what the camera sees).</summary>
     float X { get; set; }
 

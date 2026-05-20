@@ -7,7 +7,7 @@ namespace BabyBearsEngine.Worlds.Cameras;
 /// visible, or set <see cref="ICameraView.TileWidth"/>/<see cref="ICameraView.TileHeight"/> to
 /// drive the visible region from a pixel scale instead.
 /// </summary>
-public sealed class FreeCameraView : CameraView
+public sealed class FreeCameraView : CameraView, ICameraView
 {
     private float _viewH = 0f;
     private float _viewW = 0f;
