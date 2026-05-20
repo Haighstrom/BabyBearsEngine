@@ -1,4 +1,4 @@
-using BabyBearsEngine.Platform.ImageLoading;
+﻿using BabyBearsEngine.Platform.ImageLoading;
 
 namespace BabyBearsEngine.OpenGL;
 
@@ -6,7 +6,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
 {
     private const int SpritePadding = 2;
 
-    public ISpriteTexture CreateSpriteTextureFromImageFile(string filePath, int columns, int rows)
+    public ISpriteTexture CreateSpriteTextureFromImageFile(string filePath, int columns, int rows, bool linearFilter = false)
     {
         int handle = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, handle);
@@ -16,8 +16,10 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
 
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, padded.Width, padded.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, padded.Data);
 
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+        var minFilter = linearFilter ? TextureMinFilter.Linear : TextureMinFilter.Nearest;
+        var magFilter = linearFilter ? TextureMagFilter.Linear : TextureMagFilter.Nearest;
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)minFilter);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)magFilter);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
@@ -25,7 +27,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
         return new SpriteTexture(texture, columns, rows, SpritePadding);
     }
 
-    public ITexture CreateTextureFromImageFile(string filePath)
+    public ITexture CreateTextureFromImageFile(string filePath, bool linearFilter = true)
     {
         int handle = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, handle);
@@ -34,19 +36,24 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
 
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, imageData.Width, imageData.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, imageData.Data);
 
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+        var minFilter = linearFilter ? TextureMinFilter.Linear : TextureMinFilter.Nearest;
+        var magFilter = linearFilter ? TextureMagFilter.Linear : TextureMagFilter.Nearest;
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)minFilter);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)magFilter);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
-        GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+        if (linearFilter)
+        {
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+        }
 
         return new Texture(handle, imageData.Width, imageData.Height);
     }
 
     public ITexture GenBorderedRectangle(int width, int height, int borderThickness, Colour fillColour, Colour borderColour)
     {
-        Colour[,] pixels = new Colour[width, height];
+        var pixels = new Colour[width, height];
 
         for (int x = 0; x < width; x++)
         {
