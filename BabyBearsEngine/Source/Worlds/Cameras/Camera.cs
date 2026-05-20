@@ -10,12 +10,12 @@ namespace BabyBearsEngine.Worlds;
 /// bounds. Use <see cref="WithTileSize"/> for a fixed pixel-per-tile scale or
 /// <see cref="WithView"/> to show a fixed world-space region.
 /// </summary>
-public sealed class Camera : ContainerEntity, ICamera
+public class Camera : ContainerEntity, ICamera
 {
     private readonly CameraView _cameraView;
     private readonly CameraRenderer _renderer;
 
-    private Camera(float x, float y, float width, float height, Func<Func<float>, Func<float>, CameraView> createView, MsaaSamples? samples = null)
+    protected Camera(float x, float y, float width, float height, Func<Func<float>, Func<float>, CameraView> createView, MsaaSamples? samples = null)
         : base(x, y, width, height)
     {
         MsaaSamples effectiveSamples = samples ?? EngineConfiguration.DefaultCameraMsaa;
@@ -58,6 +58,14 @@ public sealed class Camera : ContainerEntity, ICamera
     public Colour BackgroundColour { get; set; } = Colour.White;
 
     public float GameSpeed { get; set; } = 1;
+
+    public float MaxX { get; set; } = 0f;
+
+    public float MaxY { get; set; } = 0f;
+
+    public float MinX { get; set; } = 0f;
+
+    public float MinY { get; set; } = 0f;
 
     public bool MouseIntersecting
     {

@@ -1,5 +1,4 @@
-using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Input;
+using BabyBearsEngine.Worlds.Cameras;
 
 namespace BabyBearsEngine.Worlds;
 
@@ -8,69 +7,16 @@ namespace BabyBearsEngine.Worlds;
 /// tile scaling, scrolling, or world-space transforms. Intended for UI overlays that must
 /// stay in screen space regardless of what the game camera is doing.
 /// </summary>
-public sealed class UICamera : ContainerEntity, ICamera
+public sealed class UICamera : Camera
 {
-    private readonly Cameras.CameraRenderer _renderer;
-    private readonly Cameras.FixedTileSizeCameraView _view;
-
     /// <param name="x">Camera X position in screen space.</param>
     /// <param name="y">Camera Y position in screen space.</param>
     /// <param name="width">Viewport width in pixels.</param>
     /// <param name="height">Viewport height in pixels.</param>
     /// <param name="samples">MSAA sample count for the render target. When omitted, uses <see cref="ApplicationSettings.DefaultCameraMsaa"/>.</param>
     public UICamera(float x, float y, float width, float height, MsaaSamples? samples = null)
-        : base(x, y, width, height)
+        : base(x, y, width, height, (getW, getH) => new FixedTileSizeCameraView(1, 1, getW, getH), samples)
     {
-        MsaaSamples effectiveSamples = samples ?? EngineConfiguration.DefaultCameraMsaa;
-        MSAASamples = effectiveSamples;
-        _view = new Cameras.FixedTileSizeCameraView(1, 1, () => Width, () => Height);
-        _renderer = new Cameras.CameraRenderer(width, height, effectiveSamples);
+        BackgroundColour = Colour.Transparent;
     }
-
-    /// <inheritdoc/>
-    public Colour BackgroundColour { get; set; } = Colour.Transparent;
-
-    /// <inheritdoc/>
-    public float GameSpeed { get; set; } = 1;
-
-    /// <inheritdoc/>
-    public bool MouseIntersecting
-    {
-        get
-        {
-            var (wx, wy) = Parent?.GetWindowCoordinates(X, Y) ?? (X, Y);
-            return new Rect(wx, wy, Width, Height).Contains(Mouse.ClientX, Mouse.ClientY);
-        }
-    }
-
-    /// <inheritdoc/>
-    public MsaaSamples MSAASamples { get; set; }
-
-    /// <inheritdoc/>
-    public Cameras.ICameraView View => _view;
-
-    /// <inheritdoc/>
-    public event EventHandler? ViewChanged
-    {
-        add => _view.ViewChanged += value;
-        remove => _view.ViewChanged -= value;
-    }
-
-    /// <summary>
-    /// Translates a local point to window space. Since UICamera uses 1:1 pixel coordinates,
-    /// this is a simple offset by the camera's screen position.
-    /// </summary>
-    public override (float x, float y) GetWindowCoordinates(float x, float y)
-    {
-        float sx = X + x;
-        float sy = Y + y;
-        return Parent?.GetWindowCoordinates(sx, sy) ?? (sx, sy);
-    }
-
-    /// <inheritdoc/>
-    public override void Update(double elapsed) => base.Update(elapsed * GameSpeed);
-
-    /// <inheritdoc/>
-    public override void Render(ref Matrix3 projection, ref Matrix3 modelView) =>
-        _renderer.Render(this, GetRenderables(), ref projection, ref modelView);
 }
