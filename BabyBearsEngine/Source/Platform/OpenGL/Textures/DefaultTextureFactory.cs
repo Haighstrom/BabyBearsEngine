@@ -6,7 +6,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
 {
     private const int SpritePadding = 2;
 
-    public ISpriteTexture CreateSpriteTextureFromImageFile(string filePath, int columns, int rows, bool linearFilter = false)
+    public ISpriteTexture CreateSpriteTextureFromImageFile(string filePath, int rows, int columns, bool linearFilter = false)
     {
         int handle = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, handle);

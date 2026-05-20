@@ -14,11 +14,11 @@ public static class Textures
     /// Loads an image file as an <see cref="ISpriteTexture"/> split into a regular grid of frames.
     /// </summary>
     /// <param name="filePath">Path to the image file.</param>
-    /// <param name="columns">Number of frame columns in the sprite sheet.</param>
     /// <param name="rows">Number of frame rows in the sprite sheet.</param>
+    /// <param name="columns">Number of frame columns in the sprite sheet.</param>
     /// <param name="linearFilter">True for bilinear filtering (smooth); false for nearest-neighbour (pixel-art sharp). Defaults to false.</param>
-    public static ISpriteTexture CreateSpriteFromFile(string filePath, int columns, int rows, bool linearFilter = false) =>
-        Implementation.CreateSpriteTextureFromImageFile(filePath, columns, rows, linearFilter);
+    public static ISpriteTexture CreateSpriteFromFile(string filePath, int rows, int columns, bool linearFilter = false) =>
+        Implementation.CreateSpriteTextureFromImageFile(filePath, rows, columns, linearFilter);
 
     /// <summary>
     /// Generates a rectangular texture with a solid <paramref name="fill"/> and a border of
