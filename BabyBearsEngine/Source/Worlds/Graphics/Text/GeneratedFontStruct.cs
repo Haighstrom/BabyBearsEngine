@@ -13,9 +13,7 @@ internal record class GeneratedFontStruct(Bitmap CharacterSS, int WidestChar, in
             return pos;
         }
 
-        throw new InvalidOperationException(
-            $"Character '{c}' (U+{(int)c:X4}) is not loaded in this font atlas. " +
-            $"Add it to FontDefinition.ExtraCharactersToLoad.");
+        throw CharNotLoaded(c);
     }
 
     public Box2 GetCharPositionNormalised(char c)
@@ -25,9 +23,37 @@ internal record class GeneratedFontStruct(Bitmap CharacterSS, int WidestChar, in
             return pos;
         }
 
-        throw new InvalidOperationException(
-            $"Character '{c}' (U+{(int)c:X4}) is not loaded in this font atlas. " +
+        throw CharNotLoaded(c);
+    }
+
+    /// <summary>
+    /// Builds the exception thrown when a character is requested that the font atlas does not contain.
+    /// Control characters are named (e.g. "newline") because their raw glyph is invisible in a message.
+    /// </summary>
+    private static InvalidOperationException CharNotLoaded(char c)
+    {
+        return new InvalidOperationException(
+            $"Character {DescribeChar(c)} is not loaded in this font atlas. " +
             $"Add it to FontDefinition.ExtraCharactersToLoad.");
+    }
+
+    /// <summary>
+    /// Produces a human-readable description of a character for error messages — a name for
+    /// non-printable characters, the glyph itself otherwise, always with the Unicode code point.
+    /// </summary>
+    private static string DescribeChar(char c)
+    {
+        string label = c switch
+        {
+            '\n' => "newline",
+            '\r' => "carriage return",
+            '\t' => "tab",
+            ' ' => "space",
+            _ when char.IsControl(c) => "control character",
+            _ => $"'{c}'",
+        };
+
+        return $"{label} (U+{(int)c:X4})";
     }
 
     public Vector2i MeasureString(char c) => new(GetCharPosition(c).Size.X, HighestChar);

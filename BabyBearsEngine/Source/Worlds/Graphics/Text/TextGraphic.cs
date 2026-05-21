@@ -41,7 +41,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     public TextGraphic(FontDefinition fontDef, string textToDisplay, Colour colour, float x, float y, float width, float height, int layer = 0)
         : base(x, y, width, height, layer)
     {
-        _textToDisplay = textToDisplay;
+        _textToDisplay = NormalizeNewlines(textToDisplay);
         _colour = colour;
 
         CachedFontAtlas atlas = FontTextureCache.GetOrCreate(fontDef);
@@ -86,7 +86,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         get => _textToDisplay;
         set
         {
-            _textToDisplay = value;
+            _textToDisplay = NormalizeNewlines(value);
             _verticesChanged = true;
         }
     }
@@ -280,6 +280,14 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         _verticesChanged = true;
     }
 
+    /// <summary>
+    /// Canonicalises line endings to '\n' so layout, wrapping and the single-line newline
+    /// check only ever have to deal with one form. Converts Windows ("\r\n") and classic-Mac
+    /// ("\r") breaks; a lone '\r' would otherwise reach the font atlas as an undrawable glyph.
+    /// </summary>
+    private static string NormalizeNewlines(string text)
+        => text.Replace("\r\n", "\n").Replace('\r', '\n');
+
     private IReadOnlyList<LineInfo> GetLines()
     {
         StyledChar[] chars = InlineTagParser.Parse(_textToDisplay, _useInlineTags);
@@ -287,6 +295,19 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         if (_multiline)
         {
             return TextLayout.ComputeLines(chars, _fontStruct, Width, ScaleX, _extraSpaceWidth, _extraCharSpacing);
+        }
+
+        // A newline can't be drawn as a glyph; in single-line mode it would otherwise crash deep in
+        // the font atlas lookup with a message that wrongly suggests loading it. Fail here instead,
+        // pointing at the real fix.
+        foreach (StyledChar styledChar in chars)
+        {
+            if (styledChar.Char == '\n')
+            {
+                throw new InvalidOperationException(
+                    "TextGraphic text contains a newline character (U+000A) but Multiline is false. " +
+                    "Set Multiline = true to render text across multiple lines.");
+            }
         }
 
         return [new LineInfo(chars, 0, chars.Length)];
