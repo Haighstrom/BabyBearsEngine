@@ -22,6 +22,7 @@ public record class LogSettings()
         ErrorFileLevels = LogLevel.None,
         FilePath = null,
         ErrorFilePath = null,
+        ErrorArchivePath = null,
     };
 
     /// <summary>
@@ -40,12 +41,25 @@ public record class LogSettings()
     public bool DedupeGLErrors { get; init; } = true;
 
     /// <summary>
-    /// Path for a separate file capturing the levels in <see cref="ErrorFileLevels"/>. Always
-    /// appended (never wiped) so historical errors survive across runs and can be attached to bug
-    /// reports. Lazy-created — the file isn't touched on disk until the first matching message
-    /// fires. Set to null to disable. Defaults to "errors.log".
+    /// Path for the current-run error file. Wiped at startup — the previous run's content is
+    /// moved to <see cref="ErrorArchivePath"/> before the wipe. Lazy-created: the file is not
+    /// touched until the first matching message fires, so a clean run leaves no file on disk.
+    /// Set to null to disable. Defaults to "errors.log".
     /// </summary>
     public string? ErrorFilePath { get; init; } = "errors.log";
+
+    /// <summary>
+    /// Path for the error archive. At startup the previous run's errors are prepended here
+    /// (newest run first) and the archive is trimmed to <see cref="ErrorArchiveMaxRuns"/> runs.
+    /// Set to null to disable archiving. Defaults to "error_archive.log".
+    /// </summary>
+    public string? ErrorArchivePath { get; init; } = "error_archive.log";
+
+    /// <summary>
+    /// Maximum number of past runs retained in <see cref="ErrorArchivePath"/>. Defaults to 50.
+    /// Ignored when <see cref="ErrorArchivePath"/> is null.
+    /// </summary>
+    public int ErrorArchiveMaxRuns { get; init; } = 50;
 
     /// <summary>
     /// Mask of severities written to <see cref="ErrorFilePath"/>. Defaults to

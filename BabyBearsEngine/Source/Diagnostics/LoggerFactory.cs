@@ -41,6 +41,11 @@ internal static class LoggerFactory
             return null;
         }
 
+        ErrorFileTrimmer.ArchivePreviousRun(
+            logSettings.ErrorFilePath,
+            logSettings.ErrorArchivePath,
+            logSettings.ErrorArchiveMaxRuns);
+
         return new FileSink(logSettings.ErrorFilePath, banner);
     }
 

@@ -12,8 +12,9 @@ public class LoggerTests
     private TextWriter _originalConsoleOut = null!;
     private StringWriter _capturedConsole = null!;
     private string _tempDir = null!;
-    private string _logPath = null!;
+    private string _archiveLogPath = null!;
     private string _errorLogPath = null!;
+    private string _logPath = null!;
 
     [TestInitialize]
     public void Setup()
@@ -24,8 +25,9 @@ public class LoggerTests
 
         _tempDir = Path.Combine(Path.GetTempPath(), "bbe_logger_tests_" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_tempDir);
-        _logPath = Path.Combine(_tempDir, "log.log");
+        _archiveLogPath = Path.Combine(_tempDir, "error_archive.log");
         _errorLogPath = Path.Combine(_tempDir, "errors.log");
+        _logPath = Path.Combine(_tempDir, "log.log");
     }
 
     [TestCleanup]
@@ -54,13 +56,15 @@ public class LoggerTests
         LogMetadata metadata = LogMetadata.Default,
         bool dedupeGLErrors = true,
         string? filePath = null,
-        string? errorFilePath = null) => new()
+        string? errorFilePath = null,
+        string? errorArchivePath = null) => new()
         {
             ConsoleLevels = consoleLevels,
             FileLevels = fileLevels,
             ErrorFileLevels = errorFileLevels,
             FilePath = filePath ?? _logPath,
             ErrorFilePath = errorFilePath ?? _errorLogPath,
+            ErrorArchivePath = errorArchivePath ?? _archiveLogPath,
             FileMode = fileMode,
             MessageMetadata = metadata,
             DedupeGLErrors = dedupeGLErrors,
