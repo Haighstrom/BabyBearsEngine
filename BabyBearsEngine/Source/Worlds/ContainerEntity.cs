@@ -62,7 +62,7 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
     /// <inheritdoc/>
     public event EventHandler<LayerChangedEventArgs>? LayerChanged;
 
-    /// <summary>Returns a snapshot of the child <see cref="IUpdateable"/>s. Safe to mutate the container while iterating the returned list.</summary>
+    /// <summary>Returns a snapshot of the child <see cref="IUpdateable"/>s in update order (highest layer first, so the top-most child updates last). Safe to mutate the container while iterating the returned list.</summary>
     protected IList<IUpdateable> GetUpdatables() => _container.GetUpdatables();
 
     /// <summary>Returns a snapshot of the child <see cref="IRenderable"/>s in render order (highest layer first). Safe to mutate the container while iterating.</summary>

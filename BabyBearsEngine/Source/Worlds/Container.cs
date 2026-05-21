@@ -9,8 +9,9 @@ namespace BabyBearsEngine.Worlds;
 // parent and that handles coordinate translation up the tree.
 internal class Container(IContainer realParent) : IContainer
 {
-    // Layer assigned to IRenderable objects that do not implement ILayered.
-    private const int NonLayeredRenderableLayer = 0;
+    // Layer assigned to children that do not implement ILayered, used for both
+    // render-order and update-order sorting.
+    private const int NonLayeredLayer = 0;
 
     // Authoritative collection of added items. Other lists are derived
     // convenience views for rendering and updating.
@@ -47,17 +48,17 @@ internal class Container(IContainer realParent) : IContainer
 
         if (entity is IUpdateable updatable)
         {
-            _updateables.Add(updatable);
+            InsertUpdateable(updatable);
         }
 
         if (entity is IRenderable renderable)
         {
             InsertRenderable(renderable);
+        }
 
-            if (entity is ILayered layered)
-            {
-                layered.LayerChanged += OnLayerChanged;
-            }
+        if (entity is ILayered layered)
+        {
+            layered.LayerChanged += OnLayerChanged;
         }
 
         entity.Parent = realParent;
@@ -83,11 +84,11 @@ internal class Container(IContainer realParent) : IContainer
         if (entity is IRenderable renderable)
         {
             _graphics.Remove(renderable);
+        }
 
-            if (entity is ILayered layered)
-            {
-                layered.LayerChanged -= OnLayerChanged;
-            }
+        if (entity is ILayered layered)
+        {
+            layered.LayerChanged -= OnLayerChanged;
         }
 
         entity.Parent = null;
@@ -120,11 +121,11 @@ internal class Container(IContainer realParent) : IContainer
 
     private void InsertRenderable(IRenderable renderable)
     {
-        int layer = (renderable as ILayered)?.Layer ?? NonLayeredRenderableLayer;
+        int layer = (renderable as ILayered)?.Layer ?? NonLayeredLayer;
 
         for (int i = 0; i < _graphics.Count; i++)
         {
-            if (layer > ((_graphics[i] as ILayered)?.Layer ?? NonLayeredRenderableLayer))
+            if (layer > ((_graphics[i] as ILayered)?.Layer ?? NonLayeredLayer))
             {
                 _graphics.Insert(i, renderable);
                 return;
@@ -134,10 +135,37 @@ internal class Container(IContainer realParent) : IContainer
         _graphics.Add(renderable);
     }
 
+    // Updateables are kept in the same layer order as renderables, so that per-frame
+    // update — and therefore mouse-input registration — follows the visual stacking:
+    // the entity drawn on top (lowest layer) updates last.
+    private void InsertUpdateable(IUpdateable updateable)
+    {
+        int layer = (updateable as ILayered)?.Layer ?? NonLayeredLayer;
+
+        for (int i = 0; i < _updateables.Count; i++)
+        {
+            if (layer > ((_updateables[i] as ILayered)?.Layer ?? NonLayeredLayer))
+            {
+                _updateables.Insert(i, updateable);
+                return;
+            }
+        }
+
+        _updateables.Add(updateable);
+    }
+
     private void OnLayerChanged(object? sender, LayerChangedEventArgs _)
     {
-        var renderable = (IRenderable)sender!;
-        _graphics.Remove(renderable);
-        InsertRenderable(renderable);
+        if (sender is IRenderable renderable)
+        {
+            _graphics.Remove(renderable);
+            InsertRenderable(renderable);
+        }
+
+        if (sender is IUpdateable updateable)
+        {
+            _updateables.Remove(updateable);
+            InsertUpdateable(updateable);
+        }
     }
 }
