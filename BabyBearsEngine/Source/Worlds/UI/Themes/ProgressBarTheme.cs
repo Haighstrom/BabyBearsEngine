@@ -39,6 +39,13 @@ public sealed record ProgressBarTheme
         FillFactory = r => new ColourGraphic(fill, r.X, r.Y, r.W, r.H),
     };
 
+    /// <summary>Builds a theme with solid-colour background and fill rectangles, each drawn with a border.</summary>
+    public static ProgressBarTheme FromBorderedColours(Colour background, Colour fill, Colour border, float borderThickness) => new()
+    {
+        BackgroundFactory = r => new BorderedColourGraphic(r, background, border, borderThickness),
+        FillFactory = r => new BorderedColourGraphic(r, fill, border, borderThickness),
+    };
+
     /// <summary>Builds a theme with a transparent background and a fill loaded from a path string.</summary>
     public static ProgressBarTheme FromFillTexturePath(string fillPath) => new()
     {
