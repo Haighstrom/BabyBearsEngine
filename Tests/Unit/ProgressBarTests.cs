@@ -23,6 +23,22 @@ public class ProgressBarTests
     private static ProgressBar Make(float amountFilled = 0f) =>
         new(0, 0, 200, 20, StubTheme(), amountFilled);
 
+    private static ProgressBar MakeWithFill(IGraphic fill)
+    {
+        ProgressBarTheme theme = new()
+        {
+            BackgroundFactory = _ => new StubGraphic(),
+            FillFactory = r =>
+            {
+                fill.Width = r.W;
+                fill.Height = r.H;
+                return fill;
+            },
+        };
+
+        return new ProgressBar(0, 0, 200, 20, theme);
+    }
+
     // Initial state
 
     [TestMethod]
@@ -127,5 +143,18 @@ public class ProgressBarTests
         bar.AmountFilled = 1f;
 
         Assert.AreEqual(2, fired);
+    }
+
+    // Fill graphic tracking
+
+    [TestMethod]
+    public void AmountFilled_NonTextureFill_MutatesFillWidth()
+    {
+        StubGraphic fill = new();
+        ProgressBar bar = MakeWithFill(fill);
+
+        bar.AmountFilled = 0.25f;
+
+        Assert.AreEqual(50f, fill.Width);
     }
 }

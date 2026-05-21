@@ -20,6 +20,7 @@ public sealed class TextureGraphic(ITexture texture, float x, float y, float wid
     private readonly GraphicRenderer _graphicRenderer = new(texture);
     private float _angle = 0;
     private Colour _colour = Colour.White;
+    private Rect _sourceArea = Rect.UnitRect;
     private bool _verticesChanged = true;
 
     /// <param name="texture">The texture to sample. Not owned by this graphic; not disposed when the graphic is disposed.</param>
@@ -58,6 +59,38 @@ public sealed class TextureGraphic(ITexture texture, float x, float y, float wid
         }
     }
 
+    /// <summary>
+    /// The sub-region of the texture to display, expressed as fractions of the texture in
+    /// [0, 1] on both axes. Defaults to the whole texture, <c>(0, 0, 1, 1)</c>. The region is
+    /// drawn into the matching sub-region of the graphic's rectangle — e.g. a source area of
+    /// <c>(0.5, 0.5, 0.5, 0.5)</c> draws the texture's bottom-right quarter into the
+    /// bottom-right quarter of the graphic's rectangle. Must be a subset of the unit square.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">The assigned area is not within the unit square (0, 0, 1, 1).</exception>
+    public Rect SourceArea
+    {
+        get => _sourceArea;
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+
+            if (value.X < 0f || value.Y < 0f || value.W < 0f || value.H < 0f
+                || value.Right > 1f || value.Bottom > 1f)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    "SourceArea must be a subset of the unit square (0, 0, 1, 1).");
+            }
+
+            if (_sourceArea.Equals(value))
+            {
+                return;
+            }
+
+            _sourceArea = new Rect(value);
+            _verticesChanged = true;
+        }
+    }
+
     protected override void OnSizeChanged()
     {
         base.OnSizeChanged();
@@ -66,17 +99,21 @@ public sealed class TextureGraphic(ITexture texture, float x, float y, float wid
 
     public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
+        float drawWidth = Width * _sourceArea.W;
+        float drawHeight = Height * _sourceArea.H;
+
         if (_verticesChanged)
         {
-            _graphicRenderer.UpdateVertices(Width, Height, _colour);
+            _graphicRenderer.UpdateVertices(drawWidth, drawHeight, _colour,
+                _sourceArea.Left, _sourceArea.Top, _sourceArea.Right, _sourceArea.Bottom);
             _verticesChanged = false;
         }
 
-        var mv = Matrix3.Translate(ref modelView, X, Y);
+        var mv = Matrix3.Translate(ref modelView, X + Width * _sourceArea.X, Y + Height * _sourceArea.Y);
 
         if (_angle != 0)
         {
-            mv = Matrix3.RotateAroundPoint(ref mv, _angle, Width / 2, Height / 2);
+            mv = Matrix3.RotateAroundPoint(ref mv, _angle, drawWidth / 2, drawHeight / 2);
         }
 
         _graphicRenderer.Render(ref projection, ref mv);

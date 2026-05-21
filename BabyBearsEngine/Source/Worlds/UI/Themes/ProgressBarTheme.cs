@@ -22,8 +22,10 @@ public sealed record ProgressBarTheme
 
     /// <summary>
     /// Factory producing the fill graphic for one bar. Called once with the bar's full
-    /// local rectangle; the <see cref="ProgressBar"/> mutates the returned graphic's
-    /// <see cref="IGraphic.Width"/> to track <see cref="ProgressBar.AmountFilled"/>.
+    /// local rectangle. The <see cref="ProgressBar"/> tracks <see cref="ProgressBar.AmountFilled"/>
+    /// by setting the <see cref="TextureGraphic.SourceArea"/> of a <see cref="TextureGraphic"/>
+    /// fill (so the texture is clipped, not stretched), otherwise by mutating the fill's
+    /// <see cref="IGraphic.Width"/>.
     /// </summary>
     public required Func<Rect, IGraphic> FillFactory { get; init; }
 

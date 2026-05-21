@@ -6,13 +6,16 @@ namespace BabyBearsEngine.Worlds.UI;
 
 /// <summary>
 /// A horizontal bar that fills from left to right as <see cref="AmountFilled"/> moves from
-/// 0 to 1. The background graphic stays fixed; the fill graphic's width is mutated to track
-/// the current value.
+/// 0 to 1. The background graphic stays fixed. The fill graphic tracks the current value: a
+/// <see cref="TextureGraphic"/> fill is clipped via its <see cref="TextureGraphic.SourceArea"/>
+/// (revealed left-to-right without distorting the texture); any other fill graphic has its
+/// width mutated.
 /// </summary>
 public class ProgressBar : Entity
 {
     private readonly IGraphic _background;
     private readonly IGraphic _fill;
+    private readonly TextureGraphic? _textureFill;
     private readonly float _fullWidth;
     private float _amountFilled = 0f;
 
@@ -32,6 +35,7 @@ public class ProgressBar : Entity
         Add(_background);
 
         _fill = theme.FillFactory(new Rect(0, 0, width, height));
+        _textureFill = _fill as TextureGraphic;
         Add(_fill);
 
         AmountFilled = amountFilled;
@@ -64,7 +68,15 @@ public class ProgressBar : Entity
 
             bool wasUnfilled = _amountFilled < 1f;
             _amountFilled = clamped;
-            _fill.Width = _fullWidth * clamped;
+
+            if (_textureFill is not null)
+            {
+                _textureFill.SourceArea = new Rect(0, 0, clamped, 1);
+            }
+            else
+            {
+                _fill.Width = _fullWidth * clamped;
+            }
 
             if (wasUnfilled && clamped >= 1f)
             {
