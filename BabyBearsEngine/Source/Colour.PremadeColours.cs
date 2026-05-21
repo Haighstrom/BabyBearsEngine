@@ -126,6 +126,9 @@ public partial record struct Colour
     /// <summary>Gets the system colour with (R, G, B, A) = (0, 191, 255, 255).</summary>
     public static Colour DeepSkyBlue => new(0, 191, byte.MaxValue, byte.MaxValue);
 
+    /// <summary>Gets the custom colour with (R, G, B, A) = (100, 100, 100, 255).</summary>
+    public static Colour DarkerGray => new(100, 100, 100, byte.MaxValue);
+
     /// <summary>Gets the system colour with (R, G, B, A) = (105, 105, 105, 255).</summary>
     public static Colour DimGray => new(105, 105, 105, byte.MaxValue);
 
