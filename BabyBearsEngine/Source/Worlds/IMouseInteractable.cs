@@ -19,4 +19,10 @@ public interface IMouseInteractable
     /// window space, exactly as <see cref="PositionOnScreen"/> does.
     /// </remarks>
     Rect HitRect => PositionOnScreen;
+
+    /// <summary>
+    /// When true, the entity is excluded from mouse interaction — its click controller skips
+    /// it entirely, so no click, hover, or scroll events fire. Defaults to false.
+    /// </summary>
+    bool Disabled => false;
 }

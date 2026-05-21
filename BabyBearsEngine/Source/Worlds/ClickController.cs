@@ -102,6 +102,15 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
     /// <summary>Advance the controller state by <paramref name="elapsed"/> seconds.</summary>
     public void Update(double elapsed)
     {
+        // A disabled target suppresses all mouse interaction — skip it entirely so neither
+        // its events nor any subclass OnLeftClicked override fire.
+        if (target.Disabled)
+        {
+            _clickState = ClickState.None;
+            _rightClickState = RightClickState.None;
+            return;
+        }
+
         _timeSinceLastClick += elapsed;
 
         if (target.HitRect.Contains(Mouse.ClientX, Mouse.ClientY))

@@ -10,7 +10,7 @@ namespace BabyBearsEngine.Worlds.UI;
 /// style — comes from a <see cref="ButtonTheme"/>; the only thing the button itself owns is
 /// the geometry, the current interaction state, and the label text.
 /// </summary>
-public class Button : Entity
+public class Button : Entity, IMouseInteractable
 {
     private readonly IGraphic? _background;
     private bool _disabled = false;
