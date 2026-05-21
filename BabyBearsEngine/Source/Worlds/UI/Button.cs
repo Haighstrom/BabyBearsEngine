@@ -13,6 +13,7 @@ namespace BabyBearsEngine.Worlds.UI;
 public class Button : Entity
 {
     private readonly IGraphic? _background;
+    private bool _disabled = false;
     private bool _hovered = false;
     private bool _pressed = false;
     private readonly TextGraphic? _textImage;
@@ -52,6 +53,25 @@ public class Button : Entity
     internal Button(float x, float y, float width, float height)
         : base(x, y, width, height, clickable: true) { }
 
+    /// <summary>
+    /// When true, the button ignores all mouse interaction and renders with the theme's
+    /// <see cref="ButtonTheme.Disabled"/> tint. Defaults to false.
+    /// </summary>
+    public bool Disabled
+    {
+        get => _disabled;
+        set
+        {
+            if (_disabled != value)
+            {
+                _disabled = value;
+                _hovered = false;
+                _pressed = false;
+                ApplyState();
+            }
+        }
+    }
+
     /// <summary>The button's label text. Mutating this updates the rendered glyphs on the next frame.</summary>
     public string Text
     {
@@ -81,13 +101,19 @@ public class Button : Entity
             return;
         }
 
-        _background.Colour = _pressed ? _theme.Pressed
+        _background.Colour = _disabled ? _theme.Disabled
+                           : _pressed ? _theme.Pressed
                            : _hovered ? _theme.Hover
                            : _theme.Idle;
     }
 
     protected override void OnLeftPressed()
     {
+        if (_disabled)
+        {
+            return;
+        }
+
         base.OnLeftPressed();
         _pressed = true;
         ApplyState();
@@ -95,6 +121,11 @@ public class Button : Entity
 
     protected override void OnLeftClicked()
     {
+        if (_disabled)
+        {
+            return;
+        }
+
         base.OnLeftClicked();
         _pressed = false;
         ApplyState();
@@ -102,6 +133,11 @@ public class Button : Entity
 
     protected override void OnMouseEntered()
     {
+        if (_disabled)
+        {
+            return;
+        }
+
         base.OnMouseEntered();
         _hovered = true;
         ApplyState();
@@ -109,6 +145,11 @@ public class Button : Entity
 
     protected override void OnMouseExited()
     {
+        if (_disabled)
+        {
+            return;
+        }
+
         base.OnMouseExited();
         _hovered = false;
         _pressed = false;
