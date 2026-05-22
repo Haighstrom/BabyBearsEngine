@@ -63,6 +63,7 @@ uiSubmenuFactory = () => new MenuWorld(
     new("TextLabel & Tooltip", () => new TextLabelDemoWorld(getUISubmenu)),
     new("Scrollbars",        () => new ScrollbarDemoWorld(getUISubmenu)),
     new("Tabbed Panel",      () => new TabbedPanelDemoWorld(getUISubmenu)),
+    new("Paged Panel",       () => new PagedPanelDemoWorld(getUISubmenu)),
     new("Dropdown",          () => new DropdownDemoWorld(getUISubmenu)),
     new("Scroll List",       () => new ScrollListDemoWorld(getUISubmenu)),
     new("Grid Layout",       () => new GridLayoutDemoWorld(getUISubmenu)),
