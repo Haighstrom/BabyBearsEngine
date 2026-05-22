@@ -11,6 +11,7 @@ namespace BabyBearsEngine.Tasks;
 /// </summary>
 public class TaskGroup : UpdateableBase, ITask
 {
+    private bool _isCompleted = false;
     private bool _isStarted = false;
 
     /// <summary>Actions invoked when the group itself starts.</summary>
@@ -101,6 +102,8 @@ public class TaskGroup : UpdateableBase, ITask
     /// <inheritdoc/>
     public virtual void Complete()
     {
+        _isCompleted = true;
+
         ActionsOnComplete.ForEach(a => a());
 
         TaskCompleted?.Invoke(this, EventArgs.Empty);
@@ -111,6 +114,7 @@ public class TaskGroup : UpdateableBase, ITask
     /// <inheritdoc/>
     public virtual void Reset()
     {
+        _isCompleted = false;
         _isStarted = false;
     }
 
@@ -127,6 +131,11 @@ public class TaskGroup : UpdateableBase, ITask
     /// <inheritdoc/>
     public override void Update(double elapsed)
     {
+        if (_isCompleted)
+        {
+            return;
+        }
+
         if (!_isStarted)
         {
             Start();
@@ -137,11 +146,20 @@ public class TaskGroup : UpdateableBase, ITask
         {
             CurrentTask.Update(elapsed);
 
+            // Each subtask owns its own completion — Task.Update and TaskGroup.Update both
+            // self-complete. As the parent we only advance the chain; calling Complete on a
+            // child here would complete a plain Task a second time.
             if (CurrentTask.IsComplete)
             {
-                CurrentTask.Complete();
                 CurrentTask = CurrentTask.NextTask;
             }
+        }
+
+        // As a child of an outer TaskController/TaskGroup, this group completes itself once
+        // the chain is exhausted — the parent never calls Complete on us.
+        if (IsComplete)
+        {
+            Complete();
         }
     }
 
