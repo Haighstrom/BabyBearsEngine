@@ -10,10 +10,12 @@ public class TaskGroupTests
     private sealed class ControllableTask : Task
     {
         public bool ShouldComplete { get; set; } = false;
+        public int CompleteCalls { get; private set; }
 
         public ControllableTask()
         {
             CompletionConditions.Add(() => ShouldComplete);
+            ActionsOnComplete.Add(() => CompleteCalls++);
         }
     }
 
@@ -105,5 +107,87 @@ public class TaskGroupTests
         group.AddTasks(b);
 
         Assert.AreSame(b, a.NextTask);
+    }
+
+    [TestMethod]
+    public void Update_CompletesEachChildExactlyOnce()
+    {
+        // Regression: a plain Task inside a TaskGroup must have Complete() called exactly once.
+        // Task.Update already self-completes, so a TaskGroup that also completed its children
+        // ran every non-idempotent Complete() override (e.g. CarryItemTask) twice.
+        var a = new ControllableTask { ShouldComplete = true };
+        var b = new ControllableTask { ShouldComplete = true };
+        var group = new TaskGroup(a, b);
+
+        group.Update(0.016);
+        group.Update(0.016);
+
+        Assert.AreEqual(1, a.CompleteCalls);
+        Assert.AreEqual(1, b.CompleteCalls);
+    }
+
+    [TestMethod]
+    public void Update_CompletesItselfWhenChainExhausted()
+    {
+        // A TaskGroup is also a task: it must complete itself once its chain is exhausted,
+        // because its parent controller/group does not call Complete() on it.
+        var a = new ControllableTask { ShouldComplete = true };
+        var group = new TaskGroup(a);
+        int groupCompletions = 0;
+        group.TaskCompleted += (_, _) => groupCompletions++;
+
+        group.Update(0.016);
+
+        Assert.AreEqual(1, groupCompletions);
+    }
+
+    [TestMethod]
+    public void Update_NestedTaskGroup_CompletesInnerGroupExactlyOnce()
+    {
+        var innerTask = new ControllableTask { ShouldComplete = true };
+        var innerGroup = new TaskGroup(innerTask);
+        int innerGroupCompletions = 0;
+        innerGroup.TaskCompleted += (_, _) => innerGroupCompletions++;
+        var outerGroup = new TaskGroup(innerGroup);
+
+        outerGroup.Update(0.016);
+        outerGroup.Update(0.016);
+
+        Assert.AreEqual(1, innerGroupCompletions);
+        Assert.AreEqual(1, innerTask.CompleteCalls);
+    }
+
+    [TestMethod]
+    public void Update_AfterSelfCompleting_DoesNotRestartOrRecomplete()
+    {
+        var a = new ControllableTask { ShouldComplete = true };
+        var group = new TaskGroup(a);
+        int starts = 0;
+        int completions = 0;
+        group.TaskStarted += (_, _) => starts++;
+        group.TaskCompleted += (_, _) => completions++;
+
+        group.Update(0.016);
+        group.Update(0.016);
+        group.Update(0.016);
+
+        Assert.AreEqual(1, starts);
+        Assert.AreEqual(1, completions);
+        Assert.AreEqual(1, a.CompleteCalls);
+    }
+
+    [TestMethod]
+    public void Reset_ClearsCompletedState_SoUpdateRunsAgain()
+    {
+        var a = new ControllableTask { ShouldComplete = true };
+        var group = new TaskGroup(a);
+        int starts = 0;
+        group.TaskStarted += (_, _) => starts++;
+
+        group.Update(0.016); // completes the group
+        group.Reset();
+        group.Update(0.016); // _isCompleted cleared, so this runs (and fires Started) again
+
+        Assert.AreEqual(2, starts);
     }
 }

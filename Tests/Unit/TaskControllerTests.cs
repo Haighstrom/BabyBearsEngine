@@ -88,6 +88,27 @@ public class TaskControllerTests
     }
 
     [TestMethod]
+    public void Update_CompletesTaskGroupChildExactlyOnce()
+    {
+        // A TaskGroup directly under a TaskController must still be completed exactly once.
+        // Previously it was never completed: TaskController does not call Complete(), and
+        // TaskGroup did not self-complete — so a top-level group's Complete() never ran.
+        var innerTask = new ControllableTask { ShouldComplete = true };
+        var group = new TaskGroup(innerTask);
+        int groupCompletions = 0;
+        group.TaskCompleted += (_, _) => groupCompletions++;
+        var controller = new TaskController(group)
+        {
+            Parent = new FakeContainer(),
+        };
+
+        controller.Update(0.016);
+
+        Assert.AreEqual(1, groupCompletions);
+        Assert.AreEqual(1, innerTask.CompleteCalls);
+    }
+
+    [TestMethod]
     public void Update_WhenChainExhausted_CallsGetNextTask()
     {
         var first = new ControllableTask { ShouldComplete = true };
