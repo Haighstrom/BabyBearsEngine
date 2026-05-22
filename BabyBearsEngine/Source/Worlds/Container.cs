@@ -10,8 +10,13 @@ namespace BabyBearsEngine.Worlds;
 internal class Container(IContainer realParent) : IContainer
 {
     // Layer assigned to children that do not implement ILayered, used for both
-    // render-order and update-order sorting.
-    private const int NonLayeredLayer = 0;
+    // render-order and update-order sorting. int.MaxValue places them at the very
+    // back: drawn behind all layered content, and updated first so their mouse-input
+    // registration is overridden by any layered content in front of them (e.g. an
+    // Entity's internal ClickController never steals clicks from the Entity's own
+    // child content). Matches the BearsEngine default, where unlayered items sat at
+    // the back rather than on top.
+    private const int NonLayeredLayer = int.MaxValue;
 
     // Authoritative collection of added items. Other lists are derived
     // convenience views for rendering and updating.

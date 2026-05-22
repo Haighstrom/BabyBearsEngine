@@ -245,8 +245,10 @@ public class ContainerTests
     }
 
     [TestMethod]
-    public void Add_NonLayeredRenderable_TreatedAsLayerZero()
+    public void Add_NonLayeredRenderable_SortsBehindLayeredContent()
     {
+        // Renderables that do not implement ILayered are treated as int.MaxValue,
+        // placing them at the very back so they draw behind all layered content.
         var container = CreateContainer(out _);
         var nonLayered = new StubRenderable();
         var layered = new StubLayeredRenderable(5);
@@ -255,8 +257,8 @@ public class ContainerTests
         container.Add(layered);
 
         var ordered = container.GetRenderables().ToList();
-        Assert.AreSame(layered, ordered[0]);     // layer 5 → behind
-        Assert.AreSame(nonLayered, ordered[1]);  // layer 0 (default) → on top
+        Assert.AreSame(nonLayered, ordered[0]);  // non-layered → int.MaxValue → drawn first (behind)
+        Assert.AreSame(layered, ordered[1]);     // layer 5 → on top
     }
 
     [TestMethod]
