@@ -1,4 +1,5 @@
 using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Input;
 
 namespace BabyBearsEngine.Worlds;
 
@@ -27,6 +28,21 @@ public interface ICamera : IRect, IUpdateable, IRenderable, IContainer
 
     /// <summary>True when the mouse cursor is within this camera's screen-space bounds.</summary>
     bool MouseIntersecting { get; }
+
+    /// <summary>
+    /// The cursor's current position in this camera's world-space coordinates. Inverts the
+    /// camera's window transform (parent chain + view scroll/zoom) so callers don't have to.
+    /// </summary>
+    Point MouseWorldPosition
+    {
+        get
+        {
+            var (winOriginX, winOriginY) = GetWindowCoordinates(0f, 0f);
+            float worldX = (Mouse.ClientX - winOriginX) / View.TileWidth;
+            float worldY = (Mouse.ClientY - winOriginY) / View.TileHeight;
+            return new Point(worldX, worldY);
+        }
+    }
 
     /// <summary>MSAA sample count for this camera's render target.</summary>
     MsaaSamples MSAASamples { get; set; }
