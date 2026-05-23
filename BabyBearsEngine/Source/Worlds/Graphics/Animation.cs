@@ -14,10 +14,11 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// <param name="width">Width in pixels.</param>
 /// <param name="height">Height in pixels.</param>
 /// <param name="frameDuration">Seconds per frame. Defaults to 0.2 s (5 fps).</param>
-public class Animation(ISpriteTexture texture, float x, float y, float width, float height, double frameDuration = Animation.DefaultFrameDuration) 
+public class Animation(ISpriteTexture texture, float x, float y, float width, float height, double frameDuration = Animation.DefaultFrameDuration)
     : Sprite(texture, x, y, width, height), IUpdateable
 {
-    private const double DefaultFrameDuration = 0.2;
+    /// <summary>Default seconds per frame (0.2 s = 5 fps) when <c>frameDuration</c> is not specified.</summary>
+    public const double DefaultFrameDuration = 0.2;
 
     private IList<int> _framesToPlay = [0];
     private int _currentFrameIndex = 0;
