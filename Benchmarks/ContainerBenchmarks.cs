@@ -81,6 +81,19 @@ public class ContainerBenchmarks
         }
 
         public event EventHandler<LayerChangedEventArgs>? LayerChanged;
+
+        public event EventHandler? Added
+        {
+            add { }
+            remove { }
+        }
+
+        public event EventHandler? Removed
+        {
+            add { }
+            remove { }
+        }
+
         public IContainer? Parent { get => _parent; set => _parent = value; }
         public bool Visible { get; set; } = true;
 

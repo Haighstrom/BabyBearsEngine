@@ -47,6 +47,18 @@ public class CameraMoveWhenMouseAtEdgeOrKeyPressedControllerTests
 
         public event EventHandler? ViewChanged;
 
+        public event EventHandler? Added
+        {
+            add { }
+            remove { }
+        }
+
+        public event EventHandler? Removed
+        {
+            add { }
+            remove { }
+        }
+
         public void Add(IAddable entity) { }
         public void Remove(IAddable entity) { }
         public void Remove() { }

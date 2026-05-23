@@ -23,11 +23,14 @@ public abstract class AddableBase : IAddable
                 Ensure.NotNull(_parent);
                 _parent = null;
                 OnRemoved();
+                Removed?.Invoke(this, EventArgs.Empty);
             }
             else
             {
                 Ensure.IsNull(_parent);
                 _parent = value;
+                OnAdded();
+                Added?.Invoke(this, EventArgs.Empty);
             }
         }
     }
@@ -35,10 +38,23 @@ public abstract class AddableBase : IAddable
     /// <inheritdoc/>
     public bool Exists => _parent is not null;
 
+    /// <inheritdoc/>
+    public event EventHandler? Added;
+
+    /// <inheritdoc/>
+    public event EventHandler? Removed;
+
+    /// <summary>
+    /// Called immediately after this object has been attached to a parent. Override to react
+    /// to attachment synchronously; outside observers should subscribe to <see cref="Added"/>
+    /// instead.
+    /// </summary>
+    protected virtual void OnAdded() { }
+
     /// <summary>
     /// Called immediately after this object has been removed from its parent. Override to react
-    /// to removal without needing to override <see cref="Remove"/> and remember to call
-    /// <c>base.Remove()</c>.
+    /// to removal synchronously; outside observers should subscribe to <see cref="Removed"/>
+    /// instead.
     /// </summary>
     protected virtual void OnRemoved() { }
 

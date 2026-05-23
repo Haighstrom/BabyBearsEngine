@@ -16,6 +16,12 @@ public interface IAddable
     /// <summary>True when this addable is currently inside a container (equivalent to <see cref="Parent"/> being non-null).</summary>
     bool Exists { get; }
 
+    /// <summary>Raised immediately after this addable has been attached to a parent container.</summary>
+    event EventHandler? Added;
+
+    /// <summary>Raised immediately after this addable has been detached from its parent container.</summary>
+    event EventHandler? Removed;
+
     /// <summary>Removes this addable from its current parent. Throws if it has no parent.</summary>
     void Remove();
 }

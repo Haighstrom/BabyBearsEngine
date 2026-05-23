@@ -39,6 +39,16 @@ public class TaskControllerTests
     {
         public IContainer? Parent { get; set; }
         public bool Exists => Parent is not null;
+        public event EventHandler? Added
+        {
+            add { }
+            remove { }
+        }
+        public event EventHandler? Removed
+        {
+            add { }
+            remove { }
+        }
         public void Remove() => Parent = null;
         public void Add(IAddable entity) { }
         public void Remove(IAddable entity) { }

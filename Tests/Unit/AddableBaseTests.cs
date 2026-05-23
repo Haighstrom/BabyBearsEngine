@@ -7,7 +7,15 @@ namespace BabyBearsEngine.Tests.Unit;
 [TestClass]
 public class AddableBaseTests
 {
-    private sealed class TestAddable : AddableBase { }
+    private sealed class TestAddable : AddableBase
+    {
+        public int OnAddedCallCount { get; private set; } = 0;
+        public int OnRemovedCallCount { get; private set; } = 0;
+
+        protected override void OnAdded() => OnAddedCallCount++;
+
+        protected override void OnRemoved() => OnRemovedCallCount++;
+    }
 
     private sealed class FakeContainer : IContainer
     {
@@ -103,5 +111,172 @@ public class AddableBaseTests
     {
         var a = new TestAddable();
         Assert.ThrowsExactly<NullReferenceException>(() => a.Remove());
+    }
+
+    // Added event
+
+    [TestMethod]
+    public void Added_Fires_WhenAttachedToParent()
+    {
+        var a = new TestAddable();
+        var c = new FakeContainer();
+        int callCount = 0;
+        object? sender = null;
+        a.Added += (s, _) => { callCount++; sender = s; };
+
+        a.Parent = c;
+
+        Assert.AreEqual(1, callCount);
+        Assert.AreSame(a, sender);
+    }
+
+    [TestMethod]
+    public void Added_DoesNotFire_WhenParentAssignmentThrows()
+    {
+        var a = new TestAddable();
+        a.Parent = new FakeContainer();
+        int callCount = 0;
+        a.Added += (_, _) => callCount++;
+
+        try
+        {
+            a.Parent = new FakeContainer();
+        }
+        catch (InvalidOperationException) { }
+
+        Assert.AreEqual(0, callCount);
+    }
+
+    [TestMethod]
+    public void Added_FiresAfterOnAdded()
+    {
+        var a = new TestAddable();
+        var c = new FakeContainer();
+        int onAddedCountAtEventFire = -1;
+        a.Added += (_, _) => onAddedCountAtEventFire = a.OnAddedCallCount;
+
+        a.Parent = c;
+
+        Assert.AreEqual(1, onAddedCountAtEventFire);
+    }
+
+    [TestMethod]
+    public void Added_SupportsMultipleSubscribers()
+    {
+        var a = new TestAddable();
+        var c = new FakeContainer();
+        int firstCount = 0;
+        int secondCount = 0;
+        a.Added += (_, _) => firstCount++;
+        a.Added += (_, _) => secondCount++;
+
+        a.Parent = c;
+
+        Assert.AreEqual(1, firstCount);
+        Assert.AreEqual(1, secondCount);
+    }
+
+    // Removed event
+
+    [TestMethod]
+    public void Removed_Fires_WhenDetachedFromParent()
+    {
+        var a = new TestAddable();
+        var c = new FakeContainer();
+        a.Parent = c;
+        int callCount = 0;
+        object? sender = null;
+        a.Removed += (s, _) => { callCount++; sender = s; };
+
+        a.Parent = null;
+
+        Assert.AreEqual(1, callCount);
+        Assert.AreSame(a, sender);
+    }
+
+    [TestMethod]
+    public void Removed_Fires_ViaRemoveHelper()
+    {
+        var a = new TestAddable();
+        var c = new FakeContainer();
+        a.Parent = c;
+        int callCount = 0;
+        a.Removed += (_, _) => callCount++;
+
+        a.Remove();
+
+        Assert.AreEqual(1, callCount);
+    }
+
+    [TestMethod]
+    public void Removed_DoesNotFire_WhenDetachThrows()
+    {
+        var a = new TestAddable();
+        int callCount = 0;
+        a.Removed += (_, _) => callCount++;
+
+        try
+        {
+            a.Parent = null;
+        }
+        catch (NullReferenceException) { }
+
+        Assert.AreEqual(0, callCount);
+    }
+
+    [TestMethod]
+    public void Removed_FiresAfterOnRemoved()
+    {
+        var a = new TestAddable();
+        var c = new FakeContainer();
+        a.Parent = c;
+        int onRemovedCountAtEventFire = -1;
+        a.Removed += (_, _) => onRemovedCountAtEventFire = a.OnRemovedCallCount;
+
+        a.Parent = null;
+
+        Assert.AreEqual(1, onRemovedCountAtEventFire);
+    }
+
+    [TestMethod]
+    public void Removed_SupportsMultipleSubscribers()
+    {
+        var a = new TestAddable();
+        var c = new FakeContainer();
+        a.Parent = c;
+        int firstCount = 0;
+        int secondCount = 0;
+        a.Removed += (_, _) => firstCount++;
+        a.Removed += (_, _) => secondCount++;
+
+        a.Parent = null;
+
+        Assert.AreEqual(1, firstCount);
+        Assert.AreEqual(1, secondCount);
+    }
+
+    // OnAdded / OnRemoved virtual hooks
+
+    [TestMethod]
+    public void OnAdded_IsCalled_WhenAttached()
+    {
+        var a = new TestAddable();
+        var c = new FakeContainer();
+
+        a.Parent = c;
+
+        Assert.AreEqual(1, a.OnAddedCallCount);
+    }
+
+    [TestMethod]
+    public void OnRemoved_IsCalled_WhenDetached()
+    {
+        var a = new TestAddable();
+        var c = new FakeContainer();
+        a.Parent = c;
+
+        a.Parent = null;
+
+        Assert.AreEqual(1, a.OnRemovedCallCount);
     }
 }

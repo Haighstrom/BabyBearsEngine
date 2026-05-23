@@ -26,6 +26,18 @@ public class IGraphicAlphaTests
             remove { }
         }
 
+        public event EventHandler? Added
+        {
+            add { }
+            remove { }
+        }
+
+        public event EventHandler? Removed
+        {
+            add { }
+            remove { }
+        }
+
         public void Remove() => throw new NotSupportedException();
 
         public void Render(ref Matrix3 projection, ref Matrix3 modelView) => throw new NotSupportedException();
