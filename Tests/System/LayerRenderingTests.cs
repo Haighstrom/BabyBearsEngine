@@ -163,11 +163,11 @@ public class LayerRenderingTests
     }
 
     [TestMethod]
-    public void UnlayeredRenderable_TreatedAsLayerZero_RendersOnTopOfBehindLayeredSibling()
+    public void UnlayeredRenderable_SortedToBack_RendersBehindLayeredSibling()
     {
-        // Red is layered at 5 (behind). The blue unlayered renderable should be treated as
-        // layer 0 by Container.InsertRenderable, so it renders on top — even though it was
-        // added FIRST (so this isn't an add-order artefact).
+        // Blue is an unlayered renderable, so Container.InsertRenderable treats it as
+        // int.MaxValue and pushes it to the very back. Red has Layer = 5 and so renders
+        // in front — even though blue was added FIRST.
         var world = new LayerCaptureWorld(w =>
         {
             w.Add(new UnlayeredRectangle(Colour.Blue, 0, 0, WindowWidth, WindowHeight));
@@ -179,7 +179,7 @@ public class LayerRenderingTests
 
         GameLauncher.Run(SettingsWithCapture(), () => world);
 
-        AssertColourClose(Colour.Blue, world.Captured);
+        AssertColourClose(Colour.Red, world.Captured);
     }
 
     [TestMethod]
