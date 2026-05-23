@@ -4,7 +4,8 @@ using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 
-public sealed class StbTrueTypeTextGraphic(float x, float y, float width, float height, string text, int layer = 0) : GraphicBase(x, y, width, height, layer), IDisposable
+public sealed class StbTrueTypeTextGraphic(float x, float y, float width, float height, string text, int layer = int.MaxValue) 
+    : GraphicBase(x, y, width, height, layer), IDisposable
 {
     private readonly R8ChannelShaderProgram _shader = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();

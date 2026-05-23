@@ -5,21 +5,24 @@ namespace BabyBearsEngine.Worlds;
 /// </summary>
 /// <remarks>
 /// <para><strong>Convention:</strong> think of <see cref="Layer"/> as <em>distance from
-/// the camera</em>. Higher values are further behind; lower values are on top. Layer 0
-/// is the default and renders on top of everything else in the same container.</para>
-/// <para><strong>Why unlayered = top:</strong> renderables that don't implement
-/// <see cref="ILayered"/> are treated as Layer 0. If a renderable hasn't expressed a
-/// preference, the safest interpretation is "just show me" — i.e. on top of anything
-/// that <em>has</em> requested to be behind.</para>
+/// the camera</em>. Higher values are further behind; lower values are on top. Negative
+/// layers are not supported; the constraint here is <see cref="Layer"/> ≥ 0.</para>
+/// <para><strong>Defaults vary by implementer:</strong> classes under <c>Worlds.Graphics</c>
+/// (raw <c>IGraphic</c> leaves like <c>ColourGraphic</c>, <c>TextureGraphic</c>, <c>Sprite</c>,
+/// etc.) default to <see cref="int.MaxValue"/> (drawn on bottom), so an explicitly-layered
+/// sibling will render in front of them. Container types — <c>Entity</c>,
+/// <c>ContainerEntity</c>, and the <c>Worlds.UI</c> widgets — default to <c>0</c> (drawn on
+/// top), since UI chrome is normally authored as the foreground.</para>
+/// <para><strong>Unlayered renderables</strong> (things that implement <see cref="IRenderable"/>
+/// but not <see cref="ILayered"/>) are treated as <see cref="int.MaxValue"/> by the container.</para>
 /// <para><strong>Need to render above everything?</strong> Use <c>IWorld.Overlay</c>
-/// — a separate render pass after the main container. Negative layers are not
-/// supported; the constraint here is <see cref="Layer"/> ≥ 0.</para>
+/// — a separate render pass after the main container.</para>
 /// <para><strong>Mutation:</strong> setting <see cref="Layer"/> raises
 /// <see cref="LayerChanged"/>. Containers subscribe to keep their render order correct.</para>
 /// </remarks>
 public interface ILayered
 {
-    /// <summary>The render layer (depth from the camera). Higher = further behind, lower = on top, Layer 0 = default top. Must be ≥ 0.</summary>
+    /// <summary>The render layer (depth from the camera). Higher = further behind, lower = on top. Must be ≥ 0. The default at construction varies by implementer — see <see cref="ILayered"/> for the convention.</summary>
     /// <exception cref="ArgumentOutOfRangeException">Thrown by implementers when set to a negative value.</exception>
     int Layer { get; set; }
 

@@ -27,8 +27,8 @@ public sealed class PointGraphic : GraphicBase, IGraphic, IDisposable
     /// <param name="y">Y position in the parent's local space.</param>
     /// <param name="size">Point diameter in pixels.</param>
     /// <param name="colour">Point colour.</param>
-    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
-    public PointGraphic(float x, float y, float size, Colour colour, int layer = 0)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top. Default is <see cref="int.MaxValue"/> (drawn at the back). Must be ≥ 0.</param>
+    public PointGraphic(float x, float y, float size, Colour colour, int layer = int.MaxValue)
         : base(x, y, size, size, layer)
     {
         _colour = colour;

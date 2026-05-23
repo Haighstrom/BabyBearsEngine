@@ -20,9 +20,9 @@ public class BorderedColourGraphic : Entity, IGraphic
     /// <param name="fillColour">Colour of the filled interior.</param>
     /// <param name="borderColour">Colour of the border frame.</param>
     /// <param name="borderThickness">Width of each border strip in pixels.</param>
-    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top. Default is <see cref="int.MaxValue"/> (drawn at the back). Must be ≥ 0.</param>
     public BorderedColourGraphic(float x, float y, float width, float height, Colour fillColour,
-        Colour borderColour, float borderThickness, int layer = 0)
+        Colour borderColour, float borderThickness, int layer = int.MaxValue)
         : base(x, y, width, height, layer: layer)
     {
         _fill = new ColourGraphic(fillColour, 0f, 0f, width, height);
@@ -35,8 +35,8 @@ public class BorderedColourGraphic : Entity, IGraphic
     /// <param name="fillColour">Colour of the filled interior.</param>
     /// <param name="borderColour">Colour of the border frame.</param>
     /// <param name="borderThickness">Width of each border strip in pixels.</param>
-    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
-    public BorderedColourGraphic(Rect rect, Colour fillColour, Colour borderColour, float borderThickness, int layer = 0)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top. Default is <see cref="int.MaxValue"/> (drawn at the back). Must be ≥ 0.</param>
+    public BorderedColourGraphic(Rect rect, Colour fillColour, Colour borderColour, float borderThickness, int layer = int.MaxValue)
         : this(rect.X, rect.Y, rect.W, rect.H, fillColour, borderColour, borderThickness, layer)
     {
     }

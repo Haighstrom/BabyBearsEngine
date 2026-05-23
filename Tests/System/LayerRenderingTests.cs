@@ -103,8 +103,9 @@ public class LayerRenderingTests
     public void Child_RendersOnTopOfParentsOwnContent()
     {
         // Parent entity holds a full-screen red rectangle AND a child entity holding a full-screen
-        // blue rectangle. The child entity is added AFTER the red rectangle, so within the parent's
-        // (same-layer-0) container the blue child renders on top of the red sibling.
+        // blue rectangle. The red graphic defaults to layer int.MaxValue; the child Entity defaults
+        // to layer 0. So within the parent's container the child renders on top of red regardless
+        // of add order, and the blue rectangle inside the child wins the centre pixel.
         var world = new LayerCaptureWorld(w =>
         {
             var parent = new Entity(0, 0, WindowWidth, WindowHeight);
@@ -149,8 +150,8 @@ public class LayerRenderingTests
     [TestMethod]
     public void Sibling_SameLayer_LaterAddRendersOnTop()
     {
-        // Both at default layer 0. Red added first, blue added second — blue should win
-        // (deterministic add order within a layer).
+        // Both at the default layer (int.MaxValue, drawn at the back). Red added first,
+        // blue added second — blue should win (deterministic add order within a layer).
         var world = new LayerCaptureWorld(w =>
         {
             w.Add(new ColourGraphic(Colour.Red, 0, 0, WindowWidth, WindowHeight));
@@ -185,9 +186,9 @@ public class LayerRenderingTests
     [TestMethod]
     public void Overlay_RendersAboveMainWorldContent()
     {
-        // Red is added to the main world container at layer 0. Blue is added to the overlay,
-        // which is rendered as a separate pass after main. Blue should be on top regardless
-        // of layer values or add order in the main container.
+        // Red is added to the main world container. Blue is added to the overlay, which is
+        // rendered as a separate pass after main. Blue should be on top regardless of layer
+        // values or add order in the main container.
         var world = new LayerCaptureWorld(w =>
         {
             w.Add(new ColourGraphic(Colour.Red, 0, 0, WindowWidth, WindowHeight));

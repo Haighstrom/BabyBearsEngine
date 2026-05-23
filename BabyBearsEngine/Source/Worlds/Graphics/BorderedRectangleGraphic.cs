@@ -23,9 +23,9 @@ public class BorderedRectangleGraphic : Entity, IBorderGraphic
     /// <param name="borderThickness">Width of each border strip in pixels.</param>
     /// <param name="borderColour">Colour of the border.</param>
     /// <param name="borderPosition">Controls whether the border draws inside, outside, or centred on the stated bounds. Defaults to <see cref="BorderPosition.Inside"/>.</param>
-    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top. Default is <see cref="int.MaxValue"/> (drawn at the back). Must be ≥ 0.</param>
     public BorderedRectangleGraphic(float x, float y, float width, float height, float borderThickness,
-        Colour borderColour, BorderPosition borderPosition = BorderPosition.Inside, int layer = 0)
+        Colour borderColour, BorderPosition borderPosition = BorderPosition.Inside, int layer = int.MaxValue)
         : base(x, y, width, height, layer: layer)
     {
         _borderThickness = borderThickness;

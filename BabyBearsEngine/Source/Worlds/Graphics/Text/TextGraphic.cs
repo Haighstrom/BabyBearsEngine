@@ -38,7 +38,15 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     private float _extraSpaceWidth = 0f;
     private int _firstCharToDraw = 0;
 
-    public TextGraphic(FontDefinition fontDef, string textToDisplay, Colour colour, float x, float y, float width, float height, int layer = 0)
+    /// <param name="fontDef">Font to render with. Resolved through the font atlas cache.</param>
+    /// <param name="textToDisplay">The text string to render.</param>
+    /// <param name="colour">Glyph colour.</param>
+    /// <param name="x">X position relative to the parent container.</param>
+    /// <param name="y">Y position relative to the parent container.</param>
+    /// <param name="width">Width in pixels.</param>
+    /// <param name="height">Height in pixels.</param>
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top. Default is <see cref="int.MaxValue"/> (drawn at the back). Must be ≥ 0.</param>
+    public TextGraphic(FontDefinition fontDef, string textToDisplay, Colour colour, float x, float y, float width, float height, int layer = int.MaxValue)
         : base(x, y, width, height, layer)
     {
         _textToDisplay = NormalizeNewlines(textToDisplay);
@@ -56,8 +64,8 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     /// <param name="y">Y position relative to the parent container.</param>
     /// <param name="width">Width in pixels.</param>
     /// <param name="height">Height in pixels.</param>
-    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
-    public TextGraphic(TextTheme theme, string textToDisplay, float x, float y, float width, float height, int layer = 0)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top. Default is <see cref="int.MaxValue"/> (drawn at the back). Must be ≥ 0.</param>
+    public TextGraphic(TextTheme theme, string textToDisplay, float x, float y, float width, float height, int layer = int.MaxValue)
         : this(theme.Font, textToDisplay, theme.Colour, x, y, width, height, layer)
     {
         HAlignment = theme.HAlignment;
@@ -67,8 +75,8 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     /// <param name="theme">Visual styling — font, colour, and alignment.</param>
     /// <param name="textToDisplay">The text string to render.</param>
     /// <param name="rect">Position and size relative to the parent container.</param>
-    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
-    public TextGraphic(TextTheme theme, string textToDisplay, Rect rect, int layer = 0)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top. Default is <see cref="int.MaxValue"/> (drawn at the back). Must be ≥ 0.</param>
+    public TextGraphic(TextTheme theme, string textToDisplay, Rect rect, int layer = int.MaxValue)
         : this(theme, textToDisplay, rect.X, rect.Y, rect.W, rect.H, layer)
     {
     }
