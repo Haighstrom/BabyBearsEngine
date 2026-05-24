@@ -1,7 +1,5 @@
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds.Graphics;
-using BabyBearsEngine.Worlds.UI;
-using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Tests.Unit;
 
@@ -11,7 +9,13 @@ public class ProgressBarTests
     private sealed class StubGraphic : GraphicBase, IGraphic
     {
         public Colour Colour { get; set; }
-        public override void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
+        public int RenderCallIndex { get; private set; } = -1;
+        public static int NextRenderCallIndex { get; set; } = 0;
+
+        public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
+        {
+            RenderCallIndex = NextRenderCallIndex++;
+        }
     }
 
     private static ProgressBarTheme StubTheme() => new()
@@ -156,5 +160,35 @@ public class ProgressBarTests
         bar.AmountFilled = 0.25f;
 
         Assert.AreEqual(50f, fill.Width);
+    }
+
+    // Identity / layering
+
+    [TestMethod]
+    public void Constructor_DefaultLayer_IsIntMaxValue()
+    {
+        ProgressBar bar = Make();
+
+        Assert.AreEqual(int.MaxValue, bar.Layer);
+    }
+
+    [TestMethod]
+    public void Render_DrawsBackgroundBeforeFill()
+    {
+        StubGraphic background = new();
+        StubGraphic fill = new();
+        ProgressBarTheme theme = new()
+        {
+            BackgroundFactory = _ => background,
+            FillFactory = _ => fill,
+        };
+        ProgressBar bar = new(0, 0, 200, 20, theme);
+        StubGraphic.NextRenderCallIndex = 0;
+
+        Matrix3 projection = Matrix3.Identity;
+        Matrix3 modelView = Matrix3.Identity;
+        bar.Render(ref projection, ref modelView);
+
+        Assert.IsLessThan(fill.RenderCallIndex, background.RenderCallIndex);
     }
 }

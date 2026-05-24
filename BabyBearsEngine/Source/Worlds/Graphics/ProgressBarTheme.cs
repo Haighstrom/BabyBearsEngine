@@ -1,8 +1,7 @@
 ﻿using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.OpenGL;
 
-namespace BabyBearsEngine.Worlds.UI.Themes;
+namespace BabyBearsEngine.Worlds.Graphics;
 
 /// <summary>
 /// Visual styling for a <see cref="ProgressBar"/>: two factories, one for the background

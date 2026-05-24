@@ -1,7 +1,6 @@
 using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Worlds;
 using BabyBearsEngine.Worlds.Graphics;
-using BabyBearsEngine.Worlds.UI;
-using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Tests.Unit;
 
@@ -152,5 +151,23 @@ public class TimedProgressBarTests
         bar.Update(4.0);
 
         Assert.AreEqual(1, fired);
+    }
+
+    // Identity / IUpdateable
+
+    [TestMethod]
+    public void IsIUpdateable()
+    {
+        TimedProgressBar bar = Make(4.0);
+
+        Assert.IsInstanceOfType<IUpdateable>(bar);
+    }
+
+    [TestMethod]
+    public void Constructor_ActiveIsTrueByDefault()
+    {
+        TimedProgressBar bar = Make(4.0);
+
+        Assert.IsTrue(bar.Active);
     }
 }

@@ -1,8 +1,6 @@
-﻿using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Worlds.Graphics;
-using BabyBearsEngine.Worlds.UI.Themes;
+using BabyBearsEngine.Geometry;
 
-namespace BabyBearsEngine.Worlds.UI;
+namespace BabyBearsEngine.Worlds.Graphics;
 
 /// <summary>
 /// A horizontal bar that fills from left to right as <see cref="AmountFilled"/> moves from
@@ -10,8 +8,10 @@ namespace BabyBearsEngine.Worlds.UI;
 /// <see cref="TextureGraphic"/> fill is clipped via its <see cref="TextureGraphic.SourceArea"/>
 /// (revealed left-to-right without distorting the texture); any other fill graphic has its
 /// width mutated.
+/// <para>Composed of two child graphics (background then fill) but exposes itself as a single
+/// <see cref="IGraphic"/> — they are rendered manually rather than held in a container.</para>
 /// </summary>
-public class ProgressBar : Entity
+public class ProgressBar : GraphicBase
 {
     private readonly IGraphic _background;
     private readonly IGraphic _fill;
@@ -25,18 +25,15 @@ public class ProgressBar : Entity
     /// <param name="height">Height in pixels.</param>
     /// <param name="theme">Visual styling for the bar.</param>
     /// <param name="amountFilled">Initial fill amount in [0, 1]. Defaults to 0.</param>
-    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
-    public ProgressBar(float x, float y, float width, float height, ProgressBarTheme theme, float amountFilled = 0f, int layer = 0)
-        : base(x, y, width, height, layer: layer)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top. Default is <see cref="int.MaxValue"/> (drawn at the back). Must be ≥ 0.</param>
+    public ProgressBar(float x, float y, float width, float height, ProgressBarTheme theme, float amountFilled = 0f, int layer = int.MaxValue)
+        : base(x, y, width, height, layer)
     {
         _fullWidth = width;
 
         _background = theme.BackgroundFactory(new Rect(0, 0, width, height));
-        Add(_background);
-
         _fill = theme.FillFactory(new Rect(0, 0, width, height));
         _textureFill = _fill as TextureGraphic;
-        Add(_fill);
 
         AmountFilled = amountFilled;
     }
@@ -44,8 +41,8 @@ public class ProgressBar : Entity
     /// <param name="rect">Position and size relative to the parent container. The rect's width is the bar width at <see cref="AmountFilled"/> = 1.</param>
     /// <param name="theme">Visual styling for the bar.</param>
     /// <param name="amountFilled">Initial fill amount in [0, 1]. Defaults to 0.</param>
-    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
-    public ProgressBar(Rect rect, ProgressBarTheme theme, float amountFilled = 0f, int layer = 0)
+    /// <param name="layer">Initial render layer. Higher = further behind, lower = on top. Default is <see cref="int.MaxValue"/> (drawn at the back). Must be ≥ 0.</param>
+    public ProgressBar(Rect rect, ProgressBarTheme theme, float amountFilled = 0f, int layer = int.MaxValue)
         : this(rect.X, rect.Y, rect.W, rect.H, theme, amountFilled, layer)
     {
     }
@@ -87,4 +84,11 @@ public class ProgressBar : Entity
 
     /// <summary>Raised when <see cref="AmountFilled"/> reaches 1 (from a smaller value).</summary>
     public event EventHandler? BarFilled;
+
+    public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
+    {
+        var mv = Matrix3.Translate(ref modelView, X, Y);
+        _background.Render(ref projection, ref mv);
+        _fill.Render(ref projection, ref mv);
+    }
 }

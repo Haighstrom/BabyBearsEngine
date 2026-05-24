@@ -1,7 +1,7 @@
-﻿using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Worlds.UI.Themes;
+using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Worlds;
 
-namespace BabyBearsEngine.Worlds.UI;
+namespace BabyBearsEngine.Worlds.Graphics;
 
 /// <summary>
 /// A <see cref="ProgressBar"/> that fills itself automatically over a fixed duration.
@@ -14,7 +14,7 @@ namespace BabyBearsEngine.Worlds.UI;
 /// <param name="theme">Visual styling for the bar.</param>
 /// <param name="duration">Seconds to go from empty to full.</param>
 public class TimedProgressBar(float x, float y, float width, float height, ProgressBarTheme theme, double duration)
-    : ProgressBar(x, y, width, height, theme)
+    : ProgressBar(x, y, width, height, theme), IUpdateable
 {
     private double _elapsed = 0.0;
 
@@ -25,6 +25,9 @@ public class TimedProgressBar(float x, float y, float width, float height, Progr
         : this(rect.X, rect.Y, rect.W, rect.H, theme, duration)
     {
     }
+
+    /// <inheritdoc/>
+    public bool Active { get; set; } = true;
 
     /// <summary>
     /// Restarts the timer from empty, optionally with a new duration.
@@ -41,11 +44,9 @@ public class TimedProgressBar(float x, float y, float width, float height, Progr
     }
 
     /// <inheritdoc/>
-    public override void Update(double elapsed)
+    public virtual void Update(double elapsed)
     {
         _elapsed = Math.Min(_elapsed + elapsed, duration);
         AmountFilled = (float)(_elapsed / duration);
-
-        base.Update(elapsed);
     }
 }
