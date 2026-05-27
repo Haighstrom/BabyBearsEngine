@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace BabyBearsEngine.IO;
@@ -175,28 +173,14 @@ public static class Files
     /// Reads a CSV file and returns its contents as a 2D array of <typeparamref name="T"/>.
     /// Values are converted using <see cref="CultureInfo.InvariantCulture"/>.
     /// </summary>
-    public static T[,] ReadCsvFile<T>(string path, char separator = ',') where T : IConvertible
-    {
-        string[] lines = ReadLines(path);
-        if (lines.Length == 0)
-        {
-            return new T[0, 0];
-        }
+    public static T[,] ReadCsvFile<T>(string path, char separator = ',') where T : IConvertible =>
+        Csv.Deserialize<T>(ReadText(path), separator);
 
-        string[][] cells = [.. lines.Select(l => l.Split(separator))];
-        int rowCount = cells.Length;
-        int colCount = cells.Max(c => c.Length);
-
-        T[,] result = new T[rowCount, colCount];
-        for (int row = 0; row < rowCount; row++)
-        {
-            for (int col = 0; col < cells[row].Length; col++)
-            {
-                result[row, col] = (T)Convert.ChangeType(cells[row][col], typeof(T), CultureInfo.InvariantCulture);
-            }
-        }
-        return result;
-    }
+    /// <summary>
+    /// Reads a CSV file whose first row contains column headers and returns the headers and data separately.
+    /// </summary>
+    public static (string[] Headers, T[,] Data) ReadCsvFileWithHeader<T>(string path, char separator = ',') where T : IConvertible =>
+        Csv.DeserializeWithHeader<T>(ReadText(path), separator);
 
     // Read JSON
 
@@ -318,32 +302,14 @@ public static class Files
     /// <summary>
     /// Writes a 2D array to a CSV file. Values are formatted using <see cref="CultureInfo.InvariantCulture"/>.
     /// </summary>
-    public static void WriteCsvFile<T>(string path, T[,] data, char separator = ',') where T : IConvertible
-    {
-        int rowCount = data.GetLength(0);
-        int colCount = data.GetLength(1);
-        StringBuilder sb = new();
+    public static void WriteCsvFile<T>(string path, T[,] data, char separator = ',') where T : IConvertible =>
+        WriteText(path, Csv.Serialize(data, separator));
 
-        for (int row = 0; row < rowCount; row++)
-        {
-            if (row > 0)
-            {
-                sb.AppendLine();
-            }
-
-            for (int col = 0; col < colCount; col++)
-            {
-                if (col > 0)
-                {
-                    sb.Append(separator);
-                }
-
-                sb.Append(((IConvertible)data[row, col]).ToString(CultureInfo.InvariantCulture));
-            }
-        }
-
-        WriteText(path, sb.ToString());
-    }
+    /// <summary>
+    /// Writes a 2D array to a CSV file, prepending <paramref name="headers"/> as the first row.
+    /// </summary>
+    public static void WriteCsvFileWithHeader<T>(string path, IEnumerable<string> headers, T[,] data, char separator = ',') where T : IConvertible =>
+        WriteText(path, Csv.SerializeWithHeader(headers, data, separator));
 
     // Write JSON
 
