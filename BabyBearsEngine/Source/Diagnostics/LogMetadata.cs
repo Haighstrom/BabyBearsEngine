@@ -16,7 +16,12 @@ public enum LogMetadata
     /// <summary>Prefix each message with the wall-clock time, e.g. <c>[09:14:32.123]</c>.</summary>
     Timestamp = 1 << 1,
 
-    /// <summary>Prefix each message with the source location of the caller, e.g. <c>[FileName.cs:42 MemberName]</c>.</summary>
+    /// <summary>
+    /// Prefix each message with the source location of the caller, e.g. <c>[FileName.cs:42 MemberName]</c>.
+    /// Controls behaviour for levels below <see cref="LogLevel.Error"/>; <c>Error</c> and <c>Fatal</c>
+    /// messages always include the caller prefix regardless of this flag, since the call origin is
+    /// nearly always wanted after a failure.
+    /// </summary>
     CallerInfo = 1 << 2,
 
     /// <summary>Shorthand for <see cref="LogLevel"/> and <see cref="Timestamp"/> (the everyday combo).</summary>

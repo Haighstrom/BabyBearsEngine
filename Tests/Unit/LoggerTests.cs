@@ -330,13 +330,33 @@ public class LoggerTests
     }
 
     [TestMethod]
-    public void CallerInfo_FlagUnset_NoCallerPrefix()
+    public void CallerInfo_FlagUnset_BelowError_NoCallerPrefix()
     {
         Logger.Initialise(TestSettings(metadata: LogMetadata.Default), PlainConsole());
 
         Logger.Information("msg");
 
         Assert.DoesNotContain("LoggerTests.cs", ConsoleOutput);
+    }
+
+    [TestMethod]
+    public void CallerInfo_FlagUnset_Error_PrefixStillIncluded()
+    {
+        Logger.Initialise(TestSettings(metadata: LogMetadata.Default), PlainConsole());
+
+        Logger.Error("msg");
+
+        Assert.Contains("LoggerTests.cs:", ConsoleOutput);
+    }
+
+    [TestMethod]
+    public void CallerInfo_FlagUnset_Fatal_PrefixStillIncluded()
+    {
+        Logger.Initialise(TestSettings(metadata: LogMetadata.Default), PlainConsole());
+
+        Logger.Fatal("msg");
+
+        Assert.Contains("LoggerTests.cs:", ConsoleOutput);
     }
 
     // ─── Metadata flags (timestamp / level prefix) ───

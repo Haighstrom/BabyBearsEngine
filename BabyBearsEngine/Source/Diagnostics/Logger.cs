@@ -9,9 +9,12 @@ namespace BabyBearsEngine.Diagnostics;
 /// Static facade for diagnostic logging. Call <see cref="Initialise"/> at startup to bind to
 /// <see cref="LogSettings"/> and <see cref="ConsoleSettings"/>; until then, defaults apply.
 /// Severity wrappers (<see cref="Information"/>, <see cref="Warning"/>, etc.) auto-capture caller
-/// source location — the prefix is only emitted when <see cref="LogMetadata.CallerInfo"/> is set
-/// in <see cref="LogSettings.MessageMetadata"/>. <see cref="SectionHeader"/>, <see cref="SectionBreak"/>
-/// and <see cref="NewLine"/> bypass metadata for clean visual dividers in the log stream.
+/// source location — for levels below <see cref="LogLevel.Error"/> the prefix is only emitted when
+/// <see cref="LogMetadata.CallerInfo"/> is set in <see cref="LogSettings.MessageMetadata"/>;
+/// <see cref="LogLevel.Error"/> and <see cref="LogLevel.Fatal"/> always include it regardless of the
+/// flag, since the call origin is nearly always wanted after a failure.
+/// <see cref="SectionHeader"/>, <see cref="SectionBreak"/> and <see cref="NewLine"/> bypass metadata
+/// for clean visual dividers in the log stream.
 ///
 /// <see cref="GLError"/> is a specialised entrypoint for OpenGL errors that deduplicates by source
 /// location when <see cref="LogSettings.DedupeGLErrors"/> is true (the default), preventing a
@@ -261,7 +264,7 @@ public static class Logger
             prefix += FormatLevel(level);
         }
 
-        if (s_settings.MessageMetadata.HasFlag(LogMetadata.CallerInfo))
+        if (s_settings.MessageMetadata.HasFlag(LogMetadata.CallerInfo) || level >= LogLevel.Error)
         {
             string file = string.IsNullOrEmpty(callerFilePath) ? "?" : Path.GetFileName(callerFilePath);
             prefix += $"[{file}:{callerLineNumber} {callerMemberName}] ";
