@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace BabyBearsEngine.Geometry;
 
@@ -27,7 +27,7 @@ public struct Point3(float x, float y, float z) : IEquatable<Point3>
     /// </summary>
     /// <param name="a">The left-hand operand.</param>
     /// <param name="b">The right-hand operand.</param>
-    /// <returns>The cross product <c>a � b</c>.</returns>
+    /// <returns>The cross product <c>a × b</c>.</returns>
     public static Point3 CrossProduct(Point3 a, Point3 b) =>
         new(
             a.Y * b.Z - a.Z * b.Y,
@@ -71,7 +71,7 @@ public struct Point3(float x, float y, float z) : IEquatable<Point3>
     /// </summary>
     public void Normalize()
     {
-        var l = Length;
+        float l = Length;
 
         if (l == 0)
         {

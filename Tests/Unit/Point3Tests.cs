@@ -1,4 +1,4 @@
-using BabyBearsEngine.Geometry;
+﻿using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Tests.Unit;
 
@@ -135,7 +135,7 @@ public class Point3Tests
     {
         Point3 x = new(1f, 0f, 0f);
         Point3 y = new(0f, 1f, 0f);
-        Point3 result = Point3.CrossProduct(x, y);
+        var result = Point3.CrossProduct(x, y);
 
         Assert.AreEqual(0f, result.X, Delta);
         Assert.AreEqual(0f, result.Y, Delta);
@@ -148,7 +148,7 @@ public class Point3Tests
         Point3 a = new(1f, 0f, 0f);
         Point3 b = new(0f, 1f, 0f);
         Point3 instance = a.CrossProduct(b);
-        Point3 stat = Point3.CrossProduct(a, b);
+        var stat = Point3.CrossProduct(a, b);
 
         Assert.AreEqual(stat.X, instance.X, Delta);
         Assert.AreEqual(stat.Y, instance.Y, Delta);
@@ -161,7 +161,7 @@ public class Point3Tests
     public void ToPoint_ReturnsXY()
     {
         Point3 p = new(3f, 7f, 9f);
-        Point result = p.ToPoint();
+        var result = p.ToPoint();
 
         Assert.AreEqual(3f, result.X, Delta);
         Assert.AreEqual(7f, result.Y, Delta);
@@ -173,7 +173,7 @@ public class Point3Tests
     public void ToPoint4_SetsWToOne()
     {
         Point3 p = new(1f, 2f, 3f);
-        Point4 result = p.ToPoint4();
+        var result = p.ToPoint4();
 
         Assert.AreEqual(1f, result.x, Delta);
         Assert.AreEqual(2f, result.y, Delta);

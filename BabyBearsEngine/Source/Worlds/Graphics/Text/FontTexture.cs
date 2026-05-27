@@ -74,7 +74,7 @@ internal sealed class FontTexture
         }
 
         // Upload the bitmap to OpenGL as a texture
-        var textureId = GL.GenTexture();
+        int textureId = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, textureId);
         GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R8, bitmapWidth, bitmapHeight, 0, PixelFormat.Red, PixelType.UnsignedByte, bitmap);

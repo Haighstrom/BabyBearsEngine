@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using BabyBearsEngine.Worlds;
 using BabyBearsEngine.Worlds.UI;
@@ -24,7 +24,7 @@ public class DropdownListTests
     {
         internal DropdownList<string> Dropdown { get; }
         internal StubEntity Header { get; }
-        internal List<StubEntity> Options { get; } = new();
+        internal List<StubEntity> Options { get; } = [];
 
         internal TestFixture(string[]? items = null, int initialIndex = 0)
         {

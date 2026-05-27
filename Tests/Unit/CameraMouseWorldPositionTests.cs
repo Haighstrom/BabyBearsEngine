@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Input;
@@ -153,7 +153,7 @@ public class CameraMouseWorldPositionTests
     [TestMethod]
     public void MouseWorldPosition_WithTileScale_DividesByTileSize()
     {
-        FakeCameraView view = (FakeCameraView)_camera.View;
+        var view = (FakeCameraView)_camera.View;
         view.TileWidth = 2f;
         view.TileHeight = 4f;
         _mouse.ClientX = 50;
@@ -182,7 +182,7 @@ public class CameraMouseWorldPositionTests
     [TestMethod]
     public void MouseWorldPosition_WithViewScrollAndTileScale_CombinesBoth()
     {
-        FakeCameraView view = (FakeCameraView)_camera.View;
+        var view = (FakeCameraView)_camera.View;
         view.TileWidth = 2f;
         view.TileHeight = 2f;
         view.X = 10f;
@@ -227,7 +227,7 @@ public class CameraMouseWorldPositionTests
     [TestMethod]
     public void MouseWorldPosition_AllTransformsCombined_AppliesEach()
     {
-        FakeCameraView view = (FakeCameraView)_camera.View;
+        var view = (FakeCameraView)_camera.View;
         view.TileWidth = 4f;
         view.TileHeight = 4f;
         view.X = 10f;

@@ -12,7 +12,7 @@ public sealed class FBO(int width, int height) : IDisposable
 {
     private static Texture GetTexture(int width, int height)
     {
-        var handle = GL.GenTexture();
+        int handle = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, handle);
         GL.TexStorage2D(TextureTarget2d.Texture2D, 1, SizedInternalFormat.Rgba8, width, height);
 

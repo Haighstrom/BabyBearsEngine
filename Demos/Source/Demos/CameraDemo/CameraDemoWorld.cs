@@ -39,12 +39,12 @@ internal class CameraDemoWorld : DemoWorld
             VAlignment = VAlignment.Centred,
         });
 
-        Camera leftCamera = Camera.WithTileSize(5, CamTop, CamWidth, CamHeight, TileW, TileH);
+        var leftCamera = Camera.WithTileSize(5, CamTop, CamWidth, CamHeight, TileW, TileH);
         leftCamera.BackgroundColour = new Colour(255, 215, 215);
         leftCamera.Add(new TextGraphic(demoFont, "Hello!", Colour.Black, 0.5f, 0.5f, 20f, 5f));
         Add(leftCamera);
 
-        Camera rightCamera = Camera.WithTileSize(405, CamTop, CamWidth, CamHeight, TileW, TileH);
+        var rightCamera = Camera.WithTileSize(405, CamTop, CamWidth, CamHeight, TileW, TileH);
         rightCamera.BackgroundColour = new Colour(215, 255, 215);
         TextGraphic rightText = new(demoFont,
             "Hello!\nText correctly\nscaled for camera.\nFont: 20pt\nTileSize: 10x20\nScaleForCamera applied.",

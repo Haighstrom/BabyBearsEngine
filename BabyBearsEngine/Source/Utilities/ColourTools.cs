@@ -16,7 +16,7 @@ public static class ColourTools
         foreach (var propertyInfo in typeof(Colour)
             .GetProperties(BindingFlags.Static | BindingFlags.Public))
         {
-            var v = propertyInfo.GetValue(null);
+            object? v = propertyInfo.GetValue(null);
 
             if (v is Colour colour)
             {

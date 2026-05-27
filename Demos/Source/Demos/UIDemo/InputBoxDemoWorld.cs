@@ -40,7 +40,7 @@ internal class InputBoxDemoWorld : DemoWorld
         Add(MakeInstruction(60, 75, 680, 20,
             "Click a box to focus it. Type to edit. Escape or click another box to blur. Enter to confirm."));
 
-        InputBoxTheme theme = InputBoxTheme.FromColour(new Colour(248, 248, 255));
+        var theme = InputBoxTheme.FromColour(new Colour(248, 248, 255));
 
         // --- Text input
         Add(MakeLabel(LabelX, Row1Y, "Name:"));

@@ -91,8 +91,8 @@ internal static class OpenGLHelper
 
     public static Matrix3 CreateOrthographicProjectionMatrix(int width, int height)
     {
-        var halfWidth = width / 2f;
-        var halfHeight = height / 2f;
+        float halfWidth = width / 2f;
+        float halfHeight = height / 2f;
 
         Matrix3 scale = new(1 / halfWidth, 0, 0, 0, 1 / halfHeight, 0, 0, 0, 1);
         Matrix3 flipY = new(1, 0, 0, 0, -1, 0, 0, 0, 1);
@@ -106,8 +106,8 @@ internal static class OpenGLHelper
     // Same as CreateOrtho but without the FlipY stage. Use for makign projection matrices when rendering to a framebuffer rather than screen.
     public static Matrix3 CreateFBOOrthographicProjectionMatrix(int width, int height)
     {
-        var halfWidth = width / 2f;
-        var halfHeight = height / 2f;
+        float halfWidth = width / 2f;
+        float halfHeight = height / 2f;
 
         Matrix3 scale = new(1 / halfWidth, 0, 0, 0, 1 / halfHeight, 0, 0, 0, 1);
         Matrix3 translate = new(1, 0, -halfWidth, 0, 1, -halfHeight, 0, 0, 1);
@@ -119,14 +119,14 @@ internal static class OpenGLHelper
 
     public static int CreateShader(string source, ShaderType shaderType)
     {
-        var handle = GL.CreateShader(shaderType);
+        int handle = GL.CreateShader(shaderType);
         GL.ShaderSource(handle, source);
         GL.CompileShader(handle);
 
-        GL.GetShader(handle, ShaderParameter.CompileStatus, out var success);
+        GL.GetShader(handle, ShaderParameter.CompileStatus, out int success);
         if (success == 0)
         {
-            var infoLog = GL.GetShaderInfoLog(handle);
+            string infoLog = GL.GetShaderInfoLog(handle);
             GL.DeleteShader(handle);
             throw new Exception($"Shader compilation failed ({shaderType}): {infoLog}");
         }
@@ -136,21 +136,21 @@ internal static class OpenGLHelper
 
     public static int CreateShaderProgram(int vertexShader, int fragmentShader, bool deleteShaders = true)
     {
-        var programHandle = GL.CreateProgram();
+        int programHandle = GL.CreateProgram();
 
-        var programBuiltSuccessfully = false;
-        var shadersAttached = false;
+        bool programBuiltSuccessfully = false;
+        bool shadersAttached = false;
 
         try
         {
             GL.AttachShader(programHandle, vertexShader);
             GL.AttachShader(programHandle, fragmentShader);
             GL.LinkProgram(programHandle);
-            GL.GetProgram(programHandle, GetProgramParameterName.LinkStatus, out var linkStatus);
+            GL.GetProgram(programHandle, GetProgramParameterName.LinkStatus, out int linkStatus);
 
             if (linkStatus == 0)
             {
-                var infoLog = GL.GetProgramInfoLog(programHandle);
+                string infoLog = GL.GetProgramInfoLog(programHandle);
                 throw new Exception($"Shader linking failed: {infoLog}");
             }
 
@@ -240,10 +240,10 @@ internal static class OpenGLHelper
         }
     }
 
-    public static void SaveTextureToFile(Texture t, string filePath, Dictionary<string, string>? metadata = null)
+    public static void SaveTextureToFile(Texture t, string filePath)
     {
         var b = TextureToBitmap(t);
-        SaveBitmapToPNGFile(b, filePath, metadata);
+        SaveBitmapToPNGFile(b, filePath);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
@@ -258,7 +258,7 @@ internal static class OpenGLHelper
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
-    public static void SaveBitmapToPNGFile(System.Drawing.Bitmap bmp, string filePath, Dictionary<string, string>? metadata = null)
+    public static void SaveBitmapToPNGFile(System.Drawing.Bitmap bmp, string filePath)
     {
         //Make sure the filepath has exactly one png extension
         if (Path.GetExtension(filePath) == null)

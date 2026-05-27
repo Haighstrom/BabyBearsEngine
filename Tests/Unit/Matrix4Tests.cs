@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Tests.Unit;
@@ -120,7 +120,7 @@ public class Matrix4Tests
     [TestMethod]
     public void CreateTranslation_XYZ_TranslatesPoint()
     {
-        Matrix4 t = Matrix4.CreateTranslation(3f, 5f, 7f);
+        var t = Matrix4.CreateTranslation(3f, 5f, 7f);
         Point4 p = new(0f, 0f, 0f, 1f);
         Point4 result = t * p;
 
@@ -132,7 +132,7 @@ public class Matrix4Tests
     [TestMethod]
     public void CreateTranslation_XY_TranslatesPoint()
     {
-        Matrix4 t = Matrix4.CreateTranslation(2f, 4f);
+        var t = Matrix4.CreateTranslation(2f, 4f);
         Point p = new(0f, 0f);
         Point result = t * p;
 
@@ -145,7 +145,7 @@ public class Matrix4Tests
     [TestMethod]
     public void CreateRotationAroundZAxis_ZeroDegrees_ReturnsIdentity()
     {
-        Matrix4 m = Matrix4.CreateRotationAroundZAxis(0f);
+        var m = Matrix4.CreateRotationAroundZAxis(0f);
 
         Assert.AreEqual(1f, m[0, 0], Delta);
         Assert.AreEqual(0f, m[0, 1], Delta);
@@ -156,7 +156,7 @@ public class Matrix4Tests
     [TestMethod]
     public void CreateRotationAroundZAxis_NinetyDegrees_RotatesXIntoY()
     {
-        Matrix4 m = Matrix4.CreateRotationAroundZAxis(90f);
+        var m = Matrix4.CreateRotationAroundZAxis(90f);
         Point4 p = new(1f, 0f, 0f, 1f);
         Point4 result = m * p;
 
@@ -170,7 +170,7 @@ public class Matrix4Tests
     [TestMethod]
     public void CreateScale_ScalesDiagonal()
     {
-        Matrix4 m = Matrix4.CreateScale(2f, 3f, 4f);
+        var m = Matrix4.CreateScale(2f, 3f, 4f);
 
         Assert.AreEqual(2f, m[0, 0], Delta);
         Assert.AreEqual(3f, m[1, 1], Delta);
@@ -209,7 +209,7 @@ public class Matrix4Tests
     [TestMethod]
     public void Multiply_ByIdentity_Unchanged()
     {
-        Matrix4 m = Matrix4.CreateScale(2f, 3f, 4f);
+        var m = Matrix4.CreateScale(2f, 3f, 4f);
         Matrix4 result = m * Matrix4.Identity;
 
         Assert.AreEqual(m[0, 0], result[0, 0], Delta);
@@ -235,7 +235,7 @@ public class Matrix4Tests
     [TestMethod]
     public void Multiply_Point_AppliesTranslation()
     {
-        Matrix4 t = Matrix4.CreateTranslation(10f, 20f);
+        var t = Matrix4.CreateTranslation(10f, 20f);
         Point p = new(1f, 2f);
         Point result = t * p;
 
@@ -331,7 +331,7 @@ public class Matrix4Tests
     [TestMethod]
     public void Transpose_SwapsOffDiagonalElements()
     {
-        Matrix4 t = Matrix4.CreateTranslation(3f, 5f, 7f);
+        var t = Matrix4.CreateTranslation(3f, 5f, 7f);
         Matrix4 transposed = t.Transpose();
 
         Assert.AreEqual(t[0, 0], transposed[0, 0], Delta);
@@ -344,7 +344,7 @@ public class Matrix4Tests
     [TestMethod]
     public void Inverse_MultiplyByOriginal_GivesIdentity()
     {
-        Matrix4 m = Matrix4.CreateScale(2f, 3f, 4f);
+        var m = Matrix4.CreateScale(2f, 3f, 4f);
         Matrix4 inv = m.Inverse();
         Matrix4 product = m * inv;
 

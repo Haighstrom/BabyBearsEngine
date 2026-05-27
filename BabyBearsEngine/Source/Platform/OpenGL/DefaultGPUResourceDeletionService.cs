@@ -108,7 +108,7 @@ internal class DefaultGPUResourceDeletionService : IGPUResourceDeletionService
         if (shaders.Count != 0)
         {
             OpenGLHelper.UnbindShader();
-            foreach (var handle in shaders)
+            foreach (int handle in shaders)
             {
                 GL.DeleteProgram(handle);
             }
@@ -117,7 +117,7 @@ internal class DefaultGPUResourceDeletionService : IGPUResourceDeletionService
         if (textures.Count != 0)
         {
             OpenGLHelper.UnbindTexture();
-            foreach (var handle in textures)
+            foreach (int handle in textures)
             {
                 GL.DeleteTexture(handle);
             }
@@ -126,7 +126,7 @@ internal class DefaultGPUResourceDeletionService : IGPUResourceDeletionService
         if (vertexArrays.Count != 0)
         {
             OpenGLHelper.UnbindVertexArray();
-            foreach (var handle in vertexArrays)
+            foreach (int handle in vertexArrays)
             {
                 GL.DeleteVertexArray(handle);
             }
@@ -135,7 +135,7 @@ internal class DefaultGPUResourceDeletionService : IGPUResourceDeletionService
         if (vbos.Count != 0)
         {
             OpenGLHelper.UnbindVBO();
-            foreach (var handle in vbos)
+            foreach (int handle in vbos)
             {
                 GL.DeleteBuffer(handle);
             }
@@ -144,7 +144,7 @@ internal class DefaultGPUResourceDeletionService : IGPUResourceDeletionService
         if (ebos.Count != 0)
         {
             OpenGLHelper.UnbindEBO();
-            foreach (var handle in ebos)
+            foreach (int handle in ebos)
             {
                 GL.DeleteBuffer(handle);
             }

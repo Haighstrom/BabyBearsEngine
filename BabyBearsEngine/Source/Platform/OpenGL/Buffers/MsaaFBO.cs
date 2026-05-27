@@ -12,7 +12,7 @@ public sealed class MsaaFBO(int width, int height, int samples) : IDisposable
 {
     private static Texture GetTexture(int width, int height, int samples)
     {
-        var handle = GL.GenTexture();
+        int handle = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2DMultisample, handle);
         GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, samples, PixelInternalFormat.Rgb8, width, height, false);
 

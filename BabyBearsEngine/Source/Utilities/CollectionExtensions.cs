@@ -4,7 +4,7 @@ public static class CollectionExtensions
 {
     public static List<T> ToList<T>(this T[,] array)
     {
-        List<T> list = new();
+        List<T> list = [];
 
         for (int j = 0; j < array.GetLength(1); ++j)
         {
@@ -19,10 +19,10 @@ public static class CollectionExtensions
 
     public static T[] GetRow<T>(this T[,] array, int row)
     {
-        var rowLength = array.GetLength(0);
+        int rowLength = array.GetLength(0);
         var rowVector = new T[rowLength];
 
-        for (var i = 0; i < rowLength; i++)
+        for (int i = 0; i < rowLength; i++)
         {
             rowVector[i] = array[i, row];
         }

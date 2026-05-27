@@ -286,7 +286,7 @@ public class PointTests
     [TestMethod]
     public void ToRect_ReturnsRectWithWidthAndHeightMatchingXAndY()
     {
-        Rect rect = new Point(6f, 4f).ToRect();
+        var rect = new Point(6f, 4f).ToRect();
         Assert.AreEqual(6f, rect.W);
         Assert.AreEqual(4f, rect.H);
     }
@@ -294,7 +294,7 @@ public class PointTests
     [TestMethod]
     public void ToRect_RectOriginIsAtZero()
     {
-        Rect rect = new Point(6f, 4f).ToRect();
+        var rect = new Point(6f, 4f).ToRect();
         Assert.AreEqual(0f, rect.X);
         Assert.AreEqual(0f, rect.Y);
     }

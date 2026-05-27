@@ -497,7 +497,7 @@ public sealed class Rect
     /// Get this rectangle as a clockwise list of vertices starting at the top left.
     /// </summary>
     /// <returns>Returns a list of four points.</returns>
-    public List<Point> ToVertices() => new() { TopLeft, TopRight, BottomRight, BottomLeft };
+    public List<Point> ToVertices() => [TopLeft, TopRight, BottomRight, BottomLeft];
 
     public override int GetHashCode()
     {

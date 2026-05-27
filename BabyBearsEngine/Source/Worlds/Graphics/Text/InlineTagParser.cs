@@ -218,7 +218,7 @@ internal static class InlineTagParser
 
     private static StyledChar[] ToDefaultStyle(string s)
     {
-        StyledChar[] result = new StyledChar[s.Length];
+        var result = new StyledChar[s.Length];
 
         for (int i = 0; i < s.Length; i++)
         {

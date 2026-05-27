@@ -37,17 +37,17 @@ internal static class BitmapTools
             throw new InvalidOperationException($"Unsupported pixel format {bmlock.PixelFormat}. Should be Formar32bppArgb to use TexturePremultiplier");
         }
 
-        var ptr = (byte*)bmlock.Scan0.ToPointer();
+        byte* ptr = (byte*)bmlock.Scan0.ToPointer();
 
-        for (var y = 0; y < bmlock.Height; y++)
+        for (int y = 0; y < bmlock.Height; y++)
         {
-            for (var x = 0; x < bmlock.Width; x++)
+            for (int x = 0; x < bmlock.Width; x++)
             {
                 // Obtain the memory location where our pixel data resides and cast it
                 // into a struct to improve sanity.
                 var color = (RgbaColor*)(ptr + y * bmlock.Stride + x * sizeof(RgbaColor));
 
-                var alphaFloat = (*color).Alpha / 255.0f;
+                float alphaFloat = (*color).Alpha / 255.0f;
 
                 (*color).Red = Convert.ToByte(alphaFloat * (*color).Red);
                 (*color).Green = Convert.ToByte(alphaFloat * (*color).Green);

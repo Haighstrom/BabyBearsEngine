@@ -51,7 +51,7 @@ public class MultiLayerAnimation(float x, float y, float width, float height, do
     public bool Active { get; set; } = false;
 
     /// <summary>A convenience list of every frame index, in order.</summary>
-    public IList<int> AllFrames => Enumerable.Range(0, ReferenceTexture.Frames).ToList();
+    public IList<int> AllFrames => [.. Enumerable.Range(0, ReferenceTexture.Frames)];
 
     /// <inheritdoc cref="IGraphic.Colour"/>
     public Colour Colour

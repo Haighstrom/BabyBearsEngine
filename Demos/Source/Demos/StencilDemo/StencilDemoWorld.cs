@@ -69,7 +69,7 @@ internal class StencilDemoWorld : DemoWorld
     // White tiles on black background — red channel is 1.0 inside tiles, 0.0 outside.
     internal static Colour[,] MakeCheckerboard(int width, int height, int tileSize)
     {
-        Colour[,] pixels = new Colour[width, height];
+        var pixels = new Colour[width, height];
 
         for (int x = 0; x < width; x++)
         {
@@ -87,7 +87,7 @@ internal class StencilDemoWorld : DemoWorld
     // the convention of the Jigsaw.jpg stencil (white = show, black = discard).
     internal static Colour[,] MakeCircleMask(int size)
     {
-        Colour[,] pixels = new Colour[size, size];
+        var pixels = new Colour[size, size];
         float cx = (size - 1) / 2f;
         float cy = (size - 1) / 2f;
         float radius = (size - 1) / 2f;

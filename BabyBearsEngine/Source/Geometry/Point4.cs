@@ -88,7 +88,7 @@ public struct Point4(float x, float y, float z, float w) : IEquatable<Point4>
     /// </summary>
     public void Normalize()
     {
-        var l = Length;
+        float l = Length;
         if (l == 0)
         {
             x = 0;

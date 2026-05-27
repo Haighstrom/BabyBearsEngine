@@ -80,7 +80,7 @@ public record struct Point(float X, float Y) : IPosition
     /// <param name="centre">The rotation centre.</param>
     public readonly Point Rotate(float angle, Point centre)
     {
-        var angleRadians = angle * RadianConversion;
+        double angleRadians = angle * RadianConversion;
 
         float rotatedX = (float)(Math.Cos(angleRadians) * (X - centre.X) - Math.Sin(angleRadians) * (Y - centre.Y) + centre.X);
         float rotatedY = (float)(Math.Sin(angleRadians) * (X - centre.X) + Math.Cos(angleRadians) * (Y - centre.Y) + centre.Y);

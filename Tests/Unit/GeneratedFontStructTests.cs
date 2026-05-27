@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BabyBearsEngine.Worlds.Graphics.Text;
 using OpenTK.Mathematics;
 
@@ -12,7 +12,7 @@ public class GeneratedFontStructTests
 
     private static Dictionary<char, Box2i> MakePositions(params (char c, int width)[] entries)
     {
-        Dictionary<char, Box2i> dict = new();
+        Dictionary<char, Box2i> dict = [];
 
         foreach (var (c, width) in entries)
         {

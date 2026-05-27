@@ -27,7 +27,7 @@ public class GridLayout(float x, float y, float width, float height,
                   GridCellSize[] columns, GridCellSize[] rows,
                   float padding = 0f, float gap = 0f, int layer = 0) : Entity(x, y, width, height, layer: layer)
 {
-    private readonly List<GridEntry> _entries = new();
+    private readonly List<GridEntry> _entries = [];
     private int _autoCol = 0;
     private int _autoRow = 0;
 

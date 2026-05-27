@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Tests.Unit;
@@ -48,7 +48,7 @@ public class Matrix2Tests
     [TestMethod]
     public void CreateRotation_ZeroDegrees_ReturnsIdentity()
     {
-        Matrix2 m = Matrix2.CreateRotation(0f);
+        var m = Matrix2.CreateRotation(0f);
 
         Assert.AreEqual(1f, m[0, 0], Delta);
         Assert.AreEqual(0f, m[0, 1], Delta);
@@ -59,7 +59,7 @@ public class Matrix2Tests
     [TestMethod]
     public void CreateRotation_NinetyDegrees_RotatesXIntoY()
     {
-        Matrix2 m = Matrix2.CreateRotation(90f);
+        var m = Matrix2.CreateRotation(90f);
         Point p = new(1f, 0f);
         Point result = m * p;
 
@@ -72,7 +72,7 @@ public class Matrix2Tests
     [TestMethod]
     public void CreateScale_ScalesAxesIndependently()
     {
-        Matrix2 m = Matrix2.CreateScale(3f, 5f);
+        var m = Matrix2.CreateScale(3f, 5f);
         Point p = new(1f, 1f);
         Point result = m * p;
 
@@ -213,7 +213,7 @@ public class Matrix2Tests
     public void Inverse_MultiplyByOriginal_GivesIdentity()
     {
         Matrix2 m = new(1, 2, 3, 4);
-        Matrix2 inv = Matrix2.Inverse(ref m);
+        var inv = Matrix2.Inverse(ref m);
         Matrix2 product = m * inv;
 
         Assert.AreEqual(1f, product[0, 0], Delta);
@@ -226,7 +226,7 @@ public class Matrix2Tests
     public void Inverse_SingularMatrix_ReturnsSelf()
     {
         Matrix2 singular = new(1, 2, 2, 4);
-        Matrix2 result = Matrix2.Inverse(ref singular);
+        var result = Matrix2.Inverse(ref singular);
 
         Assert.AreEqual(singular[0, 0], result[0, 0], Delta);
         Assert.AreEqual(singular[1, 1], result[1, 1], Delta);
@@ -271,7 +271,7 @@ public class Matrix2Tests
     public void RotateAroundZ_AppliesRotationToMatrix()
     {
         Matrix2 m = Matrix2.Identity;
-        Matrix2 result = Matrix2.RotateAroundZ(ref m, 90f);
+        var result = Matrix2.RotateAroundZ(ref m, 90f);
         Point p = new(1f, 0f);
         Point transformed = result * p;
 
@@ -285,7 +285,7 @@ public class Matrix2Tests
     public void ScaleAroundOrigin_AppliesScaleToMatrix()
     {
         Matrix2 m = Matrix2.Identity;
-        Matrix2 result = Matrix2.ScaleAroundOrigin(ref m, 2f, 3f);
+        var result = Matrix2.ScaleAroundOrigin(ref m, 2f, 3f);
         Point p = new(1f, 1f);
         Point transformed = result * p;
 

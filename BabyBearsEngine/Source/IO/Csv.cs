@@ -144,7 +144,7 @@ public static class Csv
             return rows;
         }
 
-        List<string> currentRow = new();
+        List<string> currentRow = [];
         StringBuilder field = new();
         bool inQuotes = false;
         int length = csv.Length;
@@ -192,14 +192,14 @@ public static class Csv
                     currentRow.Add(field.ToString());
                     field.Clear();
                     rows.Add(currentRow);
-                    currentRow = new();
+                    currentRow = [];
                 }
                 else if (ch == '\n')
                 {
                     currentRow.Add(field.ToString());
                     field.Clear();
                     rows.Add(currentRow);
-                    currentRow = new();
+                    currentRow = [];
                 }
                 else
                 {
@@ -226,7 +226,7 @@ public static class Csv
         }
 
         int colCount = rows.Max(r => r.Count);
-        T[,] result = new T[rowCount, colCount];
+        var result = new T[rowCount, colCount];
 
         for (int row = 0; row < rowCount; row++)
         {

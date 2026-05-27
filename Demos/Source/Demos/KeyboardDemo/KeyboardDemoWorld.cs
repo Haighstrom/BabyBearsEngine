@@ -41,7 +41,7 @@ internal class KeyboardDemoWorld : DemoWorld
     private static readonly Dictionary<Keys, string> s_keyLabels = BuildKeyLabels();
     private static readonly FontDefinition s_titleFont = new("Times New Roman", 16);
 
-    private readonly Dictionary<Keys, KeyChip> _chips = new();
+    private readonly Dictionary<Keys, KeyChip> _chips = [];
     private readonly TextGraphic[] _eventLabels = new TextGraphic[MaxLogLines];
     private readonly string[] _eventLogLines = new string[MaxLogLines];
     private readonly List<Keys> _keysToRemove = [];

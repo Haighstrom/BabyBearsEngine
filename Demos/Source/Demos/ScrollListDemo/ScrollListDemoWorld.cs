@@ -49,7 +49,7 @@ internal class ScrollListDemoWorld : DemoWorld
             HAlignment = HAlignment.Centred,
         });
 
-        ScrollingListPanelTheme theme = ScrollingListPanelTheme.FromColours(
+        var theme = ScrollingListPanelTheme.FromColours(
             background: new Colour(45, 45, 45),
             track: new Colour(30, 30, 30),
             thumb: new Colour(130, 130, 130));

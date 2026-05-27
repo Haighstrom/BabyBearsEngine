@@ -37,7 +37,7 @@ public sealed class PointShaderProgram : ShaderProgramBase
     public void SetPointSize(float size)
     {
         Bind();
-        var location = GL.GetUniformLocation(Handle, "PointSize");
+        int location = GL.GetUniformLocation(Handle, "PointSize");
         GL.Uniform1(location, size);
     }
 

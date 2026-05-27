@@ -1,4 +1,4 @@
-using BabyBearsEngine.Platform.OpenTK;
+﻿using BabyBearsEngine.Platform.OpenTK;
 
 using OpenTKColor4 = OpenTK.Mathematics.Color4;
 
@@ -253,7 +253,7 @@ public class ColourTests
         foreach (byte v in values)
         {
             Colour original = new(v, v, v, v);
-            Colour roundTripped = original.ToOpenTK().ToColour();
+            var roundTripped = original.ToOpenTK().ToColour();
             Assert.AreEqual(original, roundTripped, $"Round-trip failed for component value {v}.");
         }
     }

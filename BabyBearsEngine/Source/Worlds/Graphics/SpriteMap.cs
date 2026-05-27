@@ -106,7 +106,7 @@ public class SpriteMap(int[,] tiles, float tileW, float tileH, ISpriteTexture te
     private void RebuildVertices()
     {
         Color4 c = _colour.ToOpenTK();
-        Vertex[] vertices = new Vertex[Columns * Rows * 6];
+        var vertices = new Vertex[Columns * Rows * 6];
         int vi = 0;
 
         for (int col = 0; col < Columns; col++)

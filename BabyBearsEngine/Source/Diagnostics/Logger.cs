@@ -251,7 +251,7 @@ public static class Logger
 
     private static string FormatMessage(LogLevel level, string message, string callerFilePath, int callerLineNumber, string callerMemberName)
     {
-        var prefix = string.Empty;
+        string prefix = string.Empty;
 
         if (s_settings.MessageMetadata.HasFlag(LogMetadata.Timestamp))
         {

@@ -1,4 +1,4 @@
-using BabyBearsEngine.Geometry;
+﻿using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Tests.Unit;
 
@@ -184,7 +184,7 @@ public class Point4Tests
     public void ToPoint_ReturnsXY()
     {
         Point4 p = new(3f, 7f, 9f, 1f);
-        Point result = p.ToPoint();
+        var result = p.ToPoint();
 
         Assert.AreEqual(3f, result.X, Delta);
         Assert.AreEqual(7f, result.Y, Delta);
@@ -196,7 +196,7 @@ public class Point4Tests
     public void ToPoint3_ReturnsXYZ()
     {
         Point4 p = new(1f, 2f, 3f, 4f);
-        Point3 result = p.ToPoint3();
+        var result = p.ToPoint3();
 
         Assert.AreEqual(1f, result.X, Delta);
         Assert.AreEqual(2f, result.Y, Delta);
