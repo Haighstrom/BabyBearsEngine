@@ -7,6 +7,7 @@
 /// </summary>
 public class NumTween(double startValue, double endValue, double duration, bool loop = false, Func<double, double>? easing = null) : Tween(duration, loop, easing)
 {
+    private readonly double _startValue = startValue;
     private readonly double _range = endValue - startValue;
 
     /// <summary>The current interpolated value, between <c>startValue</c> and <c>endValue</c>.</summary>
@@ -14,6 +15,6 @@ public class NumTween(double startValue, double endValue, double duration, bool 
 
     protected override void OnProgressUpdated()
     {
-        Value = startValue + _range * Progress;
+        Value = _startValue + _range * Progress;
     }
 }

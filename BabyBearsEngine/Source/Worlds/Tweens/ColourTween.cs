@@ -8,12 +8,14 @@
 /// </summary>
 public class ColourTween(Colour from, Colour to, double duration, bool loop = false, Func<double, double>? easing = null) : Tween(duration, loop, easing)
 {
+    private readonly Colour _from = from;
+    private readonly Colour _to = to;
 
     /// <summary>The current interpolated colour.</summary>
     public Colour Value { get; private set; } = from;
 
     protected override void OnProgressUpdated()
     {
-        Value = Colour.Lerp(from, to, Progress);
+        Value = Colour.Lerp(_from, _to, Progress);
     }
 }
