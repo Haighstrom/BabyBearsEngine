@@ -1,3 +1,5 @@
+﻿using OpenTK.Graphics.OpenGL4;
+
 namespace BabyBearsEngine.Platform.OpenTK;
 
 internal sealed class OpenTKScreenCaptureAdapter(OpenTKGameEngine engine) : IScreenCapture

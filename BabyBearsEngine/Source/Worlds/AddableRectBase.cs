@@ -1,6 +1,4 @@
-using BabyBearsEngine.Geometry;
-
-namespace BabyBearsEngine.Worlds;
+﻿namespace BabyBearsEngine.Worlds;
 
 /// <summary>
 /// Default <see cref="IRectAddable"/> implementation — combines the parent-tracking plumbing

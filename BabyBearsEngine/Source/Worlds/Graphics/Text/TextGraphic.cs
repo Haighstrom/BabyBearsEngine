@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
-using BabyBearsEngine.Diagnostics;
-using BabyBearsEngine.Worlds.Graphics;
+﻿using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Platform.OpenGL.Buffers;
 using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
-using BabyBearsEngine.Worlds;
 using BabyBearsEngine.Worlds.Cameras;
 using BabyBearsEngine.Worlds.UI.Themes;
+using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 

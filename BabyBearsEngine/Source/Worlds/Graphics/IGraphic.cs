@@ -1,7 +1,4 @@
-﻿using System;
-using BabyBearsEngine.Worlds;
-
-namespace BabyBearsEngine.Worlds.Graphics;
+﻿namespace BabyBearsEngine.Worlds.Graphics;
 
 /// <summary>
 /// A renderable, layered, rectangular thing that can be tinted via a <see cref="Colour"/>.

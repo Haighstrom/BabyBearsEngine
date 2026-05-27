@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace BabyBearsEngine.Input;
+﻿namespace BabyBearsEngine.Input;
 
 /// <summary>
 /// Per-frame keyboard input snapshot. Methods report state as of the current frame:

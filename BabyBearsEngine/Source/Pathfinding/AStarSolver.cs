@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace BabyBearsEngine.Pathfinding;
+﻿namespace BabyBearsEngine.Pathfinding;
 
 /// <summary>
 /// A* graph-search solver. Finds the lowest-cost path from <c>start</c> to <c>end</c>

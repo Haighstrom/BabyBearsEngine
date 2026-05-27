@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;

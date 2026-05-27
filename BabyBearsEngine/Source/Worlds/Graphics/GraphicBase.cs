@@ -1,5 +1,4 @@
 ﻿using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Worlds.Graphics;
 

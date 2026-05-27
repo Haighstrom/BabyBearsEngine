@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace BabyBearsEngine.Input;
+﻿namespace BabyBearsEngine.Input;
 
 /// <summary>
 /// Static facade over the installed <see cref="IMouse"/> service. All members route through

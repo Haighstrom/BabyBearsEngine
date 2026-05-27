@@ -2,6 +2,7 @@
 using Matrix3 = BabyBearsEngine.Geometry.Matrix3;
 using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using OpenTK.Mathematics;
+using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.Platform.OpenGL.Rendering;
 

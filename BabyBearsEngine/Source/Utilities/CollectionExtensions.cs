@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace BabyBearsEngine;
+﻿namespace BabyBearsEngine;
 
 public static class CollectionExtensions
 {

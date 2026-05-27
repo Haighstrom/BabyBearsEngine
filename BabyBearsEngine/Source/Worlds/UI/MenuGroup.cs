@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace BabyBearsEngine.Worlds.UI;
+﻿namespace BabyBearsEngine.Worlds.UI;
 
 /// <summary>
 /// Coordinates a set of <see cref="IMenu"/> instances so that at most one is open at a time.

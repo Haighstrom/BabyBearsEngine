@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-using BabyBearsEngine.Input;
+﻿using BabyBearsEngine.Input;
 
 using OpenTKKeyboardState = OpenTK.Windowing.GraphicsLibraryFramework.KeyboardState;
 

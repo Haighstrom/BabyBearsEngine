@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.OpenGL;

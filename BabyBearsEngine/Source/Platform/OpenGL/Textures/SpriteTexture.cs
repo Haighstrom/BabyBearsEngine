@@ -1,3 +1,5 @@
+﻿using OpenTK.Graphics.OpenGL4;
+
 namespace BabyBearsEngine.OpenGL;
 
 internal sealed class SpriteTexture(ITexture inner, int columns, int rows, int padding) : ISpriteTexture

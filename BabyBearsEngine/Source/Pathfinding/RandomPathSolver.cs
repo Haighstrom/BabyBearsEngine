@@ -1,7 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-
-namespace BabyBearsEngine.Pathfinding;
+﻿namespace BabyBearsEngine.Pathfinding;
 
 /// <summary>
 /// Builds a random walk from <c>start</c> by repeatedly picking a passable neighbour until

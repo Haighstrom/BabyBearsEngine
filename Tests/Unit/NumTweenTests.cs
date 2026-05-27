@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using BabyBearsEngine.Worlds;
+﻿using BabyBearsEngine.Worlds;
 using BabyBearsEngine.Worlds.Tweens;
 
 namespace BabyBearsEngine.Tests.Unit;

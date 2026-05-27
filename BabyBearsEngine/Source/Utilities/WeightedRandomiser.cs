@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace BabyBearsEngine;
+﻿namespace BabyBearsEngine;
 
 /// <summary>
 /// Selects randomly from a set of items where each item carries a relative weight.

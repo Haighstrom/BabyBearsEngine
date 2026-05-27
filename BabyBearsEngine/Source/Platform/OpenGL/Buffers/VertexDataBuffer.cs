@@ -1,4 +1,6 @@
-﻿namespace BabyBearsEngine.OpenGL;
+﻿using OpenTK.Graphics.OpenGL4;
+
+namespace BabyBearsEngine.OpenGL;
 
 /// <summary>
 /// Wraps a VAO and VBO, and sets up the vertex attributes for a given vertex type.

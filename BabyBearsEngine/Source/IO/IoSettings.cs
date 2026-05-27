@@ -1,6 +1,4 @@
-using System;
-
-namespace BabyBearsEngine.IO;
+﻿namespace BabyBearsEngine.IO;
 
 /// <summary>
 /// Configuration for file IO operations. Set <see cref="Files.Settings"/> at startup to override defaults.

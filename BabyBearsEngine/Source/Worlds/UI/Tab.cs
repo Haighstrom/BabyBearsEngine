@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Collections.ObjectModel;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Worlds.Graphics.Text;

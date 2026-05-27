@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-using BabyBearsEngine.Geometry;
+﻿using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenGL.Rendering;
 

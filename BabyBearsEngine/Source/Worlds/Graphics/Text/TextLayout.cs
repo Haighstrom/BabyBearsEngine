@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace BabyBearsEngine.Worlds.Graphics.Text;
+﻿namespace BabyBearsEngine.Worlds.Graphics.Text;
 
 internal static class TextLayout
 {

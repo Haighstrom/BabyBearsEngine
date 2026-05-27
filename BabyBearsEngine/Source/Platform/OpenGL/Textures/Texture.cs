@@ -1,4 +1,6 @@
-﻿namespace BabyBearsEngine.OpenGL;
+﻿using OpenTK.Graphics.OpenGL4;
+
+namespace BabyBearsEngine.OpenGL;
 
 internal class Texture(int handle, int width, int height) : ITexture, IDisposable
 {

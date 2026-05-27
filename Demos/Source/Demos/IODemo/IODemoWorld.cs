@@ -1,7 +1,6 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
-using BabyBearsEngine.Demos.Source;
 using BabyBearsEngine.IO;
 using BabyBearsEngine.Worlds.Graphics.Text;
 

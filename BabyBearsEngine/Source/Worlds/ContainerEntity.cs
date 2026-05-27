@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using BabyBearsEngine.Worlds.Graphics;
-using BabyBearsEngine.Geometry;
+﻿using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Worlds;
 

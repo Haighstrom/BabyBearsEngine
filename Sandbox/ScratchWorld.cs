@@ -1,5 +1,4 @@
-using BabyBearsEngine.Worlds.Graphics;
-using BabyBearsEngine.Worlds.Graphics.Text;
+﻿using BabyBearsEngine.Worlds.Graphics.Text;
 
 namespace BabyBearsEngine.Sandbox;
 

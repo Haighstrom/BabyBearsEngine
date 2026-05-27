@@ -1,2 +1,3 @@
 ﻿global using System;
-global using OpenTK.Graphics.OpenGL4;
+global using System.Collections.Generic;
+global using System.Linq;

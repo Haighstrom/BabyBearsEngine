@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace BabyBearsEngine.Pathfinding;
+﻿namespace BabyBearsEngine.Pathfinding;
 
 /// <summary>
 /// Reconstructs the path produced by a graph-search algorithm. Assumes each node's

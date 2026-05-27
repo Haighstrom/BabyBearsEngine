@@ -1,6 +1,5 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using BabyBearsEngine.Demos.Source;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds.Graphics.Text;
 

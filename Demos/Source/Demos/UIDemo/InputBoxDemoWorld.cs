@@ -1,10 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using BabyBearsEngine.Demos.Source;
-using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Worlds.Graphics.Text;
-using BabyBearsEngine.Worlds.UI;
-using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Demos.Source.Demos.UIDemo;
 

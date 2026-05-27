@@ -1,8 +1,5 @@
-using System;
-using BabyBearsEngine.Demos.Source;
-using BabyBearsEngine.Worlds.Graphics;
+﻿using System;
 using BabyBearsEngine.Worlds.Graphics.Text;
-using BabyBearsEngine.Worlds.UI;
 
 namespace BabyBearsEngine.Demos.Source.Demos.UIDemo;
 

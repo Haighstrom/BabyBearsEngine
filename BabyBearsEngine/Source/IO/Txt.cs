@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace BabyBearsEngine.IO;
+﻿namespace BabyBearsEngine.IO;
 
 /// <summary>
 /// Static facade for plain-text serialization. Provided for API symmetry with

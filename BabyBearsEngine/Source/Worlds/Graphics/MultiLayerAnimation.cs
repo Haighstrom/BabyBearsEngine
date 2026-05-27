@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Platform.OpenGL.Rendering;
+﻿using BabyBearsEngine.OpenGL;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using Matrix3 = BabyBearsEngine.Geometry.Matrix3;
 

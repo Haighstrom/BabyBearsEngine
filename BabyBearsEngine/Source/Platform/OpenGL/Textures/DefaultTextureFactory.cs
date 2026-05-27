@@ -1,4 +1,5 @@
 ﻿using BabyBearsEngine.Platform.ImageLoading;
+using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
 

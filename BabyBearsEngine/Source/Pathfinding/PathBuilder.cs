@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace BabyBearsEngine.Pathfinding;
+﻿namespace BabyBearsEngine.Pathfinding;
 
 /// <summary>
 /// Default <see cref="IPathBuilder{TNode}"/>: walks <see cref="IPathfindNode{TNode}.ParentNode"/>

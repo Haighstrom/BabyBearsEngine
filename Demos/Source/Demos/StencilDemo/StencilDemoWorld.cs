@@ -1,5 +1,4 @@
-using System;
-using BabyBearsEngine.Demos.Source;
+﻿using System;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Worlds.Graphics.Text;
 

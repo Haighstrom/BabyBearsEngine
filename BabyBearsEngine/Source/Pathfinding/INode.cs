@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace BabyBearsEngine.Pathfinding;
+﻿namespace BabyBearsEngine.Pathfinding;
 
 /// <summary>
 /// A node in a graph: equatable to its own concrete type and knows which other nodes

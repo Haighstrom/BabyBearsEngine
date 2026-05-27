@@ -1,6 +1,4 @@
-using BabyBearsEngine.Diagnostics;
-
-namespace BabyBearsEngine;
+﻿namespace BabyBearsEngine;
 
 /// <summary>
 /// Settings for diagnostic and testing features. None of these should be enabled in production —

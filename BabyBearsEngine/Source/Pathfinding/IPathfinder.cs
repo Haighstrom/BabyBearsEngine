@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace BabyBearsEngine.Pathfinding;
+﻿namespace BabyBearsEngine.Pathfinding;
 
 /// <summary>
 /// High-level pathfinder over a node graph. Wraps the underlying <see cref="IPathSolver{TNode}"/>

@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using BabyBearsEngine.Diagnostics;
+﻿using BabyBearsEngine.Diagnostics;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 

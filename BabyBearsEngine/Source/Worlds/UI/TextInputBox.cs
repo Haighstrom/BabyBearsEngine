@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using BabyBearsEngine.Geometry;
+﻿using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Input;
 using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Worlds.Graphics.Text;

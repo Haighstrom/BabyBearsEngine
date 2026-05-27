@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using BabyBearsEngine.Tasks;
+﻿using BabyBearsEngine.Tasks;
 
 namespace BabyBearsEngine.Tests.Unit;
 

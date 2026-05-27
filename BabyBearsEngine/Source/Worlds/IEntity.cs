@@ -1,6 +1,4 @@
-﻿using BabyBearsEngine.Worlds.Graphics;
-
-namespace BabyBearsEngine.Worlds;
+﻿namespace BabyBearsEngine.Worlds;
 
 /// <summary>
 /// The full entity contract. An entity is a layered, rectangular, addable thing that updates

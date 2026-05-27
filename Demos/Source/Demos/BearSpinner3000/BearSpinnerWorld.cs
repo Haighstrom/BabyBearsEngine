@@ -1,5 +1,4 @@
-using System;
-using BabyBearsEngine.Demos.Source;
+﻿using System;
 
 namespace BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
 

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using BabyBearsEngine.OpenGL;
+﻿using BabyBearsEngine.OpenGL;
 
 namespace BabyBearsEngine.Worlds.Graphics;
 

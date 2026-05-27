@@ -1,6 +1,4 @@
-using System;
-using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Worlds.Graphics;
+﻿using System;
 
 namespace BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
 

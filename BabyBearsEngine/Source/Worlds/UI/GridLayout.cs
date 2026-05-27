@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace BabyBearsEngine.Worlds.UI;
+﻿namespace BabyBearsEngine.Worlds.UI;
 
 /// <summary>
 /// A container entity that arranges children in a fixed grid of rows and columns.

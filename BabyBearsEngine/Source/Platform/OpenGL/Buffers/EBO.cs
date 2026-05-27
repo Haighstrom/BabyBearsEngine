@@ -1,4 +1,6 @@
-﻿namespace BabyBearsEngine.OpenGL;
+﻿using OpenTK.Graphics.OpenGL4;
+
+namespace BabyBearsEngine.OpenGL;
 
 public sealed class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw) : IDisposable
 {

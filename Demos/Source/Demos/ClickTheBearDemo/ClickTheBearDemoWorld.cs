@@ -1,5 +1,4 @@
 ﻿using System;
-using BabyBearsEngine.Worlds.Graphics;
 
 namespace BabyBearsEngine.Demos.Source.Demos.ClickTheBearDemo;
 

@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenTK;
@@ -6,6 +6,7 @@ using BabyBearsEngine.GameEngine;
 using BabyBearsEngine.Worlds;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine;
 

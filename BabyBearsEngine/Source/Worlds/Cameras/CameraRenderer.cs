@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using BabyBearsEngine.Diagnostics;
+﻿using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenGL.Buffers;
+using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.Worlds.Cameras;
 

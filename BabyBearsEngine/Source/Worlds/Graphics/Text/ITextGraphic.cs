@@ -1,7 +1,5 @@
 ﻿using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Worlds;
 using BabyBearsEngine.Worlds.Cameras;
-using BabyBearsEngine.Worlds.Graphics;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 

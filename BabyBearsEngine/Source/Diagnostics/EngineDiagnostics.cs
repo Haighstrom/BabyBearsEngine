@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Desktop;
 
 namespace BabyBearsEngine.Diagnostics;
