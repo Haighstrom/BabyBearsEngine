@@ -9,8 +9,10 @@ internal class TypewriterDemoWorld : DemoWorld
     private const int BoxW = 640;
     private const int BoxX = 80;
     private const int BoxY = 90;
+    // Coordinates for in-box text and graphics are relative to the dialogue box's origin —
+    // they are added as children of the box, so Entity.Render translates them automatically.
     private const int ContinueHintH = 22;
-    private const int ContinueHintY = BoxY + BoxH - Padding - ContinueHintH;
+    private const int ContinueHintY = BoxH - Padding - ContinueHintH;
     private const int ControlsY = BoxY + BoxH + 25;
     private const int DecreaseSpeedX = 225;
     private const int DialogueH = ContinueHintY - DialogueY - Padding;
@@ -18,12 +20,12 @@ internal class TypewriterDemoWorld : DemoWorld
     private const int FastButtonX = IncreaseSpeedX + 40 + 10;
     private const int IncreaseSpeedX = SpeedLabelX + 120 + 5;
     private const int NameH = 22;
-    private const int NameY = BoxY + Padding;
+    private const int NameY = Padding;
     private const int Padding = 10;
     private const int PortraitW = 100;
     private const int SpeedLabelX = DecreaseSpeedX + 40 + 5;
     private const int TextW = BoxW - PortraitW - Padding * 2;
-    private const int TextX = BoxX + PortraitW + Padding;
+    private const int TextX = PortraitW + Padding;
 
     private static readonly float[] s_speeds = [5f, 15f, 30f, 60f];
     private static readonly string[] s_speedLabels = ["Slow", "Normal", "Fast", "Very Fast"];
@@ -63,7 +65,6 @@ internal class TypewriterDemoWorld : DemoWorld
         dialogueBox.Add(new ColourGraphic(new Colour(250, 245, 230), 0, 0, BoxW, BoxH));
         dialogueBox.Add(new ColourGraphic(new Colour(140, 120, 100), 0, 0, PortraitW, BoxH));
         dialogueBox.LeftClicked += OnDialogueClicked;
-        Add(dialogueBox);
 
         _speakerLabel = new TextGraphic(
             new FontDefinition("Times New Roman", 12),
@@ -73,7 +74,7 @@ internal class TypewriterDemoWorld : DemoWorld
             HAlignment = HAlignment.Left,
             VAlignment = VAlignment.Centred,
         };
-        Add(_speakerLabel);
+        dialogueBox.Add(_speakerLabel);
 
         _dialogueText = new TextGraphic(
             new FontDefinition("Times New Roman", 14),
@@ -85,7 +86,7 @@ internal class TypewriterDemoWorld : DemoWorld
             VAlignment = VAlignment.Top,
             NumCharsToDraw = 0,
         };
-        Add(_dialogueText);
+        dialogueBox.Add(_dialogueText);
 
         _continueHint = new TextGraphic(
             new FontDefinition("Times New Roman", 12),
@@ -95,7 +96,9 @@ internal class TypewriterDemoWorld : DemoWorld
             HAlignment = HAlignment.Right,
             VAlignment = VAlignment.Centred,
         };
-        Add(_continueHint);
+        dialogueBox.Add(_continueHint);
+
+        Add(dialogueBox);
 
         _speedLabel = new TextGraphic(
             new FontDefinition("Times New Roman", 13),
