@@ -169,11 +169,12 @@ internal static class EngineConfiguration
         s_gpuResourceDeletionService = gpuResourceDeletion ?? new DefaultGPUResourceDeletionService();
         s_textureFactory = textureFactory ?? new DefaultTextureFactory();
 
-        // Register both built-in backends so any FontDefinition can pin either one regardless of
-        // the chosen default. A caller-supplied generator overrides the built-in for the default
+        // Register every built-in backend so any FontDefinition can pin one regardless of the
+        // chosen default. A caller-supplied generator overrides the built-in for the default
         // backend (a test/customisation seam).
         s_atlasGenerators[TextRenderer.Gdi] = new GdiFontAtlasGenerator();
         s_atlasGenerators[TextRenderer.Sdf] = new SdfFontAtlasGenerator();
+        s_atlasGenerators[TextRenderer.FreeType] = new FreeTypeFontAtlasGenerator();
 
         if (atlasGenerator is not null)
         {

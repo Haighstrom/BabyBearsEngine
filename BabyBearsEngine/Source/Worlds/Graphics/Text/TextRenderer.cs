@@ -22,4 +22,14 @@ public enum TextRenderer
     /// <c>Assets/Fonts/</c> named to match the <see cref="FontDefinition.FontName"/>.
     /// </summary>
     Sdf,
+
+    /// <summary>
+    /// Grayscale coverage rasterisation via FreeType (light autohinting). Glyphs are
+    /// rendered at the font's chosen pixel size into a single-channel coverage atlas,
+    /// hinted so small text stays crisp — the cross-platform counterpart to the GDI+
+    /// backend. Like SDF it needs the font shipped as a <c>.ttf</c> file in
+    /// <c>Assets/Fonts/</c> named to match the <see cref="FontDefinition.FontName"/>.
+    /// Best for fixed-size UI text; use <see cref="Sdf"/> for scalable/world text.
+    /// </summary>
+    FreeType,
 }

@@ -4,11 +4,12 @@ using BabyBearsEngine.Worlds.Graphics.Text;
 namespace BabyBearsEngine.Demos.Source.Demos.TextDemo;
 
 /// <summary>
-/// Visual comparison of the two text backends side by side. Each row renders the same sample at
-/// the same size with GDI+ (left) and SDF (right), so the trade-off is easy to see by eye: GDI is
-/// crisp at small fixed sizes (hinted), while SDF is softer when small but scales cleanly. The
-/// columns are driven entirely by <see cref="FontDefinition.Renderer"/>, demonstrating the hybrid
-/// per-font backend selection — one world, both backends at once.
+/// Visual comparison of the three text backends side by side. Each row renders the same sample at
+/// the same size with GDI+ (left), FreeType (middle) and SDF (right), so the trade-offs are easy to
+/// see by eye: GDI and FreeType are both crisp at small fixed sizes (hinted) — GDI is Windows-only,
+/// FreeType is the cross-platform counterpart — while SDF is softer when small but scales cleanly.
+/// The columns are driven entirely by <see cref="FontDefinition.Renderer"/>, demonstrating the
+/// hybrid per-font backend selection — one world, all three backends at once.
 /// </summary>
 internal class TextRenderingQualityDemoWorld : DemoWorld
 {
@@ -22,14 +23,17 @@ internal class TextRenderingQualityDemoWorld : DemoWorld
         (20, "20pt"),
     ];
 
-    private const string SampleText = "Quick brown fox 0123";
+    // Short enough to fit a single narrow column at the largest size, while still exercising
+    // lower-case, upper-case and digit glyphs.
+    private const string SampleText = "Quick fox 0123";
     private const string FontName = "Arial";
 
-    private const int LabelX = 10;
-    private const int LabelWidth = 34;
-    private const int GdiColumnX = 48;
-    private const int SdfColumnX = 412;
-    private const int ColumnWidth = 360;
+    private const int LabelX = 6;
+    private const int LabelWidth = 30;
+    private const int GdiColumnX = 40;
+    private const int FreeTypeColumnX = 292;
+    private const int SdfColumnX = 544;
+    private const int ColumnWidth = 244;
     private const int RowHeight = 36;
     private const int HeaderRowHeight = 26;
 
@@ -45,7 +49,7 @@ internal class TextRenderingQualityDemoWorld : DemoWorld
 
         Add(new TextGraphic(
             GdiFont(11),
-            "Hybrid text backends — GDI (left, hinted) vs SDF (right, scalable), same sizes",
+            "Hybrid text backends — GDI & FreeType (hinted) vs SDF (scalable), same sizes",
             Colour.Black, 10, 8, 780, 20)
         {
             HAlignment = HAlignment.Left,
@@ -74,6 +78,12 @@ internal class TextRenderingQualityDemoWorld : DemoWorld
             VAlignment = VAlignment.Centred,
         });
 
+        Add(new TextGraphic(GdiFont(12), "FreeType — hinted", labelColour, FreeTypeColumnX, top, ColumnWidth, 20)
+        {
+            HAlignment = HAlignment.Left,
+            VAlignment = VAlignment.Centred,
+        });
+
         Add(new TextGraphic(GdiFont(12), "SDF — scalable", labelColour, SdfColumnX, top, ColumnWidth, 20)
         {
             HAlignment = HAlignment.Left,
@@ -96,6 +106,14 @@ internal class TextRenderingQualityDemoWorld : DemoWorld
             Add(new TextGraphic(
                 new FontDefinition(FontName, size, Renderer: TextRenderer.Gdi),
                 SampleText, sampleColour, GdiColumnX, rowY, ColumnWidth, RowHeight)
+            {
+                HAlignment = HAlignment.Left,
+                VAlignment = VAlignment.Centred,
+            });
+
+            Add(new TextGraphic(
+                new FontDefinition(FontName, size, Renderer: TextRenderer.FreeType),
+                SampleText, sampleColour, FreeTypeColumnX, rowY, ColumnWidth, RowHeight)
             {
                 HAlignment = HAlignment.Left,
                 VAlignment = VAlignment.Centred,

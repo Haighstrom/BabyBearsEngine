@@ -14,7 +14,7 @@ namespace BabyBearsEngine.Worlds.Graphics.Text;
 /// TrueType file with stb_truetype. Each glyph cell stores distance-to-outline rather than
 /// coverage, so the paired <see cref="SdfTextShaderProgram"/> can reconstruct a crisp,
 /// antialiased edge at any scale. Cross-platform (pure-managed stb_truetype); unlike the GDI+
-/// generator it needs the font as a shipped <c>.ttf</c> file (see <see cref="SdfFontFileResolver"/>).
+/// generator it needs the font as a shipped <c>.ttf</c> file (see <see cref="TrueTypeFontFileResolver"/>).
 /// </summary>
 internal sealed class SdfFontAtlasGenerator : IFontAtlasGenerator
 {
@@ -57,7 +57,7 @@ internal sealed class SdfFontAtlasGenerator : IFontAtlasGenerator
     /// </summary>
     internal (byte[] Pixels, int Width, int Height, FontAtlasMetrics Metrics) RasteriseAtlas(FontDefinition fontDef)
     {
-        string fontPath = SdfFontFileResolver.Resolve(fontDef.FontName);
+        string fontPath = TrueTypeFontFileResolver.Resolve(fontDef.FontName);
         byte[] fontData = File.ReadAllBytes(fontPath);
         StbTrueType.stbtt_fontinfo font = StbTrueType.CreateFont(fontData, 0)
             ?? throw new InvalidOperationException($"Failed to load font '{fontDef.FontName}' from '{fontPath}'.");
