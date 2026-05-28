@@ -1,18 +1,47 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
+using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 
-internal sealed class FontBitmapGenerator() : IFontBitmapGenerator
+/// <summary>
+/// Produces a font atlas by rasterising glyphs with GDI+ at the font's chosen pixel
+/// size. Encodes coverage (alpha) into the texture and pairs it with the standard
+/// matrix shader. Windows-only; the GDI+ APIs it uses are not available on other
+/// platforms.
+/// </summary>
+internal sealed class GdiFontAtlasGenerator : IFontAtlasGenerator
 {
+    // Layout choice — number of glyph columns in the atlas spritesheet. Internal
+    // to the GDI+ path; other generators may lay glyphs out differently.
+    private const int CharactersPerRow = 13;
+
     private readonly CharacterBitmapGenerator _charBitmapGenerator = new();
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
-    public (Bitmap Bitmap, FontAtlasMetrics Metrics) GenerateCharSpritesheetAndPositions(Font font, string charsToLoad, bool antiAliased, int charactersPerRow)
+    public FontAtlas Generate(FontDefinition fontDef)
     {
+        (Bitmap bitmap, FontAtlasMetrics metrics) = RasteriseAtlas(fontDef);
+        ITexture texture = new DefaultTextureFactory().GenTexture(bitmap);
+        IMatrixShaderProgram shader = new StandardMatrixShaderProgram();
+        return new FontAtlas(metrics, texture, shader);
+    }
+
+    /// <summary>
+    /// Builds the GDI+ bitmap atlas and computes per-glyph metrics, without touching
+    /// GL. Exposed as <c>internal</c> so benchmarks/tests that don't have a GL context
+    /// can measure the pure-CPU rasterisation step.
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "GDI+ is Windows-only by design.")]
+    internal (Bitmap Bitmap, FontAtlasMetrics Metrics) RasteriseAtlas(FontDefinition fontDef)
+    {
+        Font font = new FontLoader().LoadFont(fontDef);
+        string charsToLoad = fontDef.CharactersToLoad;
+        bool antiAliased = fontDef.AntiAliased;
+
         int widestChar = 0;
         int highestChar = 0;
 
@@ -35,8 +64,8 @@ internal sealed class FontBitmapGenerator() : IFontBitmapGenerator
             characterBMPs.Add(b);
         }
 
-        int spriteSheetWidth = charactersPerRow * widestChar;
-        int spriteSheetHeight = (int)Math.Ceiling((float)characterBMPs.Count / charactersPerRow) * highestChar;
+        int spriteSheetWidth = CharactersPerRow * widestChar;
+        int spriteSheetHeight = (int)Math.Ceiling((float)characterBMPs.Count / CharactersPerRow) * highestChar;
 
         Bitmap characterSS = new(spriteSheetWidth, spriteSheetHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         var g = System.Drawing.Graphics.FromImage(characterSS);
@@ -50,8 +79,8 @@ internal sealed class FontBitmapGenerator() : IFontBitmapGenerator
 
         foreach (char c in charsToLoad)
         {
-            posX = j % charactersPerRow * widestChar;
-            posY = j / charactersPerRow * highestChar;
+            posX = j % CharactersPerRow * widestChar;
+            posY = j / CharactersPerRow * highestChar;
 
             var charRect = new Box2i(posX, posY, posX + characterBMPs[j].Width, posY + highestChar);
             charPositions.Add(c, charRect);

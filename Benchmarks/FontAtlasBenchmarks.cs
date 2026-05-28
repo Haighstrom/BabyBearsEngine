@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Drawing;
 using BenchmarkDotNet.Attributes;
 using BabyBearsEngine.Worlds.Graphics.Text;
 
@@ -11,27 +10,25 @@ public class FontAtlasBenchmarks
 {
     private readonly Dictionary<FontDefinition, FontAtlasMetrics> _cache = [];
     private FontAtlasMetrics _cachedMetrics = null!;
-    private Font _font = null!;
     private FontDefinition _fontDef = null!;
+    private GdiFontAtlasGenerator _generator = null!;
 
     [GlobalSetup]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Windows-only benchmark.")]
     public void Setup()
     {
         _fontDef = new FontDefinition("Arial", 16);
-        _font = new FontLoader().LoadFont(_fontDef);
-        (_, _cachedMetrics) = new FontBitmapGenerator().GenerateCharSpritesheetAndPositions(
-            _font, _fontDef.CharactersToLoad, _fontDef.AntiAliased, 13);
+        _generator = new GdiFontAtlasGenerator();
+        (_, _cachedMetrics) = _generator.RasteriseAtlas(_fontDef);
         _cache[_fontDef] = _cachedMetrics;
     }
 
-    // Measures the GDI+ atlas generation — the hot path before caching.
+    // Measures the GDI+ rasterisation step — the CPU hot path before caching. Uses
+    // RasteriseAtlas rather than the public IFontAtlasGenerator.Generate, because
+    // Generate also creates a GL texture which requires an active OpenGL context.
     [Benchmark]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Windows-only benchmark.")]
     public int GenerateAtlas_Uncached()
     {
-        return new FontBitmapGenerator().GenerateCharSpritesheetAndPositions(
-            _font, _fontDef.CharactersToLoad, _fontDef.AntiAliased, 13).Metrics.HighestChar;
+        return _generator.RasteriseAtlas(_fontDef).Metrics.HighestChar;
     }
 
     // Measures the cached path — a plain dictionary lookup.

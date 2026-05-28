@@ -50,7 +50,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         _textToDisplay = NormalizeNewlines(textToDisplay);
         _colour = colour;
 
-        CachedFontAtlas atlas = FontTextureCache.GetOrCreate(fontDef);
+        FontAtlas atlas = FontTextureCache.GetOrCreate(fontDef);
         _fontDef = fontDef;
         _metrics = atlas.Metrics;
         _texture = atlas.Texture;
@@ -159,7 +159,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         get => _fontDef;
         set
         {
-            CachedFontAtlas atlas = FontTextureCache.GetOrCreate(value);
+            FontAtlas atlas = FontTextureCache.GetOrCreate(value);
             _fontDef = value;
             _metrics = atlas.Metrics;
             _texture = atlas.Texture;
