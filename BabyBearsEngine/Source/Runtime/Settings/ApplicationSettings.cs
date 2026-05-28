@@ -35,6 +35,9 @@ public record class ApplicationSettings()
     /// </summary>
     public MsaaSamples DefaultCameraMsaa { get; init; } = MsaaSamples.Disabled;
 
+    /// <summary>Configuration for the text subsystem: which atlas backend to use.</summary>
+    public TextSettings TextSettings { get; init; } = TextSettings.Default;
+
     /// <summary>Configuration for the game window: size, title, border style, cursor, VSync, and OpenGL version.</summary>
     public WindowSettings WindowSettings { get; init; } = WindowSettings.Default;
 }

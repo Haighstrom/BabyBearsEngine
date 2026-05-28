@@ -3,30 +3,12 @@ namespace BabyBearsEngine.Worlds.Graphics.Text;
 /// <summary>
 /// Memoises <see cref="FontAtlas"/> instances by <see cref="FontDefinition"/>, so each
 /// font is generated and uploaded to the GPU only once across the lifetime of the
-/// application. Atlas generation itself is delegated to <see cref="Generator"/>.
+/// application. The atlas generator itself is configured via
+/// <see cref="EngineConfiguration.AtlasGenerator"/>; this class only handles caching.
 /// </summary>
 internal static class FontTextureCache
 {
     private static readonly Dictionary<FontDefinition, FontAtlas> s_cache = [];
-    private static IFontAtlasGenerator s_generator = new GdiFontAtlasGenerator();
-
-    /// <summary>
-    /// The atlas generator used to build new <see cref="FontAtlas"/>es. Defaults to
-    /// <see cref="GdiFontAtlasGenerator"/>. Set this at startup — before any text is
-    /// rendered — to switch the atlas backend (for example to an SDF-based generator).
-    /// Assigning a new generator invalidates any cached atlases, because cached entries
-    /// are tied to the previous generator's texture format and paired shader.
-    /// </summary>
-    internal static IFontAtlasGenerator Generator
-    {
-        get => s_generator;
-        set
-        {
-            ArgumentNullException.ThrowIfNull(value);
-            s_generator = value;
-            s_cache.Clear();
-        }
-    }
 
     internal static FontAtlas GetOrCreate(FontDefinition fontDefinition)
     {
@@ -35,18 +17,15 @@ internal static class FontTextureCache
             return existing;
         }
 
-        FontAtlas atlas = s_generator.Generate(fontDefinition);
+        FontAtlas atlas = EngineConfiguration.AtlasGenerator.Generate(fontDefinition);
         s_cache[fontDefinition] = atlas;
         return atlas;
     }
 
     /// <summary>
-    /// Restore the default generator and clear the cache. A test seam — production
-    /// code should not call this.
+    /// Drops all cached atlases. Called by <see cref="EngineConfiguration"/> when the
+    /// generator changes or the engine is reset — cached entries reference the old
+    /// generator's GL texture and shader, so they cannot survive a backend swap.
     /// </summary>
-    internal static void Reset()
-    {
-        s_generator = new GdiFontAtlasGenerator();
-        s_cache.Clear();
-    }
+    internal static void InvalidateCache() => s_cache.Clear();
 }

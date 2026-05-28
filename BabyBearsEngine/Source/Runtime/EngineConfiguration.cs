@@ -1,6 +1,7 @@
 using BabyBearsEngine.Input;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Worlds;
+using BabyBearsEngine.Worlds.Graphics.Text;
 
 namespace BabyBearsEngine;
 
@@ -14,6 +15,7 @@ internal static class EngineConfiguration
     private const string ScreenCaptureNotEnabledMessage = "Screen capture is not enabled. Set ApplicationSettings.DiagnosticsSettings.CaptureFrames = true to enable.";
 
     private static IEngineInfo? s_engineInfo = null;
+    private static IFontAtlasGenerator? s_atlasGenerator = null;
     private static IGPUResourceDeletionService? s_gpuResourceDeletionService = null;
     private static IKeyboard? s_keyboard = null;
     private static IMouse? s_mouse = null;
@@ -28,6 +30,19 @@ internal static class EngineConfiguration
     /// <see cref="ApplicationSettings.DefaultCameraMsaa"/> before the engine starts.
     /// </summary>
     public static MsaaSamples DefaultCameraMsaa { get; set; } = MsaaSamples.Disabled;
+
+    public static IFontAtlasGenerator AtlasGenerator
+    {
+        get => s_atlasGenerator ?? throw new InvalidOperationException(NotInitialisedMessage);
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            s_atlasGenerator = value;
+            // Cached atlases are tied to the previous generator's texture format and shader.
+            // Drop them so the next access rebuilds via the new generator.
+            FontTextureCache.InvalidateCache();
+        }
+    }
 
     public static IEngineInfo EngineInfo
     {
@@ -85,7 +100,8 @@ internal static class EngineConfiguration
         IEngineInfo engineInfo,
         IScreenCapture? screenCapture,
         IGPUResourceDeletionService? gpuResourceDeletion = null,
-        ITextureFactory? textureFactory = null)
+        ITextureFactory? textureFactory = null,
+        IFontAtlasGenerator? atlasGenerator = null)
     {
         ArgumentNullException.ThrowIfNull(window, nameof(window));
         ArgumentNullException.ThrowIfNull(keyboard, nameof(keyboard));
@@ -100,7 +116,8 @@ internal static class EngineConfiguration
             || s_engineInfo is not null
             || s_screenCapture is not null
             || s_gpuResourceDeletionService is not null
-            || s_textureFactory is not null)
+            || s_textureFactory is not null
+            || s_atlasGenerator is not null)
         {
             throw new InvalidOperationException(AlreadyInitialisedMessage);
         }
@@ -113,11 +130,13 @@ internal static class EngineConfiguration
         s_screenCapture = screenCapture;
         s_gpuResourceDeletionService = gpuResourceDeletion ?? new DefaultGPUResourceDeletionService();
         s_textureFactory = textureFactory ?? new DefaultTextureFactory();
+        s_atlasGenerator = atlasGenerator ?? new GdiFontAtlasGenerator();
     }
 
     public static void Reset()
     {
         DefaultCameraMsaa = MsaaSamples.Disabled;
+        s_atlasGenerator = null;
         s_engineInfo = null;
         s_gpuResourceDeletionService = null;
         s_keyboard = null;
@@ -126,5 +145,6 @@ internal static class EngineConfiguration
         s_textureFactory = null;
         s_window = null;
         s_worldSwitcher = null;
+        FontTextureCache.InvalidateCache();
     }
 }

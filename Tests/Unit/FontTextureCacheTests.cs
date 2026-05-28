@@ -1,4 +1,5 @@
 using System;
+using BabyBearsEngine;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
@@ -59,13 +60,13 @@ public class FontTextureCacheTests
     }
 
     [TestCleanup]
-    public void Cleanup() => FontTextureCache.Reset();
+    public void Cleanup() => EngineConfiguration.Reset();
 
     [TestMethod]
     public void GetOrCreate_FirstCallForFont_InvokesGenerator()
     {
         CountingGenerator generator = new();
-        FontTextureCache.Generator = generator;
+        EngineConfiguration.AtlasGenerator = generator;
         FontDefinition fontDef = new("Arial", 12);
 
         FontTextureCache.GetOrCreate(fontDef);
@@ -77,7 +78,7 @@ public class FontTextureCacheTests
     public void GetOrCreate_SecondCallForSameFont_ReturnsCachedAtlas()
     {
         CountingGenerator generator = new();
-        FontTextureCache.Generator = generator;
+        EngineConfiguration.AtlasGenerator = generator;
         FontDefinition fontDef = new("Arial", 12);
 
         FontAtlas first = FontTextureCache.GetOrCreate(fontDef);
@@ -91,7 +92,7 @@ public class FontTextureCacheTests
     public void GetOrCreate_DifferentFontDefinitions_GenerateEachOnce()
     {
         CountingGenerator generator = new();
-        FontTextureCache.Generator = generator;
+        EngineConfiguration.AtlasGenerator = generator;
         FontDefinition fontA = new("Arial", 12);
         FontDefinition fontB = new("Times New Roman", 14);
 
@@ -104,15 +105,15 @@ public class FontTextureCacheTests
     }
 
     [TestMethod]
-    public void Generator_Setter_ClearsCache()
+    public void AtlasGenerator_Setter_ClearsCache()
     {
         CountingGenerator firstGenerator = new();
-        FontTextureCache.Generator = firstGenerator;
+        EngineConfiguration.AtlasGenerator = firstGenerator;
         FontDefinition fontDef = new("Arial", 12);
         FontTextureCache.GetOrCreate(fontDef);
 
         CountingGenerator secondGenerator = new();
-        FontTextureCache.Generator = secondGenerator;
+        EngineConfiguration.AtlasGenerator = secondGenerator;
         FontTextureCache.GetOrCreate(fontDef);
 
         Assert.AreEqual(1, firstGenerator.GenerateCalls);
@@ -120,34 +121,31 @@ public class FontTextureCacheTests
     }
 
     [TestMethod]
-    public void Generator_SetterWithNull_Throws()
+    public void AtlasGenerator_SetterWithNull_Throws()
     {
-        Assert.ThrowsExactly<ArgumentNullException>(() => FontTextureCache.Generator = null!);
+        Assert.ThrowsExactly<ArgumentNullException>(() => EngineConfiguration.AtlasGenerator = null!);
     }
 
     [TestMethod]
-    public void Reset_RestoresDefaultGenerator()
+    public void AtlasGenerator_GetterBeforeInitialise_Throws()
     {
-        CountingGenerator stubGenerator = new();
-        FontTextureCache.Generator = stubGenerator;
+        EngineConfiguration.Reset();
 
-        FontTextureCache.Reset();
-
-        Assert.IsInstanceOfType<GdiFontAtlasGenerator>(FontTextureCache.Generator);
+        Assert.ThrowsExactly<InvalidOperationException>(() => _ = EngineConfiguration.AtlasGenerator);
     }
 
     [TestMethod]
     public void Reset_ClearsCache()
     {
         CountingGenerator firstGenerator = new();
-        FontTextureCache.Generator = firstGenerator;
+        EngineConfiguration.AtlasGenerator = firstGenerator;
         FontDefinition fontDef = new("Arial", 12);
         FontTextureCache.GetOrCreate(fontDef);
 
-        FontTextureCache.Reset();
+        EngineConfiguration.Reset();
 
         CountingGenerator secondGenerator = new();
-        FontTextureCache.Generator = secondGenerator;
+        EngineConfiguration.AtlasGenerator = secondGenerator;
         FontTextureCache.GetOrCreate(fontDef);
 
         Assert.AreEqual(1, secondGenerator.GenerateCalls);

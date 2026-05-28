@@ -3,6 +3,7 @@ using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenTK;
 using BabyBearsEngine.Worlds;
+using BabyBearsEngine.Worlds.Graphics.Text;
 
 namespace BabyBearsEngine;
 
@@ -59,7 +60,8 @@ public static class GameLauncher
                 mouse: new OpenTKMouseAdapter(engine.MouseState),
                 worldSwitcher: engine,
                 engineInfo: engine.EngineInfo,
-                screenCapture: appSettings.DiagnosticsSettings.CaptureFrames ? new OpenTKScreenCaptureAdapter(engine) : null);
+                screenCapture: appSettings.DiagnosticsSettings.CaptureFrames ? new OpenTKScreenCaptureAdapter(engine) : null,
+                atlasGenerator: ResolveAtlasGenerator(appSettings.TextSettings.Renderer));
 
             engine.Run(worldFactory());
         }
@@ -81,4 +83,10 @@ public static class GameLauncher
             s_running = false;
         }
     }
+
+    private static IFontAtlasGenerator ResolveAtlasGenerator(TextRenderer renderer) => renderer switch
+    {
+        TextRenderer.Gdi => new GdiFontAtlasGenerator(),
+        _ => throw new NotSupportedException($"TextRenderer.{renderer} is not supported by this engine build."),
+    };
 }
