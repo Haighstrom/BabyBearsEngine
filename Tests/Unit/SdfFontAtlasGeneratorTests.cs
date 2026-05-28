@@ -103,19 +103,20 @@ public class SdfFontAtlasGeneratorTests
     }
 
     [TestMethod]
-    public void RasteriseAtlas_SourceResolutionIndependentOfFontSize()
+    public void RasteriseAtlas_SourceResolutionScalesWithFontSize()
     {
         SdfFontAtlasGenerator generator = new();
 
         (_, int smallWidth, int smallHeight, FontAtlasMetrics smallMetrics) = generator.RasteriseAtlas(new FontDefinition(TestFontName, 24f));
         (_, int largeWidth, int largeHeight, FontAtlasMetrics largeMetrics) = generator.RasteriseAtlas(new FontDefinition(TestFontName, 48f));
 
-        // The atlas texture is rasterised at a fixed source resolution, so its pixel
-        // dimensions are the same regardless of the requested font size...
-        Assert.AreEqual(largeWidth, smallWidth);
-        Assert.AreEqual(largeHeight, smallHeight);
+        // The distance field is authored at (about) the requested display size so on-screen
+        // sampling stays near 1:1 and thin strokes don't fragment under minification. A larger
+        // font size therefore rasterises to a larger source atlas...
+        Assert.IsGreaterThan(smallWidth, largeWidth);
+        Assert.IsGreaterThan(smallHeight, largeHeight);
 
-        // ...but the logical layout metrics scale with the requested font size.
+        // ...and the logical layout metrics scale with it too.
         Assert.IsGreaterThan(smallMetrics.HighestChar, largeMetrics.HighestChar);
     }
 }

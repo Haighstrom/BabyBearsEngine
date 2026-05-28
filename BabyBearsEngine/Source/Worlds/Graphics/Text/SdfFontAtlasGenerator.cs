@@ -22,23 +22,22 @@ internal sealed class SdfFontAtlasGenerator : IFontAtlasGenerator
     // choice so both backends produce similarly-shaped atlases.
     private const int CharactersPerRow = 13;
 
-    // Pixel height the glyphs are rasterised at to build the SDF texture. Decoupled from the
-    // requested FontDefinition.FontSize: the texture is built once at this resolution for good
-    // quality, while the exposed metrics are scaled down to the logical font size so layout
-    // matches regardless of how big the source bitmap is.
-    private const float SourcePixelHeight = 48f;
+    // Floor for the pixel height the glyphs are rasterised at. The field is authored at roughly
+    // the requested display size (see RasteriseAtlas) so on-screen sampling stays close to 1:1 —
+    // a distance field minified far below the size it was authored at fragments thin strokes,
+    // because their peak interior distance falls beneath the shader's antialiasing band. This
+    // floor keeps the field from degenerating for very small font sizes.
+    private const float MinSourcePixelHeight = 8f;
 
-    // SDF spread, in source texels, on each side of the glyph outline. The distance field ramps
-    // from "inside" to "outside" across this many texels, giving the shader room to antialias.
-    private const int Padding = 6;
+    // Floor for the SDF spread, in source texels, on each side of the glyph outline. The distance
+    // field ramps from "inside" to "outside" across this many texels, giving the shader room to
+    // antialias. Scales with the source resolution (see RasteriseAtlas) so the spread stays a
+    // sensible fraction of the glyph regardless of size.
+    private const int MinPadding = 2;
 
     // The SDF byte value (0..255) that represents the glyph outline itself — 128 maps to 0.5,
     // the isovalue the shader tests against. Values above are inside the glyph, below are outside.
     private const byte OnEdgeValue = 128;
-
-    // How much the stored SDF value changes per texel of distance from the edge. Chosen so the
-    // distance reaches 0 exactly Padding texels outside the outline (and saturates inside).
-    private const float PixelDistScale = OnEdgeValue / (float)Padding;
 
     private readonly record struct GlyphBitmap(byte[] Data, int Width, int Height, int XOffset, int YOffset);
 
@@ -66,7 +65,14 @@ internal sealed class SdfFontAtlasGenerator : IFontAtlasGenerator
         string charsToLoad = fontDef.CharactersToLoad;
         int charCount = charsToLoad.Length;
 
-        float scale = StbTrueType.stbtt_ScaleForPixelHeight(font, SourcePixelHeight);
+        // Author the field at (about) the requested display size so on-screen sampling stays
+        // close to 1:1. The SDF win — crisp magnification and smooth scaling — is preserved
+        // around this size, while heavy minification (which fragments thin strokes) is avoided.
+        float sourcePixelHeight = MathF.Max(fontDef.FontSize, MinSourcePixelHeight);
+        int padding = Math.Max(MinPadding, (int)MathF.Round(sourcePixelHeight / 8f));
+        float pixelDistScale = OnEdgeValue / (float)padding;
+
+        float scale = StbTrueType.stbtt_ScaleForPixelHeight(font, sourcePixelHeight);
 
         var glyphs = new GlyphBitmap?[charCount];
         var cellWidths = new int[charCount];
@@ -100,7 +106,7 @@ internal sealed class SdfFontAtlasGenerator : IFontAtlasGenerator
 
                 int glyphWidth, glyphHeight, xOffset, yOffset;
                 byte* sdfPtr = StbTrueType.stbtt_GetCodepointSDF(
-                    font, scale, c, Padding, OnEdgeValue, PixelDistScale,
+                    font, scale, c, padding, OnEdgeValue, pixelDistScale,
                     &glyphWidth, &glyphHeight, &xOffset, &yOffset);
 
                 // Glyphs with no outline (e.g. space, or codepoints absent from the font) return
@@ -124,7 +130,7 @@ internal sealed class SdfFontAtlasGenerator : IFontAtlasGenerator
         int spriteSheetHeight = Math.Max(1, rowCount * sourceCellHeight);
         byte[] pixels = new byte[spriteSheetWidth * spriteSheetHeight];
 
-        float logicalScale = fontDef.FontSize / SourcePixelHeight;
+        float logicalScale = fontDef.FontSize / sourcePixelHeight;
         int highestCharLogical = Math.Max(1, (int)MathF.Round(sourceCellHeight * logicalScale));
         int widestCharLogical = 1;
 
