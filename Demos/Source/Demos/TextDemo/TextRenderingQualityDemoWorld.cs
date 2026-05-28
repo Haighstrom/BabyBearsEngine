@@ -14,6 +14,7 @@ internal class TextRenderingQualityDemoWorld : DemoWorld
 {
     private static readonly (int Size, string Label)[] s_sizes =
     [
+        (7,  "7pt"),
         (9,  "9pt"),
         (11, "11pt"),
         (13, "13pt"),
@@ -31,6 +32,10 @@ internal class TextRenderingQualityDemoWorld : DemoWorld
     private const int ColumnWidth = 360;
     private const int RowHeight = 36;
     private const int HeaderRowHeight = 26;
+
+    // The header and comparison columns start at the very top-left, so move the Back button out of
+    // their way to the top-right corner (which is otherwise empty).
+    protected override bool BackButtonTopRight => true;
 
     public override string Name => "Text Rendering Quality";
 

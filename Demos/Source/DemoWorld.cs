@@ -15,8 +15,16 @@ internal abstract class DemoWorld : World
 
     public abstract string Name { get; }
 
+    /// <summary>
+    /// Where the shared "← Back" button sits. Defaults to the top-left corner; a demo whose own
+    /// content fills the top-left can override this to move the button to the top-right instead.
+    /// </summary>
+    protected virtual bool BackButtonTopRight => false;
+
     protected void AddCommonControls()
     {
-        Add(new BackButton(5, 5, _menuWorldFactory));
+        // 80px wide button + 5px right margin = 85px inset from the right edge, mirroring MenuWorld.
+        float x = BackButtonTopRight ? Window.Width - 85 : 5;
+        Add(new BackButton(x, 5, _menuWorldFactory));
     }
 }

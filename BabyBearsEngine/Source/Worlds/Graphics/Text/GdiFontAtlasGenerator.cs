@@ -25,7 +25,12 @@ internal sealed class GdiFontAtlasGenerator : IFontAtlasGenerator
     public FontAtlas Generate(FontDefinition fontDef)
     {
         (Bitmap bitmap, FontAtlasMetrics metrics) = RasteriseAtlas(fontDef);
-        ITexture texture = new DefaultTextureFactory().GenTexture(bitmap);
+
+        // Point (nearest) sampling, not bilinear: GDI+ is the fixed-size, grid-fitted backend, so its
+        // glyphs are authored to be drawn 1:1. Bilinear filtering would resample the coverage and
+        // soften the hinted edges even at scale 1; nearest keeps them crisp. (The SDF backend keeps
+        // linear filtering — it relies on inter-texel blending to reconstruct its distance field.)
+        ITexture texture = new DefaultTextureFactory().GenTexture(bitmap, linearFilter: false);
         IMatrixShaderProgram shader = new StandardMatrixShaderProgram();
         return new FontAtlas(metrics, texture, shader);
     }
@@ -69,7 +74,11 @@ internal sealed class GdiFontAtlasGenerator : IFontAtlasGenerator
         Bitmap characterSS = new(spriteSheetWidth, spriteSheetHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         var g = System.Drawing.Graphics.FromImage(characterSS);
         g.CompositingQuality = CompositingQuality.HighQuality;
-        g.TextRenderingHint = TextRenderingHint.AntiAlias;
+        // Grid-fit (hint) the glyphs: AntiAliasGridFit snaps stems to whole pixels, so small text
+        // stays crisp instead of smearing each stem across two columns at partial coverage — the
+        // blur the plain AntiAlias hint produces. Grayscale (not ClearType) AA keeps the atlas a
+        // single coverage channel, which the alpha-tinting text shader expects.
+        g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
 
         int j = 0, posX, posY;
 

@@ -11,6 +11,11 @@ namespace BabyBearsEngine.Worlds.Graphics.Text;
 
 public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposable
 {
+    // How close to 1:1 the scale must be before glyph quads are snapped to the pixel grid. A small
+    // tolerance absorbs floating-point drift (e.g. a camera tile size that divides to 0.9999) so
+    // text drawn at native size still snaps, while genuinely scaled text does not.
+    private const float ScaleSnapTolerance = 0.001f;
+
     private readonly SolidColourShaderProgramMatrix _decorationShader = SolidColourShaderProgramMatrix.Instance;
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
     private readonly VertexDataBuffer<VertexNoTexture> _decorationVertexDataBuffer = new();
@@ -296,6 +301,18 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     private static string NormalizeNewlines(string text)
         => text.Replace("\r\n", "\n").Replace('\r', '\n');
 
+    /// <summary>
+    /// Whether glyph quads should be snapped to whole-pixel positions. Only when the text is drawn
+    /// 1:1 and unrotated: at native scale, snapping keeps hinted, point-sampled glyphs landing exactly
+    /// on the pixel grid (so nearest sampling never drops or duplicates an edge column when fractional
+    /// spacing nudges a glyph off-grid). Snapping a scaled or rotated quad to the integer grid would
+    /// instead distort its shape or spacing, so it is suppressed there.
+    /// </summary>
+    internal static bool ShouldPixelSnap(float scaleX, float scaleY, float angle)
+        => angle == 0f
+           && MathF.Abs(scaleX - 1f) < ScaleSnapTolerance
+           && MathF.Abs(scaleY - 1f) < ScaleSnapTolerance;
+
     private IReadOnlyList<LineInfo> GetLines()
     {
         StyledChar[] chars = InlineTagParser.Parse(_textToDisplay, _useInlineTags);
@@ -337,6 +354,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         List<VertexNoTexture> decorationVertices = [];
 
         var glColour = Colour.ToOpenTK();
+        bool snapToPixelGrid = ShouldPixelSnap(_scaleX, _scaleY, _angle);
         float lineHeight = ScaleY * _metrics.HighestChar;
         IReadOnlyList<LineInfo> lines = GetLines();
         float totalHeight = lines.Count * (lineHeight + _extraLineSpacing);
@@ -413,6 +431,16 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
                     // of the edge. The pen still advances by the font advance, kept separate below.
                     float quadLeft   = charLeft + bearing.X * ScaleX;
                     float quadTop    = lineTop + bearing.Y * ScaleY;
+
+                    // At native, unrotated scale, snap the quad's top-left to whole pixels so the
+                    // glyph lands exactly on the grid. Width/height are already whole pixels here, so
+                    // the right/bottom edges follow without rounding (which would risk a ±1px width).
+                    if (snapToPixelGrid)
+                    {
+                        quadLeft = MathF.Round(quadLeft);
+                        quadTop = MathF.Round(quadTop);
+                    }
+
                     float quadRight  = quadLeft + renderWidth;
                     float quadBottom = quadTop + renderHeight;
 

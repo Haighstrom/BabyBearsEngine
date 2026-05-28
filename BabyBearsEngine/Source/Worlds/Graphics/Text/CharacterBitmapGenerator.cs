@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
@@ -11,8 +10,9 @@ internal sealed class CharacterBitmapGenerator : ICharacterBitmapGenerator
     {
         Bitmap image = new((int)font.Size * 3, (int)font.Size * 3, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         var g = System.Drawing.Graphics.FromImage(image);
-        g.TextRenderingHint = TextRenderingHint.AntiAlias;
-        g.SmoothingMode = SmoothingMode.AntiAlias;
+        // Grid-fit (hint) the glyph so stems snap to whole pixels — keeps small text crisp rather
+        // than blurring it across partial-coverage columns. Must match the second pass below.
+        g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
 
         var stringFormat = new StringFormat(StringFormat.GenericTypographic);
 
@@ -37,8 +37,9 @@ internal sealed class CharacterBitmapGenerator : ICharacterBitmapGenerator
 
         image = new Bitmap(x + width, y + height, System.Drawing.Imaging.PixelFormat.Format32bppArgb); //include alpha at left/top of image so positioning is preserved
         g = System.Drawing.Graphics.FromImage(image);
-        g.TextRenderingHint = TextRenderingHint.AntiAlias;
-        g.SmoothingMode = SmoothingMode.AntiAlias;
+        // Grid-fit hinting must match the measuring pass above so the cropped glyph matches what
+        // NonZeroAlphaRegion measured.
+        g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
         g.DrawString(c.ToString(), font, new SolidBrush(Color.White), 0, 0, stringFormat);
 
         return image;
