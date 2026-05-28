@@ -12,6 +12,7 @@ public static class FragmentShaders
     public static FragmentShaderPath Lighting { get; } = new(BasePath + "lighting.frag");
     public static FragmentShaderPath Point { get; } = new(BasePath + "point.frag");
     public static FragmentShaderPath R8Texture { get; } = new(BasePath + "r8_texture.frag");
+    public static FragmentShaderPath SdfText { get; } = new(BasePath + "sdf_text.frag");
     public static FragmentShaderPath Shader { get; } = new(BasePath + "shader.frag");
     public static FragmentShaderPath SolidColour { get; } = new(BasePath + "solid_colour.frag");
 

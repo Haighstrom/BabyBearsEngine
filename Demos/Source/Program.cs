@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using BabyBearsEngine.Demos.Source.Demos.AnimationDemo;
 using BabyBearsEngine.Demos.Source.Demos.BorderDemo;
 using BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
@@ -23,7 +23,12 @@ var appSettings = new ApplicationSettings()
         Width = 800,
         Height = 600,
         Title = "Bears",
-    }
+    },
+    TextSettings = new TextSettings()
+    {
+        Renderer = BabyBearsEngine.Worlds.Graphics.Text.TextRenderer.Sdf,
+    },
+    DefaultCameraMsaa = MsaaSamples.X8,
 };
 
 Func<World> mainMenuFactory = null!;

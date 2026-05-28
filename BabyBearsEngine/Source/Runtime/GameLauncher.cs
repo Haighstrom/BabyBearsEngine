@@ -87,6 +87,7 @@ public static class GameLauncher
     private static IFontAtlasGenerator ResolveAtlasGenerator(TextRenderer renderer) => renderer switch
     {
         TextRenderer.Gdi => new GdiFontAtlasGenerator(),
+        TextRenderer.Sdf => new SdfFontAtlasGenerator(),
         _ => throw new NotSupportedException($"TextRenderer.{renderer} is not supported by this engine build."),
     };
 }

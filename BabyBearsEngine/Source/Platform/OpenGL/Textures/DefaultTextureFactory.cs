@@ -98,6 +98,36 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
         return t;
     }
 
+    /// <summary>
+    /// Uploads a single-channel (R8) pixel buffer as a texture. Used by the SDF text backend,
+    /// whose atlas stores distance values in one byte per texel. Linear filtering is the default
+    /// because SDF reconstruction relies on bilinear sampling between texels.
+    /// </summary>
+    public ITexture GenR8Texture(byte[] data, int width, int height, bool linearFilter = true)
+    {
+        Texture t = new(
+            handle: GL.GenTexture(),
+            width: width,
+            height: height);
+
+        GL.BindTexture(TextureTarget.Texture2D, t.Handle);
+
+        // R8 rows are one byte per texel, so they aren't 4-byte aligned; relax the unpack
+        // alignment for the upload, then restore the default so other texture paths are unaffected.
+        GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R8, width, height, 0, PixelFormat.Red, PixelType.UnsignedByte, data);
+        GL.PixelStore(PixelStoreParameter.UnpackAlignment, 4);
+
+        var minFilter = linearFilter ? TextureMinFilter.Linear : TextureMinFilter.Nearest;
+        var magFilter = linearFilter ? TextureMagFilter.Linear : TextureMagFilter.Nearest;
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)minFilter);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)magFilter);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+
+        return t;
+    }
+
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
     public ITexture GenTexture(Colour[,] pixels, bool linearFilter = true)
     {
