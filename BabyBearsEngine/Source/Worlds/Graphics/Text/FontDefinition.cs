@@ -2,7 +2,20 @@
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 
-public record class FontDefinition(string FontName, float FontSize, FontStyle FontStyle = FontStyle.Regular, string ExtraCharactersToLoad = "", bool IncludeDefaultCharacters = true)
+/// <summary>
+/// Identifies a font atlas to build: family, size, style, the characters to rasterise, and
+/// optionally which rendering backend to use. Serves as the <see cref="FontTextureCache"/> key,
+/// so two definitions that differ only by <see cref="Renderer"/> are cached independently.
+/// A null <see cref="Renderer"/> falls back to the engine-wide default backend
+/// (see <see cref="TextSettings.Renderer"/>).
+/// </summary>
+public record class FontDefinition(
+    string FontName,
+    float FontSize,
+    FontStyle FontStyle = FontStyle.Regular,
+    string ExtraCharactersToLoad = "",
+    bool IncludeDefaultCharacters = true,
+    TextRenderer? Renderer = null)
 {
     private const string DefaultCharsToLoad = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 !£$%^&*()-=_+[]{};'#:@~,./<>?|`€—–…•←→↑↓‘’“”\"\\";
 

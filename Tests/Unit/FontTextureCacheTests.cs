@@ -150,4 +150,83 @@ public class FontTextureCacheTests
 
         Assert.AreEqual(1, secondGenerator.GenerateCalls);
     }
+
+    [TestMethod]
+    public void GetOrCreate_FontPinnedToRenderer_UsesGeneratorRegisteredForThatBackend()
+    {
+        // The default backend (Gdi after Reset) gets one generator; Sdf gets another.
+        CountingGenerator defaultGenerator = new();
+        CountingGenerator sdfGenerator = new();
+        EngineConfiguration.AtlasGenerator = defaultGenerator;
+        EngineConfiguration.RegisterAtlasGenerator(TextRenderer.Sdf, sdfGenerator);
+        FontDefinition pinnedFont = new("Arial", 12, Renderer: TextRenderer.Sdf);
+
+        FontTextureCache.GetOrCreate(pinnedFont);
+
+        // The font pinned itself to Sdf, so only that backend's generator runs.
+        Assert.AreEqual(0, defaultGenerator.GenerateCalls);
+        Assert.AreEqual(1, sdfGenerator.GenerateCalls);
+    }
+
+    [TestMethod]
+    public void GetOrCreate_SameFontDifferentRenderer_CachedSeparately()
+    {
+        CountingGenerator gdiGenerator = new();
+        CountingGenerator sdfGenerator = new();
+        EngineConfiguration.RegisterAtlasGenerator(TextRenderer.Gdi, gdiGenerator);
+        EngineConfiguration.RegisterAtlasGenerator(TextRenderer.Sdf, sdfGenerator);
+        FontDefinition gdiFont = new("Arial", 12, Renderer: TextRenderer.Gdi);
+        FontDefinition sdfFont = new("Arial", 12, Renderer: TextRenderer.Sdf);
+
+        FontTextureCache.GetOrCreate(gdiFont);
+        FontTextureCache.GetOrCreate(sdfFont);
+        FontTextureCache.GetOrCreate(gdiFont);
+        FontTextureCache.GetOrCreate(sdfFont);
+
+        // Definitions differing only by backend are distinct cache keys, so each generates once.
+        Assert.AreEqual(1, gdiGenerator.GenerateCalls);
+        Assert.AreEqual(1, sdfGenerator.GenerateCalls);
+    }
+
+    [TestMethod]
+    public void GetOrCreate_UnpinnedFont_FollowsDefaultTextRenderer()
+    {
+        CountingGenerator gdiGenerator = new();
+        CountingGenerator sdfGenerator = new();
+        EngineConfiguration.RegisterAtlasGenerator(TextRenderer.Gdi, gdiGenerator);
+        EngineConfiguration.RegisterAtlasGenerator(TextRenderer.Sdf, sdfGenerator);
+        EngineConfiguration.DefaultTextRenderer = TextRenderer.Sdf;
+        FontDefinition unpinnedFont = new("Arial", 12);
+
+        FontTextureCache.GetOrCreate(unpinnedFont);
+
+        // No backend pinned, so the engine-wide default (now Sdf) decides.
+        Assert.AreEqual(0, gdiGenerator.GenerateCalls);
+        Assert.AreEqual(1, sdfGenerator.GenerateCalls);
+    }
+
+    [TestMethod]
+    public void DefaultTextRenderer_Setter_ClearsCache()
+    {
+        CountingGenerator gdiGenerator = new();
+        CountingGenerator sdfGenerator = new();
+        EngineConfiguration.RegisterAtlasGenerator(TextRenderer.Gdi, gdiGenerator);
+        EngineConfiguration.RegisterAtlasGenerator(TextRenderer.Sdf, sdfGenerator);
+        FontDefinition unpinnedFont = new("Arial", 12);
+        FontTextureCache.GetOrCreate(unpinnedFont);
+
+        EngineConfiguration.DefaultTextRenderer = TextRenderer.Sdf;
+        FontTextureCache.GetOrCreate(unpinnedFont);
+
+        // Changing the default must invalidate atlases that resolved through the old default.
+        Assert.AreEqual(1, gdiGenerator.GenerateCalls);
+        Assert.AreEqual(1, sdfGenerator.GenerateCalls);
+    }
+
+    [TestMethod]
+    public void RegisterAtlasGenerator_WithNull_Throws()
+    {
+        Assert.ThrowsExactly<ArgumentNullException>(
+            () => EngineConfiguration.RegisterAtlasGenerator(TextRenderer.Sdf, null!));
+    }
 }

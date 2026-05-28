@@ -26,9 +26,9 @@ var appSettings = new ApplicationSettings()
     },
     TextSettings = new TextSettings()
     {
-        Renderer = BabyBearsEngine.Worlds.Graphics.Text.TextRenderer.Sdf,
+        Renderer = BabyBearsEngine.Worlds.Graphics.Text.TextRenderer.Gdi,
     },
-    DefaultCameraMsaa = MsaaSamples.X8,
+    DefaultCameraMsaa = MsaaSamples.X4,
 };
 
 Func<World> mainMenuFactory = null!;

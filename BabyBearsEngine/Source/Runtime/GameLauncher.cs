@@ -3,7 +3,6 @@ using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenTK;
 using BabyBearsEngine.Worlds;
-using BabyBearsEngine.Worlds.Graphics.Text;
 
 namespace BabyBearsEngine;
 
@@ -50,6 +49,10 @@ public static class GameLauncher
 
         EngineConfiguration.DefaultCameraMsaa = appSettings.DefaultCameraMsaa;
 
+        // The default backend for fonts that don't pin one; Initialise registers both built-ins so
+        // individual fonts can still opt into the other via FontDefinition.Renderer.
+        EngineConfiguration.DefaultTextRenderer = appSettings.TextSettings.Renderer;
+
         try
         {
             var engine = new OpenTKGameEngine(appSettings);
@@ -60,8 +63,7 @@ public static class GameLauncher
                 mouse: new OpenTKMouseAdapter(engine.MouseState),
                 worldSwitcher: engine,
                 engineInfo: engine.EngineInfo,
-                screenCapture: appSettings.DiagnosticsSettings.CaptureFrames ? new OpenTKScreenCaptureAdapter(engine) : null,
-                atlasGenerator: ResolveAtlasGenerator(appSettings.TextSettings.Renderer));
+                screenCapture: appSettings.DiagnosticsSettings.CaptureFrames ? new OpenTKScreenCaptureAdapter(engine) : null);
 
             engine.Run(worldFactory());
         }
@@ -83,11 +85,4 @@ public static class GameLauncher
             s_running = false;
         }
     }
-
-    private static IFontAtlasGenerator ResolveAtlasGenerator(TextRenderer renderer) => renderer switch
-    {
-        TextRenderer.Gdi => new GdiFontAtlasGenerator(),
-        TextRenderer.Sdf => new SdfFontAtlasGenerator(),
-        _ => throw new NotSupportedException($"TextRenderer.{renderer} is not supported by this engine build."),
-    };
 }

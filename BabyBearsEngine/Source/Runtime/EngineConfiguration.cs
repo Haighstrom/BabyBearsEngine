@@ -14,8 +14,12 @@ internal static class EngineConfiguration
     private const string NotInitialisedMessage = "The platform context has not been initialized. Please call Initialise() before accessing the platform context.";
     private const string ScreenCaptureNotEnabledMessage = "Screen capture is not enabled. Set ApplicationSettings.DiagnosticsSettings.CaptureFrames = true to enable.";
 
+    // One atlas generator per backend, so a FontDefinition can pin either built-in (or a custom
+    // one) independently of the engine-wide default. Resolved per font in FontTextureCache.
+    private static readonly Dictionary<TextRenderer, IFontAtlasGenerator> s_atlasGenerators = [];
+    private static TextRenderer s_defaultTextRenderer = TextRenderer.Gdi;
+
     private static IEngineInfo? s_engineInfo = null;
-    private static IFontAtlasGenerator? s_atlasGenerator = null;
     private static IGPUResourceDeletionService? s_gpuResourceDeletionService = null;
     private static IKeyboard? s_keyboard = null;
     private static IMouse? s_mouse = null;
@@ -31,16 +35,35 @@ internal static class EngineConfiguration
     /// </summary>
     public static MsaaSamples DefaultCameraMsaa { get; set; } = MsaaSamples.Disabled;
 
+    /// <summary>
+    /// The backend used to build atlases for fonts that don't pin one via
+    /// <see cref="Worlds.Graphics.Text.FontDefinition.Renderer"/>. Set by <see cref="GameLauncher"/>
+    /// from <see cref="ApplicationSettings.TextSettings"/>. Changing it drops cached atlases that
+    /// resolved through the previous default.
+    /// </summary>
+    public static TextRenderer DefaultTextRenderer
+    {
+        get => s_defaultTextRenderer;
+        set
+        {
+            s_defaultTextRenderer = value;
+            FontTextureCache.InvalidateCache();
+        }
+    }
+
+    /// <summary>
+    /// The atlas generator registered under the current <see cref="DefaultTextRenderer"/>. The
+    /// setter is a test seam: it replaces the default backend's generator and clears the cache.
+    /// Production code registers generators via <see cref="RegisterAtlasGenerator"/> during
+    /// <see cref="Initialise"/>.
+    /// </summary>
     public static IFontAtlasGenerator AtlasGenerator
     {
-        get => s_atlasGenerator ?? throw new InvalidOperationException(NotInitialisedMessage);
+        get => GetAtlasGenerator(s_defaultTextRenderer);
         set
         {
             ArgumentNullException.ThrowIfNull(value);
-            s_atlasGenerator = value;
-            // Cached atlases are tied to the previous generator's texture format and shader.
-            // Drop them so the next access rebuilds via the new generator.
-            FontTextureCache.InvalidateCache();
+            RegisterAtlasGenerator(s_defaultTextRenderer, value);
         }
     }
 
@@ -92,6 +115,21 @@ internal static class EngineConfiguration
         set => s_worldSwitcher = value ?? throw new ArgumentNullException(nameof(value));
     }
 
+    /// <summary>
+    /// Returns the atlas generator registered for <paramref name="renderer"/>.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if no generator is registered for the
+    /// requested backend — i.e. the engine has not been initialised.</exception>
+    public static IFontAtlasGenerator GetAtlasGenerator(TextRenderer renderer)
+    {
+        if (s_atlasGenerators.TryGetValue(renderer, out IFontAtlasGenerator? generator))
+        {
+            return generator;
+        }
+
+        throw new InvalidOperationException(NotInitialisedMessage);
+    }
+
     public static void Initialise(
         IWindow window,
         IKeyboard keyboard,
@@ -117,7 +155,7 @@ internal static class EngineConfiguration
             || s_screenCapture is not null
             || s_gpuResourceDeletionService is not null
             || s_textureFactory is not null
-            || s_atlasGenerator is not null)
+            || s_atlasGenerators.Count > 0)
         {
             throw new InvalidOperationException(AlreadyInitialisedMessage);
         }
@@ -130,13 +168,35 @@ internal static class EngineConfiguration
         s_screenCapture = screenCapture;
         s_gpuResourceDeletionService = gpuResourceDeletion ?? new DefaultGPUResourceDeletionService();
         s_textureFactory = textureFactory ?? new DefaultTextureFactory();
-        s_atlasGenerator = atlasGenerator ?? new GdiFontAtlasGenerator();
+
+        // Register both built-in backends so any FontDefinition can pin either one regardless of
+        // the chosen default. A caller-supplied generator overrides the built-in for the default
+        // backend (a test/customisation seam).
+        s_atlasGenerators[TextRenderer.Gdi] = new GdiFontAtlasGenerator();
+        s_atlasGenerators[TextRenderer.Sdf] = new SdfFontAtlasGenerator();
+
+        if (atlasGenerator is not null)
+        {
+            s_atlasGenerators[s_defaultTextRenderer] = atlasGenerator;
+        }
+    }
+
+    /// <summary>
+    /// Registers (or replaces) the atlas generator for a backend and drops cached atlases, since
+    /// they reference the previous generator's GL texture and shader.
+    /// </summary>
+    public static void RegisterAtlasGenerator(TextRenderer renderer, IFontAtlasGenerator generator)
+    {
+        ArgumentNullException.ThrowIfNull(generator);
+        s_atlasGenerators[renderer] = generator;
+        FontTextureCache.InvalidateCache();
     }
 
     public static void Reset()
     {
         DefaultCameraMsaa = MsaaSamples.Disabled;
-        s_atlasGenerator = null;
+        s_atlasGenerators.Clear();
+        s_defaultTextRenderer = TextRenderer.Gdi;
         s_engineInfo = null;
         s_gpuResourceDeletionService = null;
         s_keyboard = null;

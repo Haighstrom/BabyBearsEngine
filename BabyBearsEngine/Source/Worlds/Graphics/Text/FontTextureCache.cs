@@ -3,8 +3,9 @@ namespace BabyBearsEngine.Worlds.Graphics.Text;
 /// <summary>
 /// Memoises <see cref="FontAtlas"/> instances by <see cref="FontDefinition"/>, so each
 /// font is generated and uploaded to the GPU only once across the lifetime of the
-/// application. The atlas generator itself is configured via
-/// <see cref="EngineConfiguration.AtlasGenerator"/>; this class only handles caching.
+/// application. The backend is resolved per font — the definition's
+/// <see cref="FontDefinition.Renderer"/> if set, otherwise
+/// <see cref="EngineConfiguration.DefaultTextRenderer"/>; this class only handles caching.
 /// </summary>
 internal static class FontTextureCache
 {
@@ -17,7 +18,9 @@ internal static class FontTextureCache
             return existing;
         }
 
-        FontAtlas atlas = EngineConfiguration.AtlasGenerator.Generate(fontDefinition);
+        // A font may pin its own backend; otherwise it follows the engine-wide default.
+        TextRenderer renderer = fontDefinition.Renderer ?? EngineConfiguration.DefaultTextRenderer;
+        FontAtlas atlas = EngineConfiguration.GetAtlasGenerator(renderer).Generate(fontDefinition);
         s_cache[fontDefinition] = atlas;
         return atlas;
     }

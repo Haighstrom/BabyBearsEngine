@@ -1,12 +1,14 @@
-﻿using System;
+using System;
 using BabyBearsEngine.Worlds.Graphics.Text;
 
 namespace BabyBearsEngine.Demos.Source.Demos.TextDemo;
 
 /// <summary>
-/// Visual regression check for text rendering quality. Shows the same sample text rendered
-/// at a range of font sizes on both light and dark backgrounds, making AA quality, hinting,
-/// and filter artefacts easy to spot by eye.
+/// Visual comparison of the two text backends side by side. Each row renders the same sample at
+/// the same size with GDI+ (left) and SDF (right), so the trade-off is easy to see by eye: GDI is
+/// crisp at small fixed sizes (hinted), while SDF is softer when small but scales cleanly. The
+/// columns are driven entirely by <see cref="FontDefinition.Renderer"/>, demonstrating the hybrid
+/// per-font backend selection — one world, both backends at once.
 /// </summary>
 internal class TextRenderingQualityDemoWorld : DemoWorld
 {
@@ -17,11 +19,18 @@ internal class TextRenderingQualityDemoWorld : DemoWorld
         (13, "13pt"),
         (16, "16pt"),
         (20, "20pt"),
-        (28, "28pt"),
     ];
 
-    private const string SampleText = "Quick brown fox — 0123 AaBbCc";
+    private const string SampleText = "Quick brown fox 0123";
     private const string FontName = "Arial";
+
+    private const int LabelX = 10;
+    private const int LabelWidth = 34;
+    private const int GdiColumnX = 48;
+    private const int SdfColumnX = 412;
+    private const int ColumnWidth = 360;
+    private const int RowHeight = 36;
+    private const int HeaderRowHeight = 26;
 
     public override string Name => "Text Rendering Quality";
 
@@ -30,46 +39,66 @@ internal class TextRenderingQualityDemoWorld : DemoWorld
         BackgroundColour = new Colour(245, 245, 245);
 
         Add(new TextGraphic(
-            new FontDefinition(FontName, 11),
-            "Text rendering quality — light background (top) / dark background (bottom)",
-            Colour.Black, 10, 55, 780, 20)
+            GdiFont(11),
+            "Hybrid text backends — GDI (left, hinted) vs SDF (right, scalable), same sizes",
+            Colour.Black, 10, 8, 780, 20)
         {
             HAlignment = HAlignment.Left,
             VAlignment = VAlignment.Centred,
         });
 
-        int lightY = 82;
-        int darkPanelY = lightY + s_sizes.Length * 36 + 16;
+        int sectionHeight = HeaderRowHeight + s_sizes.Length * RowHeight;
 
-        Add(new ColourGraphic(new Colour(30, 30, 40), 0, darkPanelY, 800, s_sizes.Length * 36 + 8));
+        int lightTop = 40;
+        AddComparisonSection(lightTop, Colour.Black, new Colour(100, 100, 100));
+
+        int darkTop = lightTop + sectionHeight + 16;
+        Add(new ColourGraphic(new Colour(30, 30, 40), 0, darkTop - 4, 800, sectionHeight + 8));
+        AddComparisonSection(darkTop, Colour.White, new Colour(170, 170, 170));
+    }
+
+    // Labels and headers are chrome, not the thing under test — render them with GDI so they stay
+    // crisp regardless of which backend the row samples are demonstrating.
+    private static FontDefinition GdiFont(int size) => new(FontName, size, Renderer: TextRenderer.Gdi);
+
+    private void AddComparisonSection(int top, Colour sampleColour, Colour labelColour)
+    {
+        Add(new TextGraphic(GdiFont(12), "GDI — hinted", labelColour, GdiColumnX, top, ColumnWidth, 20)
+        {
+            HAlignment = HAlignment.Left,
+            VAlignment = VAlignment.Centred,
+        });
+
+        Add(new TextGraphic(GdiFont(12), "SDF — scalable", labelColour, SdfColumnX, top, ColumnWidth, 20)
+        {
+            HAlignment = HAlignment.Left,
+            VAlignment = VAlignment.Centred,
+        });
+
+        int rowsTop = top + HeaderRowHeight;
 
         for (int i = 0; i < s_sizes.Length; i++)
         {
             var (size, label) = s_sizes[i];
-            var font = new FontDefinition(FontName, size);
+            int rowY = rowsTop + i * RowHeight;
 
-            int lightRowY = lightY + i * 36;
-            int darkRowY = darkPanelY + 4 + i * 36;
-
-            Add(new TextGraphic(new FontDefinition(FontName, 10), label, new Colour(100, 100, 100), 10, lightRowY + 10, 40, 20)
+            Add(new TextGraphic(GdiFont(10), label, labelColour, LabelX, rowY, LabelWidth, RowHeight)
             {
                 HAlignment = HAlignment.Right,
                 VAlignment = VAlignment.Centred,
             });
 
-            Add(new TextGraphic(font, SampleText, Colour.Black, 60, lightRowY + 4, 720, size + 8)
+            Add(new TextGraphic(
+                new FontDefinition(FontName, size, Renderer: TextRenderer.Gdi),
+                SampleText, sampleColour, GdiColumnX, rowY, ColumnWidth, RowHeight)
             {
                 HAlignment = HAlignment.Left,
                 VAlignment = VAlignment.Centred,
             });
 
-            Add(new TextGraphic(new FontDefinition(FontName, 10), label, new Colour(160, 160, 160), 10, darkRowY + 10, 40, 20)
-            {
-                HAlignment = HAlignment.Right,
-                VAlignment = VAlignment.Centred,
-            });
-
-            Add(new TextGraphic(font, SampleText, Colour.White, 60, darkRowY + 4, 720, size + 8)
+            Add(new TextGraphic(
+                new FontDefinition(FontName, size, Renderer: TextRenderer.Sdf),
+                SampleText, sampleColour, SdfColumnX, rowY, ColumnWidth, RowHeight)
             {
                 HAlignment = HAlignment.Left,
                 VAlignment = VAlignment.Centred,
