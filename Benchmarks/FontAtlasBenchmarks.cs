@@ -9,8 +9,8 @@ namespace BabyBearsEngine.Benchmarks;
 [System.Runtime.Versioning.SupportedOSPlatform("windows")]
 public class FontAtlasBenchmarks
 {
-    private readonly Dictionary<FontDefinition, GeneratedFontStruct> _cache = [];
-    private GeneratedFontStruct _cachedAtlas = null!;
+    private readonly Dictionary<FontDefinition, FontAtlasMetrics> _cache = [];
+    private FontAtlasMetrics _cachedMetrics = null!;
     private Font _font = null!;
     private FontDefinition _fontDef = null!;
 
@@ -20,9 +20,9 @@ public class FontAtlasBenchmarks
     {
         _fontDef = new FontDefinition("Arial", 16);
         _font = new FontLoader().LoadFont(_fontDef);
-        _cachedAtlas = new FontBitmapGenerator().GenerateCharSpritesheetAndPositions(
+        (_, _cachedMetrics) = new FontBitmapGenerator().GenerateCharSpritesheetAndPositions(
             _font, _fontDef.CharactersToLoad, _fontDef.AntiAliased, 13);
-        _cache[_fontDef] = _cachedAtlas;
+        _cache[_fontDef] = _cachedMetrics;
     }
 
     // Measures the GDI+ atlas generation — the hot path before caching.
@@ -31,7 +31,7 @@ public class FontAtlasBenchmarks
     public int GenerateAtlas_Uncached()
     {
         return new FontBitmapGenerator().GenerateCharSpritesheetAndPositions(
-            _font, _fontDef.CharactersToLoad, _fontDef.AntiAliased, 13).HighestChar;
+            _font, _fontDef.CharactersToLoad, _fontDef.AntiAliased, 13).Metrics.HighestChar;
     }
 
     // Measures the cached path — a plain dictionary lookup.

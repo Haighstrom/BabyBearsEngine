@@ -3,5 +3,5 @@
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 internal interface IFontBitmapGenerator
 {
-    GeneratedFontStruct GenerateCharSpritesheetAndPositions(Font font, string charsToLoad, bool antiAliased, int charactersPerRow);
+    (Bitmap Bitmap, FontAtlasMetrics Metrics) GenerateCharSpritesheetAndPositions(Font font, string charsToLoad, bool antiAliased, int charactersPerRow);
 }

@@ -1,9 +1,15 @@
-﻿using System.Drawing;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 
-internal record class GeneratedFontStruct(Bitmap CharacterSS, int WidestChar, int HighestChar, Dictionary<char, Box2i> CharPositions, Dictionary<char, Box2> CharPositionsNormalised)
+/// <summary>
+/// Per-character metrics for a font atlas — widest/tallest character dimensions
+/// plus UV positions for each glyph within the atlas texture. The texture itself
+/// is held separately by the <see cref="CachedFontAtlas"/> that owns these metrics,
+/// so this record is backend-agnostic: a GDI+ bitmap atlas, an SDF atlas, or any
+/// future generator can produce the same shape.
+/// </summary>
+internal record class FontAtlasMetrics(int WidestChar, int HighestChar, Dictionary<char, Box2i> CharPositions, Dictionary<char, Box2> CharPositionsNormalised)
 {
     public Box2i GetCharPosition(char c)
     {

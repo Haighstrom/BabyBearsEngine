@@ -3,4 +3,4 @@ using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 
-internal record CachedFontAtlas(GeneratedFontStruct FontStruct, ITexture Texture, IMatrixShaderProgram Shader);
+internal record CachedFontAtlas(FontAtlasMetrics Metrics, ITexture Texture, IMatrixShaderProgram Shader);

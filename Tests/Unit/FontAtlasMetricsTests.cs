@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using BabyBearsEngine.Worlds.Graphics.Text;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Tests.Unit;
 
 [TestClass]
-public class GeneratedFontStructTests
+public class FontAtlasMetricsTests
 {
-    private static GeneratedFontStruct MakeStruct(int highestChar, Dictionary<char, Box2i> charPositions) =>
-        new(null!, 0, highestChar, charPositions, []);
+    private static FontAtlasMetrics MakeMetrics(int highestChar, Dictionary<char, Box2i> charPositions) =>
+        new(0, highestChar, charPositions, []);
 
     private static Dictionary<char, Box2i> MakePositions(params (char c, int width)[] entries)
     {
@@ -27,9 +27,9 @@ public class GeneratedFontStructTests
     [TestMethod]
     public void MeasureString_Char_ReturnsCharWidthAndHighestChar()
     {
-        GeneratedFontStruct fs = MakeStruct(20, MakePositions(('A', 12)));
+        FontAtlasMetrics metrics = MakeMetrics(20, MakePositions(('A', 12)));
 
-        Vector2i result = fs.MeasureString('A');
+        Vector2i result = metrics.MeasureString('A');
 
         Assert.AreEqual(12, result.X);
         Assert.AreEqual(20, result.Y);
@@ -40,9 +40,9 @@ public class GeneratedFontStructTests
     [TestMethod]
     public void MeasureString_EmptyString_ReturnszeroWidthAndHighestChar()
     {
-        GeneratedFontStruct fs = MakeStruct(20, MakePositions());
+        FontAtlasMetrics metrics = MakeMetrics(20, MakePositions());
 
-        Vector2i result = fs.MeasureString(string.Empty);
+        Vector2i result = metrics.MeasureString(string.Empty);
 
         Assert.AreEqual(0, result.X);
         Assert.AreEqual(20, result.Y);
@@ -51,9 +51,9 @@ public class GeneratedFontStructTests
     [TestMethod]
     public void MeasureString_SingleChar_ReturnsThatCharWidth()
     {
-        GeneratedFontStruct fs = MakeStruct(15, MakePositions(('B', 8)));
+        FontAtlasMetrics metrics = MakeMetrics(15, MakePositions(('B', 8)));
 
-        Vector2i result = fs.MeasureString("B");
+        Vector2i result = metrics.MeasureString("B");
 
         Assert.AreEqual(8, result.X);
         Assert.AreEqual(15, result.Y);
@@ -62,9 +62,9 @@ public class GeneratedFontStructTests
     [TestMethod]
     public void MeasureString_MultipleChars_ReturnsSumOfWidths()
     {
-        GeneratedFontStruct fs = MakeStruct(15, MakePositions(('A', 10), ('B', 8), ('C', 12)));
+        FontAtlasMetrics metrics = MakeMetrics(15, MakePositions(('A', 10), ('B', 8), ('C', 12)));
 
-        Vector2i result = fs.MeasureString("ABC");
+        Vector2i result = metrics.MeasureString("ABC");
 
         Assert.AreEqual(30, result.X);
         Assert.AreEqual(15, result.Y);
@@ -73,9 +73,9 @@ public class GeneratedFontStructTests
     [TestMethod]
     public void MeasureString_RepeatedChar_SumsWidthEachOccurrence()
     {
-        GeneratedFontStruct fs = MakeStruct(15, MakePositions(('A', 10)));
+        FontAtlasMetrics metrics = MakeMetrics(15, MakePositions(('A', 10)));
 
-        Vector2i result = fs.MeasureString("AAA");
+        Vector2i result = metrics.MeasureString("AAA");
 
         Assert.AreEqual(30, result.X);
     }
@@ -83,9 +83,9 @@ public class GeneratedFontStructTests
     [TestMethod]
     public void MeasureString_YIsAlwaysHighestChar_RegardlessOfText()
     {
-        GeneratedFontStruct fs = MakeStruct(25, MakePositions(('x', 5)));
+        FontAtlasMetrics metrics = MakeMetrics(25, MakePositions(('x', 5)));
 
-        Assert.AreEqual(25, fs.MeasureString("x").Y);
-        Assert.AreEqual(25, fs.MeasureString("xx").Y);
+        Assert.AreEqual(25, metrics.MeasureString("x").Y);
+        Assert.AreEqual(25, metrics.MeasureString("xx").Y);
     }
 }

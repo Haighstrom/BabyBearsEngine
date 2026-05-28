@@ -16,7 +16,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     private readonly VertexDataBuffer<VertexNoTexture> _decorationVertexDataBuffer = new();
     private IMatrixShaderProgram _shader;
     private ITexture _texture;
-    private GeneratedFontStruct _fontStruct;
+    private FontAtlasMetrics _metrics;
     private bool _disposedValue;
     private FontDefinition _fontDef;
     private string _textToDisplay;
@@ -52,7 +52,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
 
         CachedFontAtlas atlas = FontTextureCache.GetOrCreate(fontDef);
         _fontDef = fontDef;
-        _fontStruct = atlas.FontStruct;
+        _metrics = atlas.Metrics;
         _texture = atlas.Texture;
         _shader = atlas.Shader;
     }
@@ -161,7 +161,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         {
             CachedFontAtlas atlas = FontTextureCache.GetOrCreate(value);
             _fontDef = value;
-            _fontStruct = atlas.FontStruct;
+            _metrics = atlas.Metrics;
             _texture = atlas.Texture;
             _shader = atlas.Shader;
             _verticesChanged = true;
@@ -254,7 +254,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     /// <inheritdoc/>
     public Point MeasureString(string text)
     {
-        var raw = _fontStruct.MeasureString(text);
+        var raw = _metrics.MeasureString(text);
         return new Point(raw.X * ScaleX, raw.Y * ScaleY);
     }
 
@@ -267,19 +267,19 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         }
 
         StyledChar[] chars = InlineTagParser.Parse(_textToDisplay, _useInlineTags);
-        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(chars, _fontStruct, Width, ScaleX, _extraSpaceWidth, _extraCharSpacing);
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(chars, _metrics, Width, ScaleX, _extraSpaceWidth, _extraCharSpacing);
         float maxLineWidth = 0f;
 
         foreach (LineInfo line in lines)
         {
-            float lw = TextLayout.MeasureLine(line.Chars, _fontStruct, ScaleX, _extraSpaceWidth, _extraCharSpacing);
+            float lw = TextLayout.MeasureLine(line.Chars, _metrics, ScaleX, _extraSpaceWidth, _extraCharSpacing);
             if (lw > maxLineWidth)
             {
                 maxLineWidth = lw;
             }
         }
 
-        return new Point(maxLineWidth, lines.Count * (_fontStruct.HighestChar * ScaleY + _extraLineSpacing));
+        return new Point(maxLineWidth, lines.Count * (_metrics.HighestChar * ScaleY + _extraLineSpacing));
     }
 
     protected override void OnSizeChanged()
@@ -302,7 +302,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
 
         if (_multiline)
         {
-            return TextLayout.ComputeLines(chars, _fontStruct, Width, ScaleX, _extraSpaceWidth, _extraCharSpacing);
+            return TextLayout.ComputeLines(chars, _metrics, Width, ScaleX, _extraSpaceWidth, _extraCharSpacing);
         }
 
         // A newline can't be drawn as a glyph; in single-line mode it would otherwise crash deep in
@@ -337,7 +337,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         List<VertexNoTexture> decorationVertices = [];
 
         var glColour = Colour.ToOpenTK();
-        float lineHeight = ScaleY * _fontStruct.HighestChar;
+        float lineHeight = ScaleY * _metrics.HighestChar;
         IReadOnlyList<LineInfo> lines = GetLines();
         float totalHeight = lines.Count * (lineHeight + _extraLineSpacing);
 
@@ -368,7 +368,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
                 break;
             }
 
-            float lineWidth = TextLayout.MeasureLine(line.Chars, _fontStruct, ScaleX, _extraSpaceWidth, _extraCharSpacing);
+            float lineWidth = TextLayout.MeasureLine(line.Chars, _metrics, ScaleX, _extraSpaceWidth, _extraCharSpacing);
 
             float charLeft = MathF.Round(HAlignment switch
             {
@@ -393,8 +393,8 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
             foreach (StyledChar sc in line.Chars)
             {
                 char c = sc.Char;
-                var atlasUV = _fontStruct.GetCharPositionNormalised(c);
-                float glyphWidth = _fontStruct.GetCharPosition(c).Size.X * ScaleX;
+                var atlasUV = _metrics.GetCharPositionNormalised(c);
+                float glyphWidth = _metrics.GetCharPosition(c).Size.X * ScaleX;
                 float charAdvance = glyphWidth + (c == ' ' ? _extraSpaceWidth : _extraCharSpacing);
 
                 if (globalCharIndex >= _firstCharToDraw && globalCharIndex < visibleEnd)

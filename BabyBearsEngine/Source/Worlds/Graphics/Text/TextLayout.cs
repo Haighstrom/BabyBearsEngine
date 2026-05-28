@@ -4,7 +4,7 @@ internal static class TextLayout
 {
     public static IReadOnlyList<LineInfo> ComputeLines(
         StyledChar[] chars,
-        GeneratedFontStruct fontStruct,
+        FontAtlasMetrics metrics,
         float maxWidth,
         float scaleX,
         float extraSpaceWidth,
@@ -18,7 +18,7 @@ internal static class TextLayout
             int newlineIdx = FindNewline(chars, segStart);
             int segEnd = newlineIdx >= 0 ? newlineIdx : chars.Length;
 
-            WrapSegment(chars, segStart, segEnd, fontStruct, maxWidth, scaleX, extraSpaceWidth, extraCharSpacing, lines);
+            WrapSegment(chars, segStart, segEnd, metrics, maxWidth, scaleX, extraSpaceWidth, extraCharSpacing, lines);
 
             if (newlineIdx < 0)
             {
@@ -33,7 +33,7 @@ internal static class TextLayout
 
     public static float MeasureLine(
         StyledChar[] chars,
-        GeneratedFontStruct fontStruct,
+        FontAtlasMetrics metrics,
         float scaleX,
         float extraSpaceWidth,
         float extraCharSpacing)
@@ -43,7 +43,7 @@ internal static class TextLayout
         foreach (StyledChar sc in chars)
         {
             char c = sc.Char;
-            width += fontStruct.GetCharPosition(c).Size.X * scaleX;
+            width += metrics.GetCharPosition(c).Size.X * scaleX;
             width += c == ' ' ? extraSpaceWidth : extraCharSpacing;
         }
 
@@ -52,7 +52,7 @@ internal static class TextLayout
 
     public static float MeasureLine(
         string line,
-        GeneratedFontStruct fontStruct,
+        FontAtlasMetrics metrics,
         float scaleX,
         float extraSpaceWidth,
         float extraCharSpacing)
@@ -61,7 +61,7 @@ internal static class TextLayout
 
         foreach (char c in line)
         {
-            width += fontStruct.GetCharPosition(c).Size.X * scaleX;
+            width += metrics.GetCharPosition(c).Size.X * scaleX;
             width += c == ' ' ? extraSpaceWidth : extraCharSpacing;
         }
 
@@ -83,17 +83,17 @@ internal static class TextLayout
 
     private static float CharWidth(
         char c,
-        GeneratedFontStruct fontStruct,
+        FontAtlasMetrics metrics,
         float scaleX,
         float extraSpaceWidth,
         float extraCharSpacing)
-        => fontStruct.GetCharPosition(c).Size.X * scaleX + (c == ' ' ? extraSpaceWidth : extraCharSpacing);
+        => metrics.GetCharPosition(c).Size.X * scaleX + (c == ' ' ? extraSpaceWidth : extraCharSpacing);
 
     private static void WrapSegment(
         StyledChar[] chars,
         int segStart,
         int segEnd,
-        GeneratedFontStruct fontStruct,
+        FontAtlasMetrics metrics,
         float maxWidth,
         float scaleX,
         float extraSpaceWidth,
@@ -117,7 +117,7 @@ internal static class TextLayout
             while (i < segEnd)
             {
                 char c = chars[i].Char;
-                float cw = CharWidth(c, fontStruct, scaleX, extraSpaceWidth, extraCharSpacing);
+                float cw = CharWidth(c, metrics, scaleX, extraSpaceWidth, extraCharSpacing);
 
                 if (lineWidth + cw > maxWidth && i > lineStart)
                 {

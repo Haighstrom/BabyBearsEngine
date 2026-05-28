@@ -11,7 +11,7 @@ internal sealed class FontBitmapGenerator() : IFontBitmapGenerator
     private readonly CharacterBitmapGenerator _charBitmapGenerator = new();
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
-    public GeneratedFontStruct GenerateCharSpritesheetAndPositions(Font font, string charsToLoad, bool antiAliased, int charactersPerRow)
+    public (Bitmap Bitmap, FontAtlasMetrics Metrics) GenerateCharSpritesheetAndPositions(Font font, string charsToLoad, bool antiAliased, int charactersPerRow)
     {
         int widestChar = 0;
         int highestChar = 0;
@@ -73,11 +73,12 @@ internal sealed class FontBitmapGenerator() : IFontBitmapGenerator
             b.Dispose();
         }
 
-        return new GeneratedFontStruct(
-            CharacterSS: characterSS,
+        FontAtlasMetrics metrics = new(
             WidestChar: widestChar,
             HighestChar: highestChar,
             CharPositions: charPositions,
             CharPositionsNormalised: charPositionsNormalised);
+
+        return (characterSS, metrics);
     }
 }
