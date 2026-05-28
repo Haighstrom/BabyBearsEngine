@@ -7,12 +7,12 @@ namespace BabyBearsEngine.Worlds.Graphics.Text;
 internal sealed class CharacterBitmapGenerator : ICharacterBitmapGenerator
 {
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-    public Bitmap GenerateCharacterBitmap(char c, Font font, bool antiAliased)
+    public Bitmap GenerateCharacterBitmap(char c, Font font)
     {
         Bitmap image = new((int)font.Size * 3, (int)font.Size * 3, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         var g = System.Drawing.Graphics.FromImage(image);
-        g.TextRenderingHint = antiAliased ? TextRenderingHint.AntiAlias : TextRenderingHint.AntiAliasGridFit;
-        g.SmoothingMode = antiAliased ? SmoothingMode.AntiAlias : SmoothingMode.Default;
+        g.TextRenderingHint = TextRenderingHint.AntiAlias;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
 
         var stringFormat = new StringFormat(StringFormat.GenericTypographic);
 
@@ -37,8 +37,8 @@ internal sealed class CharacterBitmapGenerator : ICharacterBitmapGenerator
 
         image = new Bitmap(x + width, y + height, System.Drawing.Imaging.PixelFormat.Format32bppArgb); //include alpha at left/top of image so positioning is preserved
         g = System.Drawing.Graphics.FromImage(image);
-        g.TextRenderingHint = antiAliased ? TextRenderingHint.AntiAlias : TextRenderingHint.AntiAliasGridFit;
-        g.SmoothingMode = antiAliased ? SmoothingMode.AntiAlias : SmoothingMode.Default;
+        g.TextRenderingHint = TextRenderingHint.AntiAlias;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
         g.DrawString(c.ToString(), font, new SolidBrush(Color.White), 0, 0, stringFormat);
 
         return image;

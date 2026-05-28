@@ -40,7 +40,6 @@ internal sealed class GdiFontAtlasGenerator : IFontAtlasGenerator
     {
         Font font = new FontLoader().LoadFont(fontDef);
         string charsToLoad = fontDef.CharactersToLoad;
-        bool antiAliased = fontDef.AntiAliased;
 
         int widestChar = 0;
         int highestChar = 0;
@@ -49,7 +48,7 @@ internal sealed class GdiFontAtlasGenerator : IFontAtlasGenerator
         //find the biggest character and create the spritesheet based on this size
         foreach (char c in charsToLoad)
         {
-            var b = _charBitmapGenerator.GenerateCharacterBitmap(c, font, antiAliased);
+            var b = _charBitmapGenerator.GenerateCharacterBitmap(c, font);
 
             if (b.Width > widestChar)
             {
@@ -70,7 +69,7 @@ internal sealed class GdiFontAtlasGenerator : IFontAtlasGenerator
         Bitmap characterSS = new(spriteSheetWidth, spriteSheetHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         var g = System.Drawing.Graphics.FromImage(characterSS);
         g.CompositingQuality = CompositingQuality.HighQuality;
-        g.TextRenderingHint = antiAliased ? TextRenderingHint.AntiAlias : TextRenderingHint.AntiAliasGridFit;
+        g.TextRenderingHint = TextRenderingHint.AntiAlias;
 
         int j = 0, posX, posY;
 
