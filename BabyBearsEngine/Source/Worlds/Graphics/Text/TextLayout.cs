@@ -43,7 +43,7 @@ internal static class TextLayout
         foreach (StyledChar sc in chars)
         {
             char c = sc.Char;
-            width += metrics.GetCharPosition(c).Size.X * scaleX;
+            width += metrics.GetCharAdvance(c) * scaleX;
             width += c == ' ' ? extraSpaceWidth : extraCharSpacing;
         }
 
@@ -61,7 +61,7 @@ internal static class TextLayout
 
         foreach (char c in line)
         {
-            width += metrics.GetCharPosition(c).Size.X * scaleX;
+            width += metrics.GetCharAdvance(c) * scaleX;
             width += c == ' ' ? extraSpaceWidth : extraCharSpacing;
         }
 
@@ -87,7 +87,7 @@ internal static class TextLayout
         float scaleX,
         float extraSpaceWidth,
         float extraCharSpacing)
-        => metrics.GetCharPosition(c).Size.X * scaleX + (c == ' ' ? extraSpaceWidth : extraCharSpacing);
+        => metrics.GetCharAdvance(c) * scaleX + (c == ' ' ? extraSpaceWidth : extraCharSpacing);
 
     private static void WrapSegment(
         StyledChar[] chars,

@@ -89,6 +89,51 @@ public class SdfFontAtlasGeneratorTests
     }
 
     [TestMethod]
+    public void RasteriseAtlas_RenderBoxIsWiderThanAdvanceForGlowMargins()
+    {
+        SdfFontAtlasGenerator generator = new();
+        FontDefinition fontDef = new(TestFontName, 48f);
+
+        (_, _, _, FontAtlasMetrics metrics) = generator.RasteriseAtlas(fontDef);
+
+        // The render quad spans the glyph's full SDF bitmap, which carries a glow margin on each
+        // side beyond the advance. So for an inked glyph the render box must be wider than the
+        // advance — that extra width is exactly the glow that used to be clipped at the cell edge.
+        int advance = metrics.GetCharAdvance('c');
+        int renderWidth = metrics.GetCharPosition('c').Size.X;
+
+        Assert.IsGreaterThan(advance, renderWidth);
+    }
+
+    [TestMethod]
+    public void RasteriseAtlas_AdvanceIsPositiveForEveryCharacter()
+    {
+        SdfFontAtlasGenerator generator = new();
+        FontDefinition fontDef = new(TestFontName, 48f);
+
+        (_, _, _, FontAtlasMetrics metrics) = generator.RasteriseAtlas(fontDef);
+
+        foreach (char c in fontDef.CharactersToLoad)
+        {
+            Assert.IsGreaterThan(0, metrics.GetCharAdvance(c), $"Non-positive advance for '{c}' (U+{(int)c:X4}).");
+        }
+    }
+
+    [TestMethod]
+    public void RasteriseAtlas_SpaceHasAdvanceButNoRenderQuad()
+    {
+        SdfFontAtlasGenerator generator = new();
+        FontDefinition fontDef = new(TestFontName, 48f);
+
+        (_, _, _, FontAtlasMetrics metrics) = generator.RasteriseAtlas(fontDef);
+
+        // Space has no outline: it contributes spacing (a positive advance) but draws no quad, so
+        // its render box collapses to zero width.
+        Assert.IsGreaterThan(0, metrics.GetCharAdvance(' '));
+        Assert.AreEqual(0, metrics.GetCharPosition(' ').Size.X);
+    }
+
+    [TestMethod]
     public void RasteriseAtlas_ContainsInsideGlyphDistances()
     {
         SdfFontAtlasGenerator generator = new();

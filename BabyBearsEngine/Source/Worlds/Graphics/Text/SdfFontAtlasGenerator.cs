@@ -75,20 +75,24 @@ internal sealed class SdfFontAtlasGenerator : IFontAtlasGenerator
         float scale = StbTrueType.stbtt_ScaleForPixelHeight(font, sourcePixelHeight);
 
         var glyphs = new GlyphBitmap?[charCount];
-        var cellWidths = new int[charCount];
-        int widestCell = 1;
+        var advances = new int[charCount];
         int baselineRow;
-        int sourceCellHeight;
+        int emBoxHeight;
+
+        // The atlas cell must be big enough to hold the widest/tallest glyph bitmap *including* its
+        // SDF glow margins, so the distance ramp is never clipped at a cell boundary.
+        int cellWidth = 1;
+        int cellHeight = 1;
 
         unsafe
         {
             int ascent, descent, lineGap;
             StbTrueType.stbtt_GetFontVMetrics(font, &ascent, &descent, &lineGap);
 
-            // Baseline sits 'ascent' down from the top of the cell; the cell spans the full em
-            // (ascent above the baseline, descent below) so ascenders and descenders both fit.
+            // Baseline sits 'ascent' down from the top of the em box; the em box spans the full em
+            // (ascent above the baseline, descent below) and drives line height and glyph placement.
             baselineRow = (int)MathF.Round(ascent * scale);
-            sourceCellHeight = Math.Max(1, (int)MathF.Round((ascent - descent) * scale));
+            emBoxHeight = Math.Max(1, (int)MathF.Round((ascent - descent) * scale));
 
             for (int i = 0; i < charCount; i++)
             {
@@ -96,13 +100,7 @@ internal sealed class SdfFontAtlasGenerator : IFontAtlasGenerator
 
                 int advanceWidth, leftSideBearing;
                 StbTrueType.stbtt_GetCodepointHMetrics(font, c, &advanceWidth, &leftSideBearing);
-                int cellWidth = Math.Max(1, (int)MathF.Round(advanceWidth * scale));
-                cellWidths[i] = cellWidth;
-
-                if (cellWidth > widestCell)
-                {
-                    widestCell = cellWidth;
-                }
+                advances[i] = Math.Max(1, (int)MathF.Round(advanceWidth * scale));
 
                 int glyphWidth, glyphHeight, xOffset, yOffset;
                 byte* sdfPtr = StbTrueType.stbtt_GetCodepointSDF(
@@ -110,7 +108,7 @@ internal sealed class SdfFontAtlasGenerator : IFontAtlasGenerator
                     &glyphWidth, &glyphHeight, &xOffset, &yOffset);
 
                 // Glyphs with no outline (e.g. space, or codepoints absent from the font) return
-                // null. The cell still occupies its advance width so spacing stays correct.
+                // null. They draw nothing; only their advance contributes to layout.
                 if (sdfPtr is null)
                 {
                     glyphs[i] = null;
@@ -122,88 +120,110 @@ internal sealed class SdfFontAtlasGenerator : IFontAtlasGenerator
                 StbTrueType.stbtt_FreeSDF(sdfPtr, null);
 
                 glyphs[i] = new GlyphBitmap(glyphData, glyphWidth, glyphHeight, xOffset, yOffset);
+
+                if (glyphWidth > cellWidth)
+                {
+                    cellWidth = glyphWidth;
+                }
+
+                if (glyphHeight > cellHeight)
+                {
+                    cellHeight = glyphHeight;
+                }
             }
         }
 
-        int spriteSheetWidth = CharactersPerRow * widestCell;
+        int spriteSheetWidth = CharactersPerRow * cellWidth;
         int rowCount = (int)Math.Ceiling((float)charCount / CharactersPerRow);
-        int spriteSheetHeight = Math.Max(1, rowCount * sourceCellHeight);
+        int spriteSheetHeight = Math.Max(1, rowCount * cellHeight);
         byte[] pixels = new byte[spriteSheetWidth * spriteSheetHeight];
 
         float logicalScale = fontDef.FontSize / sourcePixelHeight;
-        int highestCharLogical = Math.Max(1, (int)MathF.Round(sourceCellHeight * logicalScale));
+        int highestCharLogical = Math.Max(1, (int)MathF.Round(emBoxHeight * logicalScale));
         int widestCharLogical = 1;
 
         Dictionary<char, Box2i> charPositions = [];
         Dictionary<char, Box2> charPositionsNormalised = [];
+        Dictionary<char, int> charAdvances = [];
+        Dictionary<char, Vector2i> charBearings = [];
 
         for (int i = 0; i < charCount; i++)
         {
             char c = charsToLoad[i];
-            int cellX = i % CharactersPerRow * widestCell;
-            int cellY = i / CharactersPerRow * sourceCellHeight;
-            int cellWidth = cellWidths[i];
+            int cellX = i % CharactersPerRow * cellWidth;
+            int cellY = i / CharactersPerRow * cellHeight;
+
+            // Advance (logical pixels) drives layout spacing, decoupled from the render-quad size so
+            // the glow margin never pushes glyphs apart.
+            int advanceLogical = Math.Max(1, (int)MathF.Round(advances[i] * logicalScale));
+            charAdvances[c] = advanceLogical;
+
+            if (advanceLogical > widestCharLogical)
+            {
+                widestCharLogical = advanceLogical;
+            }
 
             if (glyphs[i] is GlyphBitmap glyph)
             {
-                BlitGlyph(pixels, spriteSheetWidth, cellX, cellY, cellWidth, sourceCellHeight, baselineRow, glyph);
+                BlitGlyph(pixels, spriteSheetWidth, cellX, cellY, glyph);
+
+                // UVs map to the full glyph bitmap (glow included) at the source resolution.
+                charPositionsNormalised[c] = new Box2(
+                    cellX / (float)spriteSheetWidth,
+                    cellY / (float)spriteSheetHeight,
+                    (cellX + glyph.Width) / (float)spriteSheetWidth,
+                    (cellY + glyph.Height) / (float)spriteSheetHeight);
+
+                // Render-quad size (logical pixels): the box the shader draws into, glow and all.
+                int logicalWidth = Math.Max(1, (int)MathF.Round(glyph.Width * logicalScale));
+                int logicalHeight = Math.Max(1, (int)MathF.Round(glyph.Height * logicalScale));
+                charPositions[c] = new Box2i(0, 0, logicalWidth, logicalHeight);
+
+                // Offset of the render quad's top-left from the pen position and line top. The SDF
+                // bitmap begins 'padding' texels left of, and above, the glyph outline (encoded in
+                // stb's x/y offsets), so the glow lands outside the advance box instead of clipped.
+                int bearingX = (int)MathF.Round(glyph.XOffset * logicalScale);
+                int bearingY = (int)MathF.Round((baselineRow + glyph.YOffset) * logicalScale);
+                charBearings[c] = new Vector2i(bearingX, bearingY);
             }
-
-            // UVs map to the source-resolution atlas; independent of the logical font size.
-            charPositionsNormalised[c] = new Box2(
-                cellX / (float)spriteSheetWidth,
-                cellY / (float)spriteSheetHeight,
-                (cellX + cellWidth) / (float)spriteSheetWidth,
-                (cellY + sourceCellHeight) / (float)spriteSheetHeight);
-
-            // Logical glyph box drives layout: only the size is consumed by TextGraphic, scaled
-            // down from the source resolution to the requested font size.
-            int logicalWidth = Math.Max(1, (int)MathF.Round(cellWidth * logicalScale));
-
-            if (logicalWidth > widestCharLogical)
+            else
             {
-                widestCharLogical = logicalWidth;
+                // No outline: nothing to draw, only the advance applies. A zero-size render box
+                // suppresses the quad while keeping a valid entry for every requested character.
+                charPositionsNormalised[c] = new Box2(0f, 0f, 0f, 0f);
+                charPositions[c] = new Box2i(0, 0, 0, 0);
+                charBearings[c] = Vector2i.Zero;
             }
-
-            int logicalX = (int)MathF.Round(cellX * logicalScale);
-            int logicalY = (int)MathF.Round(cellY * logicalScale);
-            charPositions[c] = new Box2i(logicalX, logicalY, logicalX + logicalWidth, logicalY + highestCharLogical);
         }
 
         FontAtlasMetrics metrics = new(
             WidestChar: widestCharLogical,
             HighestChar: highestCharLogical,
             CharPositions: charPositions,
-            CharPositionsNormalised: charPositionsNormalised);
+            CharPositionsNormalised: charPositionsNormalised,
+            CharAdvances: charAdvances,
+            CharBearings: charBearings);
 
         return (pixels, spriteSheetWidth, spriteSheetHeight, metrics);
     }
 
     /// <summary>
-    /// Copies a glyph's SDF bitmap into its atlas cell at the correct baseline-relative position,
-    /// clipping to the cell so a glyph's distance ramp never bleeds into a neighbouring cell.
+    /// Copies a glyph's full SDF bitmap — distance ramp and glow margins included — into the
+    /// top-left of its atlas cell. The cell is sized to the largest glyph bitmap, so no clipping is
+    /// needed and the distance field is preserved on every side. The surrounding empty cell space
+    /// stays zero ("far outside"), which prevents any bleed into neighbouring cells under linear
+    /// sampling. Per-glyph placement relative to the text baseline is applied later via bearings.
     /// </summary>
-    private static void BlitGlyph(byte[] pixels, int atlasWidth, int cellX, int cellY, int cellWidth, int cellHeight, int baselineRow, GlyphBitmap glyph)
+    private static void BlitGlyph(byte[] pixels, int atlasWidth, int cellX, int cellY, GlyphBitmap glyph)
     {
         for (int sy = 0; sy < glyph.Height; sy++)
         {
-            int destY = cellY + baselineRow + glyph.YOffset + sy;
-
-            if (destY < cellY || destY >= cellY + cellHeight)
-            {
-                continue;
-            }
+            int destRowStart = (cellY + sy) * atlasWidth + cellX;
+            int srcRowStart = sy * glyph.Width;
 
             for (int sx = 0; sx < glyph.Width; sx++)
             {
-                int destX = cellX + glyph.XOffset + sx;
-
-                if (destX < cellX || destX >= cellX + cellWidth)
-                {
-                    continue;
-                }
-
-                pixels[destY * atlasWidth + destX] = glyph.Data[sy * glyph.Width + sx];
+                pixels[destRowStart + sx] = glyph.Data[srcRowStart + sx];
             }
         }
     }

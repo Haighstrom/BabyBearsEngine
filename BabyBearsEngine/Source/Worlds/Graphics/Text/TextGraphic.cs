@@ -394,8 +394,11 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
             {
                 char c = sc.Char;
                 var atlasUV = _metrics.GetCharPositionNormalised(c);
-                float glyphWidth = _metrics.GetCharPosition(c).Size.X * ScaleX;
-                float charAdvance = glyphWidth + (c == ' ' ? _extraSpaceWidth : _extraCharSpacing);
+                var renderBox = _metrics.GetCharPosition(c);
+                var bearing = _metrics.GetCharBearing(c);
+                float renderWidth = renderBox.Size.X * ScaleX;
+                float renderHeight = renderBox.Size.Y * ScaleY;
+                float charAdvance = _metrics.GetCharAdvance(c) * ScaleX + (c == ' ' ? _extraSpaceWidth : _extraCharSpacing);
 
                 if (globalCharIndex >= _firstCharToDraw && globalCharIndex < visibleEnd)
                 {
@@ -403,12 +406,17 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
                         ? sc.Style.ColourOverride.Value.ToOpenTK()
                         : glColour;
 
-                    float quadLeft   = charLeft;
-                    float quadTop    = lineTop;
-                    float quadRight  = charLeft + glyphWidth;
-                    float quadBottom = lineTop + lineHeight;
+                    // The render quad spans the full glyph bitmap including the SDF "glow" margins,
+                    // placed at the pen plus the glyph's bearing. The glow extends outside the advance
+                    // box (and may overlap neighbouring glyphs) rather than being clipped to the cell —
+                    // overlap is harmless because the shader resolves the glow to zero alpha beyond ~1px
+                    // of the edge. The pen still advances by the font advance, kept separate below.
+                    float quadLeft   = charLeft + bearing.X * ScaleX;
+                    float quadTop    = lineTop + bearing.Y * ScaleY;
+                    float quadRight  = quadLeft + renderWidth;
+                    float quadBottom = quadTop + renderHeight;
 
-                    if (glyphWidth > 0 && quadRight > 0 && quadLeft < Width && quadBottom > 0 && quadTop < Height)
+                    if (renderWidth > 0 && quadRight > 0 && quadLeft < Width && quadBottom > 0 && quadTop < Height)
                     {
                         float uvLeft   = atlasUV.Min.X;
                         float uvTop    = atlasUV.Min.Y;
@@ -441,7 +449,10 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
                             quadBottom = Height;
                         }
 
-                        decorationLeft ??= quadLeft;
+                        // Decorations key to the pen position, not the glow-shifted quad: the SDF
+                        // glow margin extends the quad beyond the glyph's logical column and must not
+                        // drag the underline/strikethrough start with it.
+                        decorationLeft ??= MathF.Max(charLeft, 0f);
                         // Advance covers spacing after the glyph; decorations span the full advance, not just glyph width.
                         decorationRight = MathF.Min(charLeft + charAdvance, Width);
 
@@ -457,7 +468,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
                         {
                             if (!inlineUlLeft.HasValue)
                             {
-                                inlineUlLeft = quadLeft;
+                                inlineUlLeft = MathF.Max(charLeft, 0f);
                                 inlineUlColour = charGlColour;
                             }
 
@@ -469,14 +480,14 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
                         {
                             if (!inlineStLeft.HasValue)
                             {
-                                inlineStLeft = quadLeft;
+                                inlineStLeft = MathF.Max(charLeft, 0f);
                                 inlineStColour = charGlColour;
                             }
 
                             inlineStRight = MathF.Min(charLeft + charAdvance, Width);
                         }
                     }
-                    else if (glyphWidth > 0) // zero-width glyphs (pure spacing) don't count as truncation
+                    else if (renderWidth > 0) // zero-width glyphs (pure spacing) don't count as truncation
                     {
                         truncated = true;
                     }

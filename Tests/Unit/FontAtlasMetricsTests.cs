@@ -88,4 +88,56 @@ public class FontAtlasMetricsTests
         Assert.AreEqual(25, metrics.MeasureString("x").Y);
         Assert.AreEqual(25, metrics.MeasureString("xx").Y);
     }
+
+    // GetCharAdvance
+
+    [TestMethod]
+    public void GetCharAdvance_NoAdvanceMap_FallsBackToRenderBoxWidth()
+    {
+        // The GDI+ atlas supplies no advance map: the render-box width *is* the advance.
+        FontAtlasMetrics metrics = MakeMetrics(20, MakePositions(('A', 12)));
+
+        Assert.AreEqual(12, metrics.GetCharAdvance('A'));
+    }
+
+    [TestMethod]
+    public void GetCharAdvance_WithAdvanceMap_UsesMappedAdvanceNotRenderBoxWidth()
+    {
+        // The SDF atlas decouples advance from the glow-inflated render box.
+        Dictionary<char, Box2i> positions = MakePositions(('A', 18));
+        Dictionary<char, int> advances = new() { ['A'] = 12 };
+        FontAtlasMetrics metrics = new(0, 20, positions, [], advances);
+
+        Assert.AreEqual(12, metrics.GetCharAdvance('A'));
+    }
+
+    [TestMethod]
+    public void MeasureString_WithAdvanceMap_SumsAdvancesNotRenderBoxWidths()
+    {
+        Dictionary<char, Box2i> positions = MakePositions(('A', 18), ('B', 16));
+        Dictionary<char, int> advances = new() { ['A'] = 10, ['B'] = 8 };
+        FontAtlasMetrics metrics = new(0, 15, positions, [], advances);
+
+        Assert.AreEqual(18, metrics.MeasureString("AB").X);
+    }
+
+    // GetCharBearing
+
+    [TestMethod]
+    public void GetCharBearing_NoBearingMap_ReturnsZero()
+    {
+        FontAtlasMetrics metrics = MakeMetrics(20, MakePositions(('A', 12)));
+
+        Assert.AreEqual(Vector2i.Zero, metrics.GetCharBearing('A'));
+    }
+
+    [TestMethod]
+    public void GetCharBearing_WithBearingMap_ReturnsMappedOffset()
+    {
+        Dictionary<char, Box2i> positions = MakePositions(('A', 12));
+        Dictionary<char, Vector2i> bearings = new() { ['A'] = new Vector2i(-2, -3) };
+        FontAtlasMetrics metrics = new(0, 20, positions, [], CharBearings: bearings);
+
+        Assert.AreEqual(new Vector2i(-2, -3), metrics.GetCharBearing('A'));
+    }
 }
