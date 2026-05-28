@@ -20,11 +20,12 @@ void main()
 	// > 0.5 is inside the glyph, < 0.5 is outside.
 	float distance = texture(Sampler, Input_TexCoord.TexCoord).r;
 
-	// fwidth gives the rate the distance changes per screen pixel, so the
-	// antialiased band stays ~1px wide no matter how far the text is scaled.
-	// This is the win over a fixed-resolution coverage atlas.
-	float width = fwidth(distance);
-	float alpha = smoothstep(0.5 - width, 0.5 + width, distance);
+	// fwidth gives the rate the distance changes per screen pixel. Dividing the
+	// signed distance-to-edge by it yields a coverage ramp exactly one pixel wide,
+	// so the edge stays crisp at any scale. (A full-fwidth smoothstep spans ~2px and
+	// looks soft; this is the standard tight SDF antialiasing.)
+	float aaWidth = max(fwidth(distance), 1e-5);
+	float alpha = clamp((distance - 0.5) / aaWidth + 0.5, 0.0, 1.0);
 
 	// Input_Colour arrives premultiplied (the vertex shader does rgb *= a), so
 	// scaling the whole colour by coverage keeps it premultiplied for blending.
