@@ -11,10 +11,10 @@ namespace BabyBearsEngine.Worlds.Graphics.Text;
 
 public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposable
 {
-    private readonly StandardMatrixShaderProgram _shader = new();
     private readonly SolidColourShaderProgramMatrix _decorationShader = SolidColourShaderProgramMatrix.Instance;
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
     private readonly VertexDataBuffer<VertexNoTexture> _decorationVertexDataBuffer = new();
+    private IMatrixShaderProgram _shader;
     private ITexture _texture;
     private GeneratedFontStruct _fontStruct;
     private bool _disposedValue;
@@ -54,6 +54,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         _fontDef = fontDef;
         _fontStruct = atlas.FontStruct;
         _texture = atlas.Texture;
+        _shader = atlas.Shader;
     }
 
     /// <param name="theme">Visual styling — font, colour, and alignment.</param>
@@ -162,6 +163,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
             _fontDef = value;
             _fontStruct = atlas.FontStruct;
             _texture = atlas.Texture;
+            _shader = atlas.Shader;
             _verticesChanged = true;
         }
     }
@@ -619,11 +621,8 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         _shader.Bind();
         _vertexDataBuffer.Bind();
         _texture.Bind();
-        if (_shader is IMVPShader mvpShader)
-        {
-            mvpShader.SetProjectionMatrix(ref projection);
-            mvpShader.SetModelViewMatrix(ref mv);
-        }
+        _shader.SetProjectionMatrix(ref projection);
+        _shader.SetModelViewMatrix(ref mv);
         GL.DrawArrays(PrimitiveType.Triangles, 0, Vertices.Length);
 
         if (DecorationVertices.Length > 0)

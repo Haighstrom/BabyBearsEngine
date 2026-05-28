@@ -4,7 +4,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
 
-internal sealed class StencilShaderProgram : ShaderProgramBase, IMVPShader
+internal sealed class StencilShaderProgram : ShaderProgramBase, IMatrixShaderProgram
 {
     private readonly int _mvMatrixLocation;
     private readonly int _pMatrixLocation;

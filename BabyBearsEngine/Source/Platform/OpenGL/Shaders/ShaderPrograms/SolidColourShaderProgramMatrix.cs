@@ -4,7 +4,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
 
-public sealed class SolidColourShaderProgramMatrix : ShaderProgramBase, IMVPShader
+public sealed class SolidColourShaderProgramMatrix : ShaderProgramBase, IMatrixShaderProgram
 {
     private static Lazy<SolidColourShaderProgramMatrix> s_instance = new(() => new SolidColourShaderProgramMatrix());
 

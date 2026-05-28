@@ -32,11 +32,8 @@ internal class GraphicRenderer(ITexture texture) : IDisposable
         _vertexDataBuffer.Bind();
         texture.Bind();
 
-        if (Shader is IMVPShader mvpShader)
-        {
-            mvpShader.SetProjectionMatrix(ref projection);
-            mvpShader.SetModelViewMatrix(ref modelView);
-        }
+        Shader.SetProjectionMatrix(ref projection);
+        Shader.SetModelViewMatrix(ref modelView);
 
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
     }
