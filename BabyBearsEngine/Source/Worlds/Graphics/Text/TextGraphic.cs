@@ -313,6 +313,23 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
            && MathF.Abs(scaleX - 1f) < ScaleSnapTolerance
            && MathF.Abs(scaleY - 1f) < ScaleSnapTolerance;
 
+    /// <summary>
+    /// Whether a glyph's logical content falls outside the graphic's bounds and is therefore cut
+    /// off. Truncation is judged on the glyph's advance cell — horizontally
+    /// [<paramref name="charLeft"/>, charLeft + <paramref name="charAdvance"/>] and vertically the
+    /// line box [<paramref name="lineTop"/>, lineTop + <paramref name="lineHeight"/>] — not on the
+    /// render quad. The SDF backend inflates the render quad with transparent "glow" margins (via
+    /// negative bearings) that legitimately spill past the bounds without any text being lost, so
+    /// keying off the quad would flag those false positives. The GDI backend has zero bearings and a
+    /// quad equal to the advance cell, so its behaviour is unchanged.
+    /// </summary>
+    internal static bool IsContentTruncated(
+        float charLeft, float charAdvance, float lineTop, float lineHeight, float width, float height)
+        => charLeft < 0f
+           || charLeft + charAdvance > width
+           || lineTop < 0f
+           || lineTop + lineHeight > height;
+
     private IReadOnlyList<LineInfo> GetLines()
     {
         StyledChar[] chars = InlineTagParser.Parse(_textToDisplay, _useInlineTags);
@@ -424,6 +441,14 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
                         ? sc.Style.ColourOverride.Value.ToOpenTK()
                         : glColour;
 
+                    // Flag truncation on the glyph's logical advance cell, not its render quad: the
+                    // SDF quad's transparent glow margin spills past the bounds by design and must
+                    // not count as lost text. Spaces (no ink) never count.
+                    if (renderWidth > 0 && IsContentTruncated(charLeft, charAdvance, lineTop, lineHeight, Width, Height))
+                    {
+                        truncated = true;
+                    }
+
                     // The render quad spans the full glyph bitmap including the SDF "glow" margins,
                     // placed at the pen plus the glyph's bearing. The glow extends outside the advance
                     // box (and may overlap neighbouring glyphs) rather than being clipped to the cell —
@@ -451,28 +476,27 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
                         float uvRight  = atlasUV.Max.X;
                         float uvBottom = atlasUV.Max.Y;
 
-                        // Clip the quad to graphic bounds, adjusting UVs proportionally to sample only the visible slice.
+                        // Clip the quad to graphic bounds, adjusting UVs proportionally to sample only
+                        // the visible slice. This is geometry only — whether the clip counts as lost
+                        // text is decided above on the logical advance cell, so the SDF glow margin
+                        // (which is allowed to spill past the edge) is clipped here without warning.
                         if (quadLeft < 0)
                         {
-                            truncated = true;
                             uvLeft += (uvRight - uvLeft) * -quadLeft / (quadRight - quadLeft);
                             quadLeft = 0;
                         }
                         if (quadRight > Width)
                         {
-                            truncated = true;
                             uvRight -= (uvRight - uvLeft) * (quadRight - Width) / (quadRight - quadLeft);
                             quadRight = Width;
                         }
                         if (quadTop < 0)
                         {
-                            truncated = true;
                             uvTop += (uvBottom - uvTop) * -quadTop / (quadBottom - quadTop);
                             quadTop = 0;
                         }
                         if (quadBottom > Height)
                         {
-                            truncated = true;
                             uvBottom -= (uvBottom - uvTop) * (quadBottom - Height) / (quadBottom - quadTop);
                             quadBottom = Height;
                         }
@@ -514,10 +538,6 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
 
                             inlineStRight = MathF.Min(charLeft + charAdvance, Width);
                         }
-                    }
-                    else if (renderWidth > 0) // zero-width glyphs (pure spacing) don't count as truncation
-                    {
-                        truncated = true;
                     }
 
                     // Close any inline decoration span when the style no longer requires it.
