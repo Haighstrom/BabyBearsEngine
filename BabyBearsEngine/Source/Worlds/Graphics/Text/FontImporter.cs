@@ -75,11 +75,17 @@ public static class FontImporter
 
     private const string DefaultDestinationFolder = "Assets/Fonts";
 
-    // One or more separator chars between family and style (e.g. "Roboto-Bold", "Roboto_Bold",
-    // "Roboto Bold"). Required between the family name and the style suffix.
-    private const string SeparatorClass = @"[\s\-_]+";
+    // Separator between family and style. Accepts either:
+    //   - One or more whitespace/dash/underscore chars ("Roboto-Bold", "Roboto_Bold", "Roboto Bold"), or
+    //   - A CamelCase boundary — a lowercase char immediately followed by an uppercase one — for
+    //     packs that smush the style onto the family ("ZodiakItalic", "Zodiak-VariableItalic").
+    // The inline (?-i:) disables IgnoreCase locally so the lookaround character classes treat
+    // "lowercase" as a-z only, not A-Z; otherwise IgnoreCase would let "ABC" register as a boundary.
+    private const string SeparatorClass = @"(?:[\s\-_]+|(?-i:(?<=[a-z])(?=[A-Z])))";
 
-    // Optional separator inside compound names like "Bold Italic", "Extra-Bold", "Semi_Bold".
+    // Optional separator inside compound style suffixes like "Bold Italic", "Extra-Bold",
+    // "Semi_Bold". CamelCase glueing (no separator at all) is also handled by the [\s\-_]* match
+    // length of zero.
     private const string OptionalSeparator = @"[\s\-_]*";
 
     private static readonly Regex s_boldItalicRegex = new(

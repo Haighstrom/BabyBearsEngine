@@ -135,6 +135,52 @@ public class FontImporterTests
             FontImporter.ParseFilename("Lato_Bold"));
     }
 
+    // ── ParseFilename: CamelCase (smushed) suffix ─────────────────────────
+
+    [TestMethod]
+    public void ParseFilename_CamelCaseItalicSuffix_RecognisedAsItalic()
+    {
+        // Zodiak ships its italic as "Zodiak-VariableItalic.ttf" — the "Italic" is glued onto
+        // "Variable" with no separator. Must still classify as Italic.
+        Assert.AreEqual(
+            ("Zodiak-Variable", FontImporter.FontVariantClassification.Italic),
+            FontImporter.ParseFilename("Zodiak-VariableItalic"));
+    }
+
+    [TestMethod]
+    public void ParseFilename_CamelCaseBoldSuffix_RecognisedAsBold()
+    {
+        Assert.AreEqual(
+            ("Zodiak", FontImporter.FontVariantClassification.Bold),
+            FontImporter.ParseFilename("ZodiakBold"));
+    }
+
+    [TestMethod]
+    public void ParseFilename_CamelCaseBoldItalicSuffix_RecognisedAsBoldItalic()
+    {
+        Assert.AreEqual(
+            ("Zodiak", FontImporter.FontVariantClassification.BoldItalic),
+            FontImporter.ParseFilename("ZodiakBoldItalic"));
+    }
+
+    [TestMethod]
+    public void ParseFilename_CamelCaseLightSuffix_RecognisedAsOtherWeight()
+    {
+        Assert.AreEqual(
+            ("Zodiak", FontImporter.FontVariantClassification.OtherWeight),
+            FontImporter.ParseFilename("ZodiakLight"));
+    }
+
+    [TestMethod]
+    public void ParseFilename_AllUppercaseNoLowerToUpperBoundary_FallsThrough()
+    {
+        // No CamelCase boundary in an all-uppercase name, so no smushed suffix can be detected.
+        // Falls through to the default (stem, Regular).
+        Assert.AreEqual(
+            ("ROBOTOBOLD", FontImporter.FontVariantClassification.Regular),
+            FontImporter.ParseFilename("ROBOTOBOLD"));
+    }
+
     // ── ParseFilename: family names with internal separators ──────────────
 
     [TestMethod]
