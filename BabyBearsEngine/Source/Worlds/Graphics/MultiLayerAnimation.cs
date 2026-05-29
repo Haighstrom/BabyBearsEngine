@@ -74,11 +74,18 @@ public class MultiLayerAnimation(float x, float y, float width, float height, do
     public event EventHandler? AnimationComplete;
 
     /// <summary>
-    /// Adds a sprite-sheet texture at the given sub-layer. Higher sub-layers render further behind.
-    /// All textures must have the same frame count and UV layout as the first one added.
+    /// Adds a sprite-sheet at the given sub-layer. Higher sub-layers render further behind.
+    /// All sheets must have the same frame count as the first one added. The sheet must be a
+    /// renderable <see cref="ISpriteTexture"/>; pure-data <see cref="ISpriteSheet"/>s with no
+    /// GPU surface are rejected.
     /// </summary>
-    public void AddTexture(ISpriteTexture texture, int subLayer = 0)
+    public void AddTexture(ISpriteSheet sheet, int subLayer = 0)
     {
+        if (sheet is not ISpriteTexture texture)
+        {
+            throw new ArgumentException($"Sheet must implement {nameof(ISpriteTexture)} to be rendered by {nameof(MultiLayerAnimation)}.", nameof(sheet));
+        }
+
         if (_layers.Count > 0)
         {
             if (texture.Frames != ReferenceTexture.Frames)
@@ -92,10 +99,10 @@ public class MultiLayerAnimation(float x, float y, float width, float height, do
         _layers.Sort((a, b) => b.SubLayer.CompareTo(a.SubLayer));
     }
 
-    /// <summary>Removes a previously added texture.</summary>
-    public void RemoveTexture(ISpriteTexture texture)
+    /// <summary>Removes a previously added sheet.</summary>
+    public void RemoveTexture(ISpriteSheet sheet)
     {
-        int index = _layers.FindIndex(t => t.Texture == texture);
+        int index = _layers.FindIndex(t => t.Texture == sheet);
 
         if (index >= 0)
         {
