@@ -70,6 +70,14 @@ public class ScrollbarTests
     private static Scrollbar MakeScrollable(ScrollbarDirection direction = ScrollbarDirection.Vertical, float amountFilled = 0.5f) =>
         Attach(new(20, 200, direction, amountFilled: amountFilled, scrollOnMouseWheel: true));
 
+    // Vertical 20x200 with thumb proportion 0.2 → thumb height = 40, max thumb Y = 160.
+    // Horizontal 200x20 with thumb proportion 0.2 → thumb width = 40, max thumb X = 160.
+    private static Scrollbar MakeTrackClickableV(float amountFilled = 0.5f) =>
+        Attach(new(20, 200, ScrollbarDirection.Vertical, amountFilled: amountFilled, scrollOnTrackClick: true));
+
+    private static Scrollbar MakeTrackClickableH(float amountFilled = 0.5f) =>
+        Attach(new(200, 20, ScrollbarDirection.Horizontal, amountFilled: amountFilled, scrollOnTrackClick: true));
+
     private FakeMouse _mouse = null!;
 
     [TestInitialize]
@@ -340,6 +348,151 @@ public class ScrollbarTests
     {
         Scrollbar bar = Attach(new(20, 200, ScrollbarDirection.Vertical, amountFilled: 0.5f, scrollOnMouseWheel: false));
         _mouse.WheelDelta = 1f;
+
+        Frame(bar);
+
+        Assert.AreEqual(0.5f, bar.AmountFilled);
+    }
+
+    // -------------------------------------------------------------------------
+    // Track-click scrolling
+
+    [TestMethod]
+    public void TrackClickStep_DefaultIsPointTwo()
+    {
+        Scrollbar bar = MakeTrackClickableV();
+
+        Assert.AreEqual(0.2f, bar.TrackClickStep);
+    }
+
+    [TestMethod]
+    public void TrackClick_AboveThumb_Vertical_DecreasesAmountFilled()
+    {
+        // Thumb at y=80..120 (amountFilled=0.5); click at y=5 is above.
+        Scrollbar bar = MakeTrackClickableV(amountFilled: 0.5f);
+        _mouse.ClientX = 5;
+        _mouse.ClientY = 5;
+        Frame(bar);
+        _mouse.LeftPressed = true;
+
+        Frame(bar);
+
+        Assert.AreEqual(0.3f, bar.AmountFilled, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void TrackClick_BelowThumb_Vertical_IncreasesAmountFilled()
+    {
+        // Thumb at y=80..120 (amountFilled=0.5); click at y=150 is below.
+        Scrollbar bar = MakeTrackClickableV(amountFilled: 0.5f);
+        _mouse.ClientX = 5;
+        _mouse.ClientY = 150;
+        Frame(bar);
+        _mouse.LeftPressed = true;
+
+        Frame(bar);
+
+        Assert.AreEqual(0.7f, bar.AmountFilled, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void TrackClick_BeforeThumb_Horizontal_DecreasesAmountFilled()
+    {
+        // Thumb at x=80..120 (amountFilled=0.5); click at x=5 is before.
+        Scrollbar bar = MakeTrackClickableH(amountFilled: 0.5f);
+        _mouse.ClientX = 5;
+        _mouse.ClientY = 5;
+        Frame(bar);
+        _mouse.LeftPressed = true;
+
+        Frame(bar);
+
+        Assert.AreEqual(0.3f, bar.AmountFilled, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void TrackClick_AfterThumb_Horizontal_IncreasesAmountFilled()
+    {
+        // Thumb at x=80..120 (amountFilled=0.5); click at x=150 is after.
+        Scrollbar bar = MakeTrackClickableH(amountFilled: 0.5f);
+        _mouse.ClientX = 150;
+        _mouse.ClientY = 5;
+        Frame(bar);
+        _mouse.LeftPressed = true;
+
+        Frame(bar);
+
+        Assert.AreEqual(0.7f, bar.AmountFilled, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void TrackClick_ClampsAtZero()
+    {
+        Scrollbar bar = MakeTrackClickableV(amountFilled: 0.1f);
+        _mouse.ClientX = 5;
+        _mouse.ClientY = 5;
+        Frame(bar);
+        _mouse.LeftPressed = true;
+
+        Frame(bar);
+
+        Assert.AreEqual(0f, bar.AmountFilled);
+    }
+
+    [TestMethod]
+    public void TrackClick_ClampsAtOne()
+    {
+        // At amountFilled=0.9 thumb is at y=144..184; click at y=195 is below.
+        Scrollbar bar = MakeTrackClickableV(amountFilled: 0.9f);
+        _mouse.ClientX = 5;
+        _mouse.ClientY = 195;
+        Frame(bar);
+        _mouse.LeftPressed = true;
+
+        Frame(bar);
+
+        Assert.AreEqual(1f, bar.AmountFilled);
+    }
+
+    [TestMethod]
+    public void TrackClick_RaisesScrollChanged()
+    {
+        Scrollbar bar = MakeTrackClickableV(amountFilled: 0.5f);
+        bool raised = false;
+        bar.ScrollChanged += (_, _) => raised = true;
+        _mouse.ClientX = 5;
+        _mouse.ClientY = 5;
+        Frame(bar);
+        _mouse.LeftPressed = true;
+
+        Frame(bar);
+
+        Assert.IsTrue(raised);
+    }
+
+    [TestMethod]
+    public void TrackClick_CustomStep_IsUsed()
+    {
+        Scrollbar bar = MakeTrackClickableV(amountFilled: 0.5f);
+        bar.TrackClickStep = 0.05f;
+        _mouse.ClientX = 5;
+        _mouse.ClientY = 150;
+        Frame(bar);
+        _mouse.LeftPressed = true;
+
+        Frame(bar);
+
+        Assert.AreEqual(0.55f, bar.AmountFilled, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void ScrollOnTrackClick_False_DoesNotScroll()
+    {
+        Scrollbar bar = Attach(new(20, 200, ScrollbarDirection.Vertical, amountFilled: 0.5f, scrollOnTrackClick: false));
+        _mouse.ClientX = 5;
+        _mouse.ClientY = 5;
+        Frame(bar);
+        _mouse.LeftPressed = true;
 
         Frame(bar);
 

@@ -1,4 +1,5 @@
 ﻿using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Input;
 using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Worlds.UI;
@@ -20,6 +21,7 @@ public class Scrollbar : Entity
     private const float MinThumbProportion = 0.05f;
 
     private readonly ScrollbarDirection _direction;
+    private readonly bool _scrollOnTrackClick = false;
     private readonly Button _thumb;
     private float _thumbProportion;
     private float _amountFilled = 0f;
@@ -33,6 +35,7 @@ public class Scrollbar : Entity
     /// <param name="thumbProportion">Thumb size as a fraction of the track length (along the scroll axis), in [0.05, 1]. Defaults to 0.2 (20%).</param>
     /// <param name="amountFilled">Initial scroll position in [0, 1]. Defaults to 0.</param>
     /// <param name="scrollOnMouseWheel">When true, scroll wheel movement over this scrollbar adjusts <see cref="AmountFilled"/> by <see cref="WheelScrollStep"/> per notch and consumes the wheel event. Defaults to true.</param>
+    /// <param name="scrollOnTrackClick">When true, left-clicking the track outside the thumb adjusts <see cref="AmountFilled"/> by <see cref="TrackClickStep"/> in the click's direction. Defaults to true.</param>
     /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
     public Scrollbar(
         float x,
@@ -44,10 +47,12 @@ public class Scrollbar : Entity
         float thumbProportion = 0.2f,
         float amountFilled = 0f,
         bool scrollOnMouseWheel = true,
+        bool scrollOnTrackClick = true,
         int layer = 0)
-        : base(x, y, width, height, clickable: scrollOnMouseWheel, layer: layer)
+        : base(x, y, width, height, clickable: scrollOnMouseWheel || scrollOnTrackClick, layer: layer)
     {
         _direction = direction;
+        _scrollOnTrackClick = scrollOnTrackClick;
         _thumbProportion = Math.Clamp(thumbProportion, MinThumbProportion, 1f);
         _amountFilled = Math.Clamp(amountFilled, 0f, 1f);
 
@@ -83,6 +88,7 @@ public class Scrollbar : Entity
     /// <param name="thumbProportion">Thumb size as a fraction of the track length (along the scroll axis), in [0.05, 1]. Defaults to 0.2 (20%).</param>
     /// <param name="amountFilled">Initial scroll position in [0, 1]. Defaults to 0.</param>
     /// <param name="scrollOnMouseWheel">When true, scroll wheel movement over this scrollbar adjusts <see cref="AmountFilled"/> by <see cref="WheelScrollStep"/> per notch and consumes the wheel event. Defaults to true.</param>
+    /// <param name="scrollOnTrackClick">When true, left-clicking the track outside the thumb adjusts <see cref="AmountFilled"/> by <see cref="TrackClickStep"/> in the click's direction. Defaults to true.</param>
     /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
     public Scrollbar(
         Rect rect,
@@ -91,15 +97,24 @@ public class Scrollbar : Entity
         float thumbProportion = 0.2f,
         float amountFilled = 0f,
         bool scrollOnMouseWheel = true,
+        bool scrollOnTrackClick = true,
         int layer = 0)
-        : this(rect.X, rect.Y, rect.W, rect.H, direction, theme, thumbProportion, amountFilled, scrollOnMouseWheel, layer)
+        : this(rect.X, rect.Y, rect.W, rect.H, direction, theme, thumbProportion, amountFilled, scrollOnMouseWheel, scrollOnTrackClick, layer)
     {
     }
 
-    internal Scrollbar(float width, float height, ScrollbarDirection direction, float thumbProportion = 0.2f, float amountFilled = 0f, bool scrollOnMouseWheel = false)
-        : base(0, 0, width, height, clickable: scrollOnMouseWheel)
+    internal Scrollbar(
+        float width,
+        float height,
+        ScrollbarDirection direction,
+        float thumbProportion = 0.2f,
+        float amountFilled = 0f,
+        bool scrollOnMouseWheel = false,
+        bool scrollOnTrackClick = false)
+        : base(0, 0, width, height, clickable: scrollOnMouseWheel || scrollOnTrackClick)
     {
         _direction = direction;
+        _scrollOnTrackClick = scrollOnTrackClick;
         _thumbProportion = Math.Clamp(thumbProportion, MinThumbProportion, 1f);
         _amountFilled = Math.Clamp(amountFilled, 0f, 1f);
 
@@ -157,8 +172,52 @@ public class Scrollbar : Entity
     /// </summary>
     public float WheelScrollStep { get; set; } = 0.1f;
 
+    /// <summary>
+    /// How much <see cref="AmountFilled"/> changes per left-click on the track outside the
+    /// thumb when <c>scrollOnTrackClick</c> was enabled at construction. Defaults to 0.2 (20%
+    /// of the track). Clicking before the thumb decreases <see cref="AmountFilled"/>; clicking
+    /// after the thumb increases it.
+    /// </summary>
+    public float TrackClickStep { get; set; } = 0.2f;
+
     /// <summary>Raised after <see cref="AmountFilled"/> changes — by user drag or direct assignment.</summary>
     public event EventHandler<ScrollChangedEventArgs>? ScrollChanged;
+
+    /// <inheritdoc/>
+    protected override void OnLeftPressed()
+    {
+        base.OnLeftPressed();
+
+        if (!_scrollOnTrackClick)
+        {
+            return;
+        }
+
+        var (thumbWindowX, thumbWindowY) = GetWindowCoordinates(_thumb.X, _thumb.Y);
+
+        if (_direction == ScrollbarDirection.Horizontal)
+        {
+            if (Mouse.ClientX < thumbWindowX)
+            {
+                AmountFilled -= TrackClickStep;
+            }
+            else if (Mouse.ClientX >= thumbWindowX + _thumb.Width)
+            {
+                AmountFilled += TrackClickStep;
+            }
+        }
+        else
+        {
+            if (Mouse.ClientY < thumbWindowY)
+            {
+                AmountFilled -= TrackClickStep;
+            }
+            else if (Mouse.ClientY >= thumbWindowY + _thumb.Height)
+            {
+                AmountFilled += TrackClickStep;
+            }
+        }
+    }
 
     /// <inheritdoc/>
     protected override void OnMouseScrolled(float delta)
