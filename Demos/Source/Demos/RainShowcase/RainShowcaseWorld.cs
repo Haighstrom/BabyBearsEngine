@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using BabyBearsEngine.AudioSystem;
 using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Platform.ImageLoading;
+using BabyBearsEngine.Worlds.GraphicEffects;
 using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Worlds.Graphics.Text;
 using BabyBearsEngine.Worlds.Particles;
@@ -29,6 +32,16 @@ internal sealed class RainShowcaseWorld : DemoWorld
     private const string BackgroundPath = "Assets/RainShowcase/background.png";
     private const string RaindropPath = "Assets/RainShowcase/raindrop.png";
     private const string RainMusicPath = "Assets/Audio/Music/rain-loop.wav";
+    private const string SplashMaskPath = "Assets/RainShowcase/rain_splash_locations.png";
+
+    // Mask sampling: walk every Nth pixel and weight each candidate by its grey value.
+    // The denser/sparser split mirrors what the user painted into the mask — black puddles
+    // get a heavier weight than the surrounding ground.
+    private const int MaskSampleStep = 4;
+    private const byte MaskBlackThreshold = 64;
+    private const byte MaskGreyThreshold = 200;
+    private const int MaskBlackWeight = 3;
+    private const int MaskGreyWeight = 1;
 
     private const float DefaultIntensity = 1f;
     private const float MaxWindSpeed = 220f;
@@ -50,8 +63,9 @@ internal sealed class RainShowcaseWorld : DemoWorld
 
     private readonly Random _random = new();
     private readonly RainLayer[] _layers;
-    private readonly LightningController _lightning;
+    private readonly Flash _lightning;
     private readonly ColourGraphic _lightningOverlay;
+    private readonly SplashSpawner _splashSpawner;
     private IMusicClip? _rainClip = null;
     private float _wind = 0f;
     private float _intensity = DefaultIntensity;
@@ -75,11 +89,13 @@ internal sealed class RainShowcaseWorld : DemoWorld
             Add(layer.System);
         }
 
+        _splashSpawner = BuildSplashes();
+
         _lightningOverlay = new ColourGraphic(new Colour(255, 255, 255, 0),
             0, 0, Window.Width, Window.Height, layer: 1);
         Add(_lightningOverlay);
 
-        _lightning = new LightningController(_lightningOverlay, _random);
+        _lightning = new Flash(_lightningOverlay, _random);
         Add(_lightning);
 
         BuildTitle();
@@ -161,6 +177,71 @@ internal sealed class RainShowcaseWorld : DemoWorld
                 particleLayer: 4,
                 texture: raindropTexture),
         ];
+    }
+
+    private SplashSpawner BuildSplashes()
+    {
+        // One shared particle system drives every splash on the ground. The emitter shape's
+        // Centre is mutated per burst by the spawner, so all splashes recycle the same GL
+        // buffers and shader rather than allocating a new ParticleSystem per impact.
+        // Splash particles render slightly behind the nearest rain layer so close streaks
+        // pass in front of distant impacts.
+        SplashEmitterShape shape = new(minSpeed: 40f, maxSpeed: 110f);
+        ParticleSystem system = new(shape, layer: 5, _random)
+        {
+            EmissionRate = 0f,           // bursts only — no steady stream
+            Emitting = false,
+            Lifetime = 0.4f,
+            StartSize = new Point(1.6f, 1.6f),
+            Colour = new Colour(235, 245, 255, 230),
+            MaxParticles = 800,
+            ColourOverLife = static (t, startColour) => new Colour(
+                startColour.R,
+                startColour.G,
+                startColour.B,
+                (byte)Math.Round(startColour.A * (1f - t))),
+            SizeOverLife = static (t, startSize) => startSize * (1f - 0.35f * t),
+        };
+        Add(system);
+
+        List<Point> candidates = BuildSplashCandidatesFromMask(SplashMaskPath);
+
+        SplashSpawner spawner = new(system, shape, candidates, _random);
+        Add(spawner);
+        return spawner;
+    }
+
+    private static List<Point> BuildSplashCandidatesFromMask(string maskPath)
+    {
+        Rgba8ImageData mask = ImageLoader.LoadAsRgba8(maskPath);
+        List<Point> candidates = [];
+
+        for (int y = 0; y < mask.Height; y += MaskSampleStep)
+        {
+            for (int x = 0; x < mask.Width; x += MaskSampleStep)
+            {
+                int byteIndex = (y * mask.Width + x) * 4;
+                byte intensity = mask.Data[byteIndex];
+
+                int weight = intensity < MaskBlackThreshold
+                    ? MaskBlackWeight
+                    : intensity < MaskGreyThreshold
+                        ? MaskGreyWeight
+                        : 0;
+
+                for (int repeat = 0; repeat < weight; repeat++)
+                {
+                    candidates.Add(new Point(x, y));
+                }
+            }
+        }
+
+        if (candidates.Count == 0)
+        {
+            Logger.Warning($"RainShowcase: splash mask '{maskPath}' yielded zero candidates — splashes will not spawn.");
+        }
+
+        return candidates;
     }
 
     private RainLayer BuildRainLayer(Point size, float speed, Colour colour, float maxRate,
@@ -340,6 +421,7 @@ internal sealed class RainShowcaseWorld : DemoWorld
             layer.System.EmissionRate = layer.MaxRate * _intensity;
             layer.System.Emitting = _intensity > 0.001f;
         }
+        _splashSpawner.Intensity = _intensity;
     }
 
     private static string FormatWind(float wind)
