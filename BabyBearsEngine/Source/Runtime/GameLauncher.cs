@@ -1,6 +1,8 @@
 using System.Reflection;
+using BabyBearsEngine.AudioSystem;
 using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Platform.OpenAL;
 using BabyBearsEngine.Platform.OpenTK;
 using BabyBearsEngine.Worlds;
 
@@ -53,9 +55,12 @@ public static class GameLauncher
         // individual fonts can still opt into the other via FontDefinition.Renderer.
         EngineConfiguration.DefaultTextRenderer = appSettings.TextSettings.Renderer;
 
+        OpenALAudioService? audioService = null;
         try
         {
             var engine = new OpenTKGameEngine(appSettings);
+
+            audioService = new OpenALAudioService(appSettings.AudioSettings);
 
             EngineConfiguration.Initialise(
                 window: new OpenTKWindowAdapter(engine),
@@ -63,6 +68,7 @@ public static class GameLauncher
                 mouse: new OpenTKMouseAdapter(engine.MouseState),
                 worldSwitcher: engine,
                 engineInfo: engine.EngineInfo,
+                audio: audioService,
                 screenCapture: appSettings.DiagnosticsSettings.CaptureFrames ? new OpenTKScreenCaptureAdapter(engine) : null);
 
             engine.Run(worldFactory());
@@ -80,6 +86,8 @@ public static class GameLauncher
             // being torn down anyway.
             SolidColourShaderProgram.ResetForNextRun();
             SolidColourShaderProgramMatrix.ResetForNextRun();
+
+            audioService?.Dispose();
 
             EngineConfiguration.Reset();
             s_running = false;

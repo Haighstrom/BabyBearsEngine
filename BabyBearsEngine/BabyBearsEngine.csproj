@@ -9,7 +9,7 @@
     <Description>A 2D game engine built on OpenTK.</Description>
     <Authors>Simon Haigh</Authors>
     <Copyright>Copyright © Simon Haigh 2026</Copyright>
-    <Version>0.2.4</Version>
+    <Version>0.3.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -43,6 +43,33 @@
   <ItemGroup>
     <None Update="Assets\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!--
+    OpenAL Soft (OpenAL32.dll) is required at runtime by OpenTK.Audio.OpenAL. We ship it with the
+    engine so games and tests don't depend on a system-wide install. The DLL is the OpenAL Soft
+    redistributable - BSD-licensed.
+
+    Placement under runtimes/win-x64/native/ is the canonical layout the .NET runtime knows to
+    probe for native libraries (via deps.json), so both normal app launches and test hosts find
+    it without any DllImportResolver workarounds. CopyToOutputDirectory preserves the folder
+    structure so the same probe works from bin output.
+  -->
+  <ItemGroup>
+    <None Include="runtimes\win-x64\native\OpenAL32.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+      <PackagePath>runtimes\win-x64\native\OpenAL32.dll</PackagePath>
+    </None>
+    <!--
+      wrap_oal.dll is the backend implementation that the OpenAL32.dll router DLL delegates to.
+      It must sit alongside OpenAL32.dll at load time.
+    -->
+    <None Include="runtimes\win-x64\native\wrap_oal.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+      <PackagePath>runtimes\win-x64\native\wrap_oal.dll</PackagePath>
     </None>
   </ItemGroup>
 

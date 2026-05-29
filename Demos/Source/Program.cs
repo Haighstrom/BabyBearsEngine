@@ -1,5 +1,6 @@
 ﻿using System;
 using BabyBearsEngine.Demos.Source.Demos.AnimationDemo;
+using BabyBearsEngine.Demos.Source.Demos.AudioDemo;
 using BabyBearsEngine.Demos.Source.Demos.BorderDemo;
 using BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
 using BabyBearsEngine.Demos.Source.Demos.CameraDemo;
@@ -104,6 +105,7 @@ MenuEntry[] mainMenuEntries =
     new("Graphics",  getGraphicsSubmenu,  MenuEntryStyle.Submenu),
     new("Input",     getInputSubmenu,     MenuEntryStyle.Submenu),
     new("Showcases", getShowcasesSubmenu, MenuEntryStyle.Submenu),
+    new("Audio Demo",  () => new AudioDemoWorld(getMainMenu)),
     new("Camera Demo", () => new CameraDemoWorld(getMainMenu)),
     new("IO Demo",     () => new IODemoWorld(getMainMenu)),
     new("Tween Demo",  () => new TweenDemoWorld(getMainMenu)),

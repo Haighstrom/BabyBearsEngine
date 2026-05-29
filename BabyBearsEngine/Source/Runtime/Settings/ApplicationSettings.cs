@@ -12,6 +12,9 @@ public record class ApplicationSettings()
     /// <summary>The default application settings — all subsystems at their defaults.</summary>
     public static ApplicationSettings Default => new();
 
+    /// <summary>Configuration for the audio subsystem: SFX channel pool size, initial volumes, and music playlist defaults.</summary>
+    public AudioSettings AudioSettings { get; init; } = AudioSettings.Default;
+
     /// <summary>Configuration for the optional debug console window (position, size, and visibility).</summary>
     public ConsoleSettings ConsoleSettings { get; init; } = ConsoleSettings.Default;
 

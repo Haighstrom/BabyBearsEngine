@@ -1,3 +1,4 @@
+using BabyBearsEngine.AudioSystem;
 using BabyBearsEngine.Input;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Worlds;
@@ -19,6 +20,7 @@ internal static class EngineConfiguration
     private static readonly Dictionary<TextRenderer, IFontAtlasGenerator> s_atlasGenerators = [];
     private static TextRenderer s_defaultTextRenderer = TextRenderer.Gdi;
 
+    private static IAudio? s_audio = null;
     private static IEngineInfo? s_engineInfo = null;
     private static IGPUResourceDeletionService? s_gpuResourceDeletionService = null;
     private static IKeyboard? s_keyboard = null;
@@ -65,6 +67,12 @@ internal static class EngineConfiguration
             ArgumentNullException.ThrowIfNull(value);
             RegisterAtlasGenerator(s_defaultTextRenderer, value);
         }
+    }
+
+    public static IAudio AudioService
+    {
+        get => s_audio ?? throw new InvalidOperationException(NotInitialisedMessage);
+        set => s_audio = value ?? throw new ArgumentNullException(nameof(value));
     }
 
     public static IEngineInfo EngineInfo
@@ -136,6 +144,7 @@ internal static class EngineConfiguration
         IMouse mouse,
         IWorldSwitcher worldSwitcher,
         IEngineInfo engineInfo,
+        IAudio audio,
         IScreenCapture? screenCapture,
         IGPUResourceDeletionService? gpuResourceDeletion = null,
         ITextureFactory? textureFactory = null,
@@ -146,12 +155,14 @@ internal static class EngineConfiguration
         ArgumentNullException.ThrowIfNull(mouse, nameof(mouse));
         ArgumentNullException.ThrowIfNull(worldSwitcher, nameof(worldSwitcher));
         ArgumentNullException.ThrowIfNull(engineInfo, nameof(engineInfo));
+        ArgumentNullException.ThrowIfNull(audio, nameof(audio));
 
         if (s_window is not null
             || s_keyboard is not null
             || s_mouse is not null
             || s_worldSwitcher is not null
             || s_engineInfo is not null
+            || s_audio is not null
             || s_screenCapture is not null
             || s_gpuResourceDeletionService is not null
             || s_textureFactory is not null
@@ -165,6 +176,7 @@ internal static class EngineConfiguration
         s_mouse = mouse;
         s_worldSwitcher = worldSwitcher;
         s_engineInfo = engineInfo;
+        s_audio = audio;
         s_screenCapture = screenCapture;
         s_gpuResourceDeletionService = gpuResourceDeletion ?? new DefaultGPUResourceDeletionService();
         s_textureFactory = textureFactory ?? new DefaultTextureFactory();
@@ -198,6 +210,7 @@ internal static class EngineConfiguration
         DefaultCameraMsaa = MsaaSamples.Disabled;
         s_atlasGenerators.Clear();
         s_defaultTextRenderer = TextRenderer.Gdi;
+        s_audio = null;
         s_engineInfo = null;
         s_gpuResourceDeletionService = null;
         s_keyboard = null;
