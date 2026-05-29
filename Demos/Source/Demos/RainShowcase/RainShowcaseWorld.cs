@@ -133,27 +133,28 @@ internal sealed class RainShowcaseWorld : DemoWorld
 
     private RainLayer[] BuildRainLayers(ITexture? raindropTexture)
     {
-        // Layer order, back to front: far → mid → near. Far particles are smaller, slower, and
-        // dimmer — they read as distance. Near particles are larger, faster, and brighter so
-        // the foreground feels close. Rendering order is enforced via the Layer property.
+        // Layer order, back to front: far → mid → near. Far streaks are shorter, slower, and
+        // dimmer — they read as distance. Near streaks are longer, faster, and brighter so
+        // the foreground feels close. Each particle is a thin tall quad — width is the streak
+        // thickness, height is the streak length. Rendering order is enforced via Layer.
         return
         [
             BuildRainLayer(
-                size: 2.0f,
+                size: new Point(1.4f, 12f),
                 speed: 280f,
                 colour: new Colour(150, 175, 210, 165),
                 maxRate: 280f,
                 particleLayer: 6,
                 texture: raindropTexture),
             BuildRainLayer(
-                size: 3.0f,
+                size: new Point(1.8f, 18f),
                 speed: 480f,
                 colour: new Colour(190, 210, 240, 200),
                 maxRate: 360f,
                 particleLayer: 5,
                 texture: raindropTexture),
             BuildRainLayer(
-                size: 4.5f,
+                size: new Point(2.4f, 28f),
                 speed: 780f,
                 colour: new Colour(230, 240, 255, 235),
                 maxRate: 420f,
@@ -162,7 +163,7 @@ internal sealed class RainShowcaseWorld : DemoWorld
         ];
     }
 
-    private RainLayer BuildRainLayer(float size, float speed, Colour colour, float maxRate,
+    private RainLayer BuildRainLayer(Point size, float speed, Colour colour, float maxRate,
         int particleLayer, ITexture? texture)
     {
         // Lifetime tuned to cover the screen height plus a small buffer at the chosen speed —

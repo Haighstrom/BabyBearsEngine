@@ -112,8 +112,14 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
     /// </summary>
     public ParticleShaderProgram? Shader => _shader;
 
-    /// <summary>Size in pixels applied to every emitted particle as its <see cref="Particle.StartSize"/>. Default 16. Must be > 0.</summary>
-    public float StartSize { get; set; } = 16f;
+    /// <summary>
+    /// Per-axis size in pixels applied to every emitted particle as its
+    /// <see cref="Particle.StartSize"/>. X is quad width, Y is quad height. Pass equal
+    /// components for a square sprite (the common case); unequal components for stretched
+    /// billboards — rain streaks (small X, large Y), wide shockwaves (large X, small Y).
+    /// Default <c>(16, 16)</c>. Components must be > 0.
+    /// </summary>
+    public Point StartSize { get; set; } = new(16f, 16f);
 
     /// <summary>
     /// Optional texture sampled across each particle's quad, multiplied by the per-particle
@@ -127,11 +133,13 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
     public ITexture? Texture { get; set; } = null;
 
     /// <summary>
-    /// Function that returns the rendered size for a particle based on its normalised
-    /// lifetime <c>t</c> (0 → 1) and its <see cref="Particle.StartSize"/>. Default returns the
-    /// start size unchanged. Use e.g. <c>(t, s) => s * (1 - t)</c> for shrinking-to-nothing.
+    /// Function that returns the rendered per-axis size for a particle based on its
+    /// normalised lifetime <c>t</c> (0 → 1) and its <see cref="Particle.StartSize"/>. Default
+    /// returns the start size unchanged. Use e.g.
+    /// <c>(t, s) => new Point(s.X * (1 - t), s.Y * (1 - t))</c> for shrinking-to-nothing on
+    /// both axes, or scale axes independently to e.g. lengthen rain streaks as they fall.
     /// </summary>
-    public Func<float, float, float> SizeOverLife { get; set; } = static (t, startSize) => startSize;
+    public Func<float, Point, Point> SizeOverLife { get; set; } = static (t, startSize) => startSize;
 
     /// <inheritdoc/>
     public bool Visible { get; set; } = true;
@@ -258,7 +266,7 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
 
     private ParticleVertex[] BuildVertices()
     {
-        var vertices = new ParticleVertex[_particles.Count];
+        ParticleVertex[] vertices = new ParticleVertex[_particles.Count];
         for (int i = 0; i < _particles.Count; i++)
         {
             Particle particle = _particles[i];
@@ -266,12 +274,13 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
                 ? Math.Clamp(1f - particle.RemainingLifetime / particle.TotalLifetime, 0f, 1f)
                 : 1f;
             Colour currentColour = ColourOverLife(t, particle.StartColour);
-            float currentSize = SizeOverLife(t, particle.StartSize);
+            Point currentSize = SizeOverLife(t, particle.StartSize);
             vertices[i] = new ParticleVertex(
                 particle.Position.X,
                 particle.Position.Y,
                 currentColour.ToOpenTK(),
-                currentSize);
+                currentSize.X,
+                currentSize.Y);
         }
         return vertices;
     }

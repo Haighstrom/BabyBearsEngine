@@ -8,14 +8,16 @@ namespace BabyBearsEngine.Worlds.Particles;
 /// are sampled at spawn time and combined with the system's per-frame colour-over-life and
 /// size-over-life functions to compute the current visual values without mutating the spawn
 /// state — so the over-life functions can be swapped between frames and still produce sensible
-/// results for particles already in flight.
+/// results for particles already in flight. <see cref="StartSize"/> is a 2D vector
+/// (X = quad width, Y = quad height); square sprites set X = Y, stretched billboards (rain
+/// streaks, shockwaves) set them independently.
 /// </summary>
 public struct Particle
 {
     public Point Position;
     public Point Velocity;
     public Colour StartColour;
-    public float StartSize;
+    public Point StartSize;
     public float TotalLifetime;
     public float RemainingLifetime;
 }

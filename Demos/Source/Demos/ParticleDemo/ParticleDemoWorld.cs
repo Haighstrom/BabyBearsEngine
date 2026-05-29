@@ -69,7 +69,7 @@ internal sealed class ParticleDemoWorld : DemoWorld
         {
             EmissionRate = 120f,
             Lifetime = 1.8f,
-            StartSize = 14f,
+            StartSize = new Point(14f, 14f),
             Colour = new Colour(255, 200, 120),
             MaxParticles = 4000,
             SizeOverLife = (t, startSize) => startSize * (1f - 0.6f * t),

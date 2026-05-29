@@ -5,9 +5,9 @@ using OpenTK.Mathematics;
 namespace BabyBearsEngine.OpenGL;
 
 [StructLayout(LayoutKind.Sequential)]
-internal readonly struct ParticleVertex(float x, float y, Color4 colour, float size) : IVertex
+internal readonly struct ParticleVertex(float x, float y, Color4 colour, float sizeX, float sizeY) : IVertex
 {
-    public static int Stride { get; } = (2 + 4 + 1) * sizeof(float);
+    public static int Stride { get; } = (2 + 4 + 2) * sizeof(float);
 
     public static void SetVertexAttributes()
     {
@@ -18,7 +18,7 @@ internal readonly struct ParticleVertex(float x, float y, Color4 colour, float s
         GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, Stride, 2 * sizeof(float));
 
         GL.EnableVertexAttribArray(2);
-        GL.VertexAttribPointer(2, 1, VertexAttribPointerType.Float, false, Stride, (2 + 4) * sizeof(float));
+        GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, Stride, (2 + 4) * sizeof(float));
     }
 
     public float X { get; } = x;
@@ -27,5 +27,7 @@ internal readonly struct ParticleVertex(float x, float y, Color4 colour, float s
 
     public Color4 Colour { get; } = colour;
 
-    public float Size { get; } = size;
+    public float SizeX { get; } = sizeX;
+
+    public float SizeY { get; } = sizeY;
 }

@@ -1,10 +1,10 @@
-// Billboard vertex shader. Outputs raw position + size for a geometry-shader stage
+// Billboard vertex shader. Outputs raw position + per-axis size for a geometry-shader stage
 // (billboard_points_to_quads.geom) to expand into a camera-facing quad.
 #version 330
 
 layout (location = 0) in vec2 Position;
 layout (location = 1) in vec4 Colour;
-layout (location = 2) in float Size;
+layout (location = 2) in vec2 Size;
 
 out ColourData
 {
@@ -13,7 +13,7 @@ out ColourData
 
 out SizeData
 {
-	float Size;
+	vec2 Size;
 } Output_Size;
 
 void main()

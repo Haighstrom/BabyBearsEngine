@@ -163,7 +163,7 @@ public class ParticleSystemTests
                     EmissionRate = 0f,
                     Emitting = false,
                     Lifetime = 5f,
-                    StartSize = 40f,
+                    StartSize = new Point(40f, 40f),
                     Colour = bright,
                     Texture = texture,
                 };
@@ -207,7 +207,7 @@ public class ParticleSystemTests
                     EmissionRate = 0f,
                     Emitting = false,
                     Lifetime = 5f,
-                    StartSize = 40f,
+                    StartSize = new Point(40f, 40f),
                     Colour = bright,
                 };
                 system.EmitBurst(1);
@@ -252,7 +252,7 @@ public class ParticleSystemTests
                     EmissionRate = 0f,
                     Emitting = false,
                     Lifetime = 5f,
-                    StartSize = 10f,
+                    StartSize = new Point(10f, 10f),
                     Colour = Colour.Red,
                 };
                 system.EmitBurst(1);
@@ -289,7 +289,7 @@ public class ParticleSystemTests
                 {
                     EmissionRate = 200f,
                     Lifetime = 1.5f,
-                    StartSize = 6f,
+                    StartSize = new Point(6f, 6f),
                     Colour = Colour.Yellow,
                 };
                 w.Add(system);

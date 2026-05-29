@@ -1,6 +1,7 @@
-// Expands each input point into a camera-facing quad centred on it, sized by the per-point
-// Size attribute carried through from billboard.vert. Used for particle / sprite-from-point
-// rendering.
+// Expands each input point into a camera-facing quad centred on it. The per-axis Size carried
+// through from billboard.vert (Size.x = quad width, Size.y = quad height) lets a single shader
+// drive both square sprites (equal components) and stretched billboards like rain streaks
+// (unequal components). Used for particle and sprite-from-point rendering.
 #version 150
 
 uniform mat3 MVMatrix;
@@ -17,7 +18,7 @@ in ColourData
 
 in SizeData
 {
-	float Size;
+	vec2 Size;
 } Input_SizeData[];
 
 out ColourData
@@ -34,8 +35,8 @@ void main()
 {
 	for (int i = 0; i < 4; ++i)
 	{
-		vec2 eyePos = gl_in[0].gl_Position.xy;                   //start with point position
-		eyePos += Input_SizeData[0].Size * (corners[i] - vec2(0.5)); //add corner offset
+		vec2 eyePos = gl_in[0].gl_Position.xy;
+		eyePos += Input_SizeData[0].Size * (corners[i] - vec2(0.5));
 		gl_Position = vec4(PMatrix * MVMatrix * vec3(eyePos.xy, 1), 1);
 		Output_TexCoord.TexCoord = corners[i];
 		Output_Colour.Colour = Input_Colour[0].Colour;
