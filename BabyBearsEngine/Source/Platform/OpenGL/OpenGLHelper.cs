@@ -136,6 +136,11 @@ internal static class OpenGLHelper
 
     public static int CreateShaderProgram(int vertexShader, int fragmentShader, bool deleteShaders = true)
     {
+        return CreateShaderProgram(vertexShader, geometryShader: 0, fragmentShader, deleteShaders);
+    }
+
+    public static int CreateShaderProgram(int vertexShader, int geometryShader, int fragmentShader, bool deleteShaders = true)
+    {
         int programHandle = GL.CreateProgram();
 
         bool programBuiltSuccessfully = false;
@@ -144,6 +149,10 @@ internal static class OpenGLHelper
         try
         {
             GL.AttachShader(programHandle, vertexShader);
+            if (geometryShader != 0)
+            {
+                GL.AttachShader(programHandle, geometryShader);
+            }
             GL.AttachShader(programHandle, fragmentShader);
             GL.LinkProgram(programHandle);
             GL.GetProgram(programHandle, GetProgramParameterName.LinkStatus, out int linkStatus);
@@ -165,10 +174,18 @@ internal static class OpenGLHelper
                 if (shadersAttached)
                 {
                     GL.DetachShader(programHandle, vertexShader);
+                    if (geometryShader != 0)
+                    {
+                        GL.DetachShader(programHandle, geometryShader);
+                    }
                     GL.DetachShader(programHandle, fragmentShader);
                 }
 
                 GL.DeleteShader(vertexShader);
+                if (geometryShader != 0)
+                {
+                    GL.DeleteShader(geometryShader);
+                }
                 GL.DeleteShader(fragmentShader);
             }
 
