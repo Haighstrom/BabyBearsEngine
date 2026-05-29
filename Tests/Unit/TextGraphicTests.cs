@@ -5,6 +5,7 @@ namespace BabyBearsEngine.Tests.Unit;
 [TestClass]
 public class TextGraphicTests
 {
+
     [TestMethod]
     public void ShouldPixelSnap_NativeScaleNoRotation_ReturnsTrue()
     {
@@ -95,5 +96,87 @@ public class TextGraphicTests
         // The line box extends below the bottom edge: the row is cut off vertically.
         Assert.IsTrue(TextGraphic.IsContentTruncated(
             charLeft: 10f, charAdvance: 12f, lineTop: 30f, lineHeight: 20f, width: 360f, height: 36f));
+    }
+
+    // Bold/italic auto-discovery convention. Exercised via the internal helper so the tests do
+    // not need a GL context (TextGraphic's decoration shader Lazy<> would fail to initialise).
+
+    [TestMethod]
+    public void TryAutoDiscoverVariant_FontWithBoldCompanion_ReturnsRenamedFontDefinition()
+    {
+        // Arial_b.ttf is shipped in Assets/Fonts as the bold companion to Arial.ttf.
+        FontDefinition baseFont = new("Arial", 12f);
+
+        FontDefinition? bold = TextGraphic.TryAutoDiscoverVariant(baseFont, "_b");
+
+        Assert.IsNotNull(bold);
+        Assert.AreEqual("Arial_b", bold!.FontName);
+        Assert.AreEqual(12f, bold.FontSize);
+    }
+
+    [TestMethod]
+    public void TryAutoDiscoverVariant_FontWithItalicCompanion_ReturnsRenamedFontDefinition()
+    {
+        FontDefinition baseFont = new("Arial", 12f);
+
+        FontDefinition? italic = TextGraphic.TryAutoDiscoverVariant(baseFont, "_i");
+
+        Assert.IsNotNull(italic);
+        Assert.AreEqual("Arial_i", italic!.FontName);
+    }
+
+    [TestMethod]
+    public void TryAutoDiscoverVariant_FontWithBoldItalicCompanion_ReturnsRenamedFontDefinition()
+    {
+        // Arial_bi.ttf is shipped in Assets/Fonts as the bold-italic companion to Arial.ttf.
+        FontDefinition baseFont = new("Arial", 12f);
+
+        FontDefinition? boldItalic = TextGraphic.TryAutoDiscoverVariant(baseFont, "_bi");
+
+        Assert.IsNotNull(boldItalic);
+        Assert.AreEqual("Arial_bi", boldItalic!.FontName);
+    }
+
+    [TestMethod]
+    public void TryAutoDiscoverVariant_TahomaHasNoBoldItalicCompanion_ReturnsNull()
+    {
+        // Tahoma ships no italic at all on Windows, so neither _i nor _bi exist.
+        FontDefinition baseFont = new("Tahoma", 12f);
+
+        Assert.IsNull(TextGraphic.TryAutoDiscoverVariant(baseFont, "_bi"));
+    }
+
+    [TestMethod]
+    public void TryAutoDiscoverVariant_TahomaHasBoldButNoItalic_ReturnsBoldNotItalic()
+    {
+        // Windows ships Tahoma Bold but no Tahoma Italic — the convention should distinguish.
+        FontDefinition baseFont = new("Tahoma", 12f);
+
+        Assert.IsNotNull(TextGraphic.TryAutoDiscoverVariant(baseFont, "_b"));
+        Assert.IsNull(TextGraphic.TryAutoDiscoverVariant(baseFont, "_i"));
+    }
+
+    [TestMethod]
+    public void TryAutoDiscoverVariant_FontWithNoCompanion_ReturnsNull()
+    {
+        FontDefinition baseFont = new("MadeUpFont", 12f);
+
+        Assert.IsNull(TextGraphic.TryAutoDiscoverVariant(baseFont, "_b"));
+        Assert.IsNull(TextGraphic.TryAutoDiscoverVariant(baseFont, "_i"));
+    }
+
+    [TestMethod]
+    public void TryAutoDiscoverVariant_PreservesSizeRendererAndExtraChars()
+    {
+        // The variant must inherit everything but the FontName — size, renderer, and the
+        // ExtraCharactersToLoad list — so its atlas covers the same glyph set as the base.
+        FontDefinition baseFont = new("Arial", 18f, ExtraCharactersToLoad: "αβ", Renderer: TextRenderer.Gdi);
+
+        FontDefinition? bold = TextGraphic.TryAutoDiscoverVariant(baseFont, "_b");
+
+        Assert.IsNotNull(bold);
+        Assert.AreEqual(18f, bold!.FontSize);
+        Assert.AreEqual(TextRenderer.Gdi, bold.Renderer);
+        Assert.AreEqual("αβ", bold.ExtraCharactersToLoad);
     }
 }

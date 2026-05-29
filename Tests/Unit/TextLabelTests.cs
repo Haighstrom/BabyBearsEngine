@@ -19,6 +19,9 @@ public class TextLabelTests
         public float ExtraSpaceWidth { get; set; } = 0f;
         public int FirstCharToDraw { get; set; } = 0;
         public FontDefinition Font { get; set; } = new("Arial", 12);
+        public FontDefinition? BoldFont { get; set; } = null;
+        public FontDefinition? ItalicFont { get; set; } = null;
+        public FontDefinition? BoldItalicFont { get; set; } = null;
         public bool Multiline { get; set; } = false;
         public int NumCharsToDraw { get; set; } = int.MaxValue;
         public float ScaleX { get; set; } = 1f;

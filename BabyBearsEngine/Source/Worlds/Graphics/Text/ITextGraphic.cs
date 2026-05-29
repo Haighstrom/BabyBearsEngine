@@ -26,6 +26,31 @@ public interface ITextGraphic : IRenderable, IAddable
     /// <summary>The font definition used to render <see cref="Text"/>.</summary>
     FontDefinition Font { get; set; }
 
+    /// <summary>
+    /// Optional font used to render spans marked with <c>&lt;b&gt;...&lt;/b&gt;</c>. When <see cref="Font"/>
+    /// is assigned, a companion <c>{FontName}_b.ttf</c> in <c>Assets/Fonts/</c> (if present) is picked up
+    /// automatically; assign this property to override. When null and a <c>&lt;b&gt;</c> span is rendered,
+    /// the base font is used and a warning is logged.
+    /// </summary>
+    FontDefinition? BoldFont { get; set; }
+
+    /// <summary>
+    /// Optional font used to render spans marked with <c>&lt;i&gt;...&lt;/i&gt;</c>. When <see cref="Font"/>
+    /// is assigned, a companion <c>{FontName}_i.ttf</c> in <c>Assets/Fonts/</c> (if present) is picked up
+    /// automatically; assign this property to override. When null and an <c>&lt;i&gt;</c> span is rendered,
+    /// the base font is used and a warning is logged.
+    /// </summary>
+    FontDefinition? ItalicFont { get; set; }
+
+    /// <summary>
+    /// Optional font used to render spans marked with both <c>&lt;b&gt;</c> and <c>&lt;i&gt;</c> at the same
+    /// time. When <see cref="Font"/> is assigned, a companion <c>{FontName}_bi.ttf</c> in
+    /// <c>Assets/Fonts/</c> (if present) is picked up automatically; assign this property to override.
+    /// When null and a bold-italic span is rendered, the renderer falls back to <see cref="BoldFont"/>,
+    /// then <see cref="ItalicFont"/>, then the base font, logging a warning the first time.
+    /// </summary>
+    FontDefinition? BoldItalicFont { get; set; }
+
     /// <summary>When true, text wraps to multiple lines within the graphic's width.</summary>
     bool Multiline { get; set; }
 
@@ -47,7 +72,7 @@ public interface ITextGraphic : IRenderable, IAddable
     /// <summary>Optional underline decoration drawn beneath rendered characters, or <see langword="null"/> for none.</summary>
     TextDecoration? Underline { get; set; }
 
-    /// <summary>When true, inline markup tags (e.g. <c>&lt;colour=#FF0000&gt;</c>, <c>&lt;u&gt;</c>, <c>&lt;s&gt;</c>) are parsed and applied during rendering. When false, tag characters are rendered literally.</summary>
+    /// <summary>When true, inline markup tags (e.g. <c>&lt;colour=#FF0000&gt;</c>, <c>&lt;u&gt;</c>, <c>&lt;s&gt;</c>, <c>&lt;b&gt;</c>, <c>&lt;i&gt;</c>) are parsed and applied during rendering. When false, tag characters are rendered literally.</summary>
     bool UseInlineTags { get; set; }
 
     /// <summary>Returns the rendered size of <paramref name="text"/> in pixels at the current scale.</summary>

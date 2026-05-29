@@ -79,6 +79,16 @@ internal static class InlineTagParser
             activeOverrides.Add(new StyleOverride("s", null));
             currentStyle = ComputeStyle(activeOverrides);
         }
+        else if (lower == "b")
+        {
+            activeOverrides.Add(new StyleOverride("b", null));
+            currentStyle = ComputeStyle(activeOverrides);
+        }
+        else if (lower == "i")
+        {
+            activeOverrides.Add(new StyleOverride("i", null));
+            currentStyle = ComputeStyle(activeOverrides);
+        }
         else if (lower.StartsWith("colour="))
         {
             string colourStr = tagContent[7..].Trim();
@@ -114,7 +124,7 @@ internal static class InlineTagParser
                 Logger.Warning("InlineTagParser: '</>' found but no open tag to close.");
             }
         }
-        else if (closeName is "u" or "s" or "colour")
+        else if (closeName is "u" or "s" or "b" or "i" or "colour")
         {
             int lastIdx = FindLastIndex(activeOverrides, closeName);
 
@@ -152,6 +162,8 @@ internal static class InlineTagParser
         Colour? colour = null;
         bool underline = false;
         bool strikethrough = false;
+        bool bold = false;
+        bool italic = false;
 
         foreach (StyleOverride o in overrides)
         {
@@ -166,10 +178,16 @@ internal static class InlineTagParser
                 case "s":
                     strikethrough = true;
                     break;
+                case "b":
+                    bold = true;
+                    break;
+                case "i":
+                    italic = true;
+                    break;
             }
         }
 
-        return new InlineTagStyle(colour, underline, strikethrough);
+        return new InlineTagStyle(colour, underline, strikethrough, bold, italic);
     }
 
     private static bool TryParseColour(string value, out Colour colour)

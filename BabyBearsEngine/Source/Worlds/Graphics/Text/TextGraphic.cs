@@ -1,4 +1,5 @@
 ﻿using BabyBearsEngine.Diagnostics;
+using BabyBearsEngine.IO;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Platform.OpenGL.Buffers;
@@ -16,12 +17,38 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     // text drawn at native size still snaps, while genuinely scaled text does not.
     private const float ScaleSnapTolerance = 0.001f;
 
+    // Convention used by BoldFont/ItalicFont/BoldItalicFont auto-discovery: a companion file named
+    // "{baseFontName}_b.ttf", "{baseFontName}_i.ttf", or "{baseFontName}_bi.ttf" in Assets/Fonts/ is
+    // picked up automatically when the base Font is assigned.
+    private const string DefaultFontFolder = "Assets/Fonts/";
+    private const string BoldSuffix = "_b";
+    private const string ItalicSuffix = "_i";
+    private const string BoldItalicSuffix = "_bi";
+
     private readonly SolidColourShaderProgramMatrix _decorationShader = SolidColourShaderProgramMatrix.Instance;
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
+    private readonly VertexDataBuffer<Vertex> _boldVertexDataBuffer = new();
+    private readonly VertexDataBuffer<Vertex> _italicVertexDataBuffer = new();
+    private readonly VertexDataBuffer<Vertex> _boldItalicVertexDataBuffer = new();
     private readonly VertexDataBuffer<VertexNoTexture> _decorationVertexDataBuffer = new();
     private IMatrixShaderProgram _shader;
     private ITexture _texture;
     private FontAtlasMetrics _metrics;
+    private FontDefinition? _boldFontDef;
+    private FontAtlasMetrics? _boldMetrics;
+    private ITexture? _boldTexture;
+    private IMatrixShaderProgram? _boldShader;
+    private FontDefinition? _italicFontDef;
+    private FontAtlasMetrics? _italicMetrics;
+    private ITexture? _italicTexture;
+    private IMatrixShaderProgram? _italicShader;
+    private FontDefinition? _boldItalicFontDef;
+    private FontAtlasMetrics? _boldItalicMetrics;
+    private ITexture? _boldItalicTexture;
+    private IMatrixShaderProgram? _boldItalicShader;
+    private bool _warnedMissingBold = false;
+    private bool _warnedMissingItalic = false;
+    private bool _warnedMissingBoldItalic = false;
     private bool _disposedValue;
     private FontDefinition _fontDef;
     private string _textToDisplay;
@@ -60,6 +87,10 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         _metrics = atlas.Metrics;
         _texture = atlas.Texture;
         _shader = atlas.Shader;
+
+        SetBoldFontInternal(TryAutoDiscoverVariant(fontDef, BoldSuffix));
+        SetItalicFontInternal(TryAutoDiscoverVariant(fontDef, ItalicSuffix));
+        SetBoldItalicFontInternal(TryAutoDiscoverVariant(fontDef, BoldItalicSuffix));
     }
 
     /// <param name="theme">Visual styling — font, colour, and alignment.</param>
@@ -169,6 +200,63 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
             _metrics = atlas.Metrics;
             _texture = atlas.Texture;
             _shader = atlas.Shader;
+            _warnedMissingBold = false;
+            _warnedMissingItalic = false;
+            _warnedMissingBoldItalic = false;
+
+            // Re-run auto-discovery for the new base font. Variants that the caller previously set
+            // explicitly are preserved — we only refresh slots that are currently null.
+            if (_boldFontDef is null)
+            {
+                SetBoldFontInternal(TryAutoDiscoverVariant(value, BoldSuffix));
+            }
+
+            if (_italicFontDef is null)
+            {
+                SetItalicFontInternal(TryAutoDiscoverVariant(value, ItalicSuffix));
+            }
+
+            if (_boldItalicFontDef is null)
+            {
+                SetBoldItalicFontInternal(TryAutoDiscoverVariant(value, BoldItalicSuffix));
+            }
+
+            _verticesChanged = true;
+        }
+    }
+
+    /// <inheritdoc/>
+    public FontDefinition? BoldFont
+    {
+        get => _boldFontDef;
+        set
+        {
+            SetBoldFontInternal(value);
+            _warnedMissingBold = false;
+            _verticesChanged = true;
+        }
+    }
+
+    /// <inheritdoc/>
+    public FontDefinition? ItalicFont
+    {
+        get => _italicFontDef;
+        set
+        {
+            SetItalicFontInternal(value);
+            _warnedMissingItalic = false;
+            _verticesChanged = true;
+        }
+    }
+
+    /// <inheritdoc/>
+    public FontDefinition? BoldItalicFont
+    {
+        get => _boldItalicFontDef;
+        set
+        {
+            SetBoldItalicFontInternal(value);
+            _warnedMissingBoldItalic = false;
             _verticesChanged = true;
         }
     }
@@ -230,6 +318,9 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
 
     private VertexNoTexture[] DecorationVertices { get; set; } = [];
     private Vertex[] Vertices { get; set; } = [];
+    private Vertex[] BoldVertices { get; set; } = [];
+    private Vertex[] ItalicVertices { get; set; } = [];
+    private Vertex[] BoldItalicVertices { get; set; } = [];
 
     /// <inheritdoc/>
     public float ScaleX
@@ -365,9 +456,152 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         ScaleY = 1f / view.TileHeight;
     }
 
+    private void SetBoldFontInternal(FontDefinition? value)
+    {
+        _boldFontDef = value;
+
+        if (value is not null)
+        {
+            FontAtlas atlas = FontTextureCache.GetOrCreate(value);
+            _boldMetrics = atlas.Metrics;
+            _boldTexture = atlas.Texture;
+            _boldShader = atlas.Shader;
+        }
+        else
+        {
+            _boldMetrics = null;
+            _boldTexture = null;
+            _boldShader = null;
+        }
+    }
+
+    private void SetItalicFontInternal(FontDefinition? value)
+    {
+        _italicFontDef = value;
+
+        if (value is not null)
+        {
+            FontAtlas atlas = FontTextureCache.GetOrCreate(value);
+            _italicMetrics = atlas.Metrics;
+            _italicTexture = atlas.Texture;
+            _italicShader = atlas.Shader;
+        }
+        else
+        {
+            _italicMetrics = null;
+            _italicTexture = null;
+            _italicShader = null;
+        }
+    }
+
+    private void SetBoldItalicFontInternal(FontDefinition? value)
+    {
+        _boldItalicFontDef = value;
+
+        if (value is not null)
+        {
+            FontAtlas atlas = FontTextureCache.GetOrCreate(value);
+            _boldItalicMetrics = atlas.Metrics;
+            _boldItalicTexture = atlas.Texture;
+            _boldItalicShader = atlas.Shader;
+        }
+        else
+        {
+            _boldItalicMetrics = null;
+            _boldItalicTexture = null;
+            _boldItalicShader = null;
+        }
+    }
+
+    /// <summary>
+    /// Looks for a companion font file alongside <paramref name="baseFont"/> following the
+    /// <c>{FontName}_b.ttf</c> / <c>{FontName}_i.ttf</c> convention. Returns a clone of the base
+    /// FontDefinition pointing at the new file when found, or <see langword="null"/> otherwise.
+    /// </summary>
+    internal static FontDefinition? TryAutoDiscoverVariant(FontDefinition baseFont, string suffix)
+    {
+        if (string.IsNullOrEmpty(baseFont.FontName))
+        {
+            return null;
+        }
+
+        string candidateName = baseFont.FontName + suffix;
+        string candidatePath = DefaultFontFolder + candidateName + ".ttf";
+
+        if (!Files.FileExists(candidatePath))
+        {
+            return null;
+        }
+
+        // The file IS the bold/italic design, so keep FontStyle.Regular — passing Bold/Italic here
+        // would ask the renderer to synthesise the style on top of an already-styled face.
+        return baseFont with { FontName = candidateName };
+    }
+
+    /// <summary>
+    /// Chooses which atlas (metrics and vertex list) to use for a styled character. When both
+    /// <c>&lt;b&gt;</c> and <c>&lt;i&gt;</c> are active, prefers <see cref="BoldItalicFont"/>; if that is not
+    /// registered, falls through to <see cref="BoldFont"/>, then <see cref="ItalicFont"/>, then the
+    /// base font, logging a one-shot warning whenever the slot for the requested style is missing.
+    /// </summary>
+    private (FontAtlasMetrics Metrics, List<Vertex> Output) SelectAtlasForStyle(
+        InlineTagStyle style,
+        List<Vertex> regular,
+        List<Vertex> bold,
+        List<Vertex> italic,
+        List<Vertex> boldItalic)
+    {
+        if (style.Bold && style.Italic)
+        {
+            if (_boldItalicMetrics is not null)
+            {
+                return (_boldItalicMetrics, boldItalic);
+            }
+
+            if (!_warnedMissingBoldItalic)
+            {
+                Logger.Warning($"TextGraphic: <b><i> span encountered but BoldItalicFont is not set on font '{_fontDef.FontName}' — falling back to bold/italic/base.");
+                _warnedMissingBoldItalic = true;
+            }
+        }
+
+        if (style.Bold)
+        {
+            if (_boldMetrics is not null)
+            {
+                return (_boldMetrics, bold);
+            }
+
+            if (!_warnedMissingBold)
+            {
+                Logger.Warning($"TextGraphic: <b> span encountered but BoldFont is not set on font '{_fontDef.FontName}' — falling back to base font.");
+                _warnedMissingBold = true;
+            }
+        }
+
+        if (style.Italic)
+        {
+            if (_italicMetrics is not null)
+            {
+                return (_italicMetrics, italic);
+            }
+
+            if (!_warnedMissingItalic)
+            {
+                Logger.Warning($"TextGraphic: <i> span encountered but ItalicFont is not set on font '{_fontDef.FontName}' — falling back to base font.");
+                _warnedMissingItalic = true;
+            }
+        }
+
+        return (_metrics, regular);
+    }
+
     private void SetVertices()
     {
         List<Vertex> vertices = [];
+        List<Vertex> boldVertices = [];
+        List<Vertex> italicVertices = [];
+        List<Vertex> boldItalicVertices = [];
         List<VertexNoTexture> decorationVertices = [];
 
         var glColour = Colour.ToOpenTK();
@@ -428,12 +662,13 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
             foreach (StyledChar sc in line.Chars)
             {
                 char c = sc.Char;
-                var atlasUV = _metrics.GetCharPositionNormalised(c);
-                var renderBox = _metrics.GetCharPosition(c);
-                var bearing = _metrics.GetCharBearing(c);
+                (FontAtlasMetrics charMetrics, List<Vertex> charVertexOutput) = SelectAtlasForStyle(sc.Style, vertices, boldVertices, italicVertices, boldItalicVertices);
+                var atlasUV = charMetrics.GetCharPositionNormalised(c);
+                var renderBox = charMetrics.GetCharPosition(c);
+                var bearing = charMetrics.GetCharBearing(c);
                 float renderWidth = renderBox.Size.X * ScaleX;
                 float renderHeight = renderBox.Size.Y * ScaleY;
-                float charAdvance = _metrics.GetCharAdvance(c) * ScaleX + (c == ' ' ? _extraSpaceWidth : _extraCharSpacing);
+                float charAdvance = charMetrics.GetCharAdvance(c) * ScaleX + (c == ' ' ? _extraSpaceWidth : _extraCharSpacing);
 
                 if (globalCharIndex >= _firstCharToDraw && globalCharIndex < visibleEnd)
                 {
@@ -508,7 +743,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
                         // Advance covers spacing after the glyph; decorations span the full advance, not just glyph width.
                         decorationRight = MathF.Min(charLeft + charAdvance, Width);
 
-                        vertices.Add(GeometryHelper.QuadToTris(
+                        charVertexOutput.Add(GeometryHelper.QuadToTris(
                             new Vertex(quadLeft,  quadTop,    charGlColour, uvLeft,  uvTop),
                             new Vertex(quadRight, quadTop,    charGlColour, uvRight, uvTop),
                             new Vertex(quadLeft,  quadBottom, charGlColour, uvLeft,  uvBottom),
@@ -613,6 +848,9 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         }
 
         Vertices = [..vertices];
+        BoldVertices = [..boldVertices];
+        ItalicVertices = [..italicVertices];
+        BoldItalicVertices = [..boldItalicVertices];
         DecorationVertices = [..decorationVertices];
 
         if (truncated && !_wasTruncated)
@@ -666,6 +904,9 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         {
             SetVertices();
             _vertexDataBuffer.SetNewVertices(Vertices);
+            _boldVertexDataBuffer.SetNewVertices(BoldVertices);
+            _italicVertexDataBuffer.SetNewVertices(ItalicVertices);
+            _boldItalicVertexDataBuffer.SetNewVertices(BoldItalicVertices);
             _decorationVertexDataBuffer.SetNewVertices(DecorationVertices);
             _verticesChanged = false;
         }
@@ -677,12 +918,45 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
             mv = Matrix3.RotateAroundPoint(ref mv, _angle, Width / 2, Height / 2);
         }
 
-        _shader.Bind();
-        _vertexDataBuffer.Bind();
-        _texture.Bind();
-        _shader.SetProjectionMatrix(ref projection);
-        _shader.SetModelViewMatrix(ref mv);
-        GL.DrawArrays(PrimitiveType.Triangles, 0, Vertices.Length);
+        if (Vertices.Length > 0)
+        {
+            _shader.Bind();
+            _vertexDataBuffer.Bind();
+            _texture.Bind();
+            _shader.SetProjectionMatrix(ref projection);
+            _shader.SetModelViewMatrix(ref mv);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, Vertices.Length);
+        }
+
+        if (BoldVertices.Length > 0 && _boldShader is not null && _boldTexture is not null)
+        {
+            _boldShader.Bind();
+            _boldVertexDataBuffer.Bind();
+            _boldTexture.Bind();
+            _boldShader.SetProjectionMatrix(ref projection);
+            _boldShader.SetModelViewMatrix(ref mv);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, BoldVertices.Length);
+        }
+
+        if (ItalicVertices.Length > 0 && _italicShader is not null && _italicTexture is not null)
+        {
+            _italicShader.Bind();
+            _italicVertexDataBuffer.Bind();
+            _italicTexture.Bind();
+            _italicShader.SetProjectionMatrix(ref projection);
+            _italicShader.SetModelViewMatrix(ref mv);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, ItalicVertices.Length);
+        }
+
+        if (BoldItalicVertices.Length > 0 && _boldItalicShader is not null && _boldItalicTexture is not null)
+        {
+            _boldItalicShader.Bind();
+            _boldItalicVertexDataBuffer.Bind();
+            _boldItalicTexture.Bind();
+            _boldItalicShader.SetProjectionMatrix(ref projection);
+            _boldItalicShader.SetModelViewMatrix(ref mv);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, BoldItalicVertices.Length);
+        }
 
         if (DecorationVertices.Length > 0)
         {
@@ -701,6 +975,9 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
             if (disposing)
             {
                 _vertexDataBuffer.Dispose();
+                _boldVertexDataBuffer.Dispose();
+                _italicVertexDataBuffer.Dispose();
+                _boldItalicVertexDataBuffer.Dispose();
                 _decorationVertexDataBuffer.Dispose();
             }
 

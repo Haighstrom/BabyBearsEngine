@@ -26,7 +26,7 @@ var appSettings = new ApplicationSettings()
     },
     TextSettings = new TextSettings()
     {
-        Renderer = BabyBearsEngine.Worlds.Graphics.Text.TextRenderer.Gdi,
+        Renderer = BabyBearsEngine.Worlds.Graphics.Text.TextRenderer.FreeType,
     },
     DefaultCameraMsaa = MsaaSamples.X4,
 };
@@ -56,6 +56,7 @@ textSubmenuFactory = () => new MenuWorld(
     new("Font Swapping",    () => new FontSwappingDemoWorld(getTextSubmenu)),
     new("Typewriter Demo",  () => new TypewriterDemoWorld(getTextSubmenu)),
     new("Inline Tags Demo", () => new InlineTagsDemoWorld(getTextSubmenu)),
+    new("Bold & Italic",    () => new BoldItalicDemoWorld(getTextSubmenu)),
     new("Rendering Quality", () => new TextRenderingQualityDemoWorld(getTextSubmenu)),
 ], backFactory: getMainMenu);
 

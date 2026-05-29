@@ -18,11 +18,13 @@ public class InlineTagParserTests
         }
     }
 
-    private static void AssertStyle(StyledChar sc, Colour? expectedColour = null, bool expectedUnderline = false, bool expectedStrikethrough = false)
+    private static void AssertStyle(StyledChar sc, Colour? expectedColour = null, bool expectedUnderline = false, bool expectedStrikethrough = false, bool expectedBold = false, bool expectedItalic = false)
     {
         Assert.AreEqual(expectedColour, sc.Style.ColourOverride);
         Assert.AreEqual(expectedUnderline, sc.Style.Underline);
         Assert.AreEqual(expectedStrikethrough, sc.Style.Strikethrough);
+        Assert.AreEqual(expectedBold, sc.Style.Bold);
+        Assert.AreEqual(expectedItalic, sc.Style.Italic);
     }
 
     // No tags
@@ -281,5 +283,128 @@ public class InlineTagParserTests
         AssertChars(result, "ab");
         AssertStyle(result[0], expectedColour: Blue);
         AssertStyle(result[1], expectedColour: Red);
+    }
+
+    // Bold tag
+
+    [TestMethod]
+    public void Parse_BoldTag_SetsBold()
+    {
+        StyledChar[] result = InlineTagParser.Parse("<b>hi</b>", true);
+
+        AssertChars(result, "hi");
+        AssertStyle(result[0], expectedBold: true);
+        AssertStyle(result[1], expectedBold: true);
+    }
+
+    [TestMethod]
+    public void Parse_BoldTagClosed_ClearsBold()
+    {
+        StyledChar[] result = InlineTagParser.Parse("a<b>b</b>c", true);
+
+        AssertChars(result, "abc");
+        AssertStyle(result[0]);
+        AssertStyle(result[1], expectedBold: true);
+        AssertStyle(result[2]);
+    }
+
+    // Italic tag
+
+    [TestMethod]
+    public void Parse_ItalicTag_SetsItalic()
+    {
+        StyledChar[] result = InlineTagParser.Parse("<i>hi</i>", true);
+
+        AssertChars(result, "hi");
+        AssertStyle(result[0], expectedItalic: true);
+        AssertStyle(result[1], expectedItalic: true);
+    }
+
+    [TestMethod]
+    public void Parse_ItalicTagClosed_ClearsItalic()
+    {
+        StyledChar[] result = InlineTagParser.Parse("a<i>b</i>c", true);
+
+        AssertChars(result, "abc");
+        AssertStyle(result[0]);
+        AssertStyle(result[1], expectedItalic: true);
+        AssertStyle(result[2]);
+    }
+
+    // Combined bold/italic + interaction with other tags
+
+    [TestMethod]
+    public void Parse_BoldAndItalicCombined_BothApply()
+    {
+        StyledChar[] result = InlineTagParser.Parse("<b><i>x</i></b>", true);
+
+        AssertChars(result, "x");
+        AssertStyle(result[0], expectedBold: true, expectedItalic: true);
+    }
+
+    [TestMethod]
+    public void Parse_BoldWithColourAndUnderline_AllApply()
+    {
+        StyledChar[] result = InlineTagParser.Parse("<colour=#FF0000><u><b>x</b></u></colour>", true);
+
+        AssertChars(result, "x");
+        AssertStyle(result[0], expectedColour: Red, expectedUnderline: true, expectedBold: true);
+    }
+
+    [TestMethod]
+    public void Parse_NestedBoldTags_OuterStillBoldAfterInnerClose()
+    {
+        StyledChar[] result = InlineTagParser.Parse("<b>a<b>b</b>c</b>d", true);
+
+        AssertChars(result, "abcd");
+        AssertStyle(result[0], expectedBold: true);
+        AssertStyle(result[1], expectedBold: true);
+        AssertStyle(result[2], expectedBold: true);
+        AssertStyle(result[3]);
+    }
+
+    [TestMethod]
+    public void Parse_CloseLastTag_ClosesBold()
+    {
+        StyledChar[] result = InlineTagParser.Parse("<b>a</>b", true);
+
+        AssertChars(result, "ab");
+        AssertStyle(result[0], expectedBold: true);
+        AssertStyle(result[1]);
+    }
+
+    [TestMethod]
+    public void Parse_CloseLastTag_ClosesItalic()
+    {
+        StyledChar[] result = InlineTagParser.Parse("<i>a</>b", true);
+
+        AssertChars(result, "ab");
+        AssertStyle(result[0], expectedItalic: true);
+        AssertStyle(result[1]);
+    }
+
+    [TestMethod]
+    public void Parse_BoldTagsIgnoredWhenUseInlineTagsFalse()
+    {
+        StyledChar[] result = InlineTagParser.Parse("<b>hi</b>", false);
+
+        AssertChars(result, "<b>hi</b>");
+        foreach (StyledChar sc in result)
+        {
+            AssertStyle(sc);
+        }
+    }
+
+    [TestMethod]
+    public void Parse_BoldDoesNotMatchUnknownBoldTag()
+    {
+        // <bold> is unknown — must NOT be treated as <b>.
+        StyledChar[] result = InlineTagParser.Parse("a<bold>b</bold>c", true);
+
+        AssertChars(result, "abc");
+        foreach (StyledChar sc in result)
+        {
+            AssertStyle(sc);
+        }
     }
 }
