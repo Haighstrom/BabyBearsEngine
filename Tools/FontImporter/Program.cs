@@ -17,9 +17,10 @@ internal static class Program
                                    `static/` subfolder of a Google Fonts download.
 
         Options:
-          --to <path>              Destination folder. Defaults to "Assets/Fonts" relative to
-                                   the current working directory. Pass an absolute path to your
-                                   project's source Assets/Fonts folder so imports survive a clean.
+          --to <path>              Destination folder. Defaults to the engine project's source
+                                   Assets/Fonts (resolved by walking up from the running exe to find
+                                   the .sln and adjacent BabyBearsEngine folder). Pass an absolute
+                                   path here only if you need somewhere else.
           --name <name>            Override the destination family name. By default the family
                                    is inferred from the source filenames (e.g. "Roboto" from
                                    "Roboto-Bold.ttf").
@@ -70,6 +71,8 @@ internal static class Program
         {
             FontImporterResult result;
 
+            string destFull = Path.GetFullPath(parsed.DestinationFolder);
+
             if (parsed.DryRun)
             {
                 Console.WriteLine("DRY RUN — no files will be copied. Re-run without --dry-run to commit.");
@@ -80,6 +83,7 @@ internal static class Program
                     targetFontName: parsed.TargetFontName,
                     familyFilter: parsed.FamilyFilter);
 
+                Console.WriteLine($"Destination: {destFull}");
                 Console.WriteLine(result.FormatSummary(verb: "would import"));
             }
             else
@@ -91,6 +95,7 @@ internal static class Program
                     familyFilter: parsed.FamilyFilter,
                     overwrite: parsed.Overwrite);
 
+                Console.WriteLine($"Destination: {destFull}");
                 Console.WriteLine(result.FormatSummary());
             }
 
@@ -125,7 +130,7 @@ internal static class Program
     private static ParsedArgs ParseArgs(string[] args)
     {
         string? sourceFolder = null;
-        string destinationFolder = "Assets/Fonts";
+        string destinationFolder = ResolveDefaultDestination();
         string? targetFontName = null;
         string? familyFilter = null;
         bool overwrite = true;
@@ -202,5 +207,33 @@ internal static class Program
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Picks a sensible default destination by walking up from the running executable until we find
+    /// a folder containing both a <c>.sln</c> file and a <c>BabyBearsEngine</c> sub-folder, then
+    /// resolving <c>BabyBearsEngine/Assets/Fonts</c> from there. This lands in the engine project's
+    /// source assets folder regardless of where <c>dotnet run</c> was invoked from. Falls back to
+    /// <c>Assets/Fonts</c> relative to the current working directory if the layout can't be found
+    /// (e.g. the tool was copied into a different solution).
+    /// </summary>
+    private static string ResolveDefaultDestination()
+    {
+        string? current = AppContext.BaseDirectory;
+
+        while (!string.IsNullOrEmpty(current))
+        {
+            bool hasSln = Directory.GetFiles(current, "*.sln").Length > 0;
+            bool hasEngineFolder = Directory.Exists(Path.Combine(current, "BabyBearsEngine"));
+
+            if (hasSln && hasEngineFolder)
+            {
+                return Path.Combine(current, "BabyBearsEngine", "Assets", "Fonts");
+            }
+
+            current = Path.GetDirectoryName(current);
+        }
+
+        return "Assets/Fonts";
     }
 }
