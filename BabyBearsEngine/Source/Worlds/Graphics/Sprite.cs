@@ -1,6 +1,7 @@
 ﻿using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenGL.Rendering;
+using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 
 namespace BabyBearsEngine.Worlds.Graphics;
 
@@ -57,16 +58,30 @@ public class Sprite(ISpriteTexture texture, float x, float y, float width, float
     /// <summary>Last valid frame index (<see cref="Frames"/> − 1).</summary>
     public int LastFrame => Frames - 1;
 
-    /// <summary>The sprite sheet texture currently used for rendering.</summary>
+    /// <summary>The sprite sheet texture currently used for rendering. Never null; assigning null throws <see cref="ArgumentNullException"/>.</summary>
     public ISpriteTexture Texture
     {
         get => texture;
         set
         {
+            ArgumentNullException.ThrowIfNull(value);
             texture = value;
-            _renderer.Shader = new();
+            _renderer.Texture = value;
             _verticesChanged = true;
         }
+    }
+
+    /// <summary>
+    /// The shader program used to render this sprite. Defaults to a
+    /// <see cref="StandardMatrixShaderProgram"/> (straight texture passthrough); assign a
+    /// different <see cref="IMatrixShaderProgram"/> — e.g. <see cref="GreyscaleShaderProgram"/>,
+    /// <see cref="DarkenShaderProgram"/>, <see cref="BlurShaderProgram"/> — to apply a
+    /// fragment effect. Never null; assigning null throws <see cref="ArgumentNullException"/>.
+    /// </summary>
+    public IMatrixShaderProgram Shader
+    {
+        get => _renderer.Shader;
+        set => _renderer.Shader = value;
     }
 
     protected override void OnSizeChanged()

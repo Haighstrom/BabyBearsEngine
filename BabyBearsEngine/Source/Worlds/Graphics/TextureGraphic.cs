@@ -1,6 +1,7 @@
 ﻿using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Platform.OpenGL.Rendering;
+using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 
 namespace BabyBearsEngine.Worlds.Graphics;
 
@@ -47,6 +48,19 @@ public sealed class TextureGraphic(ITexture texture, float x, float y, float wid
     {
         get => Colour.A;
         set => Colour = new(Colour.R, Colour.G, Colour.B, (byte)Math.Round(value * 255f));
+    }
+
+    /// <summary>
+    /// The shader program used to render this graphic. Defaults to a
+    /// <see cref="StandardMatrixShaderProgram"/> (straight texture passthrough); assign a
+    /// different <see cref="IMatrixShaderProgram"/> — e.g. <see cref="GreyscaleShaderProgram"/>,
+    /// <see cref="DarkenShaderProgram"/>, <see cref="BlurShaderProgram"/> — to apply a
+    /// fragment effect. Never null; assigning null throws <see cref="ArgumentNullException"/>.
+    /// </summary>
+    public IMatrixShaderProgram Shader
+    {
+        get => _graphicRenderer.Shader;
+        set => _graphicRenderer.Shader = value;
     }
 
     /// <summary>Rotation angle in degrees, applied around the image's centre.</summary>
