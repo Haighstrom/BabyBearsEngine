@@ -44,15 +44,31 @@ public class ScrollbarTests
         public bool AllButtonsReleased(params MouseButton[] buttons) => false;
     }
 
+    // Test root that gives the scrollbar a parent so it has a valid screen position.
+    // GetWindowCoordinates returns the input unchanged — same as a World at the tree root.
+    private sealed class FakeRoot : IContainer
+    {
+        public void Add(IAddable entity) { }
+        public void Remove(IAddable entity) { }
+        public void RemoveAll() { }
+        public (float x, float y) GetWindowCoordinates(float x, float y) => (x, y);
+    }
+
+    private static Scrollbar Attach(Scrollbar bar)
+    {
+        bar.Parent = new FakeRoot();
+        return bar;
+    }
+
     private static Scrollbar MakeH(float thumbProportion = 0.2f, float amountFilled = 0f) =>
-        new(200, 20, ScrollbarDirection.Horizontal, thumbProportion, amountFilled);
+        Attach(new(200, 20, ScrollbarDirection.Horizontal, thumbProportion, amountFilled));
 
     private static Scrollbar MakeV(float thumbProportion = 0.2f, float amountFilled = 0f) =>
-        new(20, 200, ScrollbarDirection.Vertical, thumbProportion, amountFilled);
+        Attach(new(20, 200, ScrollbarDirection.Vertical, thumbProportion, amountFilled));
 
     // Mouse is at (5,5) by default — inside a scrollbar at origin with any reasonable size.
     private static Scrollbar MakeScrollable(ScrollbarDirection direction = ScrollbarDirection.Vertical, float amountFilled = 0.5f) =>
-        new(20, 200, direction, amountFilled: amountFilled, scrollOnMouseWheel: true);
+        Attach(new(20, 200, direction, amountFilled: amountFilled, scrollOnMouseWheel: true));
 
     private FakeMouse _mouse = null!;
 
@@ -322,7 +338,7 @@ public class ScrollbarTests
     [TestMethod]
     public void ScrollOnMouseWheel_False_DoesNotScroll()
     {
-        Scrollbar bar = new(20, 200, ScrollbarDirection.Vertical, amountFilled: 0.5f, scrollOnMouseWheel: false);
+        Scrollbar bar = Attach(new(20, 200, ScrollbarDirection.Vertical, amountFilled: 0.5f, scrollOnMouseWheel: false));
         _mouse.WheelDelta = 1f;
 
         Frame(bar);

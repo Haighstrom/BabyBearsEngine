@@ -20,6 +20,16 @@ public class DropdownListTests
         internal void SetText(string text) => LastSetText = text;
     }
 
+    // Test root that gives the dropdown a parent so its GetWindowCoordinates works.
+    // GetWindowCoordinates returns the input unchanged — same as a World at the tree root.
+    private sealed class FakeRoot : IContainer
+    {
+        public void Add(IAddable entity) { }
+        public void Remove(IAddable entity) { }
+        public void RemoveAll() { }
+        public (float x, float y) GetWindowCoordinates(float x, float y) => (x, y);
+    }
+
     private sealed class TestFixture
     {
         internal DropdownList<string> Dropdown { get; }
@@ -43,6 +53,7 @@ public class DropdownListTests
                 },
                 formatter: null,
                 initialIndex: initialIndex);
+            Dropdown.Parent = new FakeRoot();
         }
     }
 

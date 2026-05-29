@@ -159,22 +159,31 @@ public class ContainerEntityTests
     // GetWindowCoordinates
 
     [TestMethod]
-    public void GetWindowCoordinates_WithoutParent_ReturnsInputUnchanged()
+    public void GetWindowCoordinates_WithoutParent_Throws()
     {
-        var ce = new TestContainerEntity();
-        var (x, y) = ce.GetWindowCoordinates(3f, 4f);
-        Assert.AreEqual(3f, x);
-        Assert.AreEqual(4f, y);
+        var containerEntity = new TestContainerEntity();
+        Assert.ThrowsExactly<InvalidOperationException>(() => containerEntity.GetWindowCoordinates(3f, 4f));
+    }
+
+    [TestMethod]
+    public void GetWindowCoordinates_AfterRemoval_Throws()
+    {
+        var containerEntity = new TestContainerEntity();
+        var parent = new FakeParent { Translation = (10f, 20f) };
+        containerEntity.Parent = parent;
+        containerEntity.Parent = null;
+
+        Assert.ThrowsExactly<InvalidOperationException>(() => containerEntity.GetWindowCoordinates(3f, 4f));
     }
 
     [TestMethod]
     public void GetWindowCoordinates_WithParent_DelegatesUpward()
     {
-        var ce = new TestContainerEntity();
+        var containerEntity = new TestContainerEntity();
         var parent = new FakeParent { Translation = (10f, 20f) };
-        ce.Parent = parent;
+        containerEntity.Parent = parent;
 
-        var (x, y) = ce.GetWindowCoordinates(3f, 4f);
+        var (x, y) = containerEntity.GetWindowCoordinates(3f, 4f);
 
         Assert.AreEqual(13f, x);
         Assert.AreEqual(24f, y);

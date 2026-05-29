@@ -110,7 +110,7 @@ public class ScrollingListPanel : Entity
         }
 
         public override (float x, float y) GetWindowCoordinates(float localX, float localY) =>
-            Parent?.GetWindowCoordinates(localX + X, localY + Y) ?? (localX + X, localY + Y);
+            Parent?.GetWindowCoordinates(localX + X, localY + Y) ?? throw new InvalidOperationException("GetWindowCoordinates requires Parent — content pane is not in an entity tree (never added, or removed).");
 
         public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
         {

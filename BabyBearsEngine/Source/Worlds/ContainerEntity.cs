@@ -114,6 +114,7 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
     public void RemoveAll() => _container.RemoveAll();
 
     /// <inheritdoc/>
+    /// <exception cref="InvalidOperationException">Thrown when <see cref="AddableBase.Parent"/> is <c>null</c> — a container entity outside the entity tree has no window-space position to translate into.</exception>
     public virtual (float x, float y) GetWindowCoordinates(float x, float y) =>
-        Parent?.GetWindowCoordinates(x, y) ?? (x, y);
+        Parent?.GetWindowCoordinates(x, y) ?? throw new InvalidOperationException("GetWindowCoordinates requires Parent — entity is not in an entity tree (never added, or removed).");
 }

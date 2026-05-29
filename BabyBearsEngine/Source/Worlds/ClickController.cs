@@ -103,8 +103,10 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
     public void Update(double elapsed)
     {
         // A disabled target suppresses all mouse interaction — skip it entirely so neither
-        // its events nor any subclass OnLeftClicked override fire.
-        if (target.Disabled)
+        // its events nor any subclass OnLeftClicked override fire. A target whose parent
+        // chain doesn't reach a tree root (a non-IAddable IContainer like a World) is
+        // detached, has no screen position to hit-test, and is treated the same as disabled.
+        if (target.Disabled || IsDetached(target))
         {
             _clickState = ClickState.None;
             _rightClickState = RightClickState.None;
@@ -275,5 +277,17 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
             ScrollWheelMoved?.Invoke(Mouse.WheelDelta);
             MouseSolver.ConsumeWheelScroll();
         }
+    }
+
+    private static bool IsDetached(IMouseInteractable target)
+    {
+        for (IAddable? cursor = target as IAddable; cursor is not null; cursor = cursor.Parent as IAddable)
+        {
+            if (cursor.Parent is null)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

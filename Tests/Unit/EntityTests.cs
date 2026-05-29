@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Geometry;
+﻿using System;
+using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Tests.Unit;
@@ -42,24 +43,31 @@ public class EntityTests
     // PositionOnScreen
 
     [TestMethod]
-    public void PositionOnScreen_NoParent_UsesLocalXYAndSize()
+    public void PositionOnScreen_NoParent_Throws()
     {
-        var e = new Entity(10, 20, 30, 40);
-        var rect = e.PositionOnScreen;
-        Assert.AreEqual(10f, rect.X);
-        Assert.AreEqual(20f, rect.Y);
-        Assert.AreEqual(30f, rect.W);
-        Assert.AreEqual(40f, rect.H);
+        var entity = new Entity(10, 20, 30, 40);
+        Assert.ThrowsExactly<InvalidOperationException>(() => _ = entity.PositionOnScreen);
+    }
+
+    [TestMethod]
+    public void PositionOnScreen_AfterRemoval_Throws()
+    {
+        var parent = new FakeParent { ParentTranslation = (100f, 200f) };
+        var entity = new Entity(10, 20, 30, 40);
+        entity.Parent = parent;
+        entity.Parent = null;
+
+        Assert.ThrowsExactly<InvalidOperationException>(() => _ = entity.PositionOnScreen);
     }
 
     [TestMethod]
     public void PositionOnScreen_WithParent_AddsParentTranslation()
     {
         var parent = new FakeParent { ParentTranslation = (100f, 200f) };
-        var e = new Entity(10, 20, 30, 40);
-        e.Parent = parent;
+        var entity = new Entity(10, 20, 30, 40);
+        entity.Parent = parent;
 
-        var rect = e.PositionOnScreen;
+        var rect = entity.PositionOnScreen;
 
         Assert.AreEqual(110f, rect.X);
         Assert.AreEqual(220f, rect.Y);
@@ -67,25 +75,43 @@ public class EntityTests
         Assert.AreEqual(40f, rect.H);
     }
 
+    // HitRect — defaults to PositionOnScreen, so it inherits the throw
+
+    [TestMethod]
+    public void HitRect_NoParent_Throws()
+    {
+        var entity = new Entity(10, 20, 30, 40);
+        Assert.ThrowsExactly<InvalidOperationException>(() => _ = entity.HitRect);
+    }
+
     // GetWindowCoordinates
 
     [TestMethod]
-    public void GetWindowCoordinates_NoParent_AddsEntityXY()
+    public void GetWindowCoordinates_NoParent_Throws()
     {
-        var e = new Entity(10, 20, 30, 40);
-        var (x, y) = e.GetWindowCoordinates(3f, 4f);
-        Assert.AreEqual(13f, x);
-        Assert.AreEqual(24f, y);
+        var entity = new Entity(10, 20, 30, 40);
+        Assert.ThrowsExactly<InvalidOperationException>(() => entity.GetWindowCoordinates(3f, 4f));
+    }
+
+    [TestMethod]
+    public void GetWindowCoordinates_AfterRemoval_Throws()
+    {
+        var parent = new FakeParent { ParentTranslation = (100f, 200f) };
+        var entity = new Entity(10, 20, 30, 40);
+        entity.Parent = parent;
+        entity.Parent = null;
+
+        Assert.ThrowsExactly<InvalidOperationException>(() => entity.GetWindowCoordinates(3f, 4f));
     }
 
     [TestMethod]
     public void GetWindowCoordinates_WithParent_ChainsThroughParent()
     {
         var parent = new FakeParent { ParentTranslation = (100f, 200f) };
-        var e = new Entity(10, 20, 30, 40);
-        e.Parent = parent;
+        var entity = new Entity(10, 20, 30, 40);
+        entity.Parent = parent;
 
-        var (x, y) = e.GetWindowCoordinates(3f, 4f);
+        var (x, y) = entity.GetWindowCoordinates(3f, 4f);
 
         // (3 + 10) translated by parent = 113; (4 + 20) translated by parent = 224
         Assert.AreEqual(113f, x);

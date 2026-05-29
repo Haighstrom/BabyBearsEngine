@@ -128,11 +128,12 @@ public class Entity : ContainerEntity, IMouseInteractable
     }
 
     /// <inheritdoc/>
+    /// <exception cref="InvalidOperationException">Thrown when <see cref="AddableBase.Parent"/> is <c>null</c> — an entity outside the entity tree has no screen position.</exception>
     public Rect PositionOnScreen
     {
         get
         {
-            var (wx, wy) = Parent?.GetWindowCoordinates(X, Y) ?? (X, Y);
+            var (wx, wy) = Parent?.GetWindowCoordinates(X, Y) ?? throw new InvalidOperationException("PositionOnScreen requires Parent — entity is not in an entity tree (never added, or removed).");
             return new(wx, wy, Width, Height);
         }
     }
@@ -144,8 +145,9 @@ public class Entity : ContainerEntity, IMouseInteractable
     /// Translates a point from this entity's local space to window space by adding this entity's
     /// position and walking up the parent chain.
     /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when <see cref="AddableBase.Parent"/> is <c>null</c> — an entity outside the entity tree has no window-space position to translate into.</exception>
     public override (float x, float y) GetWindowCoordinates(float x, float y) =>
-        Parent?.GetWindowCoordinates(x + X, y + Y) ?? (x + X, y + Y);
+        Parent?.GetWindowCoordinates(x + X, y + Y) ?? throw new InvalidOperationException("GetWindowCoordinates requires Parent — entity is not in an entity tree (never added, or removed).");
 
     /// <summary>
     /// Renders all child renderables, applying this entity's (X, Y) translation to the model-view matrix first.

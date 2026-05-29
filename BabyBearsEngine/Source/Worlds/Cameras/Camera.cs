@@ -67,11 +67,12 @@ public class Camera : ContainerEntity, ICamera
 
     public float MinY { get; set; } = 0f;
 
+    /// <exception cref="InvalidOperationException">Thrown when <see cref="AddableBase.Parent"/> is <c>null</c> — a camera outside the entity tree has no screen viewport to test against.</exception>
     public bool MouseIntersecting
     {
         get
         {
-            var (wx, wy) = Parent?.GetWindowCoordinates(X, Y) ?? (X, Y);
+            var (wx, wy) = Parent?.GetWindowCoordinates(X, Y) ?? throw new InvalidOperationException("MouseIntersecting requires Parent — camera is not in an entity tree (never added, or removed).");
             return new Rect(wx, wy, Width, Height).Contains(Mouse.ClientX, Mouse.ClientY);
         }
     }
@@ -91,12 +92,13 @@ public class Camera : ContainerEntity, ICamera
     /// Converts a world-space point to screen (window) coordinates by applying the camera's
     /// view transform and then this camera's position within the entity hierarchy.
     /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when <see cref="AddableBase.Parent"/> is <c>null</c> — a camera outside the entity tree has no window-space position to translate into.</exception>
     public override (float x, float y) GetWindowCoordinates(float x, float y)
     {
         var (lx, ly) = _cameraView.WorldToLocal(x, y);
         float sx = X + lx;
         float sy = Y + ly;
-        return Parent?.GetWindowCoordinates(sx, sy) ?? (sx, sy);
+        return Parent?.GetWindowCoordinates(sx, sy) ?? throw new InvalidOperationException("GetWindowCoordinates requires Parent — camera is not in an entity tree (never added, or removed).");
     }
 
     public override void Update(double elapsed) => base.Update(elapsed * GameSpeed);
