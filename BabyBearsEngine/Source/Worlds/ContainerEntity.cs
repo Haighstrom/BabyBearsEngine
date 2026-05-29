@@ -81,9 +81,7 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
     {
         foreach (var entity in GetUpdatables())
         {
-            // Container only accepts IAddable, so every IUpdateable child is also IAddable in practice;
-            // the cast is defensive in case a custom IUpdateable ever sneaks through.
-            if (!entity.Active || (entity is IAddable addable && !addable.IsConnectedToTree))
+            if (!entity.Active || !entity.IsConnectedToTree)
             {
                 continue;
             }
