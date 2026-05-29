@@ -108,6 +108,83 @@ public class ParticleSystemTests
     }
 
     /// <summary>
+    /// Same sanity check for the textured variant — billboard.vert + billboard_points_to_quads.geom
+    /// + default.frag must compose and link. The pieces ship as separately-compiled shaders that
+    /// happen to share GLSL interface blocks; this catches breakage if any of them drifts.
+    /// </summary>
+    [TestMethod]
+    public void TexturedParticleShaderProgram_ConstructsUnderLiveGLContext()
+    {
+        bool constructed = false;
+        Exception? caught = null;
+        var world = new ParticleCaptureWorld(
+            framesBeforeCapture: 0,
+            setup: _ =>
+            {
+                try
+                {
+                    using var program = new TexturedParticleShaderProgram();
+                    constructed = true;
+                }
+                catch (Exception ex)
+                {
+                    caught = ex;
+                }
+            },
+            capture: _ => { });
+
+        GameLauncher.Run(SettingsWithCapture(), () => world);
+
+        Assert.IsNull(caught, caught?.Message);
+        Assert.IsTrue(constructed);
+    }
+
+    /// <summary>
+    /// Render a textured particle at the screen centre using a 1×1 white texture and verify the
+    /// centre pixel is painted with the per-particle colour — proves the textured pipeline binds
+    /// the texture, samples it, and modulates it by the colour attribute end-to-end.
+    /// </summary>
+    [TestMethod]
+    public void ParticleSystem_TexturedBurstAtCentre_PaintsCentrePixel()
+    {
+        const int sampleX = WindowWidth / 2;
+        const int sampleY = WindowHeight / 2;
+        Colour bright = new(60, 200, 120);
+        Colour? captured = null;
+
+        var world = new ParticleCaptureWorld(
+            framesBeforeCapture: 2,
+            setup: w =>
+            {
+                ITexture texture = Worlds.Graphics.Textures.GenTexture(new[,] { { Colour.White } });
+                ParticleSystem system = new(
+                    new PointEmitterShape(new Point(sampleX, sampleY), Point.Zero))
+                {
+                    EmissionRate = 0f,
+                    Emitting = false,
+                    Lifetime = 5f,
+                    StartSize = 40f,
+                    Colour = bright,
+                    Texture = texture,
+                };
+                system.EmitBurst(1);
+                w.Add(system);
+            },
+            capture: w => captured = w.SamplePixel(sampleX, sampleY));
+
+        GameLauncher.Run(SettingsWithCapture(), () => world);
+
+        Assert.IsEmpty(world.Errors, string.Join(Environment.NewLine, world.Errors));
+        Assert.IsNotNull(captured);
+        int rDelta = Math.Abs(bright.R - captured.Value.R);
+        int gDelta = Math.Abs(bright.G - captured.Value.G);
+        int bDelta = Math.Abs(bright.B - captured.Value.B);
+        Assert.IsLessThanOrEqualTo(8, rDelta, $"R delta {rDelta} too high; expected {bright.R}, got {captured.Value.R}");
+        Assert.IsLessThanOrEqualTo(8, gDelta, $"G delta {gDelta} too high; expected {bright.G}, got {captured.Value.G}");
+        Assert.IsLessThanOrEqualTo(8, bDelta, $"B delta {bDelta} too high; expected {bright.B}, got {captured.Value.B}");
+    }
+
+    /// <summary>
     /// Render a single bright burst at the screen centre and verify the centre pixel goes from
     /// black to bright — proves the billboard geom-shader stage actually expands the point into
     /// pixels rather than being silently culled.

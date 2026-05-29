@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.Worlds.Particles;
@@ -29,6 +30,7 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
     private readonly List<Particle> _particles = [];
     private readonly Random _random;
     private ParticleShaderProgram? _shader = null;
+    private TexturedParticleShaderProgram? _texturedShader = null;
     private VertexDataBuffer<ParticleVertex>? _vertexDataBuffer = null;
     private IEmitterShape _emitterShape;
     private double _emitCounter = 0;
@@ -114,6 +116,17 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
     public float StartSize { get; set; } = 16f;
 
     /// <summary>
+    /// Optional texture sampled across each particle's quad, multiplied by the per-particle
+    /// colour. Null (the default) draws particles as solid coloured quads via
+    /// <see cref="ParticleShaderProgram"/>; non-null switches to
+    /// <see cref="TexturedParticleShaderProgram"/> and binds this texture before every draw.
+    /// The texture is not owned by the system — disposing the system does not dispose the
+    /// texture. Assigning a different texture is free; the textured shader program is lazily
+    /// constructed on the first render that needs it.
+    /// </summary>
+    public ITexture? Texture { get; set; } = null;
+
+    /// <summary>
     /// Function that returns the rendered size for a particle based on its normalised
     /// lifetime <c>t</c> (0 → 1) and its <see cref="Particle.StartSize"/>. Default returns the
     /// start size unchanged. Use e.g. <c>(t, s) => s * (1 - t)</c> for shrinking-to-nothing.
@@ -179,19 +192,33 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
 
         // Lazy-init so Update-only test paths don't need a GL context. The first render call
         // happens on the engine thread with the context live, matching the construction
-        // requirements of every other GL-backed graphic in the engine.
-        _shader ??= new ParticleShaderProgram();
+        // requirements of every other GL-backed graphic in the engine. Each shader program
+        // type is constructed on first use only — a system that stays untextured never
+        // allocates the textured program, and vice versa.
         _vertexDataBuffer ??= new VertexDataBuffer<ParticleVertex>();
 
-        _shader.Bind();
+        IMatrixShaderProgram activeShader;
+        if (Texture is not null)
+        {
+            _texturedShader ??= new TexturedParticleShaderProgram();
+            activeShader = _texturedShader;
+        }
+        else
+        {
+            _shader ??= new ParticleShaderProgram();
+            activeShader = _shader;
+        }
+
+        activeShader.Bind();
         _vertexDataBuffer.Bind();
+        Texture?.Bind();
 
         ParticleVertex[] vertices = BuildVertices();
         _vertexDataBuffer.SetNewVertices(vertices);
 
         Matrix3 mv = Matrix3.Translate(ref modelView, X, Y);
-        _shader.SetProjectionMatrix(ref projection);
-        _shader.SetModelViewMatrix(ref mv);
+        activeShader.SetProjectionMatrix(ref projection);
+        activeShader.SetModelViewMatrix(ref mv);
 
         GL.DrawArrays(PrimitiveType.Points, 0, vertices.Length);
     }
@@ -257,6 +284,7 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
             {
                 _vertexDataBuffer?.Dispose();
                 _shader?.Dispose();
+                _texturedShader?.Dispose();
             }
             _disposed = true;
         }

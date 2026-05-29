@@ -248,6 +248,44 @@ public class ParticleSystemTests
 
         Assert.IsEmpty(events);
     }
+
+    [TestMethod]
+    public void Texture_Default_IsNull()
+    {
+        ParticleSystem system = MakeSystem();
+        Assert.IsNull(system.Texture);
+    }
+
+    [TestMethod]
+    public void Texture_CanBeAssignedAndCleared()
+    {
+        ParticleSystem system = MakeSystem();
+        FakeTexture fake = new();
+
+        system.Texture = fake;
+        Assert.AreSame(fake, system.Texture);
+
+        system.Texture = null;
+        Assert.IsNull(system.Texture);
+    }
+
+    private sealed class FakeTexture : BabyBearsEngine.OpenGL.ITexture
+    {
+        public int Handle => 0;
+
+        public int Width => 1;
+
+        public int Height => 1;
+
+        public void Bind(OpenTK.Graphics.OpenGL4.TextureTarget textureTarget = OpenTK.Graphics.OpenGL4.TextureTarget.Texture2D,
+            OpenTK.Graphics.OpenGL4.TextureUnit textureUnit = OpenTK.Graphics.OpenGL4.TextureUnit.Texture0)
+        {
+        }
+
+        public void Dispose()
+        {
+        }
+    }
 }
 
 [TestClass]

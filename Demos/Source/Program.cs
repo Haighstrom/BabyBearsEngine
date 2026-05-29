@@ -10,6 +10,7 @@ using BabyBearsEngine.Demos.Source.Demos.IODemo;
 using BabyBearsEngine.Demos.Source.Demos.KeyboardDemo;
 using BabyBearsEngine.Demos.Source.Demos.MouseDemo;
 using BabyBearsEngine.Demos.Source.Demos.ParticleDemo;
+using BabyBearsEngine.Demos.Source.Demos.RainShowcase;
 using BabyBearsEngine.Demos.Source.Demos.ShaderDemo;
 using BabyBearsEngine.Demos.Source.Demos.TextDemo;
 using BabyBearsEngine.Demos.Source.Demos.StencilDemo;
@@ -98,6 +99,7 @@ showcasesSubmenuFactory = () => new MenuWorld(
 [
     new("Bear Spinner 3000", () => new BearSpinnerWorld(getShowcasesSubmenu)),
     new("Click The Bear",    () => new ClickTheBearDemoWorld(getShowcasesSubmenu)),
+    new("Rain Showcase",     () => new RainShowcaseWorld(getShowcasesSubmenu)),
 ], backFactory: getMainMenu);
 
 MenuEntry[] mainMenuEntries =
