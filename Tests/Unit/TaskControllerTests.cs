@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using BabyBearsEngine.Tasks;
 using BabyBearsEngine.Worlds;
 
@@ -23,6 +24,27 @@ public class TaskControllerTests
         {
             base.Update(elapsed);
             UpdateCalls++;
+        }
+    }
+
+    // Mirrors HappyBlacksmith's CreateTaskTask pattern: on Start, save the existing NextTask,
+    // overwrite NextTask with a newly-created task, then re-attach the original after the new one.
+    // The linked-list NextTask model exists specifically to support this kind of dynamic mid-chain
+    // insertion — see issue #64 for the discussion of why we keep it.
+    private sealed class SpliceOnStartTask(Func<ITask> taskCreator) : Task
+    {
+        public override void Start()
+        {
+            base.Start();
+
+            ITask? existingNextTask = NextTask;
+
+            NextTask = taskCreator();
+
+            if (existingNextTask is not null)
+            {
+                NextTask.NextTask = existingNextTask;
+            }
         }
     }
 
@@ -138,6 +160,43 @@ public class TaskControllerTests
 
         Assert.AreEqual(1, fetchCalls);
         Assert.AreSame(next, controller.CurrentTask);
+    }
+
+    [TestMethod]
+    public void Update_TaskThatSplicesNextTaskOnStart_RunsInsertedTaskBeforeOriginalNext()
+    {
+        // Documents and pins the dynamic mid-chain insertion supported by ITask.NextTask.
+        // A task may, during its own Start(), overwrite NextTask with a newly-created task and
+        // re-attach the originally-queued next task behind it — turning [A → C] into [A → B → C]
+        // at runtime. HappyBlacksmith's CreateTaskTask relies on exactly this behaviour. See
+        // issue #64.
+        var inserted = new ControllableTask { ShouldComplete = true };
+        var originalNext = new ControllableTask { ShouldComplete = true };
+        var splicer = new SpliceOnStartTask(() => inserted);
+        splicer.NextTask = originalNext;
+
+        var executionOrder = new List<string>();
+        splicer.TaskStarted += (_, _) => executionOrder.Add("splicer");
+        inserted.TaskStarted += (_, _) => executionOrder.Add("inserted");
+        originalNext.TaskStarted += (_, _) => executionOrder.Add("originalNext");
+
+        var controller = new TaskController(splicer)
+        {
+            Parent = new FakeContainer(),
+        };
+
+        // Splicer's first update fires Start (which performs the splice), then auto-completes
+        // (it has no completion conditions). After three updates the chain has fully drained.
+        controller.Update(0.016);
+        controller.Update(0.016);
+        controller.Update(0.016);
+
+        CollectionAssert.AreEqual(new[] { "splicer", "inserted", "originalNext" }, executionOrder);
+        Assert.AreSame(inserted, splicer.NextTask);
+        Assert.AreSame(originalNext, inserted.NextTask);
+        Assert.AreEqual(1, inserted.CompleteCalls);
+        Assert.AreEqual(1, originalNext.CompleteCalls);
+        Assert.IsNull(controller.CurrentTask);
     }
 
     [TestMethod]
