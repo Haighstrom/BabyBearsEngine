@@ -34,14 +34,12 @@ internal sealed class RainShowcaseWorld : DemoWorld
     private const string RainMusicPath = "Assets/Audio/Music/rain-loop.wav";
     private const string SplashMaskPath = "Assets/RainShowcase/rain_splash_locations.png";
 
-    // Mask sampling: walk every Nth pixel and weight each candidate by its grey value.
-    // The denser/sparser split mirrors what the user painted into the mask — black puddles
-    // get a heavier weight than the surrounding ground.
+    // Mask sampling: walk every Nth pixel and weight each candidate by its alpha. Alpha is
+    // the continuous density field — 0 = no splashes, 255 = densest. RGB is ignored. Dividing
+    // alpha by MaskWeightDivisor buckets it into 0..31, so the duplicated-Point candidate
+    // list stays at a manageable size (~30k pixels × max 31 = ~930k entries on an 800×600 mask).
     private const int MaskSampleStep = 4;
-    private const byte MaskBlackThreshold = 64;
-    private const byte MaskGreyThreshold = 200;
-    private const int MaskBlackWeight = 3;
-    private const int MaskGreyWeight = 1;
+    private const int MaskWeightDivisor = 8;
 
     private const float DefaultIntensity = 1f;
     private const float MaxWindSpeed = 220f;
@@ -227,14 +225,15 @@ internal sealed class RainShowcaseWorld : DemoWorld
             for (int x = 0; x < mask.Width; x += MaskSampleStep)
             {
                 int byteIndex = (y * mask.Width + x) * 4;
-                byte intensity = mask.Data[byteIndex];
+                byte alpha = mask.Data[byteIndex + 3];
+                if (alpha == 0)
+                {
+                    continue;
+                }
 
-                int weight = intensity < MaskBlackThreshold
-                    ? MaskBlackWeight
-                    : intensity < MaskGreyThreshold
-                        ? MaskGreyWeight
-                        : 0;
-
+                // Floor of alpha/divisor, with a minimum of 1 so even very faint pixels
+                // (alpha ≈ 1..7) get a token entry rather than rounding down to nothing.
+                int weight = Math.Max(1, alpha / MaskWeightDivisor);
                 for (int repeat = 0; repeat < weight; repeat++)
                 {
                     candidates.Add(new Point(x, y));
