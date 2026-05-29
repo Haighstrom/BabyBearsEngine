@@ -1,5 +1,5 @@
 //Multisampled Antialiased fragment shader which passes through a texture and multiplies it with colour - http://www.opentk.com/node/2251
-#version 430
+#version 150
 
 uniform sampler2DMS Sampler;
 

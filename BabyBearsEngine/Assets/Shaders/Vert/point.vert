@@ -1,4 +1,4 @@
-#version 430
+#version 330
 
 uniform mat3 PMatrix;
 uniform float PointSize; // Allow dynamic point size control

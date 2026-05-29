@@ -1,4 +1,4 @@
-#version 430
+#version 150
 
 uniform sampler2D ImageSampler;
 uniform sampler2D StencilSampler;

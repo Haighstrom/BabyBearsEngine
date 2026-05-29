@@ -1,5 +1,5 @@
 // Used for UI borders - joins up points in neat bevelled lines. Lines adjacency in, triangle strip out. This variant does not calculate texture coords to speed up rendering a solid colour line. 
-#version 430
+#version 150
 
 layout(lines_adjacency) in;
 layout(triangle_strip, max_vertices = 30) out;

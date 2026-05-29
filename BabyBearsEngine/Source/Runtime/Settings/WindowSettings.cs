@@ -67,7 +67,12 @@ public record class WindowSettings()
     public Point MinClientSize { get; set; } = new();
 
     /// <summary>
-    /// The OpenGL version to be used for graphics.
+    /// The OpenGL version to be requested when creating the context. The driver may grant a
+    /// different version; the engine refuses to start if the granted version is below
+    /// <see cref="OpenGL.GpuCapabilities.EngineMinimumOpenGL"/> (currently 3.2 — the lowest
+    /// <c>#version</c> floor across BBE's bundled shaders). Individual shaders may require
+    /// higher GLSL versions and will throw <see cref="OpenGL.ShaderRequiresGLVersionException"/>
+    /// at compile time on GPUs that fall short.
     /// </summary>
     public (int major, int minor) OpenGLVersion { get; set; } = (4, 5);
 

@@ -1,5 +1,5 @@
 // Vertex shader that cuts a rectangle out of a sprite sheet
-#version 430
+#version 150
 
 uniform mat3 MVMatrix;
 uniform mat3 PMatrix;

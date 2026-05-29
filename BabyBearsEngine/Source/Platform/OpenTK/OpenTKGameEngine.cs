@@ -68,7 +68,13 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
         CursorState = ws.ToCursorState();
         Cursor = ws.Cursor.ToOpenTK();
 
+        // Capability snapshot must precede LogStartupContext (which reads it) and the engine
+        // version gate (which throws on insufficient GL). Both run before any world loads or
+        // shaders compile so a refusal produces a clean diagnostic rather than a shader-compile
+        // crash or a black screen.
+        GpuCapabilities.PopulateFromGL();
         EngineDiagnostics.LogStartupContext(appSettings.LogSettings);
+        GpuCapabilities.EnforceEngineMinimum(GpuCapabilities.Current.OpenGLVersion, GpuCapabilities.EngineMinimumOpenGL);
 
         _world.Load(); //does nothing currently - world is swapped
 

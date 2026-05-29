@@ -1,4 +1,4 @@
-#version 330 core
+#version 130
 out vec4 outputColor;  
 
 in vec4 ourColor;

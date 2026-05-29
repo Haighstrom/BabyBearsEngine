@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using BabyBearsEngine.OpenGL;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Desktop;
 
@@ -25,7 +26,9 @@ internal static class EngineDiagnostics
 
     /// <summary>
     /// Emits the OpenGL Context and Display Devices sections. Call from <c>OpenTKGameEngine.OnLoad</c>
-    /// after the GL context is live — requires <see cref="GL.GetString"/> to be callable.
+    /// after the GL context is live and <see cref="GpuCapabilities.PopulateFromGL"/> has run —
+    /// requires <see cref="GL.GetString"/> to be callable and <see cref="GpuCapabilities.Current"/>
+    /// to be available.
     /// </summary>
     public static void LogStartupContext(LogSettings logSettings)
     {
@@ -35,12 +38,19 @@ internal static class EngineDiagnostics
             ? "enabled (GL errors fire once per call site)"
             : "disabled (GL errors fire every time)";
 
+        var capabilities = GpuCapabilities.Current;
+        Version engineMin = GpuCapabilities.EngineMinimumOpenGL;
+        Version reported = capabilities.OpenGLVersion;
+        string versionStatus = reported >= engineMin ? "OK" : "BELOW MINIMUM";
+
         Logger.Section("GL Context Information",
         [
             $"OpenGL {GL.GetString(StringName.Version)}",
             $"GLSL {GL.GetString(StringName.ShadingLanguageVersion)}",
             $"Vendor: {GL.GetString(StringName.Vendor)}",
             $"Renderer: {GL.GetString(StringName.Renderer)}",
+            $"Reported GL: {reported.Major}.{reported.Minor} (engine minimum {engineMin.Major}.{engineMin.Minor}, {versionStatus})",
+            $"Max MSAA samples: {capabilities.MaxMsaaSamples}x",
             $"GL error deduplication: {dedupe}",
         ]);
 

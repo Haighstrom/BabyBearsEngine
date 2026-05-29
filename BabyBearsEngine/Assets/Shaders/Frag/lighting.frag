@@ -1,4 +1,4 @@
-#version 430
+#version 150
 
 uniform sampler2D Sampler;
 uniform vec4 AmbientLightColour;
@@ -61,7 +61,7 @@ vec4 SumLights(vec2 pos)
 {
 	vec4 resultColour = AmbientLightColour;
 
-	for (int i=0; i< Lights.length(); i++)
+	for (int i=0; i< 25; i++)
 		if(Lights[i].Colour.w > 0)	//Exclude null or non-instantiated values which will have alpha of zero
 			resultColour = resultColour + GetLightAtPos(pos, Lights[i].Pos, Lights[i].Colour, Lights[i].Radius,  Lights[i].CutoffRadius);
 

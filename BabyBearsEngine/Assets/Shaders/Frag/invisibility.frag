@@ -1,5 +1,5 @@
 // Fragment shader for invisible objects in Haigh's mushroom game. only draws pixels within a range of a point.
-#version 430
+#version 150
 
 uniform sampler2D Sampler;
 uniform float radius;    //Radius (in pixels) within which things will be drawn

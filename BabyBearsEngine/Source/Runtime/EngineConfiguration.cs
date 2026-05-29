@@ -206,6 +206,7 @@ internal static class EngineConfiguration
         s_textureFactory = null;
         s_window = null;
         s_worldSwitcher = null;
+        GpuCapabilities.Reset();
         FontTextureCache.InvalidateCache();
     }
 }

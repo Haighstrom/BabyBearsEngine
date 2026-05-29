@@ -1,6 +1,6 @@
 // Simple in-out geometry shader that does not affect the vertices at all. Tris or triangle strips
 
-#version 430
+#version 150
 
 layout(triangles) in;
 layout(triangle_strip) out;

@@ -48,24 +48,16 @@ internal sealed class CameraRenderer : IDisposable
 
     private static MsaaSamples ClampToGpuMax(MsaaSamples requested)
     {
-        int maxSamples = GL.GetInteger(GetPName.MaxSamples);
-        if ((int)requested <= maxSamples)
+        int maxSamples = GpuCapabilities.Current.MaxMsaaSamples;
+        MsaaSamples clamped = requested.ClampToMax(maxSamples);
+        if (clamped == requested)
         {
             return requested;
         }
 
-        MsaaSamples best = MsaaSamples.Disabled;
-        foreach (MsaaSamples s in Enum.GetValues<MsaaSamples>())
-        {
-            if ((int)s <= maxSamples && (int)s > (int)best)
-            {
-                best = s;
-            }
-        }
-
-        string bestLabel = best == MsaaSamples.Disabled ? "disabled" : $"{(int)best}×";
+        string bestLabel = clamped == MsaaSamples.Disabled ? "disabled" : $"{(int)clamped}×";
         Logger.Warning($"Requested MSAA {(int)requested}× exceeds GPU maximum of {maxSamples}×; reducing to {bestLabel}.");
-        return best;
+        return clamped;
     }
 
     public void Dispose()

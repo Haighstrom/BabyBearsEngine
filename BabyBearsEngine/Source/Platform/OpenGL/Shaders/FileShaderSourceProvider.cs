@@ -20,6 +20,9 @@ internal sealed class FileShaderSourceProvider : IShaderSourceProvider
         }
 
         string loadedSource = File.ReadAllText(shaderPath);
+        // Gate at load time so the path is naturally available for the error message — and so
+        // a too-new shader is caught before any GL compile call is made.
+        GpuCapabilities.EnforceShaderRequirement(shaderPath, loadedSource);
         _shaderSourceByPath.Add(shaderPath, loadedSource);
         return loadedSource;
     }
