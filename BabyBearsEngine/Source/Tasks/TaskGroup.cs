@@ -98,6 +98,34 @@ public class TaskGroup : UpdateableBase, ITask
     }
 
     /// <inheritdoc/>
+    public virtual void Cancel()
+    {
+        if (_isCompleted)
+        {
+            return;
+        }
+
+        _isCompleted = true;
+
+        // Cancel the entire remaining chain — queued tasks may hold reservations made at
+        // construction time that need releasing too, not just the one currently running.
+        ITask? task = CurrentTask;
+        while (task is not null)
+        {
+            ITask? next = task.NextTask;
+            task.Cancel();
+            task = next;
+        }
+        CurrentTask = null;
+
+        OnCancel();
+
+        TaskCancelled?.Invoke(this, EventArgs.Empty);
+
+        _isStarted = false;
+    }
+
+    /// <inheritdoc/>
     public virtual void Complete()
     {
         _isCompleted = true;
@@ -115,6 +143,13 @@ public class TaskGroup : UpdateableBase, ITask
         _isCompleted = false;
         _isStarted = false;
     }
+
+    /// <summary>
+    /// Called by <see cref="Cancel"/> after the chain has been cancelled and before
+    /// <see cref="TaskCancelled"/> fires. Override to release group-level resources without
+    /// needing to call <c>base.Cancel()</c>.
+    /// </summary>
+    protected virtual void OnCancel() { }
 
     /// <inheritdoc/>
     public virtual void Start()
@@ -163,6 +198,9 @@ public class TaskGroup : UpdateableBase, ITask
 
     /// <inheritdoc/>
     public event EventHandler? TaskStarted;
+
+    /// <inheritdoc/>
+    public event EventHandler? TaskCancelled;
 
     /// <inheritdoc/>
     public event EventHandler? TaskCompleted;

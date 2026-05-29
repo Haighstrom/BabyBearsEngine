@@ -211,6 +211,30 @@ public class TaskControllerTests
     }
 
     [TestMethod]
+    public void ClearTask_CancelsCurrentTask()
+    {
+        // ClearTask must give the in-flight task a chance to clean up (release reservations,
+        // etc.) before being detached. Documents the OnCancel auto-trigger contract.
+        int onCancelCalls = 0;
+        var task = new OnCancelHookTask(() => onCancelCalls++);
+        var controller = new TaskController(task);
+
+        controller.ClearTask();
+
+        Assert.AreEqual(1, onCancelCalls);
+    }
+
+    [TestMethod]
+    public void ClearTask_WithNoCurrentTask_IsSafe()
+    {
+        var controller = new TaskController();
+
+        controller.ClearTask();
+
+        Assert.IsNull(controller.CurrentTask);
+    }
+
+    [TestMethod]
     public void Update_WhenParentDetachedFromWorld_DoesNotDriveTask()
     {
         var task = new ControllableTask();
@@ -222,5 +246,28 @@ public class TaskControllerTests
         controller.Update(0.016);
 
         Assert.AreEqual(0, task.UpdateCalls);
+    }
+
+    [TestMethod]
+    public void Update_WhenParentDetachedFromWorld_CancelsCurrentTask()
+    {
+        // Mirror of the in-world ClearTask path: when the controller's entity is removed
+        // mid-flight, the current task must still get a chance to clean up.
+        int onCancelCalls = 0;
+        var task = new OnCancelHookTask(() => onCancelCalls++);
+        var world = new FakeContainer();
+        var entity = new FakeAddableContainer { Parent = world };
+        var controller = new TaskController(task) { Parent = entity };
+
+        entity.Parent = null;
+        controller.Update(0.016);
+
+        Assert.AreEqual(1, onCancelCalls);
+        Assert.IsNull(controller.CurrentTask);
+    }
+
+    private sealed class OnCancelHookTask(Action onCancel) : Task
+    {
+        protected override void OnCancel() => onCancel();
     }
 }

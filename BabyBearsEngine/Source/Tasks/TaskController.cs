@@ -58,13 +58,24 @@ public class TaskController : AddableBase, ITaskController
     public Func<ITask?>? GetNextTask { get; set; }
 
     /// <inheritdoc/>
-    public void ClearTask() => CurrentTask = null;
+    public void ClearTask()
+    {
+        CurrentTask?.Cancel();
+        CurrentTask = null;
+    }
 
     /// <inheritdoc/>
     public virtual void Update(double elapsed)
     {
         if (Parent is null || (Parent is IAddable addable && addable.Parent is null))
         {
+            // Parent has been removed mid-flight — cancel the in-flight task so its OnCancel
+            // hook can release reservations before we stop updating.
+            if (CurrentTask is not null)
+            {
+                CurrentTask.Cancel();
+                CurrentTask = null;
+            }
             return;
         }
 

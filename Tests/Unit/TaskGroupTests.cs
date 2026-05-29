@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Tasks;
+﻿using System;
+using BabyBearsEngine.Tasks;
 
 namespace BabyBearsEngine.Tests.Unit;
 
@@ -16,6 +17,16 @@ public class TaskGroupTests
             CompletionConditions.Add(() => ShouldComplete);
             ActionsOnComplete.Add(() => CompleteCalls++);
         }
+    }
+
+    private sealed class OnCancelHookTask(Action onCancel) : Task
+    {
+        protected override void OnCancel() => onCancel();
+    }
+
+    private sealed class OnCancelHookGroup(Action onCancel) : TaskGroup
+    {
+        protected override void OnCancel() => onCancel();
     }
 
     [TestMethod]
@@ -173,6 +184,90 @@ public class TaskGroupTests
         Assert.AreEqual(1, starts);
         Assert.AreEqual(1, completions);
         Assert.AreEqual(1, a.CompleteCalls);
+    }
+
+    // Cancel
+
+    [TestMethod]
+    public void Cancel_FiresOwnTaskCancelledEvent()
+    {
+        var a = new ControllableTask();
+        var group = new TaskGroup(a);
+        int cancelEvents = 0;
+        group.TaskCancelled += (_, _) => cancelEvents++;
+
+        group.Cancel();
+
+        Assert.AreEqual(1, cancelEvents);
+    }
+
+    [TestMethod]
+    public void Cancel_CallsOnCancelHook()
+    {
+        int onCancelCalls = 0;
+        var group = new OnCancelHookGroup(() => onCancelCalls++);
+
+        group.Cancel();
+
+        Assert.AreEqual(1, onCancelCalls);
+    }
+
+    [TestMethod]
+    public void Cancel_CancelsCurrentTaskAndQueuedChain()
+    {
+        // Queued tasks may hold construction-time reservations that need releasing too —
+        // Cancel must propagate through the full remaining chain, not just the current task.
+        int aCancels = 0;
+        int bCancels = 0;
+        int cCancels = 0;
+        var a = new OnCancelHookTask(() => aCancels++);
+        var b = new OnCancelHookTask(() => bCancels++);
+        var c = new OnCancelHookTask(() => cCancels++);
+        var group = new TaskGroup(a, b, c);
+
+        group.Cancel();
+
+        Assert.AreEqual(1, aCancels);
+        Assert.AreEqual(1, bCancels);
+        Assert.AreEqual(1, cCancels);
+    }
+
+    [TestMethod]
+    public void Cancel_SetsCurrentTaskToNull()
+    {
+        var a = new ControllableTask();
+        var group = new TaskGroup(a);
+
+        group.Cancel();
+
+        Assert.IsNull(group.CurrentTask);
+    }
+
+    [TestMethod]
+    public void Cancel_DoesNotFireTaskCompletedEvent()
+    {
+        var a = new ControllableTask();
+        var group = new TaskGroup(a);
+        bool completed = false;
+        group.TaskCompleted += (_, _) => completed = true;
+
+        group.Cancel();
+
+        Assert.IsFalse(completed);
+    }
+
+    [TestMethod]
+    public void Cancel_AfterGroupCompletes_IsNoOp()
+    {
+        var a = new ControllableTask { ShouldComplete = true };
+        var group = new TaskGroup(a);
+        group.Update(0.016); // group completes
+        int cancelEvents = 0;
+        group.TaskCancelled += (_, _) => cancelEvents++;
+
+        group.Cancel();
+
+        Assert.AreEqual(0, cancelEvents);
     }
 
     [TestMethod]

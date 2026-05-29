@@ -128,6 +128,120 @@ public class TaskTests
         Assert.AreEqual(1, resets);
     }
 
+    // Cancel
+
+    [TestMethod]
+    public void Cancel_FiresTaskCancelledEvent()
+    {
+        var task = new Task();
+        bool cancelled = false;
+        task.TaskCancelled += (_, _) => cancelled = true;
+
+        task.Cancel();
+
+        Assert.IsTrue(cancelled);
+    }
+
+    [TestMethod]
+    public void Cancel_DoesNotFireTaskCompletedEvent()
+    {
+        var task = new Task();
+        bool completed = false;
+        task.TaskCompleted += (_, _) => completed = true;
+
+        task.Cancel();
+
+        Assert.IsFalse(completed);
+    }
+
+    [TestMethod]
+    public void Cancel_DoesNotRunActionsOnComplete()
+    {
+        bool ranOnComplete = false;
+        var task = new Task(actionOnComplete: () => ranOnComplete = true);
+
+        task.Cancel();
+
+        Assert.IsFalse(ranOnComplete);
+    }
+
+    [TestMethod]
+    public void Cancel_CallsOnCancelHook()
+    {
+        int onCancelCalls = 0;
+        var task = new OnCancelHookTask(() => onCancelCalls++);
+
+        task.Cancel();
+
+        Assert.AreEqual(1, onCancelCalls);
+    }
+
+    [TestMethod]
+    public void Cancel_PreventsFurtherUpdates()
+    {
+        var task = new OnCancelHookTask(() => { });
+        int starts = 0;
+        task.TaskStarted += (_, _) => starts++;
+
+        task.Cancel();
+        task.Update(0.016);
+        task.Update(0.016);
+
+        Assert.AreEqual(0, starts);
+    }
+
+    [TestMethod]
+    public void Cancel_AfterComplete_IsNoOp()
+    {
+        // A task that has already completed cannot then be cancelled — Cancel is a no-op.
+        var task = new Task();
+        task.Update(0.016); // empty task auto-completes on first update
+        int cancelEvents = 0;
+        int onCancelCalls = 0;
+        task.TaskCancelled += (_, _) => cancelEvents++;
+        var hooked = new OnCancelHookTask(() => onCancelCalls++);
+        hooked.Update(0.016);
+
+        task.Cancel();
+        hooked.Cancel();
+
+        Assert.AreEqual(0, cancelEvents);
+        Assert.AreEqual(0, onCancelCalls);
+    }
+
+    [TestMethod]
+    public void Cancel_IsIdempotent_TaskCancelledFiresOnlyOnce()
+    {
+        var task = new Task();
+        int cancelEvents = 0;
+        task.TaskCancelled += (_, _) => cancelEvents++;
+
+        task.Cancel();
+        task.Cancel();
+        task.Cancel();
+
+        Assert.AreEqual(1, cancelEvents);
+    }
+
+    [TestMethod]
+    public void Reset_AfterCancel_AllowsTaskToRunAgain()
+    {
+        var task = new Task();
+        int starts = 0;
+        task.TaskStarted += (_, _) => starts++;
+
+        task.Cancel();
+        task.Reset();
+        task.Update(0.016);
+
+        Assert.AreEqual(1, starts);
+    }
+
+    private sealed class OnCancelHookTask(Action onCancel) : Task
+    {
+        protected override void OnCancel() => onCancel();
+    }
+
     private sealed class OnResetHookTask(Action onReset) : Task
     {
         protected override void OnReset() => onReset();

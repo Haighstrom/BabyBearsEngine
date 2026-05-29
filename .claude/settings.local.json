@@ -12,7 +12,6 @@
       "PowerShell($dll = 'C:\\\\Users\\\\simon\\\\.nuget\\\\packages\\\\opentk.windowing.desktop\\\\4.9.4\\\\lib\\\\netcoreapp3.1\\\\OpenTK.Windowing.Desktop.dll'; $asm = [System.Reflection.Assembly]::LoadFrom\\($dll\\); $asm.GetTypes\\(\\) | ForEach-Object { $_.FullName } | Select-Object -First 20)",
       "Skill(update-config)",
       "Skill(update-config:*)",
-      "Bash(gh issue *)",
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\simon\\\\Dropbox\\\\Programming\\\\.NET\\\\BabyBearsEngine\\\\Demos\" -Recurse -File)",
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(grep -rn --include=\"*.cs\" -P \"^\\\\s+\\(if|while|for|foreach|else if\\)\\\\s*\\\\\\(.+\\\\\\)\\\\s*$\" BabyBearsEngine/ Tests/ Demos/)",

@@ -44,6 +44,23 @@ public class Task : UpdateableBase, ITask
     public ITask? NextTask { get; set; } = null;
 
     /// <inheritdoc/>
+    public virtual void Cancel()
+    {
+        if (_isCompleted)
+        {
+            return;
+        }
+
+        _isCompleted = true;
+
+        OnCancel();
+
+        TaskCancelled?.Invoke(this, EventArgs.Empty);
+
+        _isStarted = false;
+    }
+
+    /// <inheritdoc/>
     public virtual void Complete()
     {
         _isCompleted = true;
@@ -61,6 +78,13 @@ public class Task : UpdateableBase, ITask
         _isStarted = false;
         OnReset();
     }
+
+    /// <summary>
+    /// Called by <see cref="Cancel"/> before <see cref="TaskCancelled"/> fires. Override to
+    /// release resources reserved during construction or partway through the task (storage
+    /// slots, equipment locks, etc.) without needing to call <c>base.Cancel()</c>.
+    /// </summary>
+    protected virtual void OnCancel() { }
 
     /// <summary>
     /// Called by <see cref="Reset"/> after clearing internal state. Override to reset
@@ -100,6 +124,9 @@ public class Task : UpdateableBase, ITask
 
     /// <inheritdoc/>
     public event EventHandler? TaskStarted;
+
+    /// <inheritdoc/>
+    public event EventHandler? TaskCancelled;
 
     /// <inheritdoc/>
     public event EventHandler? TaskCompleted;

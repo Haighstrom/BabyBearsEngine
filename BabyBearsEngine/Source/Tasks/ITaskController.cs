@@ -13,7 +13,11 @@ public interface ITaskController : IAddable, IUpdateable
     /// <summary>The task currently being driven, or <c>null</c> if idle.</summary>
     ITask? CurrentTask { get; set; }
 
-    /// <summary>Sets <see cref="CurrentTask"/> to <c>null</c>, stopping the chain mid-flight.</summary>
+    /// <summary>
+    /// Cancels the current task (firing its <see cref="ITask.TaskCancelled"/> event and
+    /// running its cancellation hook) and sets <see cref="CurrentTask"/> to <c>null</c>,
+    /// stopping the chain mid-flight.
+    /// </summary>
     void ClearTask();
 
     /// <summary>
