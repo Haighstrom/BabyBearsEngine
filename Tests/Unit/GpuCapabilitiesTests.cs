@@ -245,6 +245,44 @@ public class GpuCapabilitiesTests
         Assert.Contains("330", ex.Message);
     }
 
+    // -- GetGrantedBelowRequestedWarning ----------------------------------------------------
+
+    [TestMethod]
+    public void GetGrantedBelowRequestedWarning_GrantedExceedsRequested_ReturnsNull()
+    {
+        Assert.IsNull(GpuCapabilities.GetGrantedBelowRequestedWarning(
+            requested: new Version(4, 3), granted: new Version(4, 5)));
+    }
+
+    [TestMethod]
+    public void GetGrantedBelowRequestedWarning_GrantedEqualsRequested_ReturnsNull()
+    {
+        Assert.IsNull(GpuCapabilities.GetGrantedBelowRequestedWarning(
+            requested: new Version(4, 5), granted: new Version(4, 5)));
+    }
+
+    [TestMethod]
+    public void GetGrantedBelowRequestedWarning_GrantedBelowRequestedByMinor_ReturnsWarning()
+    {
+        string? warning = GpuCapabilities.GetGrantedBelowRequestedWarning(
+            requested: new Version(4, 5), granted: new Version(4, 3));
+
+        Assert.IsNotNull(warning);
+        Assert.Contains("4.5", warning);
+        Assert.Contains("4.3", warning);
+    }
+
+    [TestMethod]
+    public void GetGrantedBelowRequestedWarning_GrantedBelowRequestedByMajor_ReturnsWarning()
+    {
+        string? warning = GpuCapabilities.GetGrantedBelowRequestedWarning(
+            requested: new Version(4, 5), granted: new Version(3, 3));
+
+        Assert.IsNotNull(warning);
+        Assert.Contains("4.5", warning);
+        Assert.Contains("3.3", warning);
+    }
+
     // -- EnforceShaderRequirement (source-overload) ----------------------------------------
 
     [TestMethod]

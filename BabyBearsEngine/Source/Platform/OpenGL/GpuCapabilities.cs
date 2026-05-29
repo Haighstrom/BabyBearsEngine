@@ -1,4 +1,5 @@
 using System.IO;
+using BabyBearsEngine.Diagnostics;
 using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
@@ -112,6 +113,30 @@ public sealed class GpuCapabilities
             return null;
         }
         return null;
+    }
+
+    /// <summary>
+    /// Returns null when the driver granted at least the requested OpenGL version; otherwise
+    /// returns a human-readable warning message describing the shortfall. Callers route the
+    /// message through <see cref="Logger.Warning"/>. Falling short is not fatal so long as
+    /// the granted version meets <see cref="EngineMinimumOpenGL"/> — some individual shaders
+    /// may still throw <see cref="ShaderRequiresGLVersionException"/> later if their
+    /// <c>#version</c> pragma exceeds the granted version.
+    /// </summary>
+    public static string? GetGrantedBelowRequestedWarning(Version requested, Version granted)
+    {
+        ArgumentNullException.ThrowIfNull(requested);
+        ArgumentNullException.ThrowIfNull(granted);
+
+        if (granted >= requested)
+        {
+            return null;
+        }
+
+        return $"Requested OpenGL {requested.Major}.{requested.Minor} but driver granted " +
+            $"{granted.Major}.{granted.Minor}. The engine will continue (above the " +
+            $"{EngineMinimumOpenGL.Major}.{EngineMinimumOpenGL.Minor} minimum) but shaders " +
+            $"requiring higher GLSL versions may fail to load.";
     }
 
     /// <summary>

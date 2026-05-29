@@ -74,7 +74,16 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
         // crash or a black screen.
         GpuCapabilities.PopulateFromGL();
         EngineDiagnostics.LogStartupContext(appSettings.LogSettings);
-        GpuCapabilities.EnforceEngineMinimum(GpuCapabilities.Current.OpenGLVersion, GpuCapabilities.EngineMinimumOpenGL);
+
+        Version grantedVersion = GpuCapabilities.Current.OpenGLVersion;
+        Version requestedVersion = new(ws.OpenGLVersion.major, ws.OpenGLVersion.minor);
+        string? versionWarning = GpuCapabilities.GetGrantedBelowRequestedWarning(requestedVersion, grantedVersion);
+        if (versionWarning is not null)
+        {
+            Logger.Warning(versionWarning);
+        }
+
+        GpuCapabilities.EnforceEngineMinimum(grantedVersion, GpuCapabilities.EngineMinimumOpenGL);
 
         _world.Load(); //does nothing currently - world is swapped
 
