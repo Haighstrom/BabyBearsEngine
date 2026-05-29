@@ -7,7 +7,7 @@ using BabyBearsEngine.Worlds.Particles;
 namespace BabyBearsEngine.Demos.Source.Demos.RainShowcase;
 
 /// <summary>
-/// Drives <see cref="SplashEmitterShape"/>-backed bursts on a shared particle system at random
+/// Drives <see cref="ArcEmitterShape"/>-backed bursts on a shared particle system at random
 /// positions sampled from a pre-built candidate list (weighted by the splash-location mask).
 /// <see cref="Intensity"/> in [0, 1] scales the splash rate linearly between zero and
 /// <see cref="MaxSplashesPerSecond"/>; intensity 0 fully halts new splashes (existing particles
@@ -15,7 +15,7 @@ namespace BabyBearsEngine.Demos.Source.Demos.RainShowcase;
 /// </summary>
 internal sealed class SplashSpawner(
     ParticleSystem system,
-    SplashEmitterShape shape,
+    ArcEmitterShape shape,
     IReadOnlyList<Point> candidatePositions,
     Random random) : UpdateableBase
 {
@@ -51,7 +51,7 @@ internal sealed class SplashSpawner(
         Point candidate = candidatePositions[random.Next(candidatePositions.Count)];
         float jitterX = ((float)random.NextDouble() * 2f - 1f) * JitterPixels;
         float jitterY = ((float)random.NextDouble() * 2f - 1f) * JitterPixels;
-        shape.Centre = new Point(candidate.X + jitterX, candidate.Y + jitterY);
+        shape.Origin = new Point(candidate.X + jitterX, candidate.Y + jitterY);
 
         int particles = random.Next(MinParticlesPerSplash, MaxParticlesPerSplash + 1);
         system.EmitBurst(particles);

@@ -182,11 +182,17 @@ internal sealed class RainShowcaseWorld : DemoWorld
     private SplashSpawner BuildSplashes()
     {
         // One shared particle system drives every splash on the ground. The emitter shape's
-        // Centre is mutated per burst by the spawner, so all splashes recycle the same GL
+        // Origin is mutated per burst by the spawner, so all splashes recycle the same GL
         // buffers and shader rather than allocating a new ParticleSystem per impact.
         // Splash particles render slightly behind the nearest rain layer so close streaks
-        // pass in front of distant impacts.
-        SplashEmitterShape shape = new(minSpeed: 40f, maxSpeed: 110f);
+        // pass in front of distant impacts. Arc centre = 90° (upward in screen space) with
+        // a 120° spread gives a hemispherical upward fan — no drops fly into the ground.
+        ArcEmitterShape shape = new(
+            origin: Point.Zero,
+            arcCentreDegrees: 90f,
+            arcSpreadDegrees: 120f,
+            minSpeed: 40f,
+            maxSpeed: 110f);
         ParticleSystem system = new(shape, layer: 5, _random)
         {
             EmissionRate = 0f,           // bursts only — no steady stream

@@ -418,3 +418,109 @@ public class RectEmitterShapeTests
         Assert.AreEqual(new Point(2, -8), spawn.Velocity);
     }
 }
+
+[TestClass]
+public class ArcEmitterShapeTests
+{
+    [TestMethod]
+    public void Sample_PositionIsAlwaysOrigin()
+    {
+        ArcEmitterShape shape = new(new Point(42, -17), arcCentreDegrees: 90f, arcSpreadDegrees: 120f, minSpeed: 10f, maxSpeed: 50f);
+
+        for (int i = 0; i < 20; i++)
+        {
+            ParticleSpawn spawn = shape.Sample(new Random(i));
+
+            Assert.AreEqual(42f, spawn.Position.X, 0.001f);
+            Assert.AreEqual(-17f, spawn.Position.Y, 0.001f);
+        }
+    }
+
+    [TestMethod]
+    public void Sample_SpeedFallsWithinRange()
+    {
+        ArcEmitterShape shape = new(Point.Zero, arcCentreDegrees: 90f, arcSpreadDegrees: 60f, minSpeed: 30f, maxSpeed: 70f);
+
+        for (int i = 0; i < 50; i++)
+        {
+            ParticleSpawn spawn = shape.Sample(new Random(i));
+            float speed = spawn.Velocity.Length;
+
+            Assert.IsGreaterThanOrEqualTo(30f - 0.01f, speed, $"Iteration {i}: speed {speed} below min.");
+            Assert.IsLessThanOrEqualTo(70f + 0.01f, speed, $"Iteration {i}: speed {speed} above max.");
+        }
+    }
+
+    [TestMethod]
+    public void Sample_UpwardArc_AlwaysProducesNegativeScreenY()
+    {
+        // 90 degrees centre (visually upward) with a 120-degree spread covers 30 to 150 in math
+        // angles — every sample should have a negative screen-Y component (visually upward).
+        ArcEmitterShape shape = new(Point.Zero, arcCentreDegrees: 90f, arcSpreadDegrees: 120f, minSpeed: 50f, maxSpeed: 50f);
+
+        for (int i = 0; i < 50; i++)
+        {
+            ParticleSpawn spawn = shape.Sample(new Random(i));
+
+            Assert.IsLessThan(0f, spawn.Velocity.Y, $"Iteration {i}: velocity Y {spawn.Velocity.Y} not upward.");
+        }
+    }
+
+    [TestMethod]
+    public void Sample_RightwardBeam_HasZeroSpread()
+    {
+        // Spread 0 = beam exactly along the centre angle. 0 degrees centre = positive X axis.
+        ArcEmitterShape shape = new(Point.Zero, arcCentreDegrees: 0f, arcSpreadDegrees: 0f, minSpeed: 100f, maxSpeed: 100f);
+
+        for (int i = 0; i < 10; i++)
+        {
+            ParticleSpawn spawn = shape.Sample(new Random(i));
+
+            Assert.AreEqual(100f, spawn.Velocity.X, 0.001f);
+            Assert.AreEqual(0f, spawn.Velocity.Y, 0.001f);
+        }
+    }
+
+    [TestMethod]
+    public void Sample_FullCircleSpread_HitsBothHemispheres()
+    {
+        // 360 degrees of spread should produce samples that vary in sign on both axes.
+        ArcEmitterShape shape = new(Point.Zero, arcCentreDegrees: 0f, arcSpreadDegrees: 360f, minSpeed: 50f, maxSpeed: 50f);
+
+        bool sawPositiveX = false;
+        bool sawNegativeX = false;
+        bool sawPositiveY = false;
+        bool sawNegativeY = false;
+
+        for (int i = 0; i < 200; i++)
+        {
+            ParticleSpawn spawn = shape.Sample(new Random(i));
+            if (spawn.Velocity.X > 1f) { sawPositiveX = true; }
+            if (spawn.Velocity.X < -1f) { sawNegativeX = true; }
+            if (spawn.Velocity.Y > 1f) { sawPositiveY = true; }
+            if (spawn.Velocity.Y < -1f) { sawNegativeY = true; }
+        }
+
+        Assert.IsTrue(sawPositiveX);
+        Assert.IsTrue(sawNegativeX);
+        Assert.IsTrue(sawPositiveY);
+        Assert.IsTrue(sawNegativeY);
+    }
+
+    [TestMethod]
+    public void Origin_IsMutable()
+    {
+        // Mutable Origin is the central pattern this shape supports — one shared instance
+        // emits many bursts at different locations (e.g. raindrop splashes scattered
+        // across a ground plane).
+        ArcEmitterShape shape = new(Point.Zero, 90f, 60f, 10f, 10f)
+        {
+            Origin = new Point(123, 456),
+        };
+
+        ParticleSpawn spawn = shape.Sample(new Random(1));
+
+        Assert.AreEqual(123f, spawn.Position.X, 0.001f);
+        Assert.AreEqual(456f, spawn.Position.Y, 0.001f);
+    }
+}
