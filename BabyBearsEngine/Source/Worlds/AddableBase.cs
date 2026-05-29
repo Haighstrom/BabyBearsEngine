@@ -39,6 +39,22 @@ public abstract class AddableBase : IAddable
     public bool Exists => _parent is not null;
 
     /// <inheritdoc/>
+    public bool IsConnectedToTree
+    {
+        get
+        {
+            for (IAddable? current = this; current is not null; current = current.Parent as IAddable)
+            {
+                if (current.Parent is null)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    /// <inheritdoc/>
     public event EventHandler? Added;
 
     /// <inheritdoc/>

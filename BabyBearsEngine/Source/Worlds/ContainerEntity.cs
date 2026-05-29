@@ -67,20 +67,33 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
     protected IList<IRenderable> GetRenderables() => _container.GetRenderables();
 
     /// <summary>
-    /// Updates every active child <see cref="IUpdateable"/>. Children with <see cref="IUpdateable.Active"/> = false are skipped.
-    /// Override to insert custom per-frame logic; remember to call <c>base.Update(elapsed)</c> if you still want children to update.
+    /// Updates every active child <see cref="IUpdateable"/> that is part of the entity tree. Children with
+    /// <see cref="IUpdateable.Active"/> = false, or whose <see cref="AddableBase.IsConnectedToTree"/> is false,
+    /// are skipped. Override to insert custom per-frame logic; remember to call <c>base.Update(elapsed)</c> if
+    /// you still want children to update.
+    /// <para>If a child's update detaches this entity (or any ancestor) from the tree, iteration stops — any
+    /// remaining children would otherwise crash trying to access screen-space coordinates on a detached subtree.
+    /// Because every <see cref="ContainerEntity"/> in the chain performs the same check, the bail-out propagates
+    /// up correctly even when the removed ancestor is several levels above this one.</para>
     /// </summary>
     /// <param name="elapsed">Seconds since the last update.</param>
     public virtual void Update(double elapsed)
     {
         foreach (var entity in GetUpdatables())
         {
-            if (!entity.Active)
+            // Container only accepts IAddable, so every IUpdateable child is also IAddable in practice;
+            // the cast is defensive in case a custom IUpdateable ever sneaks through.
+            if (!entity.Active || (entity is IAddable addable && !addable.IsConnectedToTree))
             {
                 continue;
             }
 
             entity.Update(elapsed);
+
+            if (!IsConnectedToTree)
+            {
+                break;
+            }
         }
     }
 

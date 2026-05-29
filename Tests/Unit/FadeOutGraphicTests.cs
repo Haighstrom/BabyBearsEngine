@@ -127,6 +127,7 @@ public class FadeOutGraphicTests
     {
         FakeGraphic graphic = new() { X = 0f, Y = 0f, Width = 10f, Height = 10f };
         FadeOutGraphic fade = new(graphic, velocityX: 100f, velocityY: -50f, duration: 2.0);
+        fade.Parent = new FakeContainer();
 
         fade.Update(0.1);
 
@@ -139,6 +140,7 @@ public class FadeOutGraphicTests
     {
         FakeGraphic graphic = new() { Colour = Colour.White, Width = 10f, Height = 10f };
         FadeOutGraphic fade = new(graphic, 0f, 0f, duration: 1.0);
+        fade.Parent = new FakeContainer();
 
         fade.Update(0.5);
 

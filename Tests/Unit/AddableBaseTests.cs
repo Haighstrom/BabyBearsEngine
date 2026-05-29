@@ -279,4 +279,76 @@ public class AddableBaseTests
 
         Assert.AreEqual(1, a.OnRemovedCallCount);
     }
+
+    // IsConnectedToTree — walks the parent chain to a non-IAddable root (e.g. a World)
+
+    /// <summary>An <see cref="IAddable"/> wrapped around an <see cref="IContainer"/> so we can build
+    /// multi-level chains (root → middle → leaf) without needing a real Container/ContainerEntity.</summary>
+    private sealed class TestAddableContainer : AddableBase, IContainer
+    {
+        public void Add(IAddable entity) { }
+        public void Remove(IAddable entity) { }
+        public void RemoveAll() { }
+        public (float x, float y) GetWindowCoordinates(float x, float y) => (x, y);
+    }
+
+    [TestMethod]
+    public void IsConnectedToTree_NoParent_IsFalse()
+    {
+        var a = new TestAddable();
+        Assert.IsFalse(a.IsConnectedToTree);
+    }
+
+    [TestMethod]
+    public void IsConnectedToTree_DirectlyUnderNonAddableRoot_IsTrue()
+    {
+        var a = new TestAddable();
+        a.Parent = new FakeContainer();
+
+        Assert.IsTrue(a.IsConnectedToTree);
+    }
+
+    [TestMethod]
+    public void IsConnectedToTree_NestedUnderConnectedAncestor_IsTrue()
+    {
+        var root = new FakeContainer();
+        var middle = new TestAddableContainer();
+        middle.Parent = root;
+        var leaf = new TestAddable();
+        leaf.Parent = middle;
+
+        Assert.IsTrue(leaf.IsConnectedToTree);
+    }
+
+    [TestMethod]
+    public void IsConnectedToTree_AncestorDetached_IsFalse()
+    {
+        var root = new FakeContainer();
+        var middle = new TestAddableContainer();
+        middle.Parent = root;
+        var leaf = new TestAddable();
+        leaf.Parent = middle;
+
+        // Detach the middle layer — leaf's Parent is still middle (non-null), but the chain is broken.
+        middle.Parent = null;
+
+        Assert.IsFalse(leaf.IsConnectedToTree);
+    }
+
+    [TestMethod]
+    public void IsConnectedToTree_DeepAncestorDetached_IsFalse()
+    {
+        var root = new FakeContainer();
+        var grandparent = new TestAddableContainer();
+        grandparent.Parent = root;
+        var parent = new TestAddableContainer();
+        parent.Parent = grandparent;
+        var leaf = new TestAddable();
+        leaf.Parent = parent;
+
+        // Detach the grandparent — two levels above the leaf.
+        grandparent.Parent = null;
+
+        Assert.IsFalse(leaf.IsConnectedToTree);
+    }
 }

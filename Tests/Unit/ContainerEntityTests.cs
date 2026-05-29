@@ -94,6 +94,7 @@ public class ContainerEntityTests
     public void Update_CallsUpdateOnEveryActiveChild()
     {
         var ce = new TestContainerEntity();
+        ce.Parent = new FakeParent();
         var a = new StubUpdateable();
         var b = new StubUpdateable();
         ce.Add(a);
@@ -109,6 +110,7 @@ public class ContainerEntityTests
     public void Update_SkipsInactiveChildren()
     {
         var ce = new TestContainerEntity();
+        ce.Parent = new FakeParent();
         var active = new StubUpdateable { Active = true };
         var inactive = new StubUpdateable { Active = false };
         ce.Add(active);
@@ -118,6 +120,67 @@ public class ContainerEntityTests
 
         Assert.AreEqual(1, active.UpdateCalls);
         Assert.AreEqual(0, inactive.UpdateCalls);
+    }
+
+    [TestMethod]
+    public void Update_SkipsChildrenNotConnectedToTree()
+    {
+        // Bare ContainerEntity is unrooted — its children are not connected to any tree and must be skipped.
+        var ce = new TestContainerEntity();
+        var child = new StubUpdateable();
+        ce.Add(child);
+
+        ce.Update(0.016);
+
+        Assert.AreEqual(0, child.UpdateCalls);
+    }
+
+    /// <summary>Child whose Update detaches the configured target from its parent.</summary>
+    private sealed class DetachingUpdateable(IAddable target) : AddableBase, IUpdateable
+    {
+        public bool Active { get; set; } = true;
+        public void Update(double elapsed)
+        {
+            target.Parent = null;
+        }
+    }
+
+    [TestMethod]
+    public void Update_WhenChildDetachesSelf_StopsIteratingRemainingChildren()
+    {
+        var parent = new FakeParent { Translation = (0f, 0f) };
+        var ce = new TestContainerEntity();
+        ce.Parent = parent;
+
+        var laterChild = new StubUpdateable();
+        ce.Add(new DetachingUpdateable(ce));
+        ce.Add(laterChild);
+
+        ce.Update(0.016);
+
+        Assert.AreEqual(0, laterChild.UpdateCalls);
+    }
+
+    [TestMethod]
+    public void Update_WhenGrandchildDetachesAncestor_StopsIteratingRemainingChildrenAtSiblingLevel()
+    {
+        // Topology: root → ce (grandparent) → middle → [detacher, laterSibling]
+        // detacher removes ce from root. middle.IsConnectedToTree is then false (chain broken at ce),
+        // so middle's loop must break before reaching laterSibling.
+        var root = new FakeParent { Translation = (0f, 0f) };
+        var ce = new TestContainerEntity();
+        ce.Parent = root;
+
+        var middle = new TestContainerEntity();
+        ce.Add(middle);
+
+        var laterSibling = new StubUpdateable();
+        middle.Add(new DetachingUpdateable(ce));
+        middle.Add(laterSibling);
+
+        ce.Update(0.016);
+
+        Assert.AreEqual(0, laterSibling.UpdateCalls);
     }
 
     // Render
