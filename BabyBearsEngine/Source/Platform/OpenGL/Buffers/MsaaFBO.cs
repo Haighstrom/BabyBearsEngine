@@ -15,12 +15,6 @@ public sealed class MsaaFBO(int width, int height, int samples) : IDisposable
         int handle = GL.GenTexture();
         OpenGLHelper.BindTexture(handle, TextureTarget.Texture2DMultisample);
         GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, samples, PixelInternalFormat.Rgb8, width, height, false);
-
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-
         return new Texture(handle, width, height);
     }
 

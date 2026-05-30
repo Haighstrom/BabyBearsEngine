@@ -14,6 +14,24 @@ internal static class OpenGLHelper
 
     public static int LastBoundFBO { get; set; }
 
+    /// <summary>
+    /// Resets the bind cache to its initial uninitialised state. Must be called whenever the
+    /// GL context is recreated (e.g. between consecutive test runs each spinning up their own
+    /// <see cref="GameLauncher.Run"/>) — otherwise a stale handle from the previous context
+    /// can match a freshly-generated handle in the new context and cause Bind calls to be
+    /// silently skipped.
+    /// </summary>
+    public static void ResetCache()
+    {
+        s_lastBoundShader = -1;
+        s_lastBoundVAO = -1;
+        s_lastBoundVBO = -1;
+        s_lastBoundEBO = -1;
+        s_lastBoundTexture = -1;
+        s_lastActiveTextureUnit = TextureUnit.Texture0;
+        LastBoundFBO = 0;
+    }
+
     public static void BindFBO(int fboHandle)
     {
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, fboHandle);

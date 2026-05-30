@@ -54,6 +54,11 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
     {
         base.OnLoad();
 
+        // The bind cache is static and survives between consecutive GameLauncher.Run invocations
+        // (e.g. across system tests). Reset it now that a fresh GL context is current so stale
+        // handles from a previous context can't suppress real Bind calls.
+        OpenGLHelper.ResetCache();
+
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         GL.Enable(EnableCap.Blend);
         GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
