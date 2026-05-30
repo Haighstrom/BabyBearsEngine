@@ -465,9 +465,13 @@ internal sealed class OpenALAudioService : IAudio
         return ext switch
         {
             ".wav" => WavDecoder.Decode(path),
+            ".ogg" => OggDecoder.Decode(path),
+            ".mp3" => Mp3Decoder.Decode(path),
+            ".flac" => FlacDecoder.Decode(path),
+            ".opus" => OpusDecoder.Decode(path),
             _ => throw new NotSupportedException(
-                $"Audio: file extension '{ext}' is not supported. Only .wav is supported in this build. " +
-                "See GitHub issues for tracking of Ogg/MP3/FLAC/MIDI/Opus support."),
+                $"Audio: file extension '{ext}' is not supported. Supported formats: .wav, .ogg, .mp3, .flac, .opus. " +
+                "MIDI (.mid/.midi) support is tracked at GitHub issue #121."),
         };
     }
 
