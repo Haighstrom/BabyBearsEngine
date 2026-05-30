@@ -25,4 +25,10 @@ public interface IGraphic : IRenderable, ILayered, IRectAddable
         get => Colour.A;
         set => Colour = new(Colour.R, Colour.G, Colour.B, (byte)Math.Round(value * 255f));
     }
+
+    /// <summary>
+    /// Rotation angle in degrees, applied around the graphic's centre during rendering.
+    /// Defaults to 0 (no rotation). Positive values rotate clockwise.
+    /// </summary>
+    float Angle { get; set; }
 }

@@ -35,6 +35,9 @@ public class SpriteMap(int[,] tiles, float tileW, float tileH, ISpriteTexture te
     private Rect? _drawArea = null;
     private bool _disposed = false;
 
+    /// <inheritdoc/>
+    public float Angle { get; set; } = 0f;
+
     /// <summary>Number of tile columns.</summary>
     public int Columns { get; } = tiles.GetLength(0);
 
@@ -119,6 +122,12 @@ public class SpriteMap(int[,] tiles, float tileW, float tileH, ISpriteTexture te
         }
 
         var mv = Matrix3.Translate(ref modelView, X, Y);
+
+        if (Angle != 0f)
+        {
+            mv = Matrix3.RotateAroundPoint(ref mv, Angle, Width / 2f, Height / 2f);
+        }
+
         _shader.Bind();
         _vertexDataBuffer.Bind();
         texture.Bind();

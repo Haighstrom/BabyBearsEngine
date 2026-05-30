@@ -23,6 +23,9 @@ public sealed class ColourGraphic(Colour colour, float x, float y, float width, 
     private bool _verticesChanged = true;
     private bool _disposed = false;
 
+    /// <inheritdoc/>
+    public float Angle { get; set; } = 0f;
+
     /// <summary>Fill colour.</summary>
     public Colour Colour
     {
@@ -68,6 +71,12 @@ public sealed class ColourGraphic(Colour colour, float x, float y, float width, 
         }
 
         var mv = Matrix3.Translate(ref modelView, X, Y);
+
+        if (Angle != 0f)
+        {
+            mv = Matrix3.RotateAroundPoint(ref mv, Angle, Width / 2f, Height / 2f);
+        }
+
         _shader.SetProjectionMatrix(ref projection);
         _shader.SetModelViewMatrix(ref mv);
 

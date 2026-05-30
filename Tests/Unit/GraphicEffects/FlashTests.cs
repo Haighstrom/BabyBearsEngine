@@ -16,6 +16,7 @@ public class FlashTests
         public float Width { get; set; } = 0f;
         public float Height { get; set; } = 0f;
         public Colour Colour { get; set; } = Colour.White;
+        public float Angle { get; set; } = 0f;
         public bool Visible { get; set; } = true;
         public int Layer { get; set; } = 0;
         public IContainer? Parent { get; set; } = new FakeContainer();

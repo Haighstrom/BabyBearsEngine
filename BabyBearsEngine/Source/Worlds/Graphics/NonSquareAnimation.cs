@@ -45,6 +45,9 @@ public class NonSquareAnimation : GraphicBase, IGraphic, IUpdateable, IDisposabl
     /// <summary>A convenience list of every frame index, in order.</summary>
     public IList<int> AllFrames => Enumerable.Range(0, _frames.Count).ToList();
 
+    /// <inheritdoc/>
+    public float Angle { get; set; } = 0f;
+
     /// <inheritdoc cref="IGraphic.Colour"/>
     public Colour Colour
     {
@@ -142,6 +145,12 @@ public class NonSquareAnimation : GraphicBase, IGraphic, IUpdateable, IDisposabl
         }
 
         var mv = Matrix3.Translate(ref modelView, X, Y);
+
+        if (Angle != 0f)
+        {
+            mv = Matrix3.RotateAroundPoint(ref mv, Angle, Width / 2f, Height / 2f);
+        }
+
         _renderer.Render(ref projection, ref mv);
     }
 

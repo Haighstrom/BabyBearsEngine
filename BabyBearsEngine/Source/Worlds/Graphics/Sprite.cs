@@ -26,6 +26,9 @@ public class Sprite(ISpriteTexture texture, float x, float y, float width, float
     private bool _disposed = false;
 
     /// <inheritdoc/>
+    public float Angle { get; set; } = 0f;
+
+    /// <inheritdoc/>
     public Colour Colour
     {
         get => _colour;
@@ -106,6 +109,12 @@ public class Sprite(ISpriteTexture texture, float x, float y, float width, float
         }
 
         var mv = Matrix3.Translate(ref modelView, X, Y);
+
+        if (Angle != 0f)
+        {
+            mv = Matrix3.RotateAroundPoint(ref mv, Angle, Width / 2f, Height / 2f);
+        }
+
         _renderer.Render(ref projection, ref mv);
     }
 

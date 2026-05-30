@@ -50,6 +50,9 @@ public class MultiLayerAnimation(float x, float y, float width, float height, do
     /// <summary>Whether the animation is advancing. The scene graph skips <see cref="Update"/> when false.</summary>
     public bool Active { get; set; } = false;
 
+    /// <inheritdoc/>
+    public float Angle { get; set; } = 0f;
+
     /// <summary>A convenience list of every frame index, in order.</summary>
     public IList<int> AllFrames => [.. Enumerable.Range(0, ReferenceTexture.Frames)];
 
@@ -191,6 +194,12 @@ public class MultiLayerAnimation(float x, float y, float width, float height, do
         }
 
         var mv = Matrix3.Translate(ref modelView, X, Y);
+
+        if (Angle != 0f)
+        {
+            mv = Matrix3.RotateAroundPoint(ref mv, Angle, Width / 2f, Height / 2f);
+        }
+
         _shader.Bind();
         _vertexDataBuffer.Bind();
         _shader.SetProjectionMatrix(ref projection);

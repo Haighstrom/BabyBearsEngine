@@ -11,6 +11,7 @@ public class IGraphicAlphaTests
     private sealed class FakeGraphic : IGraphic
     {
         public Colour Colour { get; set; } = Colour.White;
+        public float Angle { get; set; } = 0f;
         public int Layer { get; set; } = 0;
         public bool Visible { get; set; } = true;
         public float X { get; set; } = 0f;

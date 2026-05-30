@@ -11,6 +11,7 @@ using BabyBearsEngine.Demos.Source.Demos.IODemo;
 using BabyBearsEngine.Demos.Source.Demos.KeyboardDemo;
 using BabyBearsEngine.Demos.Source.Demos.LoadingScreenDemo;
 using BabyBearsEngine.Demos.Source.Demos.MouseDemo;
+using BabyBearsEngine.Demos.Source.Demos.MsaaDemo;
 using BabyBearsEngine.Demos.Source.Demos.NoiseShowcase;
 using BabyBearsEngine.Demos.Source.Demos.ParticleDemo;
 using BabyBearsEngine.Demos.Source.Demos.RainShowcase;
@@ -87,6 +88,7 @@ graphicsSubmenuFactory = () => new MenuWorld(
 [
     new("Animation", () => new AnimationDemoWorld(getGraphicsSubmenu)),
     new("Border",    () => new BorderDemoWorld(getGraphicsSubmenu)),
+    new("MSAA",      () => new MsaaDemoWorld(getGraphicsSubmenu)),
     new("Particles", () => new ParticleDemoWorld(getGraphicsSubmenu)),
     new("Shader",    () => new ShaderDemoWorld(getGraphicsSubmenu)),
     new("Stencil",   () => new StencilDemoWorld(getGraphicsSubmenu)),

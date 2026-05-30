@@ -151,9 +151,12 @@ public class Entity : ContainerEntity, IMouseInteractable
 
     /// <summary>
     /// Renders all child renderables, applying this entity's (X, Y) translation to the model-view matrix first.
-    /// Sealed — entity subclasses should add their own rendering by adding child <see cref="IRenderable"/>s rather than overriding here.
+    /// Entity subclasses should normally add their own rendering by adding child <see cref="IRenderable"/>s
+    /// rather than overriding here. The override hook exists so composite <see cref="Graphics.IGraphic"/>
+    /// implementers (e.g. <see cref="Graphics.BorderedColourGraphic"/>) can apply transforms such as
+    /// rotation to the model-view matrix before children render.
     /// </summary>
-    public sealed override void Render(ref Matrix3 projection, ref Matrix3 modelView)
+    public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
         var mv = Matrix3.Translate(ref modelView, X, Y);
         base.Render(ref projection, ref mv);

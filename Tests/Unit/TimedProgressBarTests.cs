@@ -10,6 +10,7 @@ public class TimedProgressBarTests
     private sealed class StubGraphic : GraphicBase, IGraphic
     {
         public Colour Colour { get; set; }
+        public float Angle { get; set; } = 0f;
         public override void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
     }
 

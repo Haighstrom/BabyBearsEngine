@@ -9,6 +9,7 @@ public class ProgressBarTests
     private sealed class StubGraphic : GraphicBase, IGraphic
     {
         public Colour Colour { get; set; }
+        public float Angle { get; set; } = 0f;
         public int RenderCallIndex { get; private set; } = -1;
         public static int NextRenderCallIndex { get; set; } = 0;
 

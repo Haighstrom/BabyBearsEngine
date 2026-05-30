@@ -41,6 +41,9 @@ public class BorderedColourGraphic : Entity, IGraphic
     {
     }
 
+    /// <inheritdoc/>
+    public float Angle { get; set; } = 0f;
+
     /// <summary>Colour of the filled interior. The border colour is fixed at construction.</summary>
     public Colour Colour
     {
@@ -59,5 +62,20 @@ public class BorderedColourGraphic : Entity, IGraphic
             _border.Width = Width;
             _border.Height = Height;
         }
+    }
+
+    /// <inheritdoc/>
+    public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
+    {
+        if (Angle == 0f)
+        {
+            base.Render(ref projection, ref modelView);
+            return;
+        }
+
+        // Rotate around the entity's centre in the parent frame, then let Entity.Render apply
+        // its (X, Y) translate and render the fill + border children inside the rotated frame.
+        var mv = Matrix3.RotateAroundPoint(ref modelView, Angle, X + Width / 2f, Y + Height / 2f);
+        base.Render(ref projection, ref mv);
     }
 }

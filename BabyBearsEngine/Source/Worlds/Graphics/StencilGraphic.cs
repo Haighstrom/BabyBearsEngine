@@ -32,6 +32,9 @@ public sealed class StencilGraphic(ITexture imageTexture, ITexture stencilTextur
     private Colour _colour = Colour.White;
     private bool _verticesChanged = true;
 
+    /// <inheritdoc/>
+    public float Angle { get; set; } = 0f;
+
     /// <summary>
     /// Mask values at or below this threshold are fully discarded. Defaults to 0 (soft edges
     /// preserved). Set to 0.5 for hard-edged stencils from lossy sources such as JPEG, where
@@ -69,6 +72,12 @@ public sealed class StencilGraphic(ITexture imageTexture, ITexture stencilTextur
         }
 
         var mv = Matrix3.Translate(ref modelView, X, Y);
+
+        if (Angle != 0f)
+        {
+            mv = Matrix3.RotateAroundPoint(ref mv, Angle, Width / 2f, Height / 2f);
+        }
+
         _stencilRenderer.Render(ref projection, ref mv);
     }
 
