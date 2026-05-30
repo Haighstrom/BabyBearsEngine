@@ -28,12 +28,12 @@ public class World : IWorld
     public IContainer Overlay => _overlay;
 
     /// <inheritdoc/>
-    public void Load()
+    public virtual void Load()
     {
     }
 
     /// <inheritdoc/>
-    public void Unload()
+    public virtual void Unload()
     {
         //foreach (var graphic in _graphics.ToList())
         //{
