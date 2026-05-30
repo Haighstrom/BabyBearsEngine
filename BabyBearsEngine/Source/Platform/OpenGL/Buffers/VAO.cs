@@ -1,12 +1,18 @@
-﻿using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
 
-public sealed class VAO() : IDisposable
+public sealed class VAO : IDisposable
 {
     private bool _disposed = false;
 
-    public int Handle { get; } = GL.GenVertexArray();
+    public VAO()
+    {
+        GLThread.Ensure();
+        Handle = GL.GenVertexArray();
+    }
+
+    public int Handle { get; }
 
     public void Bind() => OpenGLHelper.BindVAO(Handle);
 

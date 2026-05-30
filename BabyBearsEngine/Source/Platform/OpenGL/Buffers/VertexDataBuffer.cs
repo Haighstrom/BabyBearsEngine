@@ -13,6 +13,7 @@ internal sealed class VertexDataBuffer<TVertex> : IDisposable where TVertex : st
 
     public VertexDataBuffer(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
     {
+        GLThread.Ensure();
         _bufferUsageHint = bufferUsageHint;
 
         VAO.Bind();

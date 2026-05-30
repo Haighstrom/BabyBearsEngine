@@ -16,6 +16,7 @@ public sealed class MsaaFBO : IDisposable
 
     public MsaaFBO(int width, int height, int samples)
     {
+        GLThread.Ensure();
         Handle = GL.GenFramebuffer();
         Texture = CreateTexture(width, height, samples);
 

@@ -1,18 +1,26 @@
-﻿using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
 
-public sealed class EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw) : IDisposable
+public sealed class EBO : IDisposable
 {
+    private readonly BufferUsageHint _bufferUsageHint;
     private bool _disposed = false;
 
-    public int Handle { get; } = GL.GenBuffer();
+    public EBO(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
+    {
+        GLThread.Ensure();
+        _bufferUsageHint = bufferUsageHint;
+        Handle = GL.GenBuffer();
+    }
+
+    public int Handle { get; }
 
     public void Bind() => OpenGLHelper.BindEBO(Handle);
 
     public void BufferData(uint[] indices)
     {
-        GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, bufferUsageHint);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, _bufferUsageHint);
     }
 
     public void Dispose()

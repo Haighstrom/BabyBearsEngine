@@ -10,6 +10,7 @@ public abstract class ShaderProgramBase : IShaderProgram
 
     public ShaderProgramBase(VertexShaderPath vertexShaderPath, FragmentShaderPath fragmentShaderPath)
     {
+        GLThread.Ensure();
         string vsSource = ShaderSourceProvider.GetVertexSource(vertexShaderPath);
         int vertexShader = OpenGLHelper.CreateShader(vsSource, ShaderType.VertexShader);
 
@@ -21,6 +22,7 @@ public abstract class ShaderProgramBase : IShaderProgram
 
     public ShaderProgramBase(VertexShaderPath vertexShaderPath, GeometryShaderPath geometryShaderPath, FragmentShaderPath fragmentShaderPath)
     {
+        GLThread.Ensure();
         string vsSource = ShaderSourceProvider.GetVertexSource(vertexShaderPath);
         int vertexShader = OpenGLHelper.CreateShader(vsSource, ShaderType.VertexShader);
 

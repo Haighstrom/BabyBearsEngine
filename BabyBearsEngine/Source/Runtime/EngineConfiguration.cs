@@ -22,6 +22,7 @@ internal static class EngineConfiguration
 
     private static IAudio? s_audio = null;
     private static IEngineInfo? s_engineInfo = null;
+    private static IGLLoadingContextFactory? s_glLoadingContextFactory = null;
     private static IGPUResourceDeletionService? s_gpuResourceDeletionService = null;
     private static IKeyboard? s_keyboard = null;
     private static IMouse? s_mouse = null;
@@ -79,6 +80,12 @@ internal static class EngineConfiguration
     {
         get => s_engineInfo ?? throw new InvalidOperationException(NotInitialisedMessage);
         set => s_engineInfo = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    internal static IGLLoadingContextFactory GLLoadingContextFactory
+    {
+        get => s_glLoadingContextFactory ?? throw new InvalidOperationException(NotInitialisedMessage);
+        set => s_glLoadingContextFactory = value ?? throw new ArgumentNullException(nameof(value));
     }
 
     public static IGPUResourceDeletionService GPUResourceDeletionService
@@ -212,6 +219,7 @@ internal static class EngineConfiguration
         s_defaultTextRenderer = TextRenderer.Gdi;
         s_audio = null;
         s_engineInfo = null;
+        s_glLoadingContextFactory = null;
         s_gpuResourceDeletionService = null;
         s_keyboard = null;
         s_mouse = null;

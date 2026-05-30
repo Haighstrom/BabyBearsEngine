@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.Geometry;
+using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Worlds.Graphics;
 
 namespace BabyBearsEngine.Worlds;
@@ -57,7 +58,8 @@ public class LoadingScreenWorld : World
     // Y position as a fraction of window height — slightly below centre, like a typical splash screen.
     private const float DefaultBarYFraction = 0.7f;
 
-    private readonly Func<IProgress<float>, CancellationToken, Task> _loadWork;
+    private readonly Func<IProgress<float>, CancellationToken, Task>? _asyncLoadWork;
+    private readonly Action<IProgress<float>, CancellationToken>? _syncLoadWorkWithGL;
     private readonly Func<IWorld> _nextWorldFactory;
     private readonly CancellationTokenSource _cancellation = new();
     private readonly AtomicFloatProgress _progress = new();
@@ -65,6 +67,15 @@ public class LoadingScreenWorld : World
 
     private ProgressBar _bar;
     private Task? _loadTask;
+    // Sync object created by the worker thread at the end of loadAssets and waited on by the
+    // main thread before handing off to the next world. Both contexts share sync objects
+    // (they're shareable across shared contexts), and only the main-thread wait gives the
+    // driver an opportunity to make worker-side texture uploads visible to the main context.
+    private long _workerFence = 0;
+    // The shared GL context whose lifetime spans the worker task. Created on the main thread
+    // (window creation is main-thread-only), used on the worker, then disposed on the main
+    // thread (GLFW windows can only be disposed on the main thread).
+    private ILoadingGLContext? _workerGLContext = null;
     private LoadingScreenState _state = LoadingScreenState.Pending;
     private Exception? _loadError = null;
     private bool _handoffDone = false;
@@ -98,6 +109,46 @@ public class LoadingScreenWorld : World
     {
     }
 
+    /// <summary>
+    /// Creates a loading screen world that runs <paramref name="loadAssets"/> on a dedicated
+    /// background thread that holds a shared OpenGL context, so the delegate can construct GL
+    /// resources (<see cref="Worlds.Graphics.Textures.CreateFromFile"/>, font atlases, etc.)
+    /// directly without dispatching back to the main thread. Once loading completes, the world
+    /// switches to <paramref name="nextWorldFactory"/>'s output.
+    /// </summary>
+    /// <param name="loadAssets">
+    /// The synchronous load work. Receives an <see cref="IProgress{T}"/> for reporting progress
+    /// in [0, 1] and a <see cref="CancellationToken"/> that fires when this world is unloaded.
+    /// The delegate runs on a background thread with a shared GL context current, so GL resource
+    /// constructors can be called directly. Must be fully synchronous — any <c>await</c> can move
+    /// execution off the loading thread, away from the GL context.
+    /// </param>
+    /// <param name="nextWorldFactory">Factory for the world to switch to once loading completes. Invoked on the main thread.</param>
+    /// <param name="barTheme">Visual styling for the default progress bar.</param>
+    public LoadingScreenWorld(
+        Action<IProgress<float>, CancellationToken> loadAssets,
+        Func<IWorld> nextWorldFactory,
+        ProgressBarTheme barTheme)
+        : this(
+            asyncLoadWork: null,
+            syncLoadWorkWithGL: loadAssets ?? throw new ArgumentNullException(nameof(loadAssets)),
+            nextWorldFactory,
+            barTheme,
+            worldSwitcherOverride: null)
+    {
+    }
+
+    /// <summary>
+    /// Creates a loading screen world running <paramref name="loadAssets"/> with the default
+    /// <see cref="ProgressBarTheme"/>.
+    /// </summary>
+    public LoadingScreenWorld(
+        Action<IProgress<float>, CancellationToken> loadAssets,
+        Func<IWorld> nextWorldFactory)
+        : this(loadAssets, nextWorldFactory, ProgressBarTheme.Default)
+    {
+    }
+
     // Internal ctor used by tests to inject a fake world switcher without going through Engine /
     // EngineConfiguration. The public ctors funnel into this one.
     internal LoadingScreenWorld(
@@ -105,12 +156,27 @@ public class LoadingScreenWorld : World
         Func<IWorld> nextWorldFactory,
         ProgressBarTheme barTheme,
         IWorldSwitcher? worldSwitcherOverride)
+        : this(
+            asyncLoadWork: loadWork ?? throw new ArgumentNullException(nameof(loadWork)),
+            syncLoadWorkWithGL: null,
+            nextWorldFactory,
+            barTheme,
+            worldSwitcherOverride)
     {
-        ArgumentNullException.ThrowIfNull(loadWork);
+    }
+
+    private LoadingScreenWorld(
+        Func<IProgress<float>, CancellationToken, Task>? asyncLoadWork,
+        Action<IProgress<float>, CancellationToken>? syncLoadWorkWithGL,
+        Func<IWorld> nextWorldFactory,
+        ProgressBarTheme barTheme,
+        IWorldSwitcher? worldSwitcherOverride)
+    {
         ArgumentNullException.ThrowIfNull(nextWorldFactory);
         ArgumentNullException.ThrowIfNull(barTheme);
 
-        _loadWork = loadWork;
+        _asyncLoadWork = asyncLoadWork;
+        _syncLoadWorkWithGL = syncLoadWorkWithGL;
         _nextWorldFactory = nextWorldFactory;
         _worldSwitcherOverride = worldSwitcherOverride;
 
@@ -170,7 +236,45 @@ public class LoadingScreenWorld : World
 
         _state = LoadingScreenState.Loading;
         CancellationToken token = _cancellation.Token;
-        _loadTask = Task.Run(() => _loadWork(_progress, token), token);
+
+        if (_syncLoadWorkWithGL is not null)
+        {
+            // Create the shared GL context here on the engine thread (NativeWindow creation is
+            // main-thread-only on Windows). The worker thread then claims it via MakeCurrent.
+            // The whole sync delegate runs on one Task.Run thread pool thread — no await means
+            // no continuation thread switches, so the GL context stays current for the entire load.
+            _workerGLContext = EngineConfiguration.GLLoadingContextFactory.CreateSharedContext();
+            ILoadingGLContext glCtx = _workerGLContext;
+            Action<IProgress<float>, CancellationToken> syncWork = _syncLoadWorkWithGL;
+            _loadTask = Task.Run(() =>
+            {
+                try
+                {
+                    glCtx.MakeCurrentOnThisThread();
+                    syncWork(_progress, token);
+                    // Insert a fence at the end of the worker's command stream. The main thread
+                    // will wait on this fence before using any loaded resources — without that
+                    // wait the driver can leave shared textures in a not-yet-visible state and
+                    // the first main-thread sample returns zeros (a black frame).
+                    IntPtr fence = OpenTK.Graphics.OpenGL4.GL.FenceSync(
+                        OpenTK.Graphics.OpenGL4.SyncCondition.SyncGpuCommandsComplete,
+                        OpenTK.Graphics.OpenGL4.WaitSyncFlags.None);
+                    OpenTK.Graphics.OpenGL4.GL.Flush();
+                    Interlocked.Exchange(ref _workerFence, fence.ToInt64());
+                }
+                finally
+                {
+                    // Release the context from this thread; the main thread will Dispose the
+                    // underlying GLFW window after observing task completion (GLFW only allows
+                    // window disposal on the main thread).
+                    glCtx.ReleaseFromWorkerThread();
+                }
+            }, token);
+        }
+        else
+        {
+            _loadTask = Task.Run(() => _asyncLoadWork!(_progress, token), token);
+        }
     }
 
     /// <inheritdoc/>
@@ -209,6 +313,7 @@ public class LoadingScreenWorld : World
             _loadError = UnwrapAggregate(_loadTask.Exception);
             _state = LoadingScreenState.Failed;
             _handoffDone = true;
+            DisposeWorkerGLContext();
             Logger.Warning($"LoadingScreenWorld load delegate threw: {_loadError?.GetType().Name}: {_loadError?.Message}");
             LoadFailed?.Invoke(new LoadingScreenFailedEventArgs(_loadError!));
             return;
@@ -219,7 +324,35 @@ public class LoadingScreenWorld : World
             // The world was unloaded while loading — nothing more to do. State stays Loading
             // because the world is going away anyway; we don't fire any event here.
             _handoffDone = true;
+            DisposeWorkerGLContext();
             return;
+        }
+
+        if (_syncLoadWorkWithGL is not null)
+        {
+            // Wait on the worker's end-of-stream fence so all its commands are flushed to the
+            // GPU before we proceed. Fences are shareable across shared contexts.
+            long fence = Interlocked.Read(ref _workerFence);
+            if (fence != 0)
+            {
+                OpenTK.Graphics.OpenGL4.GL.ClientWaitSync(
+                    new IntPtr(fence),
+                    OpenTK.Graphics.OpenGL4.ClientWaitSyncFlags.SyncFlushCommandsBit,
+                    timeout: 5_000_000_000L);
+                OpenTK.Graphics.OpenGL4.GL.DeleteSync(new IntPtr(fence));
+            }
+
+            // Invalidate the bind cache so the next render-path BindTexture call definitely
+            // hits glBindTexture in the main context — the glBindTexture from a different
+            // context is what tells the driver to refresh its cached view of the shared
+            // texture. Without this the cache may skip the bind (handle "already current"),
+            // the driver serves stale state, and the first sample produces a black frame.
+            OpenGLHelper.ResetCache();
+
+            // Dispose the worker's GLFW window on the main thread (GLFW only allows window
+            // disposal on the main thread). The worker already released the context via
+            // ReleaseFromWorkerThread.
+            DisposeWorkerGLContext();
         }
 
         // Successful completion. Snap the bar to full so a one-shot load with no intermediate
@@ -233,6 +366,17 @@ public class LoadingScreenWorld : World
 
         IWorldSwitcher switcher = _worldSwitcherOverride ?? EngineConfiguration.WorldSwitcher;
         switcher.RequestWorldChange(_nextWorldFactory);
+    }
+
+    private void DisposeWorkerGLContext()
+    {
+        if (_workerGLContext is null)
+        {
+            return;
+        }
+
+        _workerGLContext.Dispose();
+        _workerGLContext = null;
     }
 
     private static Exception? UnwrapAggregate(AggregateException? aggregate)

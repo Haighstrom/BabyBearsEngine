@@ -9,6 +9,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
 
     public ISpriteTexture CreateSpriteTextureFromImageFile(string filePath, int rows, int columns, bool linearFilter = false)
     {
+        GLThread.Ensure();
         int handle = GL.GenTexture();
         OpenGLHelper.BindTexture(handle);
 
@@ -36,6 +37,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
 
     public ITexture CreateTextureFromImageFile(string filePath, bool linearFilter = true)
     {
+        GLThread.Ensure();
         int handle = GL.GenTexture();
         OpenGLHelper.BindTexture(handle);
 
@@ -80,6 +82,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
     public ITexture GenTexture(System.Drawing.Bitmap bmp, bool linearFilter = true)
     {
+        GLThread.Ensure();
         bmp = BitmapTools.PremultiplyAlpha(bmp);
 
         Texture t = new(
@@ -112,6 +115,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
     /// </summary>
     public ITexture GenR8Texture(byte[] data, int width, int height, bool linearFilter = true)
     {
+        GLThread.Ensure();
         Texture t = new(
             handle: GL.GenTexture(),
             width: width,

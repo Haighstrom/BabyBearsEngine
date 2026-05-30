@@ -60,6 +60,12 @@ public static class GameLauncher
         {
             var engine = new OpenTKGameEngine(appSettings);
 
+            // The GameWindow constructor creates the GL context on this thread. Register the
+            // thread as a GL thread now (before worldFactory() runs and starts constructing GL
+            // resources) and stand up the shared-context factory for LoadingScreenWorld.
+            GLThread.Register();
+            EngineConfiguration.GLLoadingContextFactory = new OpenTKGLLoadingContextFactory(engine);
+
             audioService = new OpenALAudioService(appSettings.AudioSettings);
 
             EngineConfiguration.Initialise(

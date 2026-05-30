@@ -1,12 +1,18 @@
-﻿using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
 
-public sealed class VBO() : IDisposable
+public sealed class VBO : IDisposable
 {
     private bool _disposed = false;
 
-    public int Handle { get; } = GL.GenBuffer();
+    public VBO()
+    {
+        GLThread.Ensure();
+        Handle = GL.GenBuffer();
+    }
+
+    public int Handle { get; }
 
     public void Bind() => OpenGLHelper.BindVBO(Handle);
 

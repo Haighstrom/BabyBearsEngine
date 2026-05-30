@@ -34,6 +34,11 @@ internal static class EngineTeardown
         // and cause Bind calls to be silently skipped.
         OpenGLHelper.ResetCache();
 
+        // Unmark the current thread as a GL thread so the next run's OnLoad starts from a
+        // clean slate. (Background loading threads are short-lived and unregister themselves
+        // when their LoadingGLContext disposes.)
+        GLThread.Unregister();
+
         audioService?.Dispose();
 
         EngineConfiguration.Reset();

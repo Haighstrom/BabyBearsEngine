@@ -16,6 +16,7 @@ public sealed class FBO : IDisposable
 
     public FBO(int width, int height)
     {
+        GLThread.Ensure();
         Handle = GL.GenFramebuffer();
         Texture = CreateTexture(width, height);
 
