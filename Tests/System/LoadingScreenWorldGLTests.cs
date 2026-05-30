@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Worlds;
 using BabyBearsEngine.Worlds.Graphics;
@@ -7,10 +6,11 @@ using BabyBearsEngine.Worlds.Graphics;
 namespace BabyBearsEngine.Tests.System;
 
 /// <summary>
-/// Verifies that a texture constructed by a LoadingScreenWorld step (on the worker thread with
-/// the shared GL context current) is usable from the main thread once loading completes.
-/// Catches breakage in the shared-context plumbing, the worker-thread MakeCurrent step, the
-/// GLThread debug guards across the cross-thread handoff, and the post-load main-context sync.
+/// Verifies that a texture constructed inside <see cref="LoadingScreenWorld.LoadAssets"/> (on the
+/// worker thread with the shared GL context current) is usable from the main thread once loading
+/// completes. Catches breakage in the shared-context plumbing, the worker-thread MakeCurrent
+/// step, the GLThread debug guards across the cross-thread handoff, and the post-load
+/// main-context sync.
 /// </summary>
 [TestClass]
 public class LoadingScreenWorldGLTests
@@ -51,16 +51,17 @@ public class LoadingScreenWorldGLTests
     }
 
     /// <summary>
-    /// Minimal LoadingScreenWorld test subclass: caller passes in the steps and the next-world
-    /// factory, and the test asserts on its captured side-channels (loaded texture, worker
-    /// thread id, captured pixel) after GameLauncher.Run returns.
+    /// Minimal LoadingScreenWorld test subclass: caller passes in the load body and the
+    /// next-world factory. The load body runs on the worker thread; the factory runs from
+    /// OnLoadCompleted on the main thread.
     /// </summary>
     private sealed class TestLoadingWorld(
-        IReadOnlyList<LoadStep> steps,
+        Action loadBody,
         Func<IWorld> nextWorldFactory) : LoadingScreenWorld
     {
-        protected override IReadOnlyList<LoadStep> AssetsToLoad => steps;
-        protected override IWorld NextWorld() => nextWorldFactory();
+        protected override void LoadAssets() => loadBody();
+
+        protected override void OnLoadCompleted() => EngineConfiguration.WorldSwitcher.RequestWorldChange(nextWorldFactory);
     }
 
     private static ApplicationSettings SettingsWithCapture() => new()
@@ -116,7 +117,7 @@ public class LoadingScreenWorldGLTests
     }
 
     [TestMethod]
-    public void LoadingScreenWorld_StepCreatesTextureOnWorker_IsDrawableFromMainThread()
+    public void LoadingScreenWorld_LoadAssetsCreatesTextureOnWorker_IsDrawableFromMainThread()
     {
         Colour? captured = null;
         int? loadingThreadId = null;
@@ -124,23 +125,20 @@ public class LoadingScreenWorldGLTests
 
         Colour[,] redPixels = BuildSolidColourPixels(2, Colour.Red);
 
-        IReadOnlyList<LoadStep> steps =
-        [
-            new("Load red texture", () =>
-            {
-                loadingThreadId = Environment.CurrentManagedThreadId;
-                loadedTexture = Textures.GenTexture(redPixels);
-            }),
-        ];
+        void LoadBody()
+        {
+            loadingThreadId = Environment.CurrentManagedThreadId;
+            loadedTexture = Textures.GenTexture(redPixels);
+        }
 
         World BuildLoadingWorld() => new TestLoadingWorld(
-            steps,
+            LoadBody,
             () => new DisplayWorld(loadedTexture!, c => captured = c));
 
         GameLauncher.Run(SettingsWithCapture(), BuildLoadingWorld);
 
         Assert.IsNotNull(loadingThreadId);
-        Assert.AreNotEqual(Environment.CurrentManagedThreadId, loadingThreadId, "Step ran on the main thread instead of a worker.");
+        Assert.AreNotEqual(Environment.CurrentManagedThreadId, loadingThreadId, "LoadAssets ran on the main thread instead of a worker.");
         Assert.IsNotNull(loadedTexture);
         Assert.IsNotNull(captured);
         AssertColourClose(Colour.Red, captured!.Value);
