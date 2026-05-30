@@ -35,7 +35,11 @@ public class ProgressBar : GraphicBase
         _fill = theme.FillFactory(new Rect(0, 0, width, height));
         _textureFill = _fill as TextureGraphic;
 
-        AmountFilled = amountFilled;
+        // The FillFactory built the fill at full width. Size it down to the requested initial
+        // fill amount directly — calling the AmountFilled setter would early-return because
+        // _amountFilled and amountFilled both default to 0, leaving the fill at full width.
+        _amountFilled = Math.Clamp(amountFilled, 0f, 1f);
+        ApplyFillSize();
     }
 
     /// <param name="rect">Position and size relative to the parent container. The rect's width is the bar width at <see cref="AmountFilled"/> = 1.</param>
@@ -65,20 +69,24 @@ public class ProgressBar : GraphicBase
 
             bool wasUnfilled = _amountFilled < 1f;
             _amountFilled = clamped;
-
-            if (_textureFill is not null)
-            {
-                _textureFill.SourceArea = new Rect(0, 0, clamped, 1);
-            }
-            else
-            {
-                _fill.Width = _fullWidth * clamped;
-            }
+            ApplyFillSize();
 
             if (wasUnfilled && clamped >= 1f)
             {
                 BarFilled?.Invoke(this, EventArgs.Empty);
             }
+        }
+    }
+
+    private void ApplyFillSize()
+    {
+        if (_textureFill is not null)
+        {
+            _textureFill.SourceArea = new Rect(0, 0, _amountFilled, 1);
+        }
+        else
+        {
+            _fill.Width = _fullWidth * _amountFilled;
         }
     }
 
