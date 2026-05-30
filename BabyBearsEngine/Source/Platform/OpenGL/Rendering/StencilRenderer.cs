@@ -5,7 +5,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.Platform.OpenGL.Rendering;
 
-internal class StencilRenderer(ITexture imageTexture, ITexture stencilTexture) : IDisposable
+internal sealed class StencilRenderer(ITexture imageTexture, ITexture stencilTexture) : IDisposable
 {
     private static Vertex[] GetVertices(float w, float h, Color4 colour) =>
     [
@@ -17,7 +17,7 @@ internal class StencilRenderer(ITexture imageTexture, ITexture stencilTexture) :
 
     private readonly StencilShaderProgram _shader = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
-    private bool _disposedValue = false;
+    private bool _disposed = false;
 
     public void UpdateVertices(float w, float h, Colour colour)
     {
@@ -38,23 +38,15 @@ internal class StencilRenderer(ITexture imageTexture, ITexture stencilTexture) :
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
     }
 
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_disposedValue)
-        {
-            if (disposing)
-            {
-                _shader.Dispose();
-                _vertexDataBuffer.Dispose();
-            }
-
-            _disposedValue = true;
-        }
-    }
-
     public void Dispose()
     {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        if (_disposed)
+        {
+            return;
+        }
+
+        _shader.Dispose();
+        _vertexDataBuffer.Dispose();
+        _disposed = true;
     }
 }

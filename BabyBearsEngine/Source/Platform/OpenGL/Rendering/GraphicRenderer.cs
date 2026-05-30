@@ -6,7 +6,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.Platform.OpenGL.Rendering;
 
-internal class GraphicRenderer(ITexture texture) : IDisposable
+internal sealed class GraphicRenderer(ITexture texture) : IDisposable
 {
     private static Vertex[] GetVertices(float w, float h, Color4 colour, float u1, float v1, float u2, float v2) =>
     [
@@ -60,32 +60,15 @@ internal class GraphicRenderer(ITexture texture) : IDisposable
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
     }
 
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_disposedValue)
-        {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            _disposedValue = true;
-        }
-    }
-
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~GraphicRenderer()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
-
     public void Dispose()
     {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        if (_disposedValue)
+        {
+            return;
+        }
+
+        _shader.Dispose();
+        _vertexDataBuffer.Dispose();
+        _disposedValue = true;
     }
 }

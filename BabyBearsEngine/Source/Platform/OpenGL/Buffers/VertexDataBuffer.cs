@@ -6,9 +6,9 @@ namespace BabyBearsEngine.OpenGL;
 /// Wraps a VAO and VBO, and sets up the vertex attributes for a given vertex type.
 /// </summary>
 /// <typeparam name="TVertex"></typeparam>
-internal class VertexDataBuffer<TVertex> : IDisposable where TVertex : struct, IVertex
+internal sealed class VertexDataBuffer<TVertex> : IDisposable where TVertex : struct, IVertex
 {
-    private bool _disposed;
+    private bool _disposed = false;
     private readonly BufferUsageHint _bufferUsageHint;
 
     public VertexDataBuffer(BufferUsageHint bufferUsageHint = BufferUsageHint.DynamicDraw)
@@ -32,34 +32,15 @@ internal class VertexDataBuffer<TVertex> : IDisposable where TVertex : struct, I
         GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * TVertex.Stride, vertices, _bufferUsageHint);
     }
 
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-                VAO.Dispose();
-                VBO.Dispose();
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            _disposed = true;
-        }
-    }
-
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~ShaderConnector()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
-
     public void Dispose()
     {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        if (_disposed)
+        {
+            return;
+        }
+
+        VAO.Dispose();
+        VBO.Dispose();
+        _disposed = true;
     }
 }
