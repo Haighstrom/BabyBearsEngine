@@ -312,43 +312,35 @@ public class LoadingScreenWorldTests
         release.Set();
     }
 
-    // Failure path
+    // Failure path — the framework deliberately doesn't try to recover from load failures.
+    // It re-throws on the main thread so the exception lands in GameLauncher.Run's fatal
+    // handler. Game code that wants graceful recovery must try/catch inside its load delegate.
 
     [TestMethod]
-    public void Update_AfterLoadThrows_StateIsFailed()
-    {
-        LoadingScreenWorld world = Make(loadWork: (_, _) => throw new InvalidOperationException("boom"));
-        world.Load();
-
-        TickUntil(world, () => world.State == LoadingScreenState.Failed);
-
-        Assert.AreEqual(LoadingScreenState.Failed, world.State);
-    }
-
-    [TestMethod]
-    public void Update_AfterLoadThrows_LoadErrorIsSet()
+    public void Update_AfterLoadThrows_RethrowsExceptionOnMainThread()
     {
         var thrown = new InvalidOperationException("boom");
         LoadingScreenWorld world = Make(loadWork: (_, _) => throw thrown);
         world.Load();
 
-        TickUntil(world, () => world.LoadError is not null);
+        // Wait for the worker task to fault, then assert the next Update throws it back at us.
+        InvalidOperationException? rethrown = null;
+        var deadline = Environment.TickCount + 2000;
+        while (Environment.TickCount < deadline && rethrown is null)
+        {
+            try
+            {
+                world.Update(0.016);
+            }
+            catch (InvalidOperationException ex)
+            {
+                rethrown = ex;
+            }
+            Thread.Sleep(1);
+        }
 
-        Assert.AreSame(thrown, world.LoadError);
-    }
-
-    [TestMethod]
-    public void Update_AfterLoadThrows_RaisesLoadFailedWithUnwrappedException()
-    {
-        var thrown = new InvalidOperationException("boom");
-        Exception? observed = null;
-        LoadingScreenWorld world = Make(loadWork: (_, _) => throw thrown);
-        world.LoadFailed += args => observed = args.Error;
-        world.Load();
-
-        TickUntil(world, () => observed is not null);
-
-        Assert.AreSame(thrown, observed);
+        Assert.IsNotNull(rethrown, "Update did not rethrow the worker exception within 2 seconds.");
+        Assert.AreSame(thrown, rethrown);
     }
 
     [TestMethod]
@@ -357,8 +349,16 @@ public class LoadingScreenWorldTests
         LoadingScreenWorld world = Make(loadWork: (_, _) => throw new InvalidOperationException("boom"));
         world.Load();
 
-        TickUntil(world, () => world.State == LoadingScreenState.Failed);
+        var deadline = Environment.TickCount + 2000;
+        bool threw = false;
+        while (Environment.TickCount < deadline && !threw)
+        {
+            try { world.Update(0.016); }
+            catch (InvalidOperationException) { threw = true; }
+            Thread.Sleep(1);
+        }
 
+        Assert.IsTrue(threw, "Update did not rethrow the worker exception.");
         Assert.AreEqual(0, _switcher.RequestCount);
     }
 
@@ -370,8 +370,16 @@ public class LoadingScreenWorldTests
         world.LoadCompleted += () => completedCount++;
         world.Load();
 
-        TickUntil(world, () => world.State == LoadingScreenState.Failed);
+        var deadline = Environment.TickCount + 2000;
+        bool threw = false;
+        while (Environment.TickCount < deadline && !threw)
+        {
+            try { world.Update(0.016); }
+            catch (InvalidOperationException) { threw = true; }
+            Thread.Sleep(1);
+        }
 
+        Assert.IsTrue(threw, "Update did not rethrow the worker exception.");
         Assert.AreEqual(0, completedCount);
     }
 

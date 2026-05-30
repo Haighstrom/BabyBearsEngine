@@ -1,6 +1,5 @@
 using System.Threading;
 using System.Threading.Tasks;
-using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Worlds.Graphics;
@@ -20,18 +19,6 @@ public enum LoadingScreenState
 
     /// <summary>The load task finished successfully. The world will switch to the next world on the next update tick.</summary>
     Completed = 2,
-
-    /// <summary>The load task threw — see <see cref="LoadingScreenWorld.LoadError"/>. The world does not auto-switch in this case.</summary>
-    Failed = 3,
-}
-
-/// <summary>
-/// Payload for <see cref="LoadingScreenWorld.LoadFailed"/>.
-/// </summary>
-public sealed class LoadingScreenFailedEventArgs(Exception error)
-{
-    /// <summary>The exception thrown by the load delegate (with <see cref="AggregateException"/> unwrapped where possible).</summary>
-    public Exception Error { get; } = error;
 }
 
 /// <summary>
@@ -45,10 +32,11 @@ public sealed class LoadingScreenFailedEventArgs(Exception error)
 /// added with <see cref="World.Add(IAddable)"/>.
 /// </para>
 /// <para>
-/// Threading rule: the load delegate runs off the main thread, so it must not touch OpenGL.
-/// Loading work that needs the GL context (texture upload, shader compilation, font atlas
-/// generation) belongs in the constructor of the next world, or in the
-/// <see cref="LoadCompleted"/> handler before the world switch is applied.
+/// Exception handling: if the load delegate throws, the exception is re-thrown on the main
+/// thread from <see cref="Update"/> and propagates up to <c>GameLauncher.Run</c>'s fatal-error
+/// handler. There is no in-band recovery channel — game code that wants to recover from
+/// specific failure modes (missing asset, malformed file, etc.) must <c>try/catch</c> inside
+/// the load delegate itself.
 /// </para>
 /// </summary>
 public class LoadingScreenWorld : World
@@ -77,7 +65,6 @@ public class LoadingScreenWorld : World
     // thread (GLFW windows can only be disposed on the main thread).
     private ILoadingGLContext? _workerGLContext = null;
     private LoadingScreenState _state = LoadingScreenState.Pending;
-    private Exception? _loadError = null;
     private bool _handoffDone = false;
 
     /// <summary>
@@ -205,9 +192,6 @@ public class LoadingScreenWorld : World
     /// <summary>The world's lifecycle state — see <see cref="LoadingScreenState"/>.</summary>
     public LoadingScreenState State => _state;
 
-    /// <summary>The exception thrown by the load delegate if <see cref="State"/> is <see cref="LoadingScreenState.Failed"/>; <c>null</c> otherwise.</summary>
-    public Exception? LoadError => _loadError;
-
     /// <summary>
     /// Raised on the main thread when the load delegate completes successfully, immediately
     /// before the world is switched. Use this hook for any main-thread, post-load work that must
@@ -215,13 +199,6 @@ public class LoadingScreenWorld : World
     /// textures, finalising state derived from the loaded assets).
     /// </summary>
     public event Action? LoadCompleted;
-
-    /// <summary>
-    /// Raised on the main thread if the load delegate throws. The world does <b>not</b>
-    /// auto-switch when this fires; the handler is expected to drive the next step (e.g. show an
-    /// error screen, retry, or fall back to a degraded asset set).
-    /// </summary>
-    public event Action<LoadingScreenFailedEventArgs>? LoadFailed;
 
     /// <inheritdoc/>
     /// <remarks>Kicks off the background load task. Idempotent — calling <see cref="Load"/> a second time on the same instance has no effect.</remarks>
@@ -292,8 +269,11 @@ public class LoadingScreenWorld : World
     /// <inheritdoc/>
     /// <remarks>
     /// Mirrors the latest reported progress onto <see cref="Bar"/>, then — if the background task
-    /// has finished — raises <see cref="LoadCompleted"/> / <see cref="LoadFailed"/> and (on
-    /// success) triggers the world switch via <see cref="Engine.ChangeWorld(Func{IWorld})"/>.
+    /// has finished — raises <see cref="LoadCompleted"/> and triggers the world switch via
+    /// <see cref="Engine.ChangeWorld(Func{IWorld})"/>. If the load delegate threw, the exception
+    /// is re-thrown here on the main thread (propagating up to <c>GameLauncher.Run</c>'s fatal
+    /// handler); game code that wants to recover from a specific failure should
+    /// <c>try/catch</c> inside the load delegate itself rather than relying on a callback.
     /// </remarks>
     public override void Update(double elapsed)
     {
@@ -310,13 +290,16 @@ public class LoadingScreenWorld : World
 
         if (_loadTask.IsFaulted)
         {
-            _loadError = UnwrapAggregate(_loadTask.Exception);
-            _state = LoadingScreenState.Failed;
+            // Re-throw the worker's exception on the main thread so it propagates up to the
+            // engine's fatal-error handler. We dispose the GL context first so the GLFW window
+            // isn't leaked, but otherwise let the exception bubble — the framework deliberately
+            // doesn't try to recover, because it can't tell programmer errors apart from
+            // recoverable I/O failures. Game code that wants recovery should try/catch inside
+            // the load delegate.
             _handoffDone = true;
             DisposeWorkerGLContext();
-            Logger.Warning($"LoadingScreenWorld load delegate threw: {_loadError?.GetType().Name}: {_loadError?.Message}");
-            LoadFailed?.Invoke(new LoadingScreenFailedEventArgs(_loadError!));
-            return;
+            Exception inner = UnwrapAggregate(_loadTask.Exception) ?? new InvalidOperationException("LoadingScreenWorld load task faulted with no exception attached.");
+            throw inner;
         }
 
         if (_loadTask.IsCanceled)
