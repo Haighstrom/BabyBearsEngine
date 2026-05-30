@@ -25,6 +25,11 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
+        if (linearFilter)
+        {
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+        }
+
         Texture texture = new(handle, padded.Width, padded.Height);
         return new SpriteTexture(texture, columns, rows, SpritePadding);
     }
