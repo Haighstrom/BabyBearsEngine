@@ -1,7 +1,6 @@
-using System.IO;
+﻿using System.IO;
 using Concentus;
 using Concentus.Oggfile;
-using Concentus.Structs;
 using OpenTK.Audio.OpenAL;
 
 namespace BabyBearsEngine.Platform.OpenAL;

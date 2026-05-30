@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using BabyBearsEngine.AudioSystem;
@@ -7,11 +7,8 @@ using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.ImageLoading;
 using BabyBearsEngine.Worlds.GraphicEffects;
-using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Worlds.Graphics.Text;
 using BabyBearsEngine.Worlds.Particles;
-using BabyBearsEngine.Worlds.UI;
-using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Demos.Source.Demos.RainShowcase;
 

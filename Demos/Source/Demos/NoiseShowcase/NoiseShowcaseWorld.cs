@@ -1,10 +1,7 @@
 ﻿using System;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Utilities.Noise;
-using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Worlds.Graphics.Text;
-using BabyBearsEngine.Worlds.UI;
-using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Demos.Source.Demos.NoiseShowcase;
 

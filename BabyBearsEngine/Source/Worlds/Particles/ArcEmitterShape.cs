@@ -1,5 +1,4 @@
-using System;
-using BabyBearsEngine.Geometry;
+﻿using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Worlds.Particles;
 

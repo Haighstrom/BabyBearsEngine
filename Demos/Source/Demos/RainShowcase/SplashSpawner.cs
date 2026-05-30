@@ -1,7 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Worlds;
 using BabyBearsEngine.Worlds.Particles;
 
 namespace BabyBearsEngine.Demos.Source.Demos.RainShowcase;

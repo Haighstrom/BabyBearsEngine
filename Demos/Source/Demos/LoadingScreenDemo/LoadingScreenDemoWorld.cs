@@ -1,9 +1,7 @@
-using System;
+﻿using System;
 using System.Threading;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Worlds;
-using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Worlds.Graphics.Text;
 
 namespace BabyBearsEngine.Demos.Source.Demos.LoadingScreenDemo;

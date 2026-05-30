@@ -1,6 +1,4 @@
-using System;
-
-namespace BabyBearsEngine.Input;
+﻿namespace BabyBearsEngine.Input;
 
 /// <summary>
 /// Modifier keys held alongside a primary key in a <see cref="KeyCombination"/>. Left and right

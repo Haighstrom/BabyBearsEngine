@@ -1,5 +1,4 @@
-using System;
-using BabyBearsEngine.Geometry;
+﻿using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Tests.Unit;

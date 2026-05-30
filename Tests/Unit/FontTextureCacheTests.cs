@@ -1,5 +1,4 @@
-using System;
-using BabyBearsEngine;
+﻿using System;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Worlds.Graphics.Text;

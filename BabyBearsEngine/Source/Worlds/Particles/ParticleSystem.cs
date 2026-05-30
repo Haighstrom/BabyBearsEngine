@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using BabyBearsEngine.Geometry;
+﻿using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
 using OpenTK.Graphics.OpenGL4;
 

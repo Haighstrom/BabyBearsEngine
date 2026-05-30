@@ -1,5 +1,4 @@
-using System;
-using BabyBearsEngine.Utilities.Noise;
+﻿using BabyBearsEngine.Utilities.Noise;
 
 namespace BabyBearsEngine.Tests.Unit;
 

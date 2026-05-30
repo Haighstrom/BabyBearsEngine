@@ -1,6 +1,4 @@
-using BabyBearsEngine.Worlds;
-
-namespace BabyBearsEngine.OpenGL;
+﻿namespace BabyBearsEngine.OpenGL;
 
 /// <summary>
 /// Public facade for accessing the engine's built-in shader programs.
