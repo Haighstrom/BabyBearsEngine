@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.OpenGL;
+﻿using BabyBearsEngine.Geometry;
+using BabyBearsEngine.OpenGL;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using Matrix3 = BabyBearsEngine.Geometry.Matrix3;
@@ -31,6 +32,7 @@ public class SpriteMap(int[,] tiles, float tileW, float tileH, ISpriteTexture te
     private int _vertexCount = 0;
     private bool _verticesDirty = true;
     private Colour _colour = Colour.White;
+    private Rect? _drawArea = null;
     private bool _disposed = false;
 
     /// <summary>Number of tile columns.</summary>
@@ -43,6 +45,28 @@ public class SpriteMap(int[,] tiles, float tileW, float tileH, ISpriteTexture te
         set
         {
             _colour = value;
+            _verticesDirty = true;
+        }
+    }
+
+    /// <summary>
+    /// Restricts the vertex rebuild (and therefore the draw) to tiles whose own rect overlaps this area.
+    /// The rect is in this <see cref="SpriteMap"/>'s local space — i.e. the same coordinate system as
+    /// the tile grid itself, with (0, 0) at the top-left tile. Set to <c>null</c> (the default) to
+    /// rebuild and draw every tile in the grid.
+    /// </summary>
+    /// <remarks>
+    /// Setting this property marks the vertex buffer dirty, so each change triggers a rebuild on the
+    /// next <see cref="Render"/> call. For a large mostly-static tile map this is a net win — the
+    /// rebuild cost becomes proportional to visible tiles rather than total tiles — but for a small
+    /// map being panned across constantly it can cost more than just rebuilding the whole grid.
+    /// </remarks>
+    public Rect? DrawArea
+    {
+        get => _drawArea;
+        set
+        {
+            _drawArea = value;
             _verticesDirty = true;
         }
     }
@@ -106,12 +130,16 @@ public class SpriteMap(int[,] tiles, float tileW, float tileH, ISpriteTexture te
     private void RebuildVertices()
     {
         Color4 c = _colour.ToOpenTK();
-        var vertices = new Vertex[Columns * Rows * 6];
+        (int colMin, int colExclusiveMax, int rowMin, int rowExclusiveMax) =
+            ComputeVisibleTileRange(_drawArea, Columns, Rows, tileW, tileH);
+        int visibleColumns = colExclusiveMax - colMin;
+        int visibleRows = rowExclusiveMax - rowMin;
+        var vertices = new Vertex[visibleColumns * visibleRows * 6];
         int vi = 0;
 
-        for (int col = 0; col < Columns; col++)
+        for (int col = colMin; col < colExclusiveMax; col++)
         {
-            for (int row = 0; row < Rows; row++)
+            for (int row = rowMin; row < rowExclusiveMax; row++)
             {
                 var (u1, v1, u2, v2) = texture.GetFrameUVs(_tiles[col, row]);
                 float x1 = col * tileW;
@@ -132,6 +160,42 @@ public class SpriteMap(int[,] tiles, float tileW, float tileH, ISpriteTexture te
         _vertexDataBuffer.SetNewVertices(vertices);
         _vertexCount = vi;
         _verticesDirty = false;
+    }
+
+    /// <summary>
+    /// Computes the half-open tile-index range that overlaps <paramref name="drawArea"/>. When
+    /// <paramref name="drawArea"/> is null, returns the full grid. The returned ranges are
+    /// clamped to <c>[0, columns]</c> and <c>[0, rows]</c>; if the area falls outside the grid
+    /// or is empty, the returned range is empty (max == min).
+    /// </summary>
+    internal static (int colMin, int colExclusiveMax, int rowMin, int rowExclusiveMax) ComputeVisibleTileRange(
+        Rect? drawArea,
+        int columns,
+        int rows,
+        float tileWidth,
+        float tileHeight)
+    {
+        if (drawArea is null)
+        {
+            return (0, columns, 0, rows);
+        }
+
+        if (drawArea.W <= 0 || drawArea.H <= 0)
+        {
+            return (0, 0, 0, 0);
+        }
+
+        int colMin = Math.Clamp((int)Math.Floor(drawArea.Left / tileWidth), 0, columns);
+        int colExclusiveMax = Math.Clamp((int)Math.Ceiling(drawArea.Right / tileWidth), 0, columns);
+        int rowMin = Math.Clamp((int)Math.Floor(drawArea.Top / tileHeight), 0, rows);
+        int rowExclusiveMax = Math.Clamp((int)Math.Ceiling(drawArea.Bottom / tileHeight), 0, rows);
+
+        if (colExclusiveMax <= colMin || rowExclusiveMax <= rowMin)
+        {
+            return (0, 0, 0, 0);
+        }
+
+        return (colMin, colExclusiveMax, rowMin, rowExclusiveMax);
     }
 
     /// <inheritdoc/>
