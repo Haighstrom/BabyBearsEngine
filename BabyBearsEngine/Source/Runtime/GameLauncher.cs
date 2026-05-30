@@ -84,7 +84,6 @@ public static class GameLauncher
             // its new context — otherwise the second Run uses dangling handles from the first.
             // The previous instance's GL resources leak, but the context they belonged to is
             // being torn down anyway.
-            SolidColourShaderProgram.ResetForNextRun();
             SolidColourShaderProgramMatrix.ResetForNextRun();
 
             audioService?.Dispose();
