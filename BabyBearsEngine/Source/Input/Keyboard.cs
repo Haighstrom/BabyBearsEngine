@@ -55,4 +55,10 @@ public static class Keyboard
 
     /// <inheritdoc cref="IKeyboard.AllKeysReleased(Keys[])"/>
     public static bool AllKeysReleased(params Keys[] keys) => Implementation.AllKeysReleased(keys);
+
+    /// <inheritdoc cref="KeyboardExtensions.CombinationDown(IKeyboard, KeyCombination)"/>
+    public static bool CombinationDown(KeyCombination combination) => Implementation.CombinationDown(combination);
+
+    /// <inheritdoc cref="KeyboardExtensions.CombinationPressed(IKeyboard, KeyCombination)"/>
+    public static bool CombinationPressed(KeyCombination combination) => Implementation.CombinationPressed(combination);
 }

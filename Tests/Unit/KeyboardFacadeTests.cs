@@ -178,6 +178,43 @@ public class KeyboardFacadeTests
         Assert.AreEqual("AllKeysReleased/Params", _fake.Calls.Single().Method);
     }
 
+    // Key combinations
+
+    [TestMethod]
+    public void CombinationDown_BeforeServiceInstalled_Throws()
+    {
+        EngineConfiguration.Reset();
+        Assert.ThrowsExactly<InvalidOperationException>(() => Keyboard.CombinationDown(new KeyCombination(Keys.S, KeyModifiers.Ctrl)));
+    }
+
+    [TestMethod]
+    public void CombinationPressed_BeforeServiceInstalled_Throws()
+    {
+        EngineConfiguration.Reset();
+        Assert.ThrowsExactly<InvalidOperationException>(() => Keyboard.CombinationPressed(new KeyCombination(Keys.S, KeyModifiers.Ctrl)));
+    }
+
+    [TestMethod]
+    public void CombinationDown_RoutesThroughInstalledService()
+    {
+        // The extension method calls KeyDown on the service for both the modifier(s) and the key.
+        _fake.ReturnValue = true;
+        bool result = Keyboard.CombinationDown(new KeyCombination(Keys.S, KeyModifiers.Ctrl));
+        Assert.IsTrue(result);
+        Assert.IsNotEmpty(_fake.Calls);
+        Assert.AreEqual("KeyDown", _fake.Calls[0].Method);
+    }
+
+    [TestMethod]
+    public void CombinationPressed_RoutesThroughInstalledService()
+    {
+        // Modifier resolution calls KeyDown, then the key check calls KeyPressed.
+        _fake.ReturnValue = true;
+        bool result = Keyboard.CombinationPressed(new KeyCombination(Keys.S, KeyModifiers.Ctrl));
+        Assert.IsTrue(result);
+        Assert.Contains(("KeyPressed", (object?)Keys.S), _fake.Calls);
+    }
+
     // Service substitution after install
 
     [TestMethod]
