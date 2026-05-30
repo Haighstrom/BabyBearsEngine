@@ -13,6 +13,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
         OpenGLHelper.BindTexture(handle);
 
         Rgba8ImageData orig = ImageLoader.LoadAsRgba8(filePath);
+        Rgba8Tools.PremultiplyAlphaInPlace(orig.Data);
         Rgba8ImageData padded = CreatePaddedSpriteSheet(orig, columns, rows, SpritePadding);
 
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, padded.Width, padded.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, padded.Data);
@@ -34,6 +35,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
         OpenGLHelper.BindTexture(handle);
 
         Rgba8ImageData imageData = ImageLoader.LoadAsRgba8(filePath);
+        Rgba8Tools.PremultiplyAlphaInPlace(imageData.Data);
 
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, imageData.Width, imageData.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, imageData.Data);
 
