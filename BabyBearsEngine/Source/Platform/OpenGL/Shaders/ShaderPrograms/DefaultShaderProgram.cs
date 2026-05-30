@@ -6,6 +6,7 @@ namespace BabyBearsEngine.OpenGL;
 public sealed class DefaultShaderProgram : ShaderProgramBase
 {
     private readonly int _windowSizeLocation;
+    private bool _disposed = false;
 
     public DefaultShaderProgram()
         :base(VertexShaders.Shader, FragmentShaders.Shader)
@@ -28,13 +29,15 @@ public sealed class DefaultShaderProgram : ShaderProgramBase
         GL.Uniform2(_windowSizeLocation, new Vector2(width, height));
     }
 
-    protected override void Dispose(bool disposing)
+    public override void Dispose()
     {
-        if (disposing)
+        if (_disposed)
         {
-            Window.Resize -= OnWindowResize;
+            return;
         }
 
-        base.Dispose(disposing);
+        Window.Resize -= OnWindowResize;
+        _disposed = true;
+        base.Dispose();
     }
 }

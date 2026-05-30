@@ -2,9 +2,9 @@
 
 namespace BabyBearsEngine.OpenGL;
 
-internal class Texture(int handle, int width, int height) : ITexture, IDisposable
+internal sealed class Texture(int handle, int width, int height) : ITexture, IDisposable
 {
-    private bool _disposed;
+    private bool _disposed = false;
 
     public int Handle { get; } = handle;
 
@@ -14,35 +14,14 @@ internal class Texture(int handle, int width, int height) : ITexture, IDisposabl
 
     public void Bind(TextureTarget textureTarget = TextureTarget.Texture2D, TextureUnit textureUnit = TextureUnit.Texture0) => OpenGLHelper.BindTexture(Handle, textureTarget, textureUnit);
 
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-
-            GPUResourceDeletion.TryRequestDeleteTexture(Handle);
-
-            _disposed = true;
-        }
-    }
-
-    // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    ~Texture()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: false);
-    }
-
     public void Dispose()
     {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        if (_disposed)
+        {
+            return;
+        }
+
+        GPUResourceDeletion.TryRequestDeleteTexture(Handle);
+        _disposed = true;
     }
 }

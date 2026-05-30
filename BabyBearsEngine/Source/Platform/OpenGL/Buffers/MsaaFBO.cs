@@ -24,7 +24,7 @@ public sealed class MsaaFBO(int width, int height, int samples) : IDisposable
         return new Texture(handle, width, height);
     }
 
-    private bool _disposed;
+    private bool _disposed = false;
 
     public int Handle { get; } = GL.GenFramebuffer();
 
@@ -43,33 +43,15 @@ public sealed class MsaaFBO(int width, int height, int samples) : IDisposable
         OpenGLHelper.BindTexture(Texture.Handle, TextureTarget.Texture2DMultisample);
     }
 
-    private void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                Texture.Dispose();
-            }
-
-            GPUResourceDeletion.TryRequestDeleteFBO(Handle);
-
-            _disposed = true;
-        }
-    }
-
-    // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    ~MsaaFBO()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: false);
-        //todo: logging of the bad dispose
-    }
-
     public void Dispose()
     {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        if (_disposed)
+        {
+            return;
+        }
+
+        Texture.Dispose();
+        GPUResourceDeletion.TryRequestDeleteFBO(Handle);
+        _disposed = true;
     }
 }

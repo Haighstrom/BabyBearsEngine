@@ -6,7 +6,7 @@ public abstract class ShaderProgramBase : IShaderProgram
 {
     internal static IShaderSourceProvider ShaderSourceProvider { get; set; } = new FileShaderSourceProvider();
 
-    private bool _disposed;
+    private bool _disposed = false;
 
     public ShaderProgramBase(VertexShaderPath vertexShaderPath, FragmentShaderPath fragmentShaderPath)
     {
@@ -37,35 +37,14 @@ public abstract class ShaderProgramBase : IShaderProgram
 
     public void Bind() => OpenGLHelper.BindShader(Handle);
 
-    protected virtual void Dispose(bool disposing)
+    public virtual void Dispose()
     {
-        if (!_disposed)
+        if (_disposed)
         {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            GPUResourceDeletion.TryRequestDeleteShader(Handle);
-
-            _disposed = true;
+            return;
         }
-    }
 
-    // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    ~ShaderProgramBase()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: false);
-        //todo: logging of the bad dispose
-    }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        GPUResourceDeletion.TryRequestDeleteShader(Handle);
+        _disposed = true;
     }
 }
