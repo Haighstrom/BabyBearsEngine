@@ -154,6 +154,7 @@ internal static class OpenGLHelper
                 GL.AttachShader(programHandle, geometryShader);
             }
             GL.AttachShader(programHandle, fragmentShader);
+            shadersAttached = true;
             GL.LinkProgram(programHandle);
             GL.GetProgram(programHandle, GetProgramParameterName.LinkStatus, out int linkStatus);
 
