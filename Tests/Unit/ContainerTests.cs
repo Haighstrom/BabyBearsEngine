@@ -17,6 +17,45 @@ public class ContainerTests
         public void Update(double elapsed) => UpdateCalls++;
     }
 
+    private sealed class StubUpdateableLast : AddableBase, IUpdateable
+    {
+        public bool Active { get; set; } = true;
+        public bool UpdateLast => true;
+        public int UpdateCalls { get; private set; }
+        public void Update(double elapsed) => UpdateCalls++;
+    }
+
+    private sealed class StubMutableUpdateLast(bool initialUpdateLast) : AddableBase, IUpdateable
+    {
+        public bool Active { get; set; } = true;
+        public bool UpdateLast { get; set; } = initialUpdateLast;
+        public void Update(double elapsed) { }
+    }
+
+    private sealed class StubLayeredUpdateable(int initialLayer, bool updateLast = false) : AddableBase, IUpdateable, ILayered
+    {
+        public bool Active { get; set; } = true;
+        public bool UpdateLast => updateLast;
+
+        public int Layer
+        {
+            get => initialLayer;
+            set
+            {
+                int old = initialLayer;
+                initialLayer = value;
+                if (old != value)
+                {
+                    LayerChanged?.Invoke(this, new LayerChangedEventArgs(old, value));
+                }
+            }
+        }
+
+        public event EventHandler<LayerChangedEventArgs>? LayerChanged;
+
+        public void Update(double elapsed) { }
+    }
+
     private sealed class StubRenderable : AddableBase, IRenderable
     {
         public bool Visible { get; set; } = true;
@@ -292,6 +331,117 @@ public class ContainerTests
 
         Assert.HasCount(1, container.GetRenderables());
         Assert.AreSame(b, container.GetRenderables().Single());
+    }
+
+    // UpdateLast routing
+
+    [TestMethod]
+    public void Add_UpdateLastTrue_RoutesIntoGetUpdatablesLast()
+    {
+        var container = CreateContainer(out _);
+        var u = new StubUpdateableLast();
+
+        container.Add(u);
+
+        Assert.AreSame(u, container.GetUpdatablesLast().Single());
+        Assert.IsEmpty(container.GetUpdatables());
+    }
+
+    [TestMethod]
+    public void Add_UpdateLastDefaultFalse_RoutesIntoGetUpdatables()
+    {
+        // StubUpdateable does not override UpdateLast → uses the IUpdateable default of false.
+        var container = CreateContainer(out _);
+        var u = new StubUpdateable();
+
+        container.Add(u);
+
+        Assert.AreSame(u, container.GetUpdatables().Single());
+        Assert.IsEmpty(container.GetUpdatablesLast());
+    }
+
+    [TestMethod]
+    public void Add_MixedUpdateables_PopulatesBothBuckets()
+    {
+        var container = CreateContainer(out _);
+        var regular = new StubUpdateable();
+        var last = new StubUpdateableLast();
+
+        container.Add(regular);
+        container.Add(last);
+
+        Assert.AreSame(regular, container.GetUpdatables().Single());
+        Assert.AreSame(last, container.GetUpdatablesLast().Single());
+    }
+
+    [TestMethod]
+    public void Remove_UpdateLastEntity_RemovesFromGetUpdatablesLast()
+    {
+        var container = CreateContainer(out _);
+        var u = new StubUpdateableLast();
+        container.Add(u);
+
+        container.Remove(u);
+
+        Assert.IsEmpty(container.GetUpdatablesLast());
+        Assert.IsNull(u.Parent);
+    }
+
+    [TestMethod]
+    public void RemoveAll_ClearsBothBuckets()
+    {
+        var container = CreateContainer(out _);
+        var regular = new StubUpdateable();
+        var last = new StubUpdateableLast();
+        container.Add(regular);
+        container.Add(last);
+
+        container.RemoveAll();
+
+        Assert.IsEmpty(container.GetUpdatables());
+        Assert.IsEmpty(container.GetUpdatablesLast());
+        Assert.IsNull(regular.Parent);
+        Assert.IsNull(last.Parent);
+    }
+
+    [TestMethod]
+    public void UpdateLast_MutationAfterAdd_DoesNotMoveBucket()
+    {
+        // Contract: UpdateLast is snapshotted at Add. Changing the property afterwards must
+        // NOT move the updateable between buckets. The only way to switch buckets is to remove
+        // and re-add.
+        var container = CreateContainer(out _);
+        var u = new StubMutableUpdateLast(initialUpdateLast: false);
+        container.Add(u);
+
+        u.UpdateLast = true;
+
+        Assert.Contains(u, container.GetUpdatables());
+        Assert.DoesNotContain(u, container.GetUpdatablesLast());
+    }
+
+    [TestMethod]
+    public void LayerChanged_OnUpdateLastEntity_ReSortsWithinLastBucket()
+    {
+        // An UpdateLast entity whose layer changes should be re-sorted inside the last bucket
+        // but must not migrate into the regular bucket.
+        var container = CreateContainer(out _);
+        var lowLast = new StubLayeredUpdateable(initialLayer: 1, updateLast: true);
+        var highLast = new StubLayeredUpdateable(initialLayer: 5, updateLast: true);
+        container.Add(lowLast);
+        container.Add(highLast);
+
+        // Sanity: high layer is iterated first (matches the renderable convention).
+        var before = container.GetUpdatablesLast().ToList();
+        Assert.AreSame(highLast, before[0]);
+        Assert.AreSame(lowLast, before[1]);
+
+        lowLast.Layer = 99;
+        var after = container.GetUpdatablesLast().ToList();
+
+        Assert.AreSame(lowLast, after[0]);
+        Assert.AreSame(highLast, after[1]);
+        Assert.IsEmpty(container.GetUpdatables());
     }
 
     // GetWindowCoordinates delegation

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 namespace BabyBearsEngine.Worlds;
 
@@ -22,7 +22,15 @@ internal class Container(IContainer realParent) : IContainer
     private readonly List<IRenderable> _graphics = [];
     private readonly List<IUpdateable> _updateables = [];
 
+    // Updateables that opted in to the post-pass via IUpdateable.UpdateLast. Updated by
+    // World / ContainerEntity after every regular updateable in this container has ticked,
+    // for world-level coordinators (e.g. CollisionSolver) that need to observe entity state
+    // once everything else has moved this frame. Routed by UpdateLast snapshotted at Add.
+    private readonly List<IUpdateable> _updateablesLast = [];
+
     public IList<IUpdateable> GetUpdatables() => [.. _updateables];
+
+    public IList<IUpdateable> GetUpdatablesLast() => [.. _updateablesLast];
 
     public IList<IRenderable> GetRenderables() => [.. _graphics];
 
@@ -51,7 +59,8 @@ internal class Container(IContainer realParent) : IContainer
 
         if (entity is IUpdateable updatable)
         {
-            InsertUpdateable(updatable);
+            // Snapshot UpdateLast here — mutation afterwards is not observed (documented on IUpdateable).
+            InsertUpdateable(updatable, updatable.UpdateLast ? _updateablesLast : _updateables);
         }
 
         if (entity is IRenderable renderable)
@@ -81,7 +90,12 @@ internal class Container(IContainer realParent) : IContainer
 
         if (entity is IUpdateable updatable)
         {
-            _updateables.Remove(updatable);
+            // Try both lists since UpdateLast is snapshotted at Add and we don't track
+            // which bucket each entry went into separately.
+            if (!_updateables.Remove(updatable))
+            {
+                _updateablesLast.Remove(updatable);
+            }
         }
 
         if (entity is IRenderable renderable)
@@ -111,13 +125,14 @@ internal class Container(IContainer realParent) : IContainer
         // Remove(child). Surface this during development rather than
         // silently masking it. Still clear the lists to keep runtime state
         // consistent.
-        if (_children.Count != 0 || _updateables.Count != 0 || _graphics.Count != 0)
+        if (_children.Count != 0 || _updateables.Count != 0 || _updateablesLast.Count != 0 || _graphics.Count != 0)
         {
             Debug.Fail("RemoveAll: internal lists not empty after Remove(child) loop");
         }
 
         // Ensure auxiliary lists are empty.
         _updateables.Clear();
+        _updateablesLast.Clear();
         _graphics.Clear();
         _children.Clear();
     }
@@ -140,21 +155,22 @@ internal class Container(IContainer realParent) : IContainer
 
     // Updateables are kept in the same layer order as renderables, so that per-frame
     // update — and therefore mouse-input registration — follows the visual stacking:
-    // the entity drawn on top (lowest layer) updates last.
-    private void InsertUpdateable(IUpdateable updateable)
+    // the entity drawn on top (lowest layer) updates last. The same ordering applies
+    // independently within each of the two buckets (regular and last-pass).
+    private static void InsertUpdateable(IUpdateable updateable, List<IUpdateable> bucket)
     {
         int layer = (updateable as ILayered)?.Layer ?? NonLayeredLayer;
 
-        for (int i = 0; i < _updateables.Count; i++)
+        for (int i = 0; i < bucket.Count; i++)
         {
-            if (layer > ((_updateables[i] as ILayered)?.Layer ?? NonLayeredLayer))
+            if (layer > ((bucket[i] as ILayered)?.Layer ?? NonLayeredLayer))
             {
-                _updateables.Insert(i, updateable);
+                bucket.Insert(i, updateable);
                 return;
             }
         }
 
-        _updateables.Add(updateable);
+        bucket.Add(updateable);
     }
 
     private void OnLayerChanged(object? sender, LayerChangedEventArgs _)
@@ -167,8 +183,16 @@ internal class Container(IContainer realParent) : IContainer
 
         if (sender is IUpdateable updateable)
         {
-            _updateables.Remove(updateable);
-            InsertUpdateable(updateable);
+            // Re-sort within whichever bucket the item is already in, preserving its
+            // original UpdateLast routing (which is a snapshot from Add).
+            if (_updateables.Remove(updateable))
+            {
+                InsertUpdateable(updateable, _updateables);
+            }
+            else if (_updateablesLast.Remove(updateable))
+            {
+                InsertUpdateable(updateable, _updateablesLast);
+            }
         }
     }
 }

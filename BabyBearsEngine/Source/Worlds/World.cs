@@ -57,23 +57,34 @@ public class World : IWorld
     public (float x, float y) GetWindowCoordinates(float x, float y) => (x, y);
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// Updates the main container fully (regular pass then <see cref="IUpdateable.UpdateLast"/>
+    /// post-pass) before doing the same for the overlay. The overlay completes its own two
+    /// passes self-contained — a collision solver in the main world will not see overlay
+    /// entity positions until the next frame, and vice versa. In practice the overlay is for
+    /// UI chrome (tooltips, modals) that should not be interacting with gameplay colliders.
+    /// </remarks>
     public virtual void Update(double elapsed)
     {
-        foreach (var updateable in _container.GetUpdatables())
+        TickAll(_container, elapsed);
+        TickAll(_overlay, elapsed);
+    }
+
+    private static void TickAll(Container container, double elapsed)
+    {
+        foreach (var updateable in container.GetUpdatables())
         {
-            if (!updateable.Active)
+            if (updateable.Active)
             {
-                continue;
+                updateable.Update(elapsed);
             }
-            updateable.Update(elapsed);
         }
-        foreach (var updateable in _overlay.GetUpdatables())
+        foreach (var updateable in container.GetUpdatablesLast())
         {
-            if (!updateable.Active)
+            if (updateable.Active)
             {
-                continue;
+                updateable.Update(elapsed);
             }
-            updateable.Update(elapsed);
         }
     }
 

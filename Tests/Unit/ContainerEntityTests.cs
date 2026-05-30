@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds;
 
@@ -14,6 +15,13 @@ public class ContainerEntityTests
         public bool Active { get; set; } = true;
         public int UpdateCalls { get; private set; }
         public void Update(double elapsed) => UpdateCalls++;
+    }
+
+    private sealed class OrderTrackingUpdateable(List<string> order, string label, bool updateLast = false) : AddableBase, IUpdateable
+    {
+        public bool Active { get; set; } = true;
+        public bool UpdateLast => updateLast;
+        public void Update(double elapsed) => order.Add(label);
     }
 
     private sealed class StubRenderable : AddableBase, IRenderable
@@ -290,5 +298,27 @@ public class ContainerEntityTests
 
         Assert.IsNull(a.Parent);
         Assert.IsNull(b.Parent);
+    }
+
+    // UpdateLast — nested children should tick regulars first, then update-last children.
+
+    [TestMethod]
+    public void Update_TicksRegularChildrenBeforeUpdateLastChildren_RegardlessOfAddOrder()
+    {
+        // ContainerEntity.Update checks each child's IsConnectedToTree, so the entity itself
+        // needs a parent. Use a real World to root the tree.
+        var world = new World();
+        var ce = new TestContainerEntity();
+        world.Add(ce);
+
+        var order = new List<string>();
+        ce.Add(new OrderTrackingUpdateable(order, "last", updateLast: true));
+        ce.Add(new OrderTrackingUpdateable(order, "regular"));
+
+        ce.Update(0.016);
+
+        Assert.HasCount(2, order);
+        Assert.AreEqual("regular", order[0]);
+        Assert.AreEqual("last", order[1]);
     }
 }

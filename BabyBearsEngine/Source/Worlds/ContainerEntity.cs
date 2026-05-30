@@ -60,8 +60,11 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
     /// <inheritdoc/>
     public event EventHandler<LayerChangedEventArgs>? LayerChanged;
 
-    /// <summary>Returns a snapshot of the child <see cref="IUpdateable"/>s in update order (highest layer first, so the top-most child updates last). Safe to mutate the container while iterating the returned list.</summary>
+    /// <summary>Returns a snapshot of the child <see cref="IUpdateable"/>s in update order (highest layer first, so the top-most child updates last). Excludes children that opted into the post-pass via <see cref="IUpdateable.UpdateLast"/> — use <see cref="GetUpdatablesLast"/> for those. Safe to mutate the container while iterating the returned list.</summary>
     protected IList<IUpdateable> GetUpdatables() => _container.GetUpdatables();
+
+    /// <summary>Returns a snapshot of the child post-pass <see cref="IUpdateable"/>s (those with <see cref="IUpdateable.UpdateLast"/> = <c>true</c>) in update order. Ticked after every regular child in <see cref="GetUpdatables"/> has finished. Safe to mutate the container while iterating.</summary>
+    protected IList<IUpdateable> GetUpdatablesLast() => _container.GetUpdatablesLast();
 
     /// <summary>Returns a snapshot of the child <see cref="IRenderable"/>s in render order (highest layer first). Safe to mutate the container while iterating.</summary>
     protected IList<IRenderable> GetRenderables() => _container.GetRenderables();
@@ -71,6 +74,9 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
     /// <see cref="IUpdateable.Active"/> = false, or whose <see cref="AddableBase.IsConnectedToTree"/> is false,
     /// are skipped. Override to insert custom per-frame logic; remember to call <c>base.Update(elapsed)</c> if
     /// you still want children to update.
+    /// <para>Runs in two passes: every regular child first, then every child that opted into the post-pass
+    /// via <see cref="IUpdateable.UpdateLast"/>. The post-pass exists for world-level coordinators (e.g.
+    /// collision solvers) that need to observe child state once everything else has moved this frame.</para>
     /// <para>If a child's update detaches this entity (or any ancestor) from the tree, iteration stops — any
     /// remaining children would otherwise crash trying to access screen-space coordinates on a detached subtree.
     /// Because every <see cref="ContainerEntity"/> in the chain performs the same check, the bail-out propagates
@@ -80,6 +86,21 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
     public virtual void Update(double elapsed)
     {
         foreach (var entity in GetUpdatables())
+        {
+            if (!entity.Active || !entity.IsConnectedToTree)
+            {
+                continue;
+            }
+
+            entity.Update(elapsed);
+
+            if (!IsConnectedToTree)
+            {
+                break;
+            }
+        }
+
+        foreach (var entity in GetUpdatablesLast())
         {
             if (!entity.Active || !entity.IsConnectedToTree)
             {

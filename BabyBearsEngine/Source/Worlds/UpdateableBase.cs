@@ -12,5 +12,8 @@ public abstract class UpdateableBase : AddableBase, IUpdateable
     public virtual bool Active { get; set; } = true;
 
     /// <inheritdoc/>
+    public virtual bool UpdateLast => false;
+
+    /// <inheritdoc/>
     public abstract void Update(double elapsed);
 }

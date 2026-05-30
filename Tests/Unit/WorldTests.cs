@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Geometry;
+﻿using System.Collections.Generic;
+using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds;
 
 namespace BabyBearsEngine.Tests.Unit;
@@ -23,6 +24,13 @@ public class WorldTests
     {
         public bool Visible { get; set; } = true;
         public void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
+    }
+
+    private sealed class OrderTrackingUpdateable(List<string> order, string label, bool updateLast = false) : AddableBase, IUpdateable
+    {
+        public bool Active { get; set; } = true;
+        public bool UpdateLast => updateLast;
+        public void Update(double elapsed) => order.Add(label);
     }
 
     // Note: World.Draw is intentionally not tested here — it issues GL calls and reads
@@ -206,5 +214,62 @@ public class WorldTests
         Assert.AreEqual(0.025, mainChild.LastElapsed);
         Assert.AreEqual(1, overlayChild.UpdateCalls);
         Assert.AreEqual(0.025, overlayChild.LastElapsed);
+    }
+
+    // UpdateLast ordering — regulars tick first, update-last entries tick after, regardless of add order.
+
+    [TestMethod]
+    public void Update_TicksRegularBeforeUpdateLast_RegardlessOfAddOrder()
+    {
+        var world = new World();
+        var order = new List<string>();
+        var last = new OrderTrackingUpdateable(order, "last", updateLast: true);
+        var regular = new OrderTrackingUpdateable(order, "regular");
+
+        // Add UpdateLast FIRST to prove ordering is bucket-driven, not insertion-driven.
+        world.Add(last);
+        world.Add(regular);
+
+        world.Update(0.016);
+
+        Assert.HasCount(2, order);
+        Assert.AreEqual("regular", order[0]);
+        Assert.AreEqual("last", order[1]);
+    }
+
+    [TestMethod]
+    public void Update_TicksMainContainerFullyBeforeOverlay()
+    {
+        var world = new World();
+        var order = new List<string>();
+        world.Add(new OrderTrackingUpdateable(order, "main-last", updateLast: true));
+        world.Add(new OrderTrackingUpdateable(order, "main-regular"));
+        world.Overlay.Add(new OrderTrackingUpdateable(order, "overlay-last", updateLast: true));
+        world.Overlay.Add(new OrderTrackingUpdateable(order, "overlay-regular"));
+
+        world.Update(0.016);
+
+        // Contract: each container completes its own regular-then-last pass before the next
+        // container starts. So main-regular → main-last → overlay-regular → overlay-last.
+        Assert.HasCount(4, order);
+        Assert.AreEqual("main-regular", order[0]);
+        Assert.AreEqual("main-last", order[1]);
+        Assert.AreEqual("overlay-regular", order[2]);
+        Assert.AreEqual("overlay-last", order[3]);
+    }
+
+    [TestMethod]
+    public void Update_InactiveUpdateLast_IsSkipped()
+    {
+        var world = new World();
+        var order = new List<string>();
+        var last = new OrderTrackingUpdateable(order, "last", updateLast: true) { Active = false };
+        world.Add(new OrderTrackingUpdateable(order, "regular"));
+        world.Add(last);
+
+        world.Update(0.016);
+
+        Assert.HasCount(1, order);
+        Assert.AreEqual("regular", order[0]);
     }
 }

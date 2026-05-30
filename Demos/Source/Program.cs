@@ -6,6 +6,7 @@ using BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
 using BabyBearsEngine.Demos.Source.Demos.CameraDemo;
 using BabyBearsEngine.Demos.Source.Demos.ClickDemo;
 using BabyBearsEngine.Demos.Source.Demos.ClickTheBearDemo;
+using BabyBearsEngine.Demos.Source.Demos.CollisionDemo;
 using BabyBearsEngine.Demos.Source.Demos.IODemo;
 using BabyBearsEngine.Demos.Source.Demos.KeyboardDemo;
 using BabyBearsEngine.Demos.Source.Demos.MouseDemo;
@@ -109,10 +110,11 @@ MenuEntry[] mainMenuEntries =
     new("Graphics",  getGraphicsSubmenu,  MenuEntryStyle.Submenu),
     new("Input",     getInputSubmenu,     MenuEntryStyle.Submenu),
     new("Showcases", getShowcasesSubmenu, MenuEntryStyle.Submenu),
-    new("Audio Demo",  () => new AudioDemoWorld(getMainMenu)),
-    new("Camera Demo", () => new CameraDemoWorld(getMainMenu)),
-    new("IO Demo",     () => new IODemoWorld(getMainMenu)),
-    new("Tween Demo",  () => new TweenDemoWorld(getMainMenu)),
+    new("Audio Demo",     () => new AudioDemoWorld(getMainMenu)),
+    new("Camera Demo",    () => new CameraDemoWorld(getMainMenu)),
+    new("Collision Demo", () => new CollisionDemoWorld(getMainMenu)),
+    new("IO Demo",        () => new IODemoWorld(getMainMenu)),
+    new("Tween Demo",     () => new TweenDemoWorld(getMainMenu)),
 ];
 
 mainMenuFactory = () => new MenuWorld(mainMenuEntries);

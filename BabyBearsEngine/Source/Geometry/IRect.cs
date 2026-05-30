@@ -13,13 +13,13 @@ namespace BabyBearsEngine.Geometry;
 /// <para>Coordinates use a top-left origin: increasing <see cref="Y"/> moves downward, so
 /// <see cref="Bottom"/> = <see cref="Y"/> + <see cref="Height"/>.</para>
 /// </remarks>
-public interface IRect
+public interface IRect : IPosition
 {
     /// <summary>X position in the parent's local space.</summary>
-    float X { get; set; }
+    new float X { get; set; }
 
     /// <summary>Y position in the parent's local space.</summary>
-    float Y { get; set; }
+    new float Y { get; set; }
 
     /// <summary>Width in pixels.</summary>
     float Width { get; set; }
