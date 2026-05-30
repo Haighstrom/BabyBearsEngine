@@ -13,7 +13,7 @@ public sealed class FBO(int width, int height) : IDisposable
     private static Texture GetTexture(int width, int height)
     {
         int handle = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, handle);
+        OpenGLHelper.BindTexture(handle);
         GL.TexStorage2D(TextureTarget2d.Texture2D, 1, SizedInternalFormat.Rgba8, width, height);
 
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);

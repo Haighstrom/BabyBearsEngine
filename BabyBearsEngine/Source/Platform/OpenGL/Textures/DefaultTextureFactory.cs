@@ -10,7 +10,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
     public ISpriteTexture CreateSpriteTextureFromImageFile(string filePath, int rows, int columns, bool linearFilter = false)
     {
         int handle = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, handle);
+        OpenGLHelper.BindTexture(handle);
 
         Rgba8ImageData orig = ImageLoader.LoadAsRgba8(filePath);
         Rgba8ImageData padded = CreatePaddedSpriteSheet(orig, columns, rows, SpritePadding);
@@ -31,7 +31,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
     public ITexture CreateTextureFromImageFile(string filePath, bool linearFilter = true)
     {
         int handle = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, handle);
+        OpenGLHelper.BindTexture(handle);
 
         Rgba8ImageData imageData = ImageLoader.LoadAsRgba8(filePath);
 
@@ -80,7 +80,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
             width: bmp.Width,
             height: bmp.Height);
 
-        GL.BindTexture(TextureTarget.Texture2D, t.Handle);
+        OpenGLHelper.BindTexture(t.Handle);
 
         var minFilter = linearFilter ? TextureMinFilter.Linear : TextureMinFilter.Nearest;
         var magFilter = linearFilter ? TextureMagFilter.Linear : TextureMagFilter.Nearest;
@@ -110,7 +110,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
             width: width,
             height: height);
 
-        GL.BindTexture(TextureTarget.Texture2D, t.Handle);
+        OpenGLHelper.BindTexture(t.Handle);
 
         // R8 rows are one byte per texel, so they aren't 4-byte aligned; relax the unpack
         // alignment for the upload, then restore the default so other texture paths are unaffected.

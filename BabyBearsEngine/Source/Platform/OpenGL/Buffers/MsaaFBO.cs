@@ -13,7 +13,7 @@ public sealed class MsaaFBO(int width, int height, int samples) : IDisposable
     private static Texture GetTexture(int width, int height, int samples)
     {
         int handle = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2DMultisample, handle);
+        OpenGLHelper.BindTexture(handle, TextureTarget.Texture2DMultisample);
         GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, samples, PixelInternalFormat.Rgb8, width, height, false);
 
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
@@ -40,7 +40,7 @@ public sealed class MsaaFBO(int width, int height, int samples) : IDisposable
 
     public void BindTexture()
     {
-        GL.BindTexture(TextureTarget.Texture2DMultisample, Texture.Handle);
+        OpenGLHelper.BindTexture(Texture.Handle, TextureTarget.Texture2DMultisample);
     }
 
     private void Dispose(bool disposing)

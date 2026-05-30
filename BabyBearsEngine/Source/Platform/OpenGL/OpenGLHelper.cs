@@ -29,7 +29,7 @@ internal static class OpenGLHelper
 
     public static void BindEBO(int eBOHandle)
     {
-        //if (s_lastBoundEBO != eBOHandle)
+        if (s_lastBoundEBO != eBOHandle)
         {
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, eBOHandle);
             s_lastBoundEBO = eBOHandle;
@@ -38,22 +38,26 @@ internal static class OpenGLHelper
 
     public static void BindShader(int shaderHandle)
     {
-        //if (s_lastBoundShader != shaderHandle)
+        if (s_lastBoundShader != shaderHandle)
         {
             GL.UseProgram(shaderHandle);
             s_lastBoundShader = shaderHandle;
         }
     }
 
+    // The cache holds a single "last bound texture" handle, which is correct as long as we
+    // stay on one texture unit. When the active unit changes we invalidate the cache so the
+    // next bind always issues, because we don't track what's bound on the unit we're switching to.
     public static void BindTexture(int textureHandle, TextureTarget textureTarget = TextureTarget.Texture2D, TextureUnit textureUnit = TextureUnit.Texture0)
     {
-        //if (s_lastActiveTextureUnit != textureUnit)
+        if (s_lastActiveTextureUnit != textureUnit)
         {
             GL.ActiveTexture(textureUnit);
             s_lastActiveTextureUnit = textureUnit;
+            s_lastBoundTexture = -1;
         }
 
-        //if (s_lastBoundTexture != textureHandle)
+        if (s_lastBoundTexture != textureHandle)
         {
             GL.BindTexture(textureTarget, textureHandle);
             s_lastBoundTexture = textureHandle;
@@ -62,7 +66,7 @@ internal static class OpenGLHelper
 
     public static void BindVAO(int vAOHandle)
     {
-        //if (s_lastBoundVAO != vAOHandle)
+        if (s_lastBoundVAO != vAOHandle)
         {
             GL.BindVertexArray(vAOHandle);
             s_lastBoundVAO = vAOHandle;
@@ -71,7 +75,7 @@ internal static class OpenGLHelper
 
     public static void BindVBO(int vBOHandle)
     {
-        //if (s_lastBoundVBO != vBOHandle)
+        if (s_lastBoundVBO != vBOHandle)
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, vBOHandle);
             s_lastBoundVBO = vBOHandle;
@@ -170,7 +174,7 @@ internal static class OpenGLHelper
 
     public static void UnbindShader()
     {
-        //if (s_lastBoundShader != 0)
+        if (s_lastBoundShader != 0)
         {
             GL.UseProgram(0);
             s_lastBoundShader = 0;
@@ -179,7 +183,7 @@ internal static class OpenGLHelper
 
     public static void UnbindTexture(TextureTarget textureTarget = TextureTarget.Texture2D)
     {
-        //if (s_lastBoundTexture != 0)
+        if (s_lastBoundTexture != 0)
         {
             GL.BindTexture(textureTarget, 0);
             s_lastBoundTexture = 0;
@@ -188,7 +192,7 @@ internal static class OpenGLHelper
 
     public static void UnbindVertexArray()
     {
-        //if (s_lastBoundVAO != 0)
+        if (s_lastBoundVAO != 0)
         {
             GL.BindVertexArray(0);
             s_lastBoundVAO = 0;
@@ -197,7 +201,7 @@ internal static class OpenGLHelper
 
     public static void UnbindVBO()
     {
-        //if (s_lastBoundVBO != 0)
+        if (s_lastBoundVBO != 0)
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             s_lastBoundVBO = 0;
@@ -206,7 +210,7 @@ internal static class OpenGLHelper
 
     public static void UnbindEBO()
     {
-        //if (s_lastBoundEBO != 0)
+        if (s_lastBoundEBO != 0)
         {
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
             s_lastBoundEBO = 0;
@@ -229,7 +233,7 @@ internal static class OpenGLHelper
     public static System.Drawing.Bitmap TextureToBitmap(Texture t)
     {
         System.Drawing.Bitmap bmp = new(t.Width, t.Height);
-        GL.BindTexture(TextureTarget.Texture2D, t.Handle);
+        BindTexture(t.Handle);
         var data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         GL.GetTexImage(TextureTarget.Texture2D, 0, PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
         bmp.UnlockBits(data);
