@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using OpenTK.Mathematics;
 using StbTrueTypeSharp;
 
@@ -45,7 +44,7 @@ internal sealed class SdfFontAtlasGenerator : IFontAtlasGenerator
     {
         (byte[] pixels, int width, int height, FontAtlasMetrics metrics) = RasteriseAtlas(fontDef);
         ITexture texture = new DefaultTextureFactory().GenR8Texture(pixels, width, height);
-        IMatrixShaderProgram shader = new SdfTextShaderProgram();
+        IMatrixShaderProgram shader = Shaders.SdfText;
         return new FontAtlas(metrics, texture, shader);
     }
 

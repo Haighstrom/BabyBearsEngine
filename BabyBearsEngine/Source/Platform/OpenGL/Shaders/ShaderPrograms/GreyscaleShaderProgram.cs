@@ -1,5 +1,4 @@
 using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
@@ -12,10 +11,19 @@ namespace BabyBearsEngine.OpenGL;
 /// </summary>
 public sealed class GreyscaleShaderProgram : ShaderProgramBase, IMatrixShaderProgram
 {
+    private static Lazy<GreyscaleShaderProgram> s_instance = new(() => new GreyscaleShaderProgram());
+
+    public static GreyscaleShaderProgram Instance => s_instance.Value;
+
+    internal static void ResetForNextRun()
+    {
+        s_instance = new Lazy<GreyscaleShaderProgram>(() => new GreyscaleShaderProgram());
+    }
+
     private readonly int _mvMatrixLocation;
     private readonly int _pMatrixLocation;
 
-    public GreyscaleShaderProgram()
+    private GreyscaleShaderProgram()
         : base(VertexShaders.Default, FragmentShaders.Greyscale)
     {
         _mvMatrixLocation = GL.GetUniformLocation(Handle, "MVMatrix");

@@ -1,7 +1,6 @@
-﻿using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Platform.OpenGL.Rendering;
-using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 
 namespace BabyBearsEngine.Worlds.Graphics;
 

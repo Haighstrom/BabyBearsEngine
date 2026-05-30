@@ -24,7 +24,7 @@ public class MultiLayerAnimation(float x, float y, float width, float height, do
     private const double DefaultFrameDuration = 0.2;
 
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
-    private readonly StandardMatrixShaderProgram _shader = new();
+    private readonly StandardMatrixShaderProgram _shader = Shaders.Standard;
     private readonly List<(ISpriteTexture Texture, int SubLayer)> _layers = [];
     private IList<int> _framesToPlay = [0];
     private int _currentFrameIndex = 0;
@@ -218,7 +218,6 @@ public class MultiLayerAnimation(float x, float y, float width, float height, do
         if (!_disposed)
         {
             _vertexDataBuffer.Dispose();
-            _shader.Dispose();
             _disposed = true;
         }
 

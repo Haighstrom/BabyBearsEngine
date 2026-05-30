@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.Worlds.Particles;
@@ -29,8 +28,6 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
 {
     private readonly List<Particle> _particles = [];
     private readonly Random _random;
-    private ParticleShaderProgram? _shader = null;
-    private TexturedParticleShaderProgram? _texturedShader = null;
     private VertexDataBuffer<ParticleVertex>? _vertexDataBuffer = null;
     private IEmitterShape _emitterShape;
     private double _emitCounter = 0;
@@ -104,13 +101,6 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
 
     /// <summary>Number of live particles currently in flight. Useful for diagnostics and tests.</summary>
     public int ParticleCount => _particles.Count;
-
-    /// <summary>
-    /// The shader program used to render this system, lazily constructed on first <see cref="Render"/>.
-    /// Returns null until rendering has occurred; this lets <see cref="Update"/>-only test
-    /// harnesses exercise the system without a live GL context.
-    /// </summary>
-    public ParticleShaderProgram? Shader => _shader;
 
     /// <summary>
     /// Per-axis size in pixels applied to every emitted particle as its
@@ -198,24 +188,14 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
             return;
         }
 
-        // Lazy-init so Update-only test paths don't need a GL context. The first render call
-        // happens on the engine thread with the context live, matching the construction
-        // requirements of every other GL-backed graphic in the engine. Each shader program
-        // type is constructed on first use only — a system that stays untextured never
-        // allocates the textured program, and vice versa.
+        // Lazy-init the per-system vertex buffer so Update-only test paths don't need a GL
+        // context. The shared shader-program singletons are also lazy — accessing them through
+        // the Shaders facade compiles them on first use, matching this object's lifecycle.
         _vertexDataBuffer ??= new VertexDataBuffer<ParticleVertex>();
 
-        IMatrixShaderProgram activeShader;
-        if (Texture is not null)
-        {
-            _texturedShader ??= new TexturedParticleShaderProgram();
-            activeShader = _texturedShader;
-        }
-        else
-        {
-            _shader ??= new ParticleShaderProgram();
-            activeShader = _shader;
-        }
+        IMatrixShaderProgram activeShader = Texture is not null
+            ? Shaders.TexturedParticle
+            : Shaders.Particle;
 
         activeShader.Bind();
         _vertexDataBuffer.Bind();
@@ -292,8 +272,6 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
             if (disposing)
             {
                 _vertexDataBuffer?.Dispose();
-                _shader?.Dispose();
-                _texturedShader?.Dispose();
             }
             _disposed = true;
         }

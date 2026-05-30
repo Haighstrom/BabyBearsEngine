@@ -1,9 +1,8 @@
-﻿using BabyBearsEngine.Diagnostics;
+using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.IO;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Platform.OpenGL.Buffers;
-using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using BabyBearsEngine.Worlds.Cameras;
 using BabyBearsEngine.Worlds.UI.Themes;
 using OpenTK.Graphics.OpenGL4;
@@ -25,7 +24,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     private const string ItalicSuffix = "_i";
     private const string BoldItalicSuffix = "_bi";
 
-    private readonly SolidColourShaderProgramMatrix _decorationShader = SolidColourShaderProgramMatrix.Instance;
+    private readonly SolidColourShaderProgramMatrix _decorationShader = Shaders.SolidColour;
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
     private readonly VertexDataBuffer<Vertex> _boldVertexDataBuffer = new();
     private readonly VertexDataBuffer<Vertex> _italicVertexDataBuffer = new();

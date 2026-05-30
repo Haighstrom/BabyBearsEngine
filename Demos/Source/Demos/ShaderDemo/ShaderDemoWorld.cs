@@ -1,6 +1,5 @@
 using System;
 using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Worlds.Graphics.Text;
 using BabyBearsEngine.Worlds.UI;
@@ -34,10 +33,10 @@ internal sealed class ShaderDemoWorld : DemoWorld
     // One instance of each effect's shader program, swapped onto the bear's Shader property
     // as the user clicks an effect button. Holding them as fields lets us mutate per-effect
     // uniforms (DarkenValue, BlurSize) without rebuilding the shader.
-    private readonly StandardMatrixShaderProgram _defaultShader = new();
-    private readonly GreyscaleShaderProgram _greyscaleShader = new();
-    private readonly DarkenShaderProgram _darkenShader = new(darkenValue: 0.5f);
-    private readonly BlurShaderProgram _blurShader = new(blurSize: 5f);
+    private readonly StandardMatrixShaderProgram _defaultShader = Shaders.Standard;
+    private readonly GreyscaleShaderProgram _greyscaleShader = Shaders.Greyscale;
+    private readonly DarkenShaderProgram _darkenShader = Shaders.NewDarken(darkenValue: 0.5f);
+    private readonly BlurShaderProgram _blurShader = Shaders.NewBlur(blurSize: 5f);
 
     private ShaderEffect _currentEffect = ShaderEffect.None;
 

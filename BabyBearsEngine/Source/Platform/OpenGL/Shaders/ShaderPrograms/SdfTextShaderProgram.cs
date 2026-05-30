@@ -1,5 +1,4 @@
 using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
@@ -11,10 +10,19 @@ namespace BabyBearsEngine.OpenGL;
 /// </summary>
 public sealed class SdfTextShaderProgram : ShaderProgramBase, IMatrixShaderProgram
 {
+    private static Lazy<SdfTextShaderProgram> s_instance = new(() => new SdfTextShaderProgram());
+
+    public static SdfTextShaderProgram Instance => s_instance.Value;
+
+    internal static void ResetForNextRun()
+    {
+        s_instance = new Lazy<SdfTextShaderProgram>(() => new SdfTextShaderProgram());
+    }
+
     private readonly int _mvMatrixLocation;
     private readonly int _pMatrixLocation;
 
-    public SdfTextShaderProgram()
+    private SdfTextShaderProgram()
         : base(VertexShaders.Default, FragmentShaders.SdfText)
     {
         _mvMatrixLocation = GL.GetUniformLocation(Handle, "MVMatrix");

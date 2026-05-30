@@ -1,7 +1,6 @@
 using BabyBearsEngine.Geometry;
-using BabyBearsEngine.OpenGL;
 
-namespace BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
+namespace BabyBearsEngine.OpenGL;
 
 /// <summary>
 /// A shader program that supports model-view and projection matrix uniforms — the contract

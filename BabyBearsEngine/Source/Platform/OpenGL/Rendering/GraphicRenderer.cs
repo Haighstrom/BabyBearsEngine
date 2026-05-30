@@ -1,6 +1,5 @@
-﻿using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.OpenGL;
 using Matrix3 = BabyBearsEngine.Geometry.Matrix3;
-using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 
@@ -16,15 +15,16 @@ internal sealed class GraphicRenderer(ITexture texture) : IDisposable
         new (w, h, colour, u2, v2),
     ];
 
-    private IMatrixShaderProgram _shader = new StandardMatrixShaderProgram();
+    private IMatrixShaderProgram _shader = Shaders.Standard;
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
     private bool _disposedValue = false;
 
     /// <summary>
-    /// The matrix-aware shader used to draw this graphic. Defaults to a
-    /// <see cref="StandardMatrixShaderProgram"/>; assign a different
+    /// The matrix-aware shader used to draw this graphic. Defaults to the
+    /// <see cref="StandardMatrixShaderProgram"/> singleton; assign a different
     /// <see cref="IMatrixShaderProgram"/> (e.g. <see cref="GreyscaleShaderProgram"/>,
     /// <see cref="BlurShaderProgram"/>) to apply a fragment effect. Never null.
+    /// Not owned by the renderer — disposing the renderer does not dispose the shader.
     /// </summary>
     public IMatrixShaderProgram Shader
     {
@@ -67,7 +67,6 @@ internal sealed class GraphicRenderer(ITexture texture) : IDisposable
             return;
         }
 
-        _shader.Dispose();
         _vertexDataBuffer.Dispose();
         _disposedValue = true;
     }

@@ -1,16 +1,24 @@
-﻿using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
+using BabyBearsEngine.Geometry;
 using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
 
 internal sealed class StencilShaderProgram : ShaderProgramBase, IMatrixShaderProgram
 {
+    private static Lazy<StencilShaderProgram> s_instance = new(() => new StencilShaderProgram());
+
+    public static StencilShaderProgram Instance => s_instance.Value;
+
+    internal static void ResetForNextRun()
+    {
+        s_instance = new Lazy<StencilShaderProgram>(() => new StencilShaderProgram());
+    }
+
     private readonly int _mvMatrixLocation;
     private readonly int _pMatrixLocation;
     private readonly int _thresholdLocation;
 
-    public StencilShaderProgram()
+    private StencilShaderProgram()
         : base(VertexShaders.Default, FragmentShaders.Stencil)
     {
         _mvMatrixLocation = GL.GetUniformLocation(Handle, "MVMatrix");

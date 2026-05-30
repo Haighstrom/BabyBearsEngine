@@ -27,7 +27,7 @@ public class SpriteMap(int[,] tiles, float tileW, float tileH, ISpriteTexture te
     : GraphicBase(x, y, tiles.GetLength(0) * tileW, tiles.GetLength(1) * tileH, layer), IGraphic, IDisposable
 {
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
-    private readonly StandardMatrixShaderProgram _shader = new();
+    private readonly StandardMatrixShaderProgram _shader = Shaders.Standard;
     private readonly int[,] _tiles = (int[,])tiles.Clone();
     private int _vertexCount = 0;
     private bool _verticesDirty = true;
@@ -213,7 +213,6 @@ public class SpriteMap(int[,] tiles, float tileW, float tileH, ISpriteTexture te
         if (!_disposed)
         {
             _vertexDataBuffer.Dispose();
-            _shader.Dispose();
             _disposed = true;
         }
 

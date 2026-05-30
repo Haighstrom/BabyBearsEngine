@@ -3,7 +3,6 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
@@ -31,7 +30,7 @@ internal sealed class GdiFontAtlasGenerator : IFontAtlasGenerator
         // soften the hinted edges even at scale 1; nearest keeps them crisp. (The SDF backend keeps
         // linear filtering — it relies on inter-texel blending to reconstruct its distance field.)
         ITexture texture = new DefaultTextureFactory().GenTexture(bitmap, linearFilter: false);
-        IMatrixShaderProgram shader = new StandardMatrixShaderProgram();
+        IMatrixShaderProgram shader = Shaders.Standard;
         return new FontAtlas(metrics, texture, shader);
     }
 

@@ -88,11 +88,11 @@ public class ParticleSystemTests
             {
                 try
                 {
-                    // Dispose immediately inside the engine loop so the GPU resource deletion
-                    // service is still wired up; doing it after GameLauncher.Run returns would
-                    // hit a reset EngineConfiguration.
-                    using var program = new ParticleShaderProgram();
-                    constructed = true;
+                    // Accessing the lazy singleton triggers the shader's GL compile/link inside
+                    // the live engine loop. EngineTeardown.ResetForNextRun drops the singleton
+                    // at the end of the run so the next test re-exercises the construction path.
+                    var program = ParticleShaderProgram.Instance;
+                    constructed = program is not null;
                 }
                 catch (Exception ex)
                 {
@@ -123,8 +123,8 @@ public class ParticleSystemTests
             {
                 try
                 {
-                    using var program = new TexturedParticleShaderProgram();
-                    constructed = true;
+                    var program = TexturedParticleShaderProgram.Instance;
+                    constructed = program is not null;
                 }
                 catch (Exception ex)
                 {

@@ -19,7 +19,14 @@ internal static class EngineTeardown
         // new context — otherwise the second Run uses dangling handles from the first. The
         // previous instance's GL resources leak, but the context they belonged to is being
         // torn down anyway.
+        CoverageTextShaderProgram.ResetForNextRun();
+        GreyscaleShaderProgram.ResetForNextRun();
+        ParticleShaderProgram.ResetForNextRun();
+        SdfTextShaderProgram.ResetForNextRun();
         SolidColourShaderProgramMatrix.ResetForNextRun();
+        StandardMatrixShaderProgram.ResetForNextRun();
+        StencilShaderProgram.ResetForNextRun();
+        TexturedParticleShaderProgram.ResetForNextRun();
 
         // Clear the OpenGLHelper bind cache. Its s_lastBound* sentinels survive between
         // consecutive GameLauncher.Run invocations because they're static. A stale handle from

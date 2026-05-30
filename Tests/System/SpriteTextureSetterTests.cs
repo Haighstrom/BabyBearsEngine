@@ -1,7 +1,6 @@
 using System;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using BabyBearsEngine.Worlds;
 using BabyBearsEngine.Worlds.Graphics;
 using OpenTK.Graphics.OpenGL4;

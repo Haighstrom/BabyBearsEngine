@@ -18,7 +18,7 @@ namespace BabyBearsEngine.Worlds.Graphics;
 public sealed class ColourGraphic(Colour colour, float x, float y, float width, float height, int layer = int.MaxValue) 
     : GraphicBase(x, y, width, height, layer), IGraphic, IColourGraphic, IDisposable
 {
-    private readonly SolidColourShaderProgramMatrix _shader = SolidColourShaderProgramMatrix.Instance;
+    private readonly SolidColourShaderProgramMatrix _shader = Shaders.SolidColour;
     private readonly VertexDataBuffer<VertexNoTexture> _vertexDataBuffer = new();
     private bool _verticesChanged = true;
     private bool _disposed = false;

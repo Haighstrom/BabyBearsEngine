@@ -15,7 +15,6 @@ internal sealed class StencilRenderer(ITexture imageTexture, ITexture stencilTex
         new(w, h, colour, 1, 1),
     ];
 
-    private readonly StencilShaderProgram _shader = new();
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
     private bool _disposed = false;
 
@@ -28,13 +27,14 @@ internal sealed class StencilRenderer(ITexture imageTexture, ITexture stencilTex
 
     public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
-        _shader.Bind();
+        StencilShaderProgram shader = StencilShaderProgram.Instance;
+        shader.Bind();
         _vertexDataBuffer.Bind();
         imageTexture.Bind(TextureTarget.Texture2D, TextureUnit.Texture0);
         stencilTexture.Bind(TextureTarget.Texture2D, TextureUnit.Texture1);
-        _shader.SetThreshold(Threshold);
-        _shader.SetProjectionMatrix(ref projection);
-        _shader.SetModelViewMatrix(ref modelView);
+        shader.SetThreshold(Threshold);
+        shader.SetProjectionMatrix(ref projection);
+        shader.SetModelViewMatrix(ref modelView);
         GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
     }
 
@@ -45,7 +45,6 @@ internal sealed class StencilRenderer(ITexture imageTexture, ITexture stencilTex
             return;
         }
 
-        _shader.Dispose();
         _vertexDataBuffer.Dispose();
         _disposed = true;
     }

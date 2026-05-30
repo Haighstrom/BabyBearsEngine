@@ -1,5 +1,4 @@
-﻿using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
+using BabyBearsEngine.Geometry;
 using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
@@ -8,7 +7,7 @@ public sealed class SolidColourShaderProgramMatrix : ShaderProgramBase, IMatrixS
 {
     private static Lazy<SolidColourShaderProgramMatrix> s_instance = new(() => new SolidColourShaderProgramMatrix());
 
-    internal static SolidColourShaderProgramMatrix Instance => s_instance.Value;
+    public static SolidColourShaderProgramMatrix Instance => s_instance.Value;
 
     /// <summary>
     /// Drop the cached instance so the next access reconstructs the GL shader program. Called

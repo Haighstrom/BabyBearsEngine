@@ -1,5 +1,4 @@
 using BabyBearsEngine.Geometry;
-using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
@@ -13,10 +12,19 @@ namespace BabyBearsEngine.OpenGL;
 /// </summary>
 public sealed class CoverageTextShaderProgram : ShaderProgramBase, IMatrixShaderProgram
 {
+    private static Lazy<CoverageTextShaderProgram> s_instance = new(() => new CoverageTextShaderProgram());
+
+    public static CoverageTextShaderProgram Instance => s_instance.Value;
+
+    internal static void ResetForNextRun()
+    {
+        s_instance = new Lazy<CoverageTextShaderProgram>(() => new CoverageTextShaderProgram());
+    }
+
     private readonly int _mvMatrixLocation;
     private readonly int _pMatrixLocation;
 
-    public CoverageTextShaderProgram()
+    private CoverageTextShaderProgram()
         : base(VertexShaders.Default, FragmentShaders.R8Texture)
     {
         _mvMatrixLocation = GL.GetUniformLocation(Handle, "MVMatrix");

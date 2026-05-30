@@ -20,7 +20,7 @@ internal sealed class CameraRenderer : IDisposable
 
     public CameraRenderer(float width, float height, MsaaSamples samples)
     {
-        _shader = new();
+        _shader = Shaders.Standard;
 
         if (samples != MsaaSamples.Disabled)
         {

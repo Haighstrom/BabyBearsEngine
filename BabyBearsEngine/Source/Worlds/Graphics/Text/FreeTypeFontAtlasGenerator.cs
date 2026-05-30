@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using BabyBearsEngine.OpenGL;
-using BabyBearsEngine.Platform.OpenGL.Shaders.ShaderPrograms;
 using FreeTypeSharp;
 using OpenTK.Mathematics;
 
@@ -35,7 +34,7 @@ internal sealed class FreeTypeFontAtlasGenerator : IFontAtlasGenerator
         // TextGraphic pixel-snaps each glyph quad, so 1:1 point sampling keeps the hinted edges
         // crisp. (The SDF backend, by contrast, needs linear filtering to reconstruct distances.)
         ITexture texture = new DefaultTextureFactory().GenR8Texture(pixels, width, height, linearFilter: false);
-        IMatrixShaderProgram shader = new CoverageTextShaderProgram();
+        IMatrixShaderProgram shader = Shaders.CoverageText;
         return new FontAtlas(metrics, texture, shader);
     }
 
