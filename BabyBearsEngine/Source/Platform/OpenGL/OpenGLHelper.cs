@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using OpenTK.Graphics.OpenGL4;
-using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.OpenGL;
 
@@ -87,34 +86,6 @@ internal static class OpenGLHelper
         {
             System.Console.WriteLine($"OpenGL Error: {error}");
         }
-    }
-
-    public static Matrix3 CreateOrthographicProjectionMatrix(int width, int height)
-    {
-        float halfWidth = width / 2f;
-        float halfHeight = height / 2f;
-
-        Matrix3 scale = new(1 / halfWidth, 0, 0, 0, 1 / halfHeight, 0, 0, 0, 1);
-        Matrix3 flipY = new(1, 0, 0, 0, -1, 0, 0, 0, 1);
-        Matrix3 translate = new(1, 0, -halfWidth, 0, 1, -halfHeight, 0, 0, 1);
-
-        var ortho = scale * flipY * translate;
-
-        return ortho;
-    }
-
-    // Same as CreateOrtho but without the FlipY stage. Use for makign projection matrices when rendering to a framebuffer rather than screen.
-    public static Matrix3 CreateFBOOrthographicProjectionMatrix(int width, int height)
-    {
-        float halfWidth = width / 2f;
-        float halfHeight = height / 2f;
-
-        Matrix3 scale = new(1 / halfWidth, 0, 0, 0, 1 / halfHeight, 0, 0, 0, 1);
-        Matrix3 translate = new(1, 0, -halfWidth, 0, 1, -halfHeight, 0, 0, 1);
-
-        var ortho = scale * translate;
-
-        return ortho;
     }
 
     public static int CreateShader(string source, ShaderType shaderType)
@@ -246,22 +217,6 @@ internal static class OpenGLHelper
     {
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         LastBoundFBO = 0;
-    }
-
-    public static float[] GetValues(this Matrix3 matrix)
-    {
-        return [matrix.M11, matrix.M12, matrix.M13, matrix.M21, matrix.M22, matrix.M23, matrix.M31, matrix.M32, matrix.M33];
-    }
-
-    public static void UniformMatrix3(int location, Matrix3 matrix)
-    {
-        unsafe
-        {
-            fixed (float* valuePointer = matrix.GetValues())
-            {
-                GL.UniformMatrix3(location, 1, false, valuePointer);
-            }
-        }
     }
 
     public static void SaveTextureToFile(Texture t, string filePath)
