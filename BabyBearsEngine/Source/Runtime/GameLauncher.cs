@@ -80,15 +80,7 @@ public static class GameLauncher
         }
         finally
         {
-            // Drop cached shader-program singletons so the next Run gets fresh GL handles in
-            // its new context — otherwise the second Run uses dangling handles from the first.
-            // The previous instance's GL resources leak, but the context they belonged to is
-            // being torn down anyway.
-            SolidColourShaderProgramMatrix.ResetForNextRun();
-
-            audioService?.Dispose();
-
-            EngineConfiguration.Reset();
+            EngineTeardown.ResetForNextRun(audioService);
             s_running = false;
         }
     }
