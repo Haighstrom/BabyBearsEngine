@@ -1,7 +1,5 @@
 #version 150
 
-uniform sampler2D Sampler;
-
 in ColourData
 {
 	vec4 Colour;
