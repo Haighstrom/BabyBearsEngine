@@ -76,7 +76,7 @@ internal sealed class CameraRenderer : IDisposable
 
         bool msaaEnabled = _samples != MsaaSamples.Disabled;
         int previousFBO = OpenGLHelper.LastBoundFBO;
-        var prevVP = OpenGLHelper.GetViewport();
+        var prevVP = OpenGLHelper.LastViewport;
 
         var (fboOrtho, identity) = RenderChildrenToFBO(camera, renderables, msaaEnabled);
 
@@ -124,7 +124,7 @@ internal sealed class CameraRenderer : IDisposable
 
         _outputFBO.Texture.Bind();
         GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
-        GL.Viewport(prevVP.X, prevVP.Y, prevVP.Width, prevVP.Height);
+        OpenGLHelper.SetViewport(prevVP.X, prevVP.Y, prevVP.Width, prevVP.Height);
 
         var mv2 = modelView;
         mv2 = Matrix3.Translate(ref mv2, camera.X, camera.Y);
@@ -173,7 +173,7 @@ internal sealed class CameraRenderer : IDisposable
         GL.Clear(ClearBufferMask.ColorBufferBit);
         GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
 
-        GL.Viewport(0, 0, (int)camera.Width, (int)camera.Height);
+        OpenGLHelper.SetViewport(0, 0, (int)camera.Width, (int)camera.Height);
 
         var fboOrtho = Matrix3.CreateFBOOrtho(camera.Width, camera.Height);
         var identity = Matrix3.Identity;

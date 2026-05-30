@@ -115,7 +115,7 @@ public class ScrollingListPanel : Entity
         public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
         {
             var (wx, wy) = GetWindowCoordinates(0f, 0f);
-            var (_, _, _, vpH) = OpenGLHelper.GetViewport();
+            var (_, _, _, vpH) = OpenGLHelper.LastViewport;
 
             int scissorX = (int)wx;
             int scissorY = vpH - (int)(wy + Height);

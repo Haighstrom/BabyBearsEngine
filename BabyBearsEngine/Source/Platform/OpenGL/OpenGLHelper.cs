@@ -12,7 +12,9 @@ internal static class OpenGLHelper
     private static int s_lastBoundTexture = -1;
     private static TextureUnit s_lastActiveTextureUnit = TextureUnit.Texture0;
 
-    public static int LastBoundFBO { get; set; }
+    public static int LastBoundFBO { get; private set; } = 0;
+
+    public static (int X, int Y, int Width, int Height) LastViewport { get; private set; } = (0, 0, 0, 0);
 
     /// <summary>
     /// Resets the bind cache to its initial uninitialised state. Must be called whenever the
@@ -30,6 +32,7 @@ internal static class OpenGLHelper
         s_lastBoundTexture = -1;
         s_lastActiveTextureUnit = TextureUnit.Texture0;
         LastBoundFBO = 0;
+        LastViewport = (0, 0, 0, 0);
     }
 
     public static void BindFBO(int fboHandle)
@@ -38,11 +41,10 @@ internal static class OpenGLHelper
         LastBoundFBO = fboHandle;
     }
 
-    public static (int X, int Y, int Width, int Height) GetViewport()
+    public static void SetViewport(int x, int y, int width, int height)
     {
-        int[] ints = new int[4];
-        GL.GetInteger(GetPName.Viewport, ints);
-        return (ints[0], ints[1], ints[2], ints[3]);
+        GL.Viewport(x, y, width, height);
+        LastViewport = (x, y, width, height);
     }
 
     public static void BindEBO(int eBOHandle)

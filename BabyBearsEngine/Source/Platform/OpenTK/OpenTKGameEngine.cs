@@ -127,7 +127,7 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
     {
         base.OnResize(e);
 
-        GL.Viewport(0, 0, e.Width, e.Height);
+        OpenGLHelper.SetViewport(0, 0, e.Width, e.Height);
     }
 
     protected override void OnUnload()

@@ -48,7 +48,7 @@ public class DropdownList<T> : Entity
         _items = items;
         _formatter = formatter ?? (v => v?.ToString() ?? string.Empty);
         _currentIndex = initialIndex;
-        _getViewportHeight = static () => OpenGLHelper.GetViewport().Height;
+        _getViewportHeight = static () => OpenGLHelper.LastViewport.Height;
 
         Button header = new(0f, 0f, width, height, theme.Header, _formatter(_items[initialIndex]));
         header.LeftClicked += (_, _) => Toggle();
