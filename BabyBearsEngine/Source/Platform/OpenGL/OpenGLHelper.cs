@@ -1,5 +1,6 @@
-﻿using System.IO;
-using OpenTK.Graphics.OpenGL4;
+﻿using OpenTK.Graphics.OpenGL4;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace BabyBearsEngine.OpenGL;
 
@@ -243,33 +244,28 @@ internal static class OpenGLHelper
         LastBoundFBO = 0;
     }
 
+    /// <summary>
+    /// Reads <paramref name="t"/> back from the GPU and writes it to <paramref name="filePath"/>
+    /// as a PNG. A <c>.png</c> extension is appended if one isn't already present. Useful for
+    /// debugging texture content (atlases, FBO outputs, generated bitmaps); not intended for
+    /// release-path output. Requires a live GL context.
+    /// </summary>
     public static void SaveTextureToFile(Texture t, string filePath)
     {
-        var b = TextureToBitmap(t);
-        SaveBitmapToPNGFile(b, filePath);
-    }
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
-    public static System.Drawing.Bitmap TextureToBitmap(Texture t)
-    {
-        System.Drawing.Bitmap bmp = new(t.Width, t.Height);
-        BindTexture(t.Handle);
-        var data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-        GL.GetTexImage(TextureTarget.Texture2D, 0, PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-        bmp.UnlockBits(data);
-        return bmp;
-    }
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
-    public static void SaveBitmapToPNGFile(System.Drawing.Bitmap bmp, string filePath)
-    {
-        //Make sure the filepath has exactly one png extension
-        if (Path.GetExtension(filePath) == null)
+        if (!filePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
         {
             filePath += ".png";
         }
 
-        //Save the bitmap
-        bmp.Save(filePath);
+        byte[] pixels = new byte[t.Width * t.Height * 4];
+        BindTexture(t.Handle);
+        // R8/RGB textures may not be 4-byte aligned per row; relaxing the pack alignment keeps
+        // GetTexImage rows tightly packed for any width.
+        GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
+        GL.GetTexImage(TextureTarget.Texture2D, 0, PixelFormat.Rgba, PixelType.UnsignedByte, pixels);
+        GL.PixelStore(PixelStoreParameter.PackAlignment, 4);
+
+        using var image = Image.LoadPixelData<Rgba32>(pixels, t.Width, t.Height);
+        image.SaveAsPng(filePath);
     }
 }
