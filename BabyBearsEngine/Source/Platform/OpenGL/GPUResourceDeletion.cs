@@ -23,7 +23,7 @@ internal static class GPUResourceDeletion
 
     public static bool TryRequestDeleteVBO(int handle) => TryRequestDelete(static (service, h) => service.QueueVBODelete(h), handle);
 
-    public static bool TryRequestDeleteFBO(int handle) => false; //todo: invent this
+    public static bool TryRequestDeleteFBO(int handle) => TryRequestDelete(static (service, h) => service.QueueFramebufferDelete(h), handle);
 
     public static bool TryRequestDeleteEBO(int handle) => TryRequestDelete(static (service, h) => service.QueueEBODelete(h), handle);
 

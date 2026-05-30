@@ -242,6 +242,12 @@ internal static class OpenGLHelper
         }
     }
 
+    public static void UnbindFBO()
+    {
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        LastBoundFBO = 0;
+    }
+
     public static float[] GetValues(this Matrix3 matrix)
     {
         return [matrix.M11, matrix.M12, matrix.M13, matrix.M21, matrix.M22, matrix.M23, matrix.M31, matrix.M32, matrix.M33];

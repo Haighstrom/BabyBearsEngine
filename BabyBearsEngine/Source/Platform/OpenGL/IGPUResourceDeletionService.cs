@@ -7,5 +7,6 @@ public interface IGPUResourceDeletionService
     void QueueVertexArrayDelete(int handle);
     void QueueVBODelete(int handle);
     void QueueEBODelete(int handle);
+    void QueueFramebufferDelete(int handle);
     void ProcessDeletes();
 }

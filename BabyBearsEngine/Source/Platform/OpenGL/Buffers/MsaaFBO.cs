@@ -49,11 +49,8 @@ public sealed class MsaaFBO(int width, int height, int samples) : IDisposable
         {
             if (disposing)
             {
-                // TODO: dispose managed state (managed objects)
+                Texture.Dispose();
             }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
 
             GPUResourceDeletion.TryRequestDeleteFBO(Handle);
 

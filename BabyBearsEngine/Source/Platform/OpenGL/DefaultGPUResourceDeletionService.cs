@@ -12,6 +12,7 @@ internal class DefaultGPUResourceDeletionService : IGPUResourceDeletionService
     private HashSet<int> _vertexArraysToDelete = [];
     private HashSet<int> _vBOsToDelete = [];
     private HashSet<int> _eBOsToDelete = [];
+    private HashSet<int> _framebuffersToDelete = [];
 
     public void QueueShaderDelete(int handle)
     {
@@ -78,6 +79,19 @@ internal class DefaultGPUResourceDeletionService : IGPUResourceDeletionService
         }
     }
 
+    public void QueueFramebufferDelete(int handle)
+    {
+        if (handle == 0)
+        {
+            return;
+        }
+
+        lock (_gate)
+        {
+            _framebuffersToDelete.Add(handle);
+        }
+    }
+
     public void ProcessDeletes()
     {
         // Swap work out under lock, then delete outside the lock.
@@ -86,10 +100,11 @@ internal class DefaultGPUResourceDeletionService : IGPUResourceDeletionService
         HashSet<int> vertexArrays;
         HashSet<int> vbos;
         HashSet<int> ebos;
+        HashSet<int> framebuffers;
 
         lock (_gate)
         {
-            shaders = _shaderProgramsToDelete; 
+            shaders = _shaderProgramsToDelete;
             _shaderProgramsToDelete = [];
 
             textures = _texturesToDelete;
@@ -103,6 +118,9 @@ internal class DefaultGPUResourceDeletionService : IGPUResourceDeletionService
 
             ebos = _eBOsToDelete;
             _eBOsToDelete = [];
+
+            framebuffers = _framebuffersToDelete;
+            _framebuffersToDelete = [];
         }
 
         if (shaders.Count != 0)
@@ -147,6 +165,15 @@ internal class DefaultGPUResourceDeletionService : IGPUResourceDeletionService
             foreach (int handle in ebos)
             {
                 GL.DeleteBuffer(handle);
+            }
+        }
+
+        if (framebuffers.Count != 0)
+        {
+            OpenGLHelper.UnbindFBO();
+            foreach (int handle in framebuffers)
+            {
+                GL.DeleteFramebuffer(handle);
             }
         }
     }
