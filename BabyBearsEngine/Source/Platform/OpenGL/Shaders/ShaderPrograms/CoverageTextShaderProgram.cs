@@ -1,6 +1,3 @@
-using BabyBearsEngine.Geometry;
-using OpenTK.Graphics.OpenGL4;
-
 namespace BabyBearsEngine.OpenGL;
 
 /// <summary>
@@ -10,7 +7,7 @@ namespace BabyBearsEngine.OpenGL;
 /// stores alpha coverage rather than distance, so no edge reconstruction happens in the shader —
 /// the FreeType rasteriser already authored the antialiased edge at the target pixel size.
 /// </summary>
-public sealed class CoverageTextShaderProgram : ShaderProgramBase, IMatrixShaderProgram
+public sealed class CoverageTextShaderProgram : MatrixShaderProgramBase
 {
     private static Lazy<CoverageTextShaderProgram> s_instance = new(() => new CoverageTextShaderProgram());
 
@@ -21,42 +18,8 @@ public sealed class CoverageTextShaderProgram : ShaderProgramBase, IMatrixShader
         s_instance = new Lazy<CoverageTextShaderProgram>(() => new CoverageTextShaderProgram());
     }
 
-    private readonly int _mvMatrixLocation;
-    private readonly int _pMatrixLocation;
-
     private CoverageTextShaderProgram()
         : base(VertexShaders.Default, FragmentShaders.R8Texture)
     {
-        _mvMatrixLocation = GL.GetUniformLocation(Handle, "MVMatrix");
-        _pMatrixLocation = GL.GetUniformLocation(Handle, "PMatrix");
-
-        var mvMatrix = Matrix3.Identity;
-        SetModelViewMatrix(ref mvMatrix);
-    }
-
-    public void SetModelViewMatrix(ref Matrix3 matrix)
-    {
-        Bind();
-
-        unsafe
-        {
-            fixed (float* valuePointer = matrix.Values)
-            {
-                GL.UniformMatrix3(_mvMatrixLocation, 1, false, valuePointer);
-            }
-        }
-    }
-
-    public void SetProjectionMatrix(ref Matrix3 matrix)
-    {
-        Bind();
-
-        unsafe
-        {
-            fixed (float* valuePointer = matrix.Values)
-            {
-                GL.UniformMatrix3(_pMatrixLocation, 1, false, valuePointer);
-            }
-        }
     }
 }

@@ -1,9 +1,6 @@
-using BabyBearsEngine.Geometry;
-using OpenTK.Graphics.OpenGL4;
-
 namespace BabyBearsEngine.OpenGL;
 
-public sealed class StandardMatrixShaderProgram : ShaderProgramBase, IMatrixShaderProgram
+public sealed class StandardMatrixShaderProgram : MatrixShaderProgramBase
 {
     private static Lazy<StandardMatrixShaderProgram> s_instance = new(() => new StandardMatrixShaderProgram());
 
@@ -20,48 +17,8 @@ public sealed class StandardMatrixShaderProgram : ShaderProgramBase, IMatrixShad
         s_instance = new Lazy<StandardMatrixShaderProgram>(() => new StandardMatrixShaderProgram());
     }
 
-    private readonly int _mvMatrixLocation;
-    private readonly int _pMatrixLocation;
-
     private StandardMatrixShaderProgram()
         : base(VertexShaders.Default, FragmentShaders.Default)
     {
-        _mvMatrixLocation = GL.GetUniformLocation(Handle, "MVMatrix");
-        _pMatrixLocation = GL.GetUniformLocation(Handle, "PMatrix");
-
-        var mvMatrix = Matrix3.Identity;
-        SetModelViewMatrix(ref mvMatrix);
-    }
-
-    public void SetModelViewMatrix(ref Matrix3 matrix)
-    {
-        Bind();
-
-        unsafe
-        {
-            fixed (float* valuePointer = matrix.Values)
-            {
-                GL.UniformMatrix3(_mvMatrixLocation, 1, false, valuePointer);
-            }
-        }
-    }
-
-    public void SetProjectionMatrix(ref Matrix3 matrix)
-    {
-        Bind();
-
-        unsafe
-        {
-            fixed (float* valuePointer = matrix.Values)
-            {
-                GL.UniformMatrix3(_pMatrixLocation, 1, false, valuePointer);
-            }
-        }
-    }
-
-    public void SetProjectionMatrix(int width, int height)
-    {
-        var pMatrix = Matrix3.CreateOrtho(width, height);
-        SetProjectionMatrix(ref pMatrix);
     }
 }

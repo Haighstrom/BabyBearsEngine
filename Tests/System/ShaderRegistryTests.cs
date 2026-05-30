@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,7 +32,7 @@ public class ShaderRegistryTests
     [TestMethod]
     public void EveryRegisteredShader_PointsAtFileThatExists()
     {
-        List<string> missing = AllShaderEntries()
+        var missing = AllShaderEntries()
             .Where(entry => !File.Exists(entry.Path))
             .Select(entry => $"  {entry.RegistryName} → {entry.Path}")
             .ToList();

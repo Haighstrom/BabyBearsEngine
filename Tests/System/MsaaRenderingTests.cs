@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using BabyBearsEngine.Worlds;
 using BabyBearsEngine.Worlds.Graphics;
 
@@ -64,7 +64,7 @@ public class MsaaRenderingTests
     {
         var world = new CaptureWorld(w =>
         {
-            Camera camera = Camera.WithView(0, 0, WindowWidth, WindowHeight, 0, 0, WindowWidth, WindowHeight, samples: MsaaSamples.Disabled);
+            var camera = Camera.WithView(0, 0, WindowWidth, WindowHeight, 0, 0, WindowWidth, WindowHeight, samples: MsaaSamples.Disabled);
             camera.BackgroundColour = Colour.Black;
             camera.Add(new ColourGraphic(Colour.Blue, 0, 0, WindowWidth, WindowHeight));
             w.Add(camera);
@@ -80,7 +80,7 @@ public class MsaaRenderingTests
     {
         var world = new CaptureWorld(w =>
         {
-            Camera camera = Camera.WithView(0, 0, WindowWidth, WindowHeight, 0, 0, WindowWidth, WindowHeight, samples: MsaaSamples.X4);
+            var camera = Camera.WithView(0, 0, WindowWidth, WindowHeight, 0, 0, WindowWidth, WindowHeight, samples: MsaaSamples.X4);
             camera.BackgroundColour = Colour.Black;
             camera.Add(new ColourGraphic(Colour.Blue, 0, 0, WindowWidth, WindowHeight));
             w.Add(camera);

@@ -9,7 +9,7 @@
     <Description>A 2D game engine built on OpenTK.</Description>
     <Authors>Simon Haigh</Authors>
     <Copyright>Copyright © Simon Haigh 2026</Copyright>
-    <Version>0.6.23</Version>
+    <Version>0.6.24</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

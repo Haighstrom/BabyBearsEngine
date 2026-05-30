@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -65,7 +65,7 @@ internal sealed class FreeTypeFontAtlasGenerator : IFontAtlasGenerator
 
         // FreeType references (does not copy) the font buffer via FT_New_Memory_Face, so the bytes
         // must stay pinned for the lifetime of the face.
-        GCHandle fontHandle = GCHandle.Alloc(fontData, GCHandleType.Pinned);
+        var fontHandle = GCHandle.Alloc(fontData, GCHandleType.Pinned);
         try
         {
             using FreeTypeLibrary library = new();
@@ -175,7 +175,7 @@ internal sealed class FreeTypeFontAtlasGenerator : IFontAtlasGenerator
         int lineHeight = face.LineSpacing;
 
         // Light hinting (vertical-only grid-fit) is the grayscale sweet spot for crisp small text.
-        FT_LOAD loadFlags = (FT_LOAD)((int)FT_LOAD.FT_LOAD_RENDER | FT.FT_LOAD_TARGET_LIGHT);
+        var loadFlags = (FT_LOAD)((int)FT_LOAD.FT_LOAD_RENDER | FT.FT_LOAD_TARGET_LIGHT);
 
         int charCount = charsToLoad.Length;
         var glyphs = new GlyphBitmap[charCount];

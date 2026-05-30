@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Utilities.Noise;
 using BabyBearsEngine.Worlds.Graphics;
@@ -219,7 +219,7 @@ internal sealed class NoiseShowcaseWorld : DemoWorld
 
     private Colour[,] RenderNoiseToPixels()
     {
-        Colour[,] pixels = new Colour[PreviewResolution, PreviewResolution];
+        var pixels = new Colour[PreviewResolution, PreviewResolution];
 
         switch (_mode)
         {

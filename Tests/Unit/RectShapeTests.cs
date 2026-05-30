@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Tests.Unit;
@@ -104,7 +104,7 @@ public class RectShapeTests
     public void Translate_ShiftsPosition_PreservesSize()
     {
         RectShape original = new(1, 2, 3, 4);
-        RectShape translated = (RectShape)original.Translate(10, 20);
+        var translated = (RectShape)original.Translate(10, 20);
 
         Assert.AreEqual(11f, translated.X);
         Assert.AreEqual(22f, translated.Y);

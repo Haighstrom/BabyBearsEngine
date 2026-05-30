@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using BabyBearsEngine.Geometry;
 
 namespace BabyBearsEngine.Tests.Unit;
@@ -100,7 +100,7 @@ public class CircleShapeTests
     public void Translate_ShiftsCentre_PreservesRadius()
     {
         CircleShape original = new(1, 2, 3);
-        CircleShape translated = (CircleShape)original.Translate(10, 20);
+        var translated = (CircleShape)original.Translate(10, 20);
 
         Assert.AreEqual(11f, translated.CentreX);
         Assert.AreEqual(22f, translated.CentreY);

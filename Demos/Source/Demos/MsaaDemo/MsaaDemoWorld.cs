@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using BabyBearsEngine.Worlds.Graphics.Text;
 
 namespace BabyBearsEngine.Demos.Source.Demos.MsaaDemo;
@@ -36,12 +36,12 @@ internal class MsaaDemoWorld : DemoWorld
             VAlignment = VAlignment.Centred,
         });
 
-        Camera leftCamera = Camera.WithView(5, CamTop, CamWidth, CamHeight, 0, 0, CamWidth, CamHeight, samples: MsaaSamples.Disabled);
+        var leftCamera = Camera.WithView(5, CamTop, CamWidth, CamHeight, 0, 0, CamWidth, CamHeight, samples: MsaaSamples.Disabled);
         leftCamera.BackgroundColour = new Colour(245, 245, 245);
         leftCamera.Add(new RotatingSquare(CamWidth / 2f, CamHeight / 2f, Colour.Black));
         Add(leftCamera);
 
-        Camera rightCamera = Camera.WithView(405, CamTop, CamWidth, CamHeight, 0, 0, CamWidth, CamHeight, samples: MsaaSamples.X4);
+        var rightCamera = Camera.WithView(405, CamTop, CamWidth, CamHeight, 0, 0, CamWidth, CamHeight, samples: MsaaSamples.X4);
         rightCamera.BackgroundColour = new Colour(245, 245, 245);
         rightCamera.Add(new RotatingSquare(CamWidth / 2f, CamHeight / 2f, Colour.Black));
         Add(rightCamera);

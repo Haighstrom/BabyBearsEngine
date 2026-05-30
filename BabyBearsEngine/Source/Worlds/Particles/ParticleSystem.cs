@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
@@ -204,7 +204,7 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
         ParticleVertex[] vertices = BuildVertices();
         _vertexDataBuffer.SetNewVertices(vertices);
 
-        Matrix3 mv = Matrix3.Translate(ref modelView, X, Y);
+        var mv = Matrix3.Translate(ref modelView, X, Y);
         activeShader.SetProjectionMatrix(ref projection);
         activeShader.SetModelViewMatrix(ref mv);
 
@@ -246,7 +246,7 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
 
     private ParticleVertex[] BuildVertices()
     {
-        ParticleVertex[] vertices = new ParticleVertex[_particles.Count];
+        var vertices = new ParticleVertex[_particles.Count];
         for (int i = 0; i < _particles.Count; i++)
         {
             Particle particle = _particles[i];
