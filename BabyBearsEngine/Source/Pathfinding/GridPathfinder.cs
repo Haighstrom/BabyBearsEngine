@@ -66,8 +66,8 @@ public class GridPathfinder<TNode> : Pathfinder<TNode>, IGridPathfinder<TNode>
     /// <inheritdoc/>
     public TNode GetClosestNode(float x, float y)
     {
-        int cx = (int)Math.Clamp(x, 0, Width - 1);
-        int cy = (int)Math.Clamp(y, 0, Height - 1);
+        int cx = Math.Clamp((int)MathF.Round(x), 0, Width - 1);
+        int cy = Math.Clamp((int)MathF.Round(y), 0, Height - 1);
         return this[cx, cy];
     }
 

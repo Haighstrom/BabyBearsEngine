@@ -62,6 +62,20 @@ public class GridPathfinderTests
     }
 
     [TestMethod]
+    public void GetClosestNode_RoundsFractionalCoordinatesUp()
+    {
+        var grid = MakeGrid(5, 5);
+        Assert.AreSame(grid[3, 3], grid.GetClosestNode(2.9f, 2.9f));
+    }
+
+    [TestMethod]
+    public void GetClosestNode_RoundsFractionalCoordinatesDown()
+    {
+        var grid = MakeGrid(5, 5);
+        Assert.AreSame(grid[2, 2], grid.GetClosestNode(2.1f, 2.1f));
+    }
+
+    [TestMethod]
     public void FindPath_DirectRoute_ReturnsShortestSequence()
     {
         var grid = MakeGrid(3, 3);
