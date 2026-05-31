@@ -48,6 +48,11 @@ public record struct Point(float X, float Y) : IPosition
     /// </summary>
     public readonly Point Clamp(float minLength, float maxLength)
     {
+        if (LengthSquared == 0)
+        {
+            return this;
+        }
+
         Point point = new(X, Y);
 
         float scale = Math.Min(Math.Max(Length, minLength), maxLength) / Length;

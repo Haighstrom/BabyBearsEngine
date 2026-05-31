@@ -168,6 +168,17 @@ public class PointTests
         Assert.AreEqual(p.Normal.Y, clamped.Normal.Y, Delta);
     }
 
+    [TestMethod]
+    public void Clamp_WhenVectorIsZero_ReturnsZeroWithoutNaN()
+    {
+        Point zero = Point.Zero;
+        var clamped = zero.Clamp(10f, 20f);
+        Assert.AreEqual(0f, clamped.X);
+        Assert.AreEqual(0f, clamped.Y);
+        Assert.IsFalse(float.IsNaN(clamped.X));
+        Assert.IsFalse(float.IsNaN(clamped.Y));
+    }
+
     // Rotate
 
     [TestMethod]
