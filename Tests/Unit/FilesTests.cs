@@ -197,6 +197,54 @@ public class FilesTests
         Assert.IsTrue(files[0].EndsWith("a.txt"));
     }
 
+    // CopyFiles
+
+    [TestMethod]
+    public void CopyFiles_SourceWithTrailingSeparator_CopiesFilesWithCorrectNames()
+    {
+        Files.WriteText(Path.Combine(_tempDir, "a.txt"), "hello");
+        string source = _tempDir + Path.DirectorySeparatorChar;
+        string destination = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+        try
+        {
+            Files.CopyFiles(source, destination, CopyOptions.None);
+
+            Assert.IsTrue(File.Exists(Path.Combine(destination, "a.txt")));
+        }
+        finally
+        {
+            if (Directory.Exists(destination))
+            {
+                Directory.Delete(destination, true);
+            }
+        }
+    }
+
+    [TestMethod]
+    public void CopyFiles_BringAllWithTrailingSeparator_PreservesSubdirectoryNames()
+    {
+        string subDir = Path.Combine(_tempDir, "sub");
+        Directory.CreateDirectory(subDir);
+        Files.WriteText(Path.Combine(subDir, "nested.txt"), "world");
+        string source = _tempDir + Path.DirectorySeparatorChar;
+        string destination = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+        try
+        {
+            Files.CopyFiles(source, destination, CopyOptions.BringAll | CopyOptions.BringFolders);
+
+            Assert.IsTrue(File.Exists(Path.Combine(destination, "sub", "nested.txt")));
+        }
+        finally
+        {
+            if (Directory.Exists(destination))
+            {
+                Directory.Delete(destination, true);
+            }
+        }
+    }
+
     // Path helpers
 
     [TestMethod]

@@ -49,29 +49,19 @@ public static class Files
             Directory.CreateDirectory(destinationDirectory);
         }
 
-        if (sourceDirectory.Last() == '/')
-        {
-            sourceDirectory = sourceDirectory[..^1];
-        }
-
-        if (destinationDirectory.Last() != '/')
-        {
-            destinationDirectory += '/';
-        }
-
         SearchOption so = (options & CopyOptions.BringAll) > 0 ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
 
         if ((options & CopyOptions.BringFolders) > 0)
         {
             foreach (string dir in Directory.GetDirectories(sourceDirectory, "*", so))
             {
-                Directory.CreateDirectory(Path.Combine(destinationDirectory, dir[(sourceDirectory.Length + 1)..]));
+                Directory.CreateDirectory(Path.Combine(destinationDirectory, Path.GetRelativePath(sourceDirectory, dir)));
             }
         }
 
         foreach (string file in Directory.GetFiles(sourceDirectory, "*", so))
         {
-            Retry(() => File.Copy(file, Path.Combine(destinationDirectory, file[(sourceDirectory.Length + 1)..]), (options & CopyOptions.Overwrite) > 0));
+            Retry(() => File.Copy(file, Path.Combine(destinationDirectory, Path.GetRelativePath(sourceDirectory, file)), (options & CopyOptions.Overwrite) > 0));
         }
     }
 
