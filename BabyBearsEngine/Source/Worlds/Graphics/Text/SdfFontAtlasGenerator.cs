@@ -41,7 +41,7 @@ internal sealed class SdfFontAtlasGenerator : IFontAtlasGenerator
     public FontAtlas Generate(FontDefinition fontDef)
     {
         (byte[] pixels, int width, int height, FontAtlasMetrics metrics) = RasteriseAtlas(fontDef);
-        ITexture texture = EngineConfiguration.TextureFactory.CreateR8Texture(pixels, width, height);
+        ITexture texture = Textures.CreateR8Texture(pixels, width, height);
         IMatrixShaderProgram shader = Shaders.SdfText;
         return new FontAtlas(metrics, texture, shader);
     }

@@ -37,4 +37,12 @@ public static class Textures
     /// </summary>
     public static ITexture CreateTexture(byte[] rgbaData, int width, int height, bool linearFilter = true) =>
         Implementation.CreateTexture(rgbaData, width, height, linearFilter);
+
+    /// <summary>
+    /// Creates a single-channel (R8) texture from a tightly-packed byte buffer (1 byte per
+    /// texel, row-major). Used for coverage and SDF atlases that store one value per texel;
+    /// no premultiplication is applied since R8 has no alpha channel.
+    /// </summary>
+    public static ITexture CreateR8Texture(byte[] r8Data, int width, int height, bool linearFilter = true) =>
+        Implementation.CreateR8Texture(r8Data, width, height, linearFilter);
 }
