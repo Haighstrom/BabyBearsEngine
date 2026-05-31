@@ -27,6 +27,9 @@ public record class ApplicationSettings()
     /// <summary>Configuration for the IO subsystem: file-save retries and JSON serialisation options.</summary>
     public IoSettings IoSettings { get; init; } = IoSettings.Default;
 
+    /// <summary>Configuration for the localisation subsystem: assets folder, default locale, and fallback locale.</summary>
+    public LocalisationSettings LocalisationSettings { get; init; } = LocalisationSettings.Default;
+
     /// <summary>Configuration for the logging subsystem: sinks, severity levels, file paths, and metadata formatting.</summary>
     public LogSettings LogSettings { get; init; } = LogSettings.Default;
 

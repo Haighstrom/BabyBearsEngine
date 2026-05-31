@@ -25,6 +25,10 @@ internal static class EngineConfiguration
     private static IGLLoadingContextFactory? s_glLoadingContextFactory = null;
     private static IGPUResourceDeletionService? s_gpuResourceDeletionService = null;
     private static IKeyboard? s_keyboard = null;
+    // Same reasoning as RandomService: NullLocaliser is a safe default with no platform
+    // dependency, so the Strings facade works before GameLauncher runs (e.g. in unit tests
+    // that don't initialise the engine).
+    private static ILocaliser s_localiser = new NullLocaliser();
     private static IMouse? s_mouse = null;
     // Unlike the other services, randomness has a sensible default — there's no platform
     // dependency to wait for. Initialised eagerly so the Randomisation facade works before
@@ -102,6 +106,18 @@ internal static class EngineConfiguration
     {
         get => s_keyboard ?? throw new InvalidOperationException(NotInitialisedMessage);
         set => s_keyboard = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    /// <summary>
+    /// Process-wide <see cref="ILocaliser"/> source backing the <see cref="Strings"/> facade.
+    /// Defaults to a new <see cref="NullLocaliser"/>; <see cref="GameLauncher"/> replaces it
+    /// with a <see cref="JsonLocaliser"/> when <see cref="LocalisationSettings.AssetsFolder"/>
+    /// exists on disk, and tests substitute fakes here.
+    /// </summary>
+    public static ILocaliser LocalisationService
+    {
+        get => s_localiser;
+        set => s_localiser = value ?? throw new ArgumentNullException(nameof(value));
     }
 
     public static IMouse MouseService
@@ -236,6 +252,7 @@ internal static class EngineConfiguration
         s_glLoadingContextFactory = null;
         s_gpuResourceDeletionService = null;
         s_keyboard = null;
+        s_localiser = new NullLocaliser();
         s_mouse = null;
         s_random = new SystemRandom();
         s_screenCapture = null;

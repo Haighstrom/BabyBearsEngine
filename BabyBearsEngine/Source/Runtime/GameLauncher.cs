@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using BabyBearsEngine.Diagnostics;
+using BabyBearsEngine.IO;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenAL;
 using BabyBearsEngine.Platform.OpenTK;
@@ -53,6 +54,18 @@ public static class GameLauncher
         // The default backend for fonts that don't pin one; Initialise registers both built-ins so
         // individual fonts can still opt into the other via FontDefinition.Renderer.
         EngineConfiguration.DefaultTextRenderer = appSettings.TextSettings.Renderer;
+
+        // If the localisation assets folder exists, switch from the default NullLocaliser to a
+        // JsonLocaliser loaded from disk. Missing folder is the opt-out signal; games without
+        // translations leave it absent and Strings.Get returns keys verbatim.
+        var localisationSettings = appSettings.LocalisationSettings;
+        if (Files.DirectoryExists(localisationSettings.AssetsFolder))
+        {
+            EngineConfiguration.LocalisationService = new JsonLocaliser(
+                localisationSettings.AssetsFolder,
+                localisationSettings.DefaultLocale,
+                localisationSettings.FallbackLocale);
+        }
 
         OpenALAudioService? audioService = null;
         try
