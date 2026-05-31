@@ -214,6 +214,13 @@ public static class Csv
             rows.Add(currentRow);
         }
 
+        // RFC 4180 §2.2: the last record's trailing line break is optional. Strip a trailing
+        // single-empty-field row so "" and "\n" parse to the same 0-row result.
+        if (rows.Count > 0 && rows[^1].Count == 1 && rows[^1][0].Length == 0)
+        {
+            rows.RemoveAt(rows.Count - 1);
+        }
+
         return rows;
     }
 

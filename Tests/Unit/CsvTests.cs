@@ -193,6 +193,24 @@ public class CsvTests
     }
 
     [TestMethod]
+    public void Deserialize_SingleNewline_ReturnsEmptyArray()
+    {
+        string[,] result = Csv.Deserialize<string>("\n");
+
+        Assert.AreEqual(0, result.GetLength(0));
+        Assert.AreEqual(0, result.GetLength(1));
+    }
+
+    [TestMethod]
+    public void Deserialize_SingleCrlf_ReturnsEmptyArray()
+    {
+        string[,] result = Csv.Deserialize<string>("\r\n");
+
+        Assert.AreEqual(0, result.GetLength(0));
+        Assert.AreEqual(0, result.GetLength(1));
+    }
+
+    [TestMethod]
     public void Deserialize_RaggedRows_PadsWithDefault()
     {
         int[,] result = Csv.Deserialize<int>("1,2,3\n4,5");
