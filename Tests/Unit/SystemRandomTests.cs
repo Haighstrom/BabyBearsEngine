@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace BabyBearsEngine.Tests.Unit;
 
 [TestClass]
@@ -90,5 +93,36 @@ public class SystemRandomTests
 
         _ = random.Double();
         _ = random.Int(0, 10);
+    }
+
+    // ─── Thread safety ───
+
+    [TestMethod]
+    public void ConcurrentAccess_DoesNotCorruptStateOrThrow()
+    {
+        SystemRandom random = new();
+        const int threadCount = 8;
+        const int callsPerThread = 5000;
+        int totalCalls = threadCount * callsPerThread;
+        int nonZeroCount = 0;
+
+        Parallel.For(0, threadCount, _ =>
+        {
+            int localNonZero = 0;
+            for (int i = 0; i < callsPerThread; i++)
+            {
+                double value = random.Double();
+                if (value > 0.0)
+                {
+                    localNonZero++;
+                }
+            }
+            Interlocked.Add(ref nonZeroCount, localNonZero);
+        });
+
+        // Without the lock, a corrupted Random can lock into returning all zeros. Require
+        // that the vast majority of samples are non-zero — a healthy Random hits 0.0
+        // essentially never.
+        Assert.IsGreaterThan(totalCalls - 10, nonZeroCount);
     }
 }

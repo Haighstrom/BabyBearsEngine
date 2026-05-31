@@ -1,3 +1,5 @@
+using System.Threading;
+
 namespace BabyBearsEngine;
 
 /// <summary>
@@ -7,6 +9,10 @@ namespace BabyBearsEngine;
 /// </summary>
 public sealed class SystemRandom : IRandom
 {
+    // System.Random instances are not thread-safe; concurrent access can corrupt internal state
+    // and start returning zeros. The engine update loop is single-threaded but loaders/audio
+    // threads may still hit this, so all access goes through _lock.
+    private readonly Lock _lock = new();
     private readonly Random _random;
 
     public SystemRandom()
@@ -20,8 +26,20 @@ public sealed class SystemRandom : IRandom
     }
 
     /// <inheritdoc/>
-    public int Int(int minInclusive, int maxExclusive) => _random.Next(minInclusive, maxExclusive);
+    public int Int(int minInclusive, int maxExclusive)
+    {
+        lock (_lock)
+        {
+            return _random.Next(minInclusive, maxExclusive);
+        }
+    }
 
     /// <inheritdoc/>
-    public double Double() => _random.NextDouble();
+    public double Double()
+    {
+        lock (_lock)
+        {
+            return _random.NextDouble();
+        }
+    }
 }
