@@ -47,6 +47,8 @@ public static class GameLauncher
             ConsoleWindow.SetTitle($"BabyBearsEngine - {game}");
         }
 
+        Files.Settings = appSettings.IoSettings;
+
         Logger.Initialise(appSettings.LogSettings, appSettings.ConsoleSettings);
 
         EngineDiagnostics.LogSystemInformation();

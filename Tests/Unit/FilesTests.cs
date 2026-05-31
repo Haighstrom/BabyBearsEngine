@@ -265,6 +265,33 @@ public class FilesTests
         Assert.IsTrue(Directory.Exists(path));
     }
 
+    // ApplicationSettings ↔ Files.Settings wiring
+
+    [TestMethod]
+    public void ApplicationSettings_IoSettings_IsTheSameTypeAsFilesSettings()
+    {
+        var appSettings = ApplicationSettings.Default;
+
+        Assert.AreEqual(Files.Settings.GetType(), appSettings.IoSettings.GetType());
+    }
+
+    [TestMethod]
+    public void ApplicationSettings_IoSettings_CanBeAssignedToFilesSettings()
+    {
+        var original = Files.Settings;
+        try
+        {
+            var appSettings = new ApplicationSettings { IoSettings = new IoSettings { RetryCount = 42 } };
+            Files.Settings = appSettings.IoSettings;
+
+            Assert.AreEqual(42, Files.Settings.RetryCount);
+        }
+        finally
+        {
+            Files.Settings = original;
+        }
+    }
+
     // IoSettings default
 
     [TestMethod]
