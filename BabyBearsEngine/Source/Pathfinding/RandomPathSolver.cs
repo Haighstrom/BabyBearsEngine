@@ -52,7 +52,7 @@ public sealed class RandomPathSolver<TNode> : IPathSolver<TNode>
             return _state = SolveStatus.Failure;
         }
 
-        var nextNode = Randomisation.Choose(_openNodes);
+        var nextNode = _openNodes.RandomElement();
         Path.Add(nextNode);
         _currentNode = nextNode;
 

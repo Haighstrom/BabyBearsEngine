@@ -37,8 +37,8 @@ internal class ClickTheBearDemoWorld : DemoWorld
     {
         int scoreBarBottom = ScoreMarginTop + ScoreIconSize + ScoreMarginTop;
         int margin = 20;
-        int x = Randomisation.Rand(margin, Window.Width - BearSize - margin);
-        int y = Randomisation.Rand(scoreBarBottom + margin, Window.Height - BearSize - margin);
+        int x = Randomisation.Int(margin, Window.Width - BearSize - margin);
+        int y = Randomisation.Int(scoreBarBottom + margin, Window.Height - BearSize - margin);
 
         var bear = new BearTarget(x, y);
         bear.BearClicked += (_, _) => AddScoreIcon();

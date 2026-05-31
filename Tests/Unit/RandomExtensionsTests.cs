@@ -170,21 +170,21 @@ public class RandomExtensionsTests
     }
 
     [TestMethod]
-    public void Choose_IList_ReturnsElementAtRolledIndex()
+    public void Choose_ReadOnlyList_ReturnsElementAtRolledIndex()
     {
         FixedSequenceRandom random = FixedSequenceRandom.FromInts(2);
         List<int> items = [10, 20, 30];
 
-        Assert.AreEqual(30, random.Choose((IList<int>)items));
+        Assert.AreEqual(30, random.Choose((IReadOnlyList<int>)items));
     }
 
     [TestMethod]
-    public void Choose_EmptyIList_Throws()
+    public void Choose_EmptyReadOnlyList_Throws()
     {
         FixedSequenceRandom random = new();
         List<int> empty = [];
 
-        Assert.ThrowsExactly<ArgumentException>(() => random.Choose((IList<int>)empty));
+        Assert.ThrowsExactly<ArgumentException>(() => random.Choose((IReadOnlyList<int>)empty));
     }
 
     // ─── Enum ───

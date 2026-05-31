@@ -1,95 +1,98 @@
 namespace BabyBearsEngine;
 
 /// <summary>
-/// Static facade over the engine-wide <see cref="IRandom"/> source. Every method delegates to
-/// <c>EngineConfiguration.RandomService</c>, so substituting the underlying source (production
-/// <see cref="SystemRandom"/>, a seeded <see cref="SystemRandom"/> for replays, a
-/// <see cref="FixedSequenceRandom"/> for deterministic tests) automatically reroutes every
-/// caller. Mirrors <see cref="Audio"/> in shape.
+/// Static facade over the engine-wide <see cref="IRandom"/> source. Every method is a pure
+/// delegate to <c>EngineConfiguration.RandomService</c> via <see cref="RandomExtensions"/>, so
+/// substituting the underlying source (production <see cref="SystemRandom"/>, a seeded
+/// <see cref="SystemRandom"/> for replays, a <see cref="FixedSequenceRandom"/> for deterministic
+/// tests) automatically reroutes every caller. Mirrors <see cref="Audio"/> in shape.
 /// </summary>
 /// <remarks>
-/// The convenience surface here matches the pre-facade <c>Randomisation</c> class for
-/// migration ease, but the full set of helpers (including new names like <c>Int</c>,
-/// <c>Double</c>, <c>Float</c>, <c>Choose</c>) is also available directly on any
-/// <see cref="IRandom"/> via <see cref="RandomExtensions"/>. Inject <see cref="IRandom"/>
-/// into your classes when you need a test seam at object level rather than at process level.
+/// Method names match those on <see cref="IRandom"/> / <see cref="RandomExtensions"/> exactly,
+/// so callers can use either path interchangeably. Inject <see cref="IRandom"/> into your
+/// classes when you need a test seam at object level rather than at process level.
 /// </remarks>
 public static class Randomisation
 {
     private static IRandom Source => EngineConfiguration.RandomService;
 
-    /// <summary>Returns <c>true</c> with probability <paramref name="chanceOutOfAHundred"/>%.</summary>
-    public static bool Chance(float chanceOutOfAHundred) => Source.ChancePercent(chanceOutOfAHundred);
+    // ─── Integer / double / float ranges ───
 
-    /// <summary>Returns a randomly selected element from <paramref name="things"/>.</summary>
-    public static T Choose<T>(params T[] things) => Source.Choose(things);
+    /// <summary>Returns a random <c>int</c> in [<paramref name="minInclusive"/>, <paramref name="maxExclusive"/>).</summary>
+    public static int Int(int minInclusive, int maxExclusive) => Source.Int(minInclusive, maxExclusive);
 
-    /// <summary>Returns a randomly selected element from <paramref name="things"/>.</summary>
-    public static T Choose<T>(List<T> things) => Source.Choose((IList<T>)things);
+    /// <summary>Returns a random <c>int</c> in [0, <paramref name="maxExclusive"/>).</summary>
+    public static int Int(int maxExclusive) => Source.Int(maxExclusive);
 
-    /// <summary>Returns a random <c>double</c> in [0, <paramref name="max"/>).</summary>
-    public static double RandD(double max) => Source.Double(max);
+    /// <summary>Returns a random <c>double</c> in [0.0, 1.0).</summary>
+    public static double Double() => Source.Double();
 
-    /// <summary>Returns a random <c>int</c> in [<paramref name="min"/>, <paramref name="max"/>).</summary>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="max"/> is less than <paramref name="min"/>.</exception>
-    public static int Rand(int min, int max) => Source.Int(min, max);
+    /// <summary>Returns a random <c>double</c> in [0.0, <paramref name="maxExclusive"/>).</summary>
+    public static double Double(double maxExclusive) => Source.Double(maxExclusive);
 
-    /// <summary>Returns a random <c>int</c> in [0, <paramref name="max"/>). Returns 0 when <paramref name="max"/> is 0 or less.</summary>
-    public static int Rand(int max) => max <= 0 ? 0 : Source.Int(max);
+    /// <summary>Returns a random <c>double</c> in [<paramref name="minInclusive"/>, <paramref name="maxExclusive"/>).</summary>
+    public static double Double(double minInclusive, double maxExclusive) => Source.Double(minInclusive, maxExclusive);
 
-    /// <summary>Returns a randomly selected enum value of type <typeparamref name="T"/>.</summary>
-    public static T RandEnum<T>()
+    /// <summary>Returns a random <c>float</c> in [0.0, 1.0).</summary>
+    public static float Float() => Source.Float();
+
+    /// <summary>Returns a random <c>float</c> in [0.0, <paramref name="maxExclusive"/>).</summary>
+    public static float Float(float maxExclusive) => Source.Float(maxExclusive);
+
+    /// <summary>Returns a random <c>float</c> in [<paramref name="minInclusive"/>, <paramref name="maxExclusive"/>).</summary>
+    public static float Float(float minInclusive, float maxExclusive) => Source.Float(minInclusive, maxExclusive);
+
+    // ─── Probability ───
+
+    /// <summary>Returns <c>true</c> with probability <paramref name="probability"/> in [0, 1].</summary>
+    public static bool Chance(float probability) => Source.Chance(probability);
+
+    /// <summary>Returns <c>true</c> with probability <paramref name="percentage"/>%, where <paramref name="percentage"/> is in [0, 100].</summary>
+    public static bool ChancePercent(float percentage) => Source.ChancePercent(percentage);
+
+    // ─── Selection ───
+
+    /// <summary>
+    /// Returns a uniformly-selected element from <paramref name="items"/>. Use this overload for
+    /// literal argument lists (<c>Choose("a", "b", "c")</c>); for an existing collection variable,
+    /// call <see cref="RandomElement{T}"/> on the list to avoid ambiguity with the params form.
+    /// </summary>
+    public static T Choose<T>(params T[] items) => Source.Choose(items);
+
+    /// <summary>Returns a uniformly-selected value of enum type <typeparamref name="T"/>.</summary>
+    public static T Enum<T>()
         where T : struct, Enum
         => Source.Enum<T>();
 
-    /// <summary>Returns a random <see cref="Colour"/> with random R, G, B components and full opacity.</summary>
-    public static Colour RandColour() => Source.Colour();
-
-    /// <summary>Returns a uniformly-selected named static <see cref="Colour"/> property (e.g. <see cref="Colour.Red"/>).</summary>
-    public static Colour RandNamedColour() => Source.NamedColour();
-
-    /// <summary>Returns a random <c>float</c> in [0, <paramref name="max"/>).</summary>
-    public static float RandF(int max) => Source.Float(max);
-
-    /// <summary>Returns a random <c>float</c> in [0, <paramref name="max"/>).</summary>
-    public static float RandF(float max) => Source.Float(max);
-
-    /// <summary>
-    /// Returns a random <c>float</c> in [<paramref name="min"/>, <paramref name="max"/>].
-    /// Returns <paramref name="max"/> when <paramref name="max"/> ≤ <paramref name="min"/>.
-    /// </summary>
-    public static float RandF(int min, int max) => max <= min ? max : Source.Float(min, max);
-
-    /// <summary>
-    /// Returns a random <c>float</c> in [<paramref name="min"/>, <paramref name="max"/>].
-    /// Returns <paramref name="max"/> when <paramref name="max"/> ≤ <paramref name="min"/>.
-    /// </summary>
-    public static float RandF(float min, float max) => max <= min ? max : Source.Float(min, max);
-
-    /// <summary>
-    /// Returns a random <c>float</c> in [<paramref name="min"/>, <paramref name="max"/>] using an
-    /// approximate Gaussian distribution (cosine-based bell curve centred on the midpoint).
-    /// Returns <paramref name="max"/> when <paramref name="max"/> ≤ <paramref name="min"/>.
-    /// </summary>
-    public static float RandGaussianApprox(float min, float max) => Source.GaussianApprox(min, max);
-
-    /// <summary>Returns a random uppercase ASCII string of <paramref name="chars"/> characters.</summary>
-    public static string RandUpperCaseString(int chars) => Source.UpperCaseString(chars);
+    // ─── Shuffle (Fisher–Yates, in-place) ───
 
     /// <summary>Shuffles <paramref name="array"/> in-place using Fisher–Yates and returns it.</summary>
     public static T[] Shuffle<T>(T[] array) => Source.Shuffle(array);
 
     /// <summary>Shuffles <paramref name="list"/> in-place using Fisher–Yates and returns it.</summary>
-    public static List<T> Shuffle<T>(List<T> list)
-    {
-        Source.Shuffle(list);
-        return list;
-    }
+    public static IList<T> Shuffle<T>(this IList<T> list) => Source.Shuffle(list);
 
-    /// <summary>Returns a randomly selected element from <paramref name="list"/>.</summary>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="list"/> is empty.</exception>
-    public static T RandomElement<T>(this IList<T> list) => Source.Choose(list);
+    /// <summary>Returns a uniformly-selected element from <paramref name="list"/>.</summary>
+    public static T RandomElement<T>(this IReadOnlyList<T> list) => Source.Choose(list);
 
-    /// <summary>Shuffles <paramref name="list"/> in-place using Fisher–Yates.</summary>
-    public static void Shuffle<T>(this IList<T> list) => Source.Shuffle(list);
+    // ─── Distributions ───
+
+    /// <summary>
+    /// Returns a random <c>float</c> in [<paramref name="minInclusive"/>, <paramref name="maxExclusive"/>)
+    /// using an approximate Gaussian distribution (cosine-based bell curve centred on the midpoint).
+    /// </summary>
+    public static float GaussianApprox(float minInclusive, float maxExclusive) => Source.GaussianApprox(minInclusive, maxExclusive);
+
+    // ─── Strings ───
+
+    /// <summary>Returns a random uppercase ASCII (A–Z) string of length <paramref name="length"/>.</summary>
+    public static string UpperCaseString(int length) => Source.UpperCaseString(length);
+
+    // ─── Colour ───
+
+    /// <summary>Returns a random <see cref="BabyBearsEngine.Colour"/> with random R, G, B in [0, 255] and A = 255.</summary>
+    public static Colour Colour() => Source.Colour();
+
+    /// <summary>Returns a uniformly-selected named static <see cref="BabyBearsEngine.Colour"/> property (e.g. <see cref="BabyBearsEngine.Colour.Red"/>).</summary>
+    public static Colour NamedColour() => Source.NamedColour();
 }

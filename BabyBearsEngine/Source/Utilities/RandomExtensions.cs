@@ -32,14 +32,18 @@ public static class RandomExtensions
     }
 
     /// <summary>Returns a random <c>double</c> in [0.0, <paramref name="maxExclusive"/>).</summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="maxExclusive"/> is negative.</exception>
     public static double Double(this IRandom random, double maxExclusive)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(maxExclusive);
         return random.Double() * maxExclusive;
     }
 
     /// <summary>Returns a random <c>double</c> in [<paramref name="minInclusive"/>, <paramref name="maxExclusive"/>).</summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="minInclusive"/> is greater than <paramref name="maxExclusive"/>.</exception>
     public static double Double(this IRandom random, double minInclusive, double maxExclusive)
     {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(minInclusive, maxExclusive);
         return minInclusive + random.Double() * (maxExclusive - minInclusive);
     }
 
@@ -47,14 +51,18 @@ public static class RandomExtensions
     public static float Float(this IRandom random) => (float)random.Double();
 
     /// <summary>Returns a random <c>float</c> in [0.0, <paramref name="maxExclusive"/>).</summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="maxExclusive"/> is negative.</exception>
     public static float Float(this IRandom random, float maxExclusive)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(maxExclusive);
         return (float)(random.Double() * maxExclusive);
     }
 
     /// <summary>Returns a random <c>float</c> in [<paramref name="minInclusive"/>, <paramref name="maxExclusive"/>).</summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="minInclusive"/> is greater than <paramref name="maxExclusive"/>.</exception>
     public static float Float(this IRandom random, float minInclusive, float maxExclusive)
     {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(minInclusive, maxExclusive);
         return minInclusive + (float)random.Double() * (maxExclusive - minInclusive);
     }
 
@@ -100,7 +108,7 @@ public static class RandomExtensions
 
     /// <summary>Returns a uniformly-selected element from <paramref name="items"/>.</summary>
     /// <exception cref="ArgumentException">Thrown when <paramref name="items"/> is empty.</exception>
-    public static T Choose<T>(this IRandom random, IList<T> items)
+    public static T Choose<T>(this IRandom random, IReadOnlyList<T> items)
     {
         if (items.Count == 0)
         {
@@ -130,14 +138,15 @@ public static class RandomExtensions
         return array;
     }
 
-    /// <summary>Shuffles <paramref name="list"/> in-place using Fisher–Yates.</summary>
-    public static void Shuffle<T>(this IRandom random, IList<T> list)
+    /// <summary>Shuffles <paramref name="list"/> in-place using Fisher–Yates and returns it.</summary>
+    public static IList<T> Shuffle<T>(this IRandom random, IList<T> list)
     {
         for (int i = list.Count - 1; i > 0; i--)
         {
             int swapIndex = random.Int(0, i + 1);
             (list[i], list[swapIndex]) = (list[swapIndex], list[i]);
         }
+        return list;
     }
 
     // ─── Distributions ───

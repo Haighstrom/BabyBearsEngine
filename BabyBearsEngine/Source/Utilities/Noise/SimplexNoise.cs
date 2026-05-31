@@ -33,8 +33,8 @@ public sealed class SimplexNoise : INoise2D
     private readonly byte[] _perm;
     private readonly byte[] _permMod12;
 
-    public SimplexNoise() 
-        : this(Randomisation.Rand(int.MaxValue))
+    public SimplexNoise()
+        : this(Randomisation.Int(int.MaxValue))
     {
     }
 

@@ -7,12 +7,12 @@ internal class BearEntity : Entity
     private readonly float _startX;
     private readonly float _startY;
     private readonly TextureGraphic _graphic;
-    private readonly float _rotateSpeed = 10 * Randomisation.RandF(-10, 10);
-    private readonly float _swaySpeed = Randomisation.RandF(-4, 4);
-    private readonly float _alphaShift = Randomisation.RandF(0, 100);
-    private readonly float _alphaSpeed = Randomisation.RandF(0, 5);
-    private readonly float _xSway = Randomisation.Rand(0, 500);
-    private readonly float _ySway = Randomisation.Rand(0, 500);
+    private readonly float _rotateSpeed = 10 * Randomisation.Float(-10, 10);
+    private readonly float _swaySpeed = Randomisation.Float(-4, 4);
+    private readonly float _alphaShift = Randomisation.Float(0, 100);
+    private readonly float _alphaSpeed = Randomisation.Float(0, 5);
+    private readonly float _xSway = Randomisation.Int(0, 500);
+    private readonly float _ySway = Randomisation.Int(0, 500);
     private double _totalElapsed = 0;
 
     public BearEntity(float startX, float startY)
@@ -22,8 +22,8 @@ internal class BearEntity : Entity
         _startY = startY;
         _graphic = new TextureGraphic(Textures.CreateFromFile("Assets/SpinnableBear.png"), 0, 0, 60, 80)
         {
-            Colour = Randomisation.RandNamedColour(),
-            Angle = Randomisation.Rand(360),
+            Colour = Randomisation.NamedColour(),
+            Angle = Randomisation.Int(360),
         };
         Add(_graphic);
     }

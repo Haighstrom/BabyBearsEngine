@@ -11,21 +11,14 @@
 /// for points placed inside the unit cell. Distances are Euclidean; for a square-grid look pass
 /// a low cell scale, for an irregular look pass a high one.
 /// </remarks>
-public sealed class VoronoiNoise
+public sealed class VoronoiNoise(int seed)
 {
-    private readonly int _seed;
-
-    public VoronoiNoise() 
-        : this(Randomisation.Rand(int.MaxValue))
+    public VoronoiNoise()
+        : this(Randomisation.Int(int.MaxValue))
     {
     }
 
-    public VoronoiNoise(int seed)
-    {
-        _seed = seed;
-    }
-
-    public int Seed => _seed;
+    public int Seed => seed;
 
     /// <summary>
     /// Returns the Voronoi sample at (<paramref name="x"/>, <paramref name="y"/>). Both
@@ -81,7 +74,7 @@ public sealed class VoronoiNoise
     {
         unchecked
         {
-            uint hash = (uint)_seed;
+            uint hash = (uint)seed;
             hash ^= (uint)cellX * 374761393u;
             hash ^= (uint)cellY * 668265263u;
             hash ^= (uint)dimension * 1274126177u;

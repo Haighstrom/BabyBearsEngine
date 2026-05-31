@@ -1,16 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace BabyBearsEngine.Tests.Unit;
 
 [TestClass]
 public class RandomisationTests
 {
-    // Chance
+    // ─── Chance / ChancePercent ───
 
     [TestMethod]
-    public void Chance_Zero_AlwaysFalse()
+    public void Chance_ZeroProbability_AlwaysFalse()
     {
         for (int i = 0; i < 100; i++)
         {
@@ -19,140 +15,184 @@ public class RandomisationTests
     }
 
     [TestMethod]
-    public void Chance_Hundred_AlwaysTrue()
+    public void Chance_OneProbability_AlwaysTrue()
     {
         for (int i = 0; i < 100; i++)
         {
-            Assert.IsTrue(Randomisation.Chance(100f));
+            Assert.IsTrue(Randomisation.Chance(1f));
         }
     }
 
-    // Rand(int max)
-
     [TestMethod]
-    public void Rand_MaxZero_ReturnsZero()
-    {
-        Assert.AreEqual(0, Randomisation.Rand(0));
-    }
-
-    [TestMethod]
-    public void Rand_MaxNegative_ReturnsZero()
-    {
-        Assert.AreEqual(0, Randomisation.Rand(-5));
-    }
-
-    [TestMethod]
-    public void Rand_Max_ResultInRange()
+    public void ChancePercent_Zero_AlwaysFalse()
     {
         for (int i = 0; i < 100; i++)
         {
-            int result = Randomisation.Rand(10);
+            Assert.IsFalse(Randomisation.ChancePercent(0f));
+        }
+    }
+
+    [TestMethod]
+    public void ChancePercent_Hundred_AlwaysTrue()
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            Assert.IsTrue(Randomisation.ChancePercent(100f));
+        }
+    }
+
+    // ─── Int(int max) ───
+
+    [TestMethod]
+    public void Int_MaxZero_ReturnsZero()
+    {
+        Assert.AreEqual(0, Randomisation.Int(0));
+    }
+
+    [TestMethod]
+    public void Int_MaxNegative_Throws()
+    {
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Randomisation.Int(-5));
+    }
+
+    [TestMethod]
+    public void Int_Max_ResultInRange()
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            int result = Randomisation.Int(10);
             Assert.IsGreaterThanOrEqualTo(0, result);
             Assert.IsLessThan(10, result);
         }
     }
 
-    // Rand(int min, int max)
+    // ─── Int(int min, int max) ───
 
     [TestMethod]
-    public void Rand_MinMax_ResultInRange()
+    public void Int_MinMax_ResultInRange()
     {
         for (int i = 0; i < 100; i++)
         {
-            int result = Randomisation.Rand(5, 15);
+            int result = Randomisation.Int(5, 15);
             Assert.IsGreaterThanOrEqualTo(5, result);
             Assert.IsLessThan(15, result);
         }
     }
 
     [TestMethod]
-    public void Rand_MinEqualsMax_ReturnsThatValue()
+    public void Int_MinEqualsMax_ReturnsThatValue()
     {
-        // min == max means range [min, max) which is empty; but per implementation: Next(0) returns 0 → returns min
-        int result = Randomisation.Rand(7, 7);
+        // min == max means range [min, max) is empty; the IRandom contract returns min in this case.
+        int result = Randomisation.Int(7, 7);
         Assert.AreEqual(7, result);
     }
 
     [TestMethod]
-    public void Rand_MaxLessThanMin_Throws()
+    public void Int_MaxLessThanMin_Throws()
     {
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Randomisation.Rand(10, 5));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Randomisation.Int(10, 5));
     }
 
-    // RandF(float max)
+    // ─── Float ───
 
     [TestMethod]
-    public void RandF_FloatMax_ResultInRange()
+    public void Float_NoArgs_ResultInUnitInterval()
     {
         for (int i = 0; i < 100; i++)
         {
-            float result = Randomisation.RandF(5f);
+            float result = Randomisation.Float();
+            Assert.IsGreaterThanOrEqualTo(0f, result);
+            Assert.IsLessThan(1f, result);
+        }
+    }
+
+    [TestMethod]
+    public void Float_Max_ResultInRange()
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            float result = Randomisation.Float(5f);
             Assert.IsGreaterThanOrEqualTo(0f, result);
             Assert.IsLessThan(5f, result);
         }
     }
 
-    // RandF(float min, float max)
-
     [TestMethod]
-    public void RandF_MinMax_ResultInRange()
+    public void Float_MinMax_ResultInRange()
     {
         for (int i = 0; i < 100; i++)
         {
-            float result = Randomisation.RandF(2f, 8f);
+            float result = Randomisation.Float(2f, 8f);
             Assert.IsGreaterThanOrEqualTo(2f, result);
             Assert.IsLessThanOrEqualTo(8f, result);
         }
     }
 
     [TestMethod]
-    public void RandF_MaxEqualsMin_ReturnsMax()
+    public void Float_MaxEqualsMin_ReturnsMax()
     {
-        float result = Randomisation.RandF(5f, 5f);
+        float result = Randomisation.Float(5f, 5f);
         Assert.AreEqual(5f, result);
     }
 
     [TestMethod]
-    public void RandF_MaxLessThanMin_ReturnsMax()
+    public void Float_MaxLessThanMin_Throws()
     {
-        float result = Randomisation.RandF(10f, 3f);
-        Assert.AreEqual(3f, result);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Randomisation.Float(10f, 3f));
     }
 
-    // RandF(int min, int max)
+    [TestMethod]
+    public void Float_MaxNegative_Throws()
+    {
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Randomisation.Float(-1f));
+    }
+
+    // ─── Double ───
 
     [TestMethod]
-    public void RandF_IntMinMax_ResultInRange()
+    public void Double_NoArgs_ResultInUnitInterval()
     {
         for (int i = 0; i < 100; i++)
         {
-            float result = Randomisation.RandF(1, 9);
-            Assert.IsGreaterThanOrEqualTo(1f, result);
-            Assert.IsLessThanOrEqualTo(9f, result);
+            double result = Randomisation.Double();
+            Assert.IsGreaterThanOrEqualTo(0.0, result);
+            Assert.IsLessThan(1.0, result);
         }
     }
 
-    // RandGaussianApprox
+    [TestMethod]
+    public void Double_MaxNegative_Throws()
+    {
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Randomisation.Double(-1.0));
+    }
 
     [TestMethod]
-    public void RandGaussianApprox_ResultInRange()
+    public void Double_MaxLessThanMin_Throws()
+    {
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Randomisation.Double(10.0, 3.0));
+    }
+
+    // ─── GaussianApprox ───
+
+    [TestMethod]
+    public void GaussianApprox_ResultInRange()
     {
         for (int i = 0; i < 200; i++)
         {
-            float result = Randomisation.RandGaussianApprox(0f, 10f);
+            float result = Randomisation.GaussianApprox(0f, 10f);
             Assert.IsGreaterThanOrEqualTo(0f, result);
             Assert.IsLessThanOrEqualTo(10f, result);
         }
     }
 
     [TestMethod]
-    public void RandGaussianApprox_MaxEqualsMin_ReturnsMax()
+    public void GaussianApprox_MaxEqualsMin_ReturnsMax()
     {
-        float result = Randomisation.RandGaussianApprox(5f, 5f);
+        float result = Randomisation.GaussianApprox(5f, 5f);
         Assert.AreEqual(5f, result);
     }
 
-    // Choose
+    // ─── Choose ───
 
     [TestMethod]
     public void Choose_Params_ReturnsElementFromArray()
@@ -166,42 +206,31 @@ public class RandomisationTests
         }
     }
 
-    [TestMethod]
-    public void Choose_List_ReturnsElementFromList()
-    {
-        List<int> options = [10, 20, 30];
 
-        for (int i = 0; i < 50; i++)
-        {
-            int result = Randomisation.Choose(options);
-            Assert.Contains(result, options);
-        }
-    }
-
-    // RandUpperCaseString
+    // ─── UpperCaseString ───
 
     [TestMethod]
-    public void RandUpperCaseString_ReturnsCorrectLength()
+    public void UpperCaseString_ReturnsCorrectLength()
     {
-        string result = Randomisation.RandUpperCaseString(8);
+        string result = Randomisation.UpperCaseString(8);
         Assert.AreEqual(8, result.Length);
     }
 
     [TestMethod]
-    public void RandUpperCaseString_ContainsOnlyUppercaseLetters()
+    public void UpperCaseString_ContainsOnlyUppercaseLetters()
     {
-        string result = Randomisation.RandUpperCaseString(20);
+        string result = Randomisation.UpperCaseString(20);
         Assert.IsTrue(result.All(c => c is >= 'A' and <= 'Z'));
     }
 
     [TestMethod]
-    public void RandUpperCaseString_ZeroChars_ReturnsEmpty()
+    public void UpperCaseString_ZeroChars_ReturnsEmpty()
     {
-        string result = Randomisation.RandUpperCaseString(0);
+        string result = Randomisation.UpperCaseString(0);
         Assert.AreEqual(string.Empty, result);
     }
 
-    // Shuffle (array)
+    // ─── Shuffle (array) ───
 
     [TestMethod]
     public void Shuffle_Array_ReturnsSameElements()
@@ -223,23 +252,10 @@ public class RandomisationTests
         Assert.AreSame(array, result);
     }
 
-    // Shuffle (list)
+    // ─── Shuffle (IList extension) ───
 
     [TestMethod]
-    public void Shuffle_List_ReturnsSameElements()
-    {
-        List<int> original = [1, 2, 3, 4, 5];
-        List<int> input = [1, 2, 3, 4, 5];
-
-        Randomisation.Shuffle(input);
-
-        CollectionAssert.AreEquivalent(original, input);
-    }
-
-    // Shuffle (IList extension)
-
-    [TestMethod]
-    public void Shuffle_IListExtension_ReturnsSameElements()
+    public void Shuffle_IList_ReturnsSameElements()
     {
         List<int> original = [1, 2, 3, 4, 5];
         List<int> input = [1, 2, 3, 4, 5];
@@ -249,7 +265,16 @@ public class RandomisationTests
         CollectionAssert.AreEquivalent(original, input);
     }
 
-    // RandomElement
+    [TestMethod]
+    public void Shuffle_IList_ReturnsSameReference()
+    {
+        List<int> list = [1, 2, 3];
+        IList<int> result = list.Shuffle();
+
+        Assert.AreSame(list, result);
+    }
+
+    // ─── RandomElement ───
 
     [TestMethod]
     public void RandomElement_ReturnsElementFromList()
@@ -263,30 +288,28 @@ public class RandomisationTests
         }
     }
 
-    // RandColour
+    // ─── Colour ───
 
     [TestMethod]
-    public void RandColour_AlphaIsMax()
+    public void Colour_AlphaIsMax()
     {
         for (int i = 0; i < 20; i++)
         {
-            Colour c = Randomisation.RandColour();
+            Colour c = Randomisation.Colour();
             Assert.AreEqual(255, c.A);
         }
     }
 
-    // RandNamedColour
+    // ─── NamedColour ───
 
     [TestMethod]
-    public void RandNamedColour_ReturnsOneOfTheNamedStaticColours()
+    public void NamedColour_ReturnsOneOfTheNamedStaticColours()
     {
         // Smoke test on the facade — exhaustive coverage of the underlying extension lives in
         // RandomExtensionsTests.NamedColour_ResultIsAlwaysOneOfTheNamedStaticColours.
         for (int i = 0; i < 20; i++)
         {
-            Colour result = Randomisation.RandNamedColour();
-            // Discoverable property: at least one of the named static Colour properties equals it.
-            // We don't need to compute the full set here — RandomExtensionsTests already does so.
+            Colour result = Randomisation.NamedColour();
             bool matchesAnyNamed = false;
             foreach (System.Reflection.PropertyInfo property in typeof(Colour).GetProperties(
                 System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public))
