@@ -1,0 +1,8 @@
+{
+    "menu.greeting": "Hello!",
+    "menu.play": "Play",
+    "menu.options": "Options",
+    "menu.quit": "Quit",
+    "shop.coins": "You have {0} coins",
+    "fallback.demo": "(en-only — others fall back to this)"
+}

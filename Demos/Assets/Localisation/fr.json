@@ -1,0 +1,7 @@
+{
+    "menu.greeting": "Bonjour !",
+    "menu.play": "Jouer",
+    "menu.options": "Options",
+    "menu.quit": "Quitter",
+    "shop.coins": "Vous avez {0} pièces"
+}

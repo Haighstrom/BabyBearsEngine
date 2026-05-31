@@ -10,6 +10,7 @@ using BabyBearsEngine.Demos.Source.Demos.CollisionDemo;
 using BabyBearsEngine.Demos.Source.Demos.IODemo;
 using BabyBearsEngine.Demos.Source.Demos.KeyboardDemo;
 using BabyBearsEngine.Demos.Source.Demos.LoadingScreenDemo;
+using BabyBearsEngine.Demos.Source.Demos.LocalisationDemo;
 using BabyBearsEngine.Demos.Source.Demos.MouseDemo;
 using BabyBearsEngine.Demos.Source.Demos.MsaaDemo;
 using BabyBearsEngine.Demos.Source.Demos.NoiseShowcase;
@@ -120,6 +121,7 @@ MenuEntry[] mainMenuEntries =
     new("Collision Demo",      () => new CollisionDemoWorld(getMainMenu)),
     new("IO Demo",             () => new IODemoWorld(getMainMenu)),
     new("Loading Screen Demo", () => new LoadingScreenDemoWorld(getMainMenu)),
+    new("Localisation Demo",   () => new LocalisationDemoWorld(getMainMenu)),
     new("Tween Demo",          () => new TweenDemoWorld(getMainMenu)),
 ];
 
