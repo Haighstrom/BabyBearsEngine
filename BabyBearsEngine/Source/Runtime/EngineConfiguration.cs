@@ -26,6 +26,10 @@ internal static class EngineConfiguration
     private static IGPUResourceDeletionService? s_gpuResourceDeletionService = null;
     private static IKeyboard? s_keyboard = null;
     private static IMouse? s_mouse = null;
+    // Unlike the other services, randomness has a sensible default — there's no platform
+    // dependency to wait for. Initialised eagerly so the Randomisation facade works before
+    // GameLauncher runs (e.g. in unit tests that don't initialise the engine at all).
+    private static IRandom s_random = new SystemRandom();
     private static IScreenCapture? s_screenCapture = null;
     private static ITextureFactory? s_textureFactory = null;
     private static IWindow? s_window = null;
@@ -104,6 +108,16 @@ internal static class EngineConfiguration
     {
         get => s_mouse ?? throw new InvalidOperationException(NotInitialisedMessage);
         set => s_mouse = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    /// <summary>
+    /// Process-wide <see cref="IRandom"/> source backing the <see cref="Randomisation"/>
+    /// facade. Defaults to a new <see cref="SystemRandom"/>; tests substitute a fake here.
+    /// </summary>
+    public static IRandom RandomService
+    {
+        get => s_random;
+        set => s_random = value ?? throw new ArgumentNullException(nameof(value));
     }
 
     public static IScreenCapture ScreenCaptureService
@@ -223,6 +237,7 @@ internal static class EngineConfiguration
         s_gpuResourceDeletionService = null;
         s_keyboard = null;
         s_mouse = null;
+        s_random = new SystemRandom();
         s_screenCapture = null;
         s_textureFactory = null;
         s_window = null;

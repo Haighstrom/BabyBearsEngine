@@ -25,16 +25,16 @@ public sealed class CircleEmitterShape(Point centre, float radius, float speed) 
     /// </summary>
     public bool EmitFromInterior { get; set; } = false;
 
-    public ParticleSpawn Sample(System.Random random)
+    public ParticleSpawn Sample(IRandom random)
     {
-        double angle = random.NextDouble() * Math.PI * 2;
+        double angle = random.Double() * Math.PI * 2;
         float cos = (float)Math.Cos(angle);
         float sin = (float)Math.Sin(angle);
 
         // For a uniform disk sample, distance from the centre is sqrt(u) * radius (u uniform in [0,1]).
         // For a perimeter sample, the distance is exactly the radius.
         float distance = EmitFromInterior
-            ? Radius * (float)Math.Sqrt(random.NextDouble())
+            ? Radius * (float)Math.Sqrt(random.Double())
             : Radius;
 
         Point position = new(Centre.X + distance * cos, Centre.Y + distance * sin);

@@ -170,21 +170,21 @@ public class RandomExtensionsTests
     }
 
     [TestMethod]
-    public void Choose_ReadOnlyList_ReturnsElementAtRolledIndex()
+    public void Choose_IList_ReturnsElementAtRolledIndex()
     {
         FixedSequenceRandom random = FixedSequenceRandom.FromInts(2);
         List<int> items = [10, 20, 30];
 
-        Assert.AreEqual(30, random.Choose((IReadOnlyList<int>)items));
+        Assert.AreEqual(30, random.Choose((IList<int>)items));
     }
 
     [TestMethod]
-    public void Choose_EmptyReadOnlyList_Throws()
+    public void Choose_EmptyIList_Throws()
     {
         FixedSequenceRandom random = new();
         List<int> empty = [];
 
-        Assert.ThrowsExactly<ArgumentException>(() => random.Choose((IReadOnlyList<int>)empty));
+        Assert.ThrowsExactly<ArgumentException>(() => random.Choose((IList<int>)empty));
     }
 
     // ─── Enum ───
@@ -378,10 +378,38 @@ public class RandomExtensionsTests
     // ─── NamedColour ───
 
     [TestMethod]
-    public void NamedColour_DoesNotThrow_ForRandomSource()
+    public void NamedColour_ResultIsAlwaysOneOfTheNamedStaticColours()
     {
         SystemRandom random = new(seed: 12345);
+        IReadOnlyList<Colour> named = DiscoverNamedColours();
 
-        _ = random.NamedColour();
+        for (int i = 0; i < 50; i++)
+        {
+            Colour result = random.NamedColour();
+            Assert.Contains(result, named);
+        }
+    }
+
+    [TestMethod]
+    public void NamedColour_NamedSetIsNonEmpty()
+    {
+        // Sanity: Colour must expose at least some named static colours — otherwise NamedColour
+        // would have nothing to choose from and would throw at runtime.
+        IReadOnlyList<Colour> named = DiscoverNamedColours();
+        Assert.IsGreaterThan(0, named.Count);
+    }
+
+    private static IReadOnlyList<Colour> DiscoverNamedColours()
+    {
+        List<Colour> colours = [];
+        foreach (System.Reflection.PropertyInfo property in typeof(Colour).GetProperties(
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public))
+        {
+            if (property.GetValue(null) is Colour colour)
+            {
+                colours.Add(colour);
+            }
+        }
+        return colours;
     }
 }

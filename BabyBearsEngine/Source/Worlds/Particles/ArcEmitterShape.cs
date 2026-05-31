@@ -43,12 +43,12 @@ public sealed class ArcEmitterShape(
 
     public float MaxSpeed { get; set; } = maxSpeed;
 
-    public ParticleSpawn Sample(Random random)
+    public ParticleSpawn Sample(IRandom random)
     {
         float halfSpread = ArcSpreadDegrees * 0.5f;
-        double angleDegrees = ArcCentreDegrees - halfSpread + random.NextDouble() * ArcSpreadDegrees;
+        double angleDegrees = ArcCentreDegrees - halfSpread + random.Double() * ArcSpreadDegrees;
         double angleRadians = angleDegrees * Math.PI / 180;
-        float speed = MinSpeed + (float)random.NextDouble() * (MaxSpeed - MinSpeed);
+        float speed = MinSpeed + random.Float() * (MaxSpeed - MinSpeed);
 
         // Math convention: cos(theta) is the X component, sin(theta) the Y component in math
         // axes where +Y is up. Screen Y is flipped (down is positive), so the math-Y maps to

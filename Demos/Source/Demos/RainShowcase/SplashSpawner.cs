@@ -16,7 +16,7 @@ internal sealed class SplashSpawner(
     ParticleSystem system,
     ArcEmitterShape shape,
     IReadOnlyList<Point> candidatePositions,
-    Random random) : UpdateableBase
+    IRandom random) : UpdateableBase
 {
     private const float MaxSplashesPerSecond = 50f;
     private const int MinParticlesPerSplash = 3;
@@ -47,12 +47,12 @@ internal sealed class SplashSpawner(
 
     private void EmitOneSplash()
     {
-        Point candidate = candidatePositions[random.Next(candidatePositions.Count)];
-        float jitterX = ((float)random.NextDouble() * 2f - 1f) * JitterPixels;
-        float jitterY = ((float)random.NextDouble() * 2f - 1f) * JitterPixels;
+        Point candidate = random.Choose(candidatePositions);
+        float jitterX = random.Float(-JitterPixels, JitterPixels);
+        float jitterY = random.Float(-JitterPixels, JitterPixels);
         shape.Origin = new Point(candidate.X + jitterX, candidate.Y + jitterY);
 
-        int particles = random.Next(MinParticlesPerSplash, MaxParticlesPerSplash + 1);
+        int particles = random.Int(MinParticlesPerSplash, MaxParticlesPerSplash + 1);
         system.EmitBurst(particles);
     }
 }

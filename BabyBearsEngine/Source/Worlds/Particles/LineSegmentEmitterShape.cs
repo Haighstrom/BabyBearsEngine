@@ -18,9 +18,9 @@ public sealed class LineSegmentEmitterShape(Point start, Point end, Point veloci
 
     public Point Velocity { get; set; } = velocity;
 
-    public ParticleSpawn Sample(System.Random random)
+    public ParticleSpawn Sample(IRandom random)
     {
-        float t = (float)random.NextDouble();
+        float t = random.Float();
         Point position = new(
             Start.X + (End.X - Start.X) * t,
             Start.Y + (End.Y - Start.Y) * t);

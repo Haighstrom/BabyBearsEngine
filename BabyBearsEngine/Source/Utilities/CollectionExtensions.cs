@@ -88,4 +88,51 @@ public static class CollectionExtensions
     {
         return l.GetRange(first, l.Count - first);
     }
+
+    /// <summary>
+    /// Left-rotates <paramref name="list"/> in-place by <paramref name="amountShifted"/> positions:
+    /// the first <paramref name="amountShifted"/> elements move to the end and later elements shift
+    /// forward by the same amount.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="amountShifted"/> is ≤ 0.</exception>
+    public static void Rotate<T>(this IList<T> list, int amountShifted = 1)
+    {
+        Ensure.ArgumentPositive(amountShifted, nameof(amountShifted));
+
+        int listSize = list.Count;
+
+        if (listSize <= 1)
+        {
+            return;
+        }
+
+        int steps = amountShifted % listSize;
+
+        if (steps == 0)
+        {
+            return;
+        }
+
+        if (steps < 0)
+        {
+            steps += listSize;
+        }
+
+        var buffer = new T[steps];
+
+        for (int i = 0; i < steps; i++)
+        {
+            buffer[i] = list[i];
+        }
+
+        for (int i = steps; i < listSize; i++)
+        {
+            list[i - steps] = list[i];
+        }
+
+        for (int i = 0; i < steps; i++)
+        {
+            list[listSize - steps + i] = buffer[i];
+        }
+    }
 }

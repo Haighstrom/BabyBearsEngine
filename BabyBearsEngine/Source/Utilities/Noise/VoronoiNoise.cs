@@ -1,4 +1,4 @@
-namespace BabyBearsEngine.Utilities.Noise;
+﻿namespace BabyBearsEngine.Utilities.Noise;
 
 /// <summary>
 /// Per-instance seeded 2D cellular (Voronoi) noise — places one feature point per integer cell at
@@ -15,7 +15,8 @@ public sealed class VoronoiNoise
 {
     private readonly int _seed;
 
-    public VoronoiNoise() : this(new Random().Next())
+    public VoronoiNoise() 
+        : this(Randomisation.Rand(int.MaxValue))
     {
     }
 

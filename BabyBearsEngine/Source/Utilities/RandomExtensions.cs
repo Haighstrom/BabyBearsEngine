@@ -100,7 +100,7 @@ public static class RandomExtensions
 
     /// <summary>Returns a uniformly-selected element from <paramref name="items"/>.</summary>
     /// <exception cref="ArgumentException">Thrown when <paramref name="items"/> is empty.</exception>
-    public static T Choose<T>(this IRandom random, IReadOnlyList<T> items)
+    public static T Choose<T>(this IRandom random, IList<T> items)
     {
         if (items.Count == 0)
         {

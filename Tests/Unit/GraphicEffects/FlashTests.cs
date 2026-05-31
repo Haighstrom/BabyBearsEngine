@@ -179,7 +179,7 @@ public class FlashTests
     {
         FakeGraphic target = new() { Colour = new Colour(255, 255, 255, 0) };
         // Tight, deterministic interval window so this test doesn't gamble on RNG.
-        Flash flash = new(target, new Random(42))
+        Flash flash = new(target, new SystemRandom(seed: 42))
         {
             AutoFlashMinInterval = 1f,
             AutoFlashMaxInterval = 1f,

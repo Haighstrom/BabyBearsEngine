@@ -17,9 +17,9 @@ namespace BabyBearsEngine.Worlds.GraphicEffects;
 /// <para>The "rest alpha" is captured at construction — whatever alpha the target had then
 /// is what it returns to between flashes (typically 0 for an overlay).</para>
 /// </remarks>
-public sealed class Flash(IGraphic target, Random? random = null) : UpdateableBase
+public sealed class Flash(IGraphic target, IRandom? random = null) : UpdateableBase
 {
-    private readonly Random _random = random ?? new Random();
+    private readonly IRandom _random = random ?? EngineConfiguration.RandomService;
     private readonly byte _restAlpha = target.Colour.A;
     private float _flashTime = 0f;
     private float _flashDuration = 0f;
@@ -110,7 +110,7 @@ public sealed class Flash(IGraphic target, Random? random = null) : UpdateableBa
 
     private float NextAutoInterval()
     {
-        return AutoFlashMinInterval + (AutoFlashMaxInterval - AutoFlashMinInterval) * (float)_random.NextDouble();
+        return _random.Float(AutoFlashMinInterval, AutoFlashMaxInterval);
     }
 
     private void SetAlpha(byte alpha)

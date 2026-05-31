@@ -15,11 +15,11 @@ public sealed class RectEmitterShape(Rect area, Point velocity) : IEmitterShape
 
     public Point Velocity { get; set; } = velocity;
 
-    public ParticleSpawn Sample(System.Random random)
+    public ParticleSpawn Sample(IRandom random)
     {
         Point position = new(
-            Area.X + (float)random.NextDouble() * Area.W,
-            Area.Y + (float)random.NextDouble() * Area.H);
+            Area.X + random.Float() * Area.W,
+            Area.Y + random.Float() * Area.H);
         return new ParticleSpawn(position, Velocity);
     }
 }

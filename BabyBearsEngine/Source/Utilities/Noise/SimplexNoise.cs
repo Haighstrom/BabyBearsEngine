@@ -1,4 +1,4 @@
-namespace BabyBearsEngine.Utilities.Noise;
+﻿namespace BabyBearsEngine.Utilities.Noise;
 
 /// <summary>
 /// Per-instance seeded 2D/3D simplex noise. Output range is approximately [-1, 1]. Each instance
@@ -33,7 +33,8 @@ public sealed class SimplexNoise : INoise2D
     private readonly byte[] _perm;
     private readonly byte[] _permMod12;
 
-    public SimplexNoise() : this(new Random().Next())
+    public SimplexNoise() 
+        : this(Randomisation.Rand(int.MaxValue))
     {
     }
 

@@ -13,7 +13,7 @@ public class WeightedRandomiser<T>
 
     public WeightedRandomiser()
     {
-        _random = new SystemRandom();
+        _random = EngineConfiguration.RandomService;
     }
 
     /// <param name="random">Random source — inject a stub for deterministic tests.</param>

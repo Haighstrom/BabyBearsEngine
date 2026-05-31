@@ -18,7 +18,7 @@ internal class BearTarget : Entity
     {
         _image = new TextureGraphic(Textures.CreateFromFile("Assets/SpinnableBear.png"), 0, 0, 60, 60)
         {
-            Colour = ColourTools.RandSystemColour()
+            Colour = Randomisation.RandNamedColour()
         };
         Add(_image);
     }

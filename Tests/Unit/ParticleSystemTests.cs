@@ -21,7 +21,7 @@ public class ParticleSystemTests
 
         public Point NextVelocity { get; set; } = velocity;
 
-        public ParticleSpawn Sample(Random random)
+        public ParticleSpawn Sample(IRandom random)
         {
             SampleCount++;
             return new ParticleSpawn(NextPosition, NextVelocity);
@@ -32,7 +32,7 @@ public class ParticleSystemTests
     {
         return new ParticleSystem(
             shape ?? new FakeEmitterShape(Point.Zero, Point.Zero),
-            random: new Random(12345));
+            random: new SystemRandom(seed: 12345));
     }
 
     [TestMethod]
@@ -296,7 +296,7 @@ public class PointEmitterShapeTests
     {
         var shape = new PointEmitterShape(new Point(10, 20), new Point(-5, 0));
 
-        ParticleSpawn spawn = shape.Sample(new Random(1));
+        ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: 1));
 
         Assert.AreEqual(new Point(10, 20), spawn.Position);
         Assert.AreEqual(new Point(-5, 0), spawn.Velocity);
@@ -313,7 +313,7 @@ public class CircleEmitterShapeTests
 
         for (int i = 0; i < 50; i++)
         {
-            ParticleSpawn spawn = shape.Sample(new Random(i));
+            ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: i));
             float distance = spawn.Position.Length;
 
             Assert.AreEqual(50f, distance, 0.001f, $"Iteration {i}: distance {distance} not on perimeter.");
@@ -327,7 +327,7 @@ public class CircleEmitterShapeTests
 
         for (int i = 0; i < 20; i++)
         {
-            ParticleSpawn spawn = shape.Sample(new Random(i));
+            ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: i));
             // Position vector and velocity vector should point in the same direction (cos≈1).
             float positionDirX = spawn.Position.X / 50f;
             float positionDirY = spawn.Position.Y / 50f;
@@ -349,7 +349,7 @@ public class CircleEmitterShapeTests
 
         for (int i = 0; i < 50; i++)
         {
-            ParticleSpawn spawn = shape.Sample(new Random(i));
+            ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: i));
             float distance = spawn.Position.Length;
 
             Assert.IsLessThanOrEqualTo(50.001f, distance, $"Iteration {i}: distance {distance} outside circle.");
@@ -369,7 +369,7 @@ public class LineSegmentEmitterShapeTests
 
         for (int i = 0; i < 50; i++)
         {
-            ParticleSpawn spawn = shape.Sample(new Random(i));
+            ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: i));
 
             Assert.AreEqual(0f, spawn.Position.Y, 0.001f, $"Iteration {i}: Y off-segment.");
             Assert.IsGreaterThanOrEqualTo(0f, spawn.Position.X);
@@ -382,7 +382,7 @@ public class LineSegmentEmitterShapeTests
     {
         var shape = new LineSegmentEmitterShape(new Point(0, 0), new Point(10, 0), new Point(3, -7));
 
-        ParticleSpawn spawn = shape.Sample(new Random(1));
+        ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: 1));
 
         Assert.AreEqual(new Point(3, -7), spawn.Velocity);
     }
@@ -399,7 +399,7 @@ public class RectEmitterShapeTests
 
         for (int i = 0; i < 50; i++)
         {
-            ParticleSpawn spawn = shape.Sample(new Random(i));
+            ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: i));
 
             Assert.IsGreaterThanOrEqualTo(10f, spawn.Position.X);
             Assert.IsLessThanOrEqualTo(40f, spawn.Position.X);
@@ -413,7 +413,7 @@ public class RectEmitterShapeTests
     {
         var shape = new RectEmitterShape(new Rect(0, 0, 10, 10), new Point(2, -8));
 
-        ParticleSpawn spawn = shape.Sample(new Random(1));
+        ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: 1));
 
         Assert.AreEqual(new Point(2, -8), spawn.Velocity);
     }
@@ -429,7 +429,7 @@ public class ArcEmitterShapeTests
 
         for (int i = 0; i < 20; i++)
         {
-            ParticleSpawn spawn = shape.Sample(new Random(i));
+            ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: i));
 
             Assert.AreEqual(42f, spawn.Position.X, 0.001f);
             Assert.AreEqual(-17f, spawn.Position.Y, 0.001f);
@@ -443,7 +443,7 @@ public class ArcEmitterShapeTests
 
         for (int i = 0; i < 50; i++)
         {
-            ParticleSpawn spawn = shape.Sample(new Random(i));
+            ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: i));
             float speed = spawn.Velocity.Length;
 
             Assert.IsGreaterThanOrEqualTo(30f - 0.01f, speed, $"Iteration {i}: speed {speed} below min.");
@@ -460,7 +460,7 @@ public class ArcEmitterShapeTests
 
         for (int i = 0; i < 50; i++)
         {
-            ParticleSpawn spawn = shape.Sample(new Random(i));
+            ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: i));
 
             Assert.IsLessThan(0f, spawn.Velocity.Y, $"Iteration {i}: velocity Y {spawn.Velocity.Y} not upward.");
         }
@@ -474,7 +474,7 @@ public class ArcEmitterShapeTests
 
         for (int i = 0; i < 10; i++)
         {
-            ParticleSpawn spawn = shape.Sample(new Random(i));
+            ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: i));
 
             Assert.AreEqual(100f, spawn.Velocity.X, 0.001f);
             Assert.AreEqual(0f, spawn.Velocity.Y, 0.001f);
@@ -494,7 +494,7 @@ public class ArcEmitterShapeTests
 
         for (int i = 0; i < 200; i++)
         {
-            ParticleSpawn spawn = shape.Sample(new Random(i));
+            ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: i));
             if (spawn.Velocity.X > 1f) { sawPositiveX = true; }
             if (spawn.Velocity.X < -1f) { sawNegativeX = true; }
             if (spawn.Velocity.Y > 1f) { sawPositiveY = true; }
@@ -518,7 +518,7 @@ public class ArcEmitterShapeTests
             Origin = new Point(123, 456),
         };
 
-        ParticleSpawn spawn = shape.Sample(new Random(1));
+        ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: 1));
 
         Assert.AreEqual(123f, spawn.Position.X, 0.001f);
         Assert.AreEqual(456f, spawn.Position.Y, 0.001f);

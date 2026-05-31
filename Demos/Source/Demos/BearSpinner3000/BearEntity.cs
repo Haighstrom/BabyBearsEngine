@@ -22,7 +22,7 @@ internal class BearEntity : Entity
         _startY = startY;
         _graphic = new TextureGraphic(Textures.CreateFromFile("Assets/SpinnableBear.png"), 0, 0, 60, 80)
         {
-            Colour = ColourTools.RandSystemColour(),
+            Colour = Randomisation.RandNamedColour(),
             Angle = Randomisation.Rand(360),
         };
         Add(_graphic);

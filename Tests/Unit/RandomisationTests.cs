@@ -76,7 +76,7 @@ public class RandomisationTests
     [TestMethod]
     public void Rand_MaxLessThanMin_Throws()
     {
-        Assert.ThrowsExactly<Exception>(() => Randomisation.Rand(10, 5));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Randomisation.Rand(10, 5));
     }
 
     // RandF(float max)
@@ -263,75 +263,6 @@ public class RandomisationTests
         }
     }
 
-    // Rotate
-
-    [TestMethod]
-    public void Rotate_ByOne_MovesFirstElementToEnd()
-    {
-        List<int> list = [1, 2, 3, 4, 5];
-
-        list.Rotate(1);
-
-        CollectionAssert.AreEqual(new List<int> { 2, 3, 4, 5, 1 }, list);
-    }
-
-    [TestMethod]
-    public void Rotate_ByTwo_MovesFirstTwoElementsToEnd()
-    {
-        List<int> list = [1, 2, 3, 4, 5];
-
-        list.Rotate(2);
-
-        CollectionAssert.AreEqual(new List<int> { 3, 4, 5, 1, 2 }, list);
-    }
-
-    [TestMethod]
-    public void Rotate_ByCount_ReturnsSameOrder()
-    {
-        List<int> list = [1, 2, 3, 4, 5];
-        List<int> original = [1, 2, 3, 4, 5];
-
-        list.Rotate(5);
-
-        CollectionAssert.AreEqual(original, list);
-    }
-
-    [TestMethod]
-    public void Rotate_ByMoreThanCount_WrapsAround()
-    {
-        List<int> list = [1, 2, 3];
-
-        list.Rotate(4);
-
-        CollectionAssert.AreEqual(new List<int> { 2, 3, 1 }, list);
-    }
-
-    [TestMethod]
-    public void Rotate_SingleElement_Unchanged()
-    {
-        List<int> list = [42];
-
-        list.Rotate(1);
-
-        Assert.AreEqual(42, list[0]);
-    }
-
-    [TestMethod]
-    public void Rotate_ZeroAmount_Throws()
-    {
-        List<int> list = [1, 2, 3];
-
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => list.Rotate(0));
-    }
-
-    [TestMethod]
-    public void Rotate_NegativeAmount_Throws()
-    {
-        List<int> list = [1, 2, 3];
-
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => list.Rotate(-1));
-    }
-
     // RandColour
 
     [TestMethod]
@@ -341,6 +272,32 @@ public class RandomisationTests
         {
             Colour c = Randomisation.RandColour();
             Assert.AreEqual(255, c.A);
+        }
+    }
+
+    // RandNamedColour
+
+    [TestMethod]
+    public void RandNamedColour_ReturnsOneOfTheNamedStaticColours()
+    {
+        // Smoke test on the facade — exhaustive coverage of the underlying extension lives in
+        // RandomExtensionsTests.NamedColour_ResultIsAlwaysOneOfTheNamedStaticColours.
+        for (int i = 0; i < 20; i++)
+        {
+            Colour result = Randomisation.RandNamedColour();
+            // Discoverable property: at least one of the named static Colour properties equals it.
+            // We don't need to compute the full set here — RandomExtensionsTests already does so.
+            bool matchesAnyNamed = false;
+            foreach (System.Reflection.PropertyInfo property in typeof(Colour).GetProperties(
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public))
+            {
+                if (property.GetValue(null) is Colour named && named.Equals(result))
+                {
+                    matchesAnyNamed = true;
+                    break;
+                }
+            }
+            Assert.IsTrue(matchesAnyNamed);
         }
     }
 }

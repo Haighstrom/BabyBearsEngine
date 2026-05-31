@@ -25,7 +25,7 @@ namespace BabyBearsEngine.Worlds.Particles;
 public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, ILayered, IDisposable
 {
     private readonly List<Particle> _particles = [];
-    private readonly Random _random;
+    private readonly IRandom _random;
     private VertexDataBuffer<ParticleVertex>? _vertexDataBuffer = null;
     private IEmitterShape _emitterShape;
     private double _emitCounter = 0;
@@ -34,14 +34,14 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
 
     /// <param name="emitterShape">Strategy for sampling each particle's spawn position and velocity.</param>
     /// <param name="layer">Initial render layer. Higher = further behind, lower = on top. Default is <see cref="int.MaxValue"/> (drawn at the back). Must be ≥ 0.</param>
-    /// <param name="random">Optional random source. When null, a fresh <see cref="System.Random"/> is created. Pass a seeded instance for deterministic spawn patterns (unit tests, replays).</param>
-    public ParticleSystem(IEmitterShape emitterShape, int layer = int.MaxValue, Random? random = null)
+    /// <param name="random">Optional random source. When null, the engine-wide source (<see cref="EngineConfiguration.RandomService"/>) is used. Pass a seeded instance for deterministic spawn patterns (unit tests, replays).</param>
+    public ParticleSystem(IEmitterShape emitterShape, int layer = int.MaxValue, IRandom? random = null)
     {
         ArgumentNullException.ThrowIfNull(emitterShape);
         ArgumentOutOfRangeException.ThrowIfNegative(layer);
         _emitterShape = emitterShape;
         _layer = layer;
-        _random = random ?? new Random();
+        _random = random ?? EngineConfiguration.RandomService;
     }
 
     /// <inheritdoc/>

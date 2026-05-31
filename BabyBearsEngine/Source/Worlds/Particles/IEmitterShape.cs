@@ -15,5 +15,5 @@ public interface IEmitterShape
     /// <see cref="ParticleSystem"/>. Implementations should use the supplied <paramref name="random"/>
     /// rather than a private instance so the system stays deterministic when seeded.
     /// </summary>
-    ParticleSpawn Sample(System.Random random);
+    ParticleSpawn Sample(IRandom random);
 }

@@ -56,7 +56,7 @@ internal sealed class RainShowcaseWorld : DemoWorld
     private static readonly FontDefinition s_headerFont = new("Times New Roman", 15);
     private static readonly FontDefinition s_labelFont = new("Times New Roman", 13);
 
-    private readonly Random _random = new();
+    private readonly IRandom _random = new SystemRandom();
     private readonly RainLayer[] _layers;
     private readonly Flash _lightning;
     private readonly ColourGraphic _lightningOverlay;

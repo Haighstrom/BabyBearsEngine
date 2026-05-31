@@ -12,7 +12,6 @@ public sealed class RandomPathSolver<TNode> : IPathSolver<TNode>
     private readonly Func<TNode, TNode, bool> _passableTest;
     private readonly int _targetSteps;
     private readonly bool _canBacktrack;
-    private readonly Random _random = new();
     private List<TNode> _openNodes = [];
     private TNode _currentNode;
     private SolveStatus _state = SolveStatus.NotStarted;
@@ -53,7 +52,7 @@ public sealed class RandomPathSolver<TNode> : IPathSolver<TNode>
             return _state = SolveStatus.Failure;
         }
 
-        var nextNode = _openNodes[_random.Next(_openNodes.Count)];
+        var nextNode = Randomisation.Choose(_openNodes);
         Path.Add(nextNode);
         _currentNode = nextNode;
 

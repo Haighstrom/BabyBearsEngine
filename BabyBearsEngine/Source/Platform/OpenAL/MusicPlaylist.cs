@@ -12,7 +12,6 @@ namespace BabyBearsEngine.Platform.OpenAL;
 internal sealed class MusicPlaylist : IPlaylist
 {
     private readonly Lock _lock = new();
-    private readonly Random _random;
     private readonly Action<IMusicClip> _playTrack;
     private readonly Action _stopMusic;
 
@@ -31,7 +30,6 @@ internal sealed class MusicPlaylist : IPlaylist
         _stopMusic = stopMusic;
         _loop = loop;
         _shuffle = shuffle;
-        _random = new Random();
     }
 
     public IReadOnlyList<IMusicClip> Tracks
@@ -325,11 +323,8 @@ internal sealed class MusicPlaylist : IPlaylist
 
     private void ShuffleTracks()
     {
-        // Fisher-Yates. _lock is held by the caller.
-        for (int i = _tracks.Count - 1; i > 0; i--)
-        {
-            int swap = _random.Next(i + 1);
-            (_tracks[i], _tracks[swap]) = (_tracks[swap], _tracks[i]);
-        }
+        // _lock is held by the caller. Routes through the engine-wide IRandom so tests can
+        // substitute a deterministic source via EngineConfiguration.RandomService.
+        Randomisation.Shuffle(_tracks);
     }
 }

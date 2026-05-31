@@ -15,5 +15,5 @@ public sealed class PointEmitterShape(Point origin, Point velocity) : IEmitterSh
 
     public Point Velocity { get; set; } = velocity;
 
-    public ParticleSpawn Sample(System.Random random) => new(Origin, Velocity);
+    public ParticleSpawn Sample(IRandom random) => new(Origin, Velocity);
 }
