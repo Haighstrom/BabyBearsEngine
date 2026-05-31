@@ -51,7 +51,11 @@ public sealed class AStarSolver<TNode> : IPathSolver<TNode>
                 continue;
             }
 
-            float g = ((AStarData)_currentNode.GraphSearchData!).G + _currentNode.DistanceBetweenConnectedNodes;
+            // Symmetric edge cost: average the source and destination node costs so a swamp tile is equally
+            // expensive to enter from grass as it is to leave onto grass. Using only currentNode's cost
+            // makes A→Z and Z→A produce different total costs when start and end have different costs.
+            float edgeCost = (_currentNode.DistanceBetweenConnectedNodes + testNode.DistanceBetweenConnectedNodes) * 0.5f;
+            float g = ((AStarData)_currentNode.GraphSearchData!).G + edgeCost;
             float h = _heuristic(testNode, _end);
             float f = g + h;
 
