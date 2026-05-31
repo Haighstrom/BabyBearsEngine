@@ -499,18 +499,7 @@ public sealed class Rect
     /// <returns>Returns a list of four points.</returns>
     public List<Point> ToVertices() => [TopLeft, TopRight, BottomRight, BottomLeft];
 
-    public override int GetHashCode()
-    {
-        float hash = X;
-        hash *= 37;
-        hash += Y;
-        hash *= 37;
-        hash += W;
-        hash *= 37;
-        hash += H;
-        hash *= 37;
-        return (int)hash;
-    }
+    public override int GetHashCode() => HashCode.Combine(X, Y, W, H);
 
     public override bool Equals(object? o) => o switch
     {

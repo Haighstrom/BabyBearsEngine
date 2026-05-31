@@ -603,6 +603,22 @@ public class RectTests
         Assert.IsFalse(a.Equals(null));
     }
 
+    [TestMethod]
+    public void GetHashCode_DistinguishesRectsWithSmallFractionalDifferences()
+    {
+        Rect a = new(0f, 0f, 0f, 0.01f);
+        Rect b = new(0f, 0f, 0f, 0.02f);
+        Assert.AreNotEqual(a.GetHashCode(), b.GetHashCode());
+    }
+
+    [TestMethod]
+    public void GetHashCode_DistinguishesRectsThatDifferOnlyInFractionalPart()
+    {
+        Rect a = new(1.25f, 2.5f, 3.75f, 4.125f);
+        Rect b = new(1.25f, 2.5f, 3.75f, 4.5f);
+        Assert.AreNotEqual(a.GetHashCode(), b.GetHashCode());
+    }
+
     // Operators
 
     [TestMethod]
