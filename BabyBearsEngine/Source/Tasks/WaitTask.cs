@@ -19,7 +19,9 @@ public class WaitTask(double duration) : Task
     /// <inheritdoc/>
     public override void Update(double elapsed)
     {
-        base.Update(elapsed);
+        // Increment before base.Update: base checks IsComplete to fire completion this frame,
+        // so _elapsed must reflect the current tick first or a single-frame wait takes two updates.
         _elapsed += elapsed;
+        base.Update(elapsed);
     }
 }

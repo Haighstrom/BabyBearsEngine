@@ -93,4 +93,16 @@ public class WaitTaskTests
 
         Assert.IsTrue(started);
     }
+
+    [TestMethod]
+    public void Update_SingleCallMatchingDuration_FiresTaskCompleted()
+    {
+        var task = new WaitTask(0.016);
+        bool completed = false;
+        task.TaskCompleted += (_, _) => completed = true;
+
+        task.Update(0.016);
+
+        Assert.IsTrue(completed);
+    }
 }
