@@ -80,6 +80,38 @@ public class ErrorFileTrimmerTests
     }
 
     [TestMethod]
+    public void ArchivePreviousRun_ErrorsFileHasNoRunMarker_LogsWarningBeforeDiscarding()
+    {
+        var originalOut = Console.Out;
+        var captured = new StringWriter();
+        Console.SetOut(captured);
+
+        Logger.Initialise(new LogSettings
+        {
+            ConsoleLevels = LogLevel.All,
+            FileLevels = LogLevel.None,
+            ErrorFileLevels = LogLevel.None,
+        }, new ConsoleSettings { ColouriseLogOutput = false });
+
+        try
+        {
+            File.WriteAllText(_errorsPath, "some content without the marker");
+
+            ErrorFileTrimmer.ArchivePreviousRun(_errorsPath, _archivePath, maxArchiveRuns: 50);
+
+            string output = captured.ToString();
+            Assert.Contains("[Warning]", output);
+            Assert.Contains(_errorsPath, output);
+        }
+        finally
+        {
+            Logger.Initialise(LogSettings.Silent, ConsoleSettings.Default);
+            Console.SetOut(originalOut);
+            captured.Dispose();
+        }
+    }
+
+    [TestMethod]
     public void ArchivePreviousRun_NullArchivePath_DeletesErrorsFileWithoutArchiving()
     {
         File.WriteAllText(_errorsPath, MakeRun(1));

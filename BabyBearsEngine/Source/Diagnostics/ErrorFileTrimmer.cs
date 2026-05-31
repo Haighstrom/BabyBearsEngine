@@ -27,12 +27,21 @@ internal static class ErrorFileTrimmer
         }
 
         string previousRun = File.ReadAllText(errorsPath);
+        bool hasRunMarker = previousRun.Contains(RunStartMarker, StringComparison.Ordinal);
 
-        if (archivePath is not null && previousRun.Contains(RunStartMarker, StringComparison.Ordinal))
+        if (archivePath is not null && hasRunMarker)
         {
             string existingArchive = File.Exists(archivePath) ? File.ReadAllText(archivePath) : string.Empty;
             string combined = previousRun + existingArchive;
             File.WriteAllText(archivePath, TrimToFirstNRuns(combined, maxArchiveRuns));
+        }
+        else if (!hasRunMarker && previousRun.Length > 0)
+        {
+            // No banner means the file was truncated, externally edited, or written by a non-banner
+            // sink — we have no safe way to identify run boundaries for the archive, so we discard.
+            // Surface this in the log so the disappearance isn't silent if the user later goes
+            // looking for prior errors.
+            Logger.Warning($"Discarding errors file '{errorsPath}' ({previousRun.Length} chars) because it contains no run-start banner; cannot archive without run boundaries.");
         }
 
         File.Delete(errorsPath);
