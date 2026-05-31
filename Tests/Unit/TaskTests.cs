@@ -80,6 +80,31 @@ public class TaskTests
     }
 
     [TestMethod]
+    public void Complete_CalledTwice_RunsActionOnCompleteOnlyOnce()
+    {
+        int runCount = 0;
+        var task = new Task(actionOnComplete: () => runCount++);
+
+        task.Complete();
+        task.Complete();
+
+        Assert.AreEqual(1, runCount);
+    }
+
+    [TestMethod]
+    public void Complete_CalledTwice_FiresTaskCompletedOnlyOnce()
+    {
+        var task = new Task();
+        int completedCount = 0;
+        task.TaskCompleted += (_, _) => completedCount++;
+
+        task.Complete();
+        task.Complete();
+
+        Assert.AreEqual(1, completedCount);
+    }
+
+    [TestMethod]
     public void Reset_ClearsStartedState_SoUpdateFiresStartedAgain()
     {
         var task = new Task();

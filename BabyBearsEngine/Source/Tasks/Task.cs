@@ -63,6 +63,11 @@ public class Task : UpdateableBase, ITask
     /// <inheritdoc/>
     public virtual void Complete()
     {
+        if (_isCompleted)
+        {
+            return;
+        }
+
         _isCompleted = true;
         ActionsOnComplete.ForEach(a => a());
 
