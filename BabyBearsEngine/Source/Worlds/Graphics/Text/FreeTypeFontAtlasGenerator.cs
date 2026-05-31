@@ -31,7 +31,7 @@ internal sealed class FreeTypeFontAtlasGenerator : IFontAtlasGenerator
         // Nearest filtering: the coverage is hinted and authored at the target pixel size, and
         // TextGraphic pixel-snaps each glyph quad, so 1:1 point sampling keeps the hinted edges
         // crisp. (The SDF backend, by contrast, needs linear filtering to reconstruct distances.)
-        ITexture texture = new DefaultTextureFactory().GenR8Texture(pixels, width, height, linearFilter: false);
+        ITexture texture = EngineConfiguration.TextureFactory.CreateR8Texture(pixels, width, height, linearFilter: false);
         IMatrixShaderProgram shader = Shaders.CoverageText;
         return new FontAtlas(metrics, texture, shader);
     }

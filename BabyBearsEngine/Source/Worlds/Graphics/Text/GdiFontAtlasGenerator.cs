@@ -3,6 +3,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using BabyBearsEngine.OpenGL;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
@@ -10,8 +11,12 @@ namespace BabyBearsEngine.Worlds.Graphics.Text;
 /// <summary>
 /// Produces a font atlas by rasterising glyphs with GDI+ at the font's chosen pixel
 /// size. Encodes coverage (alpha) into the texture and pairs it with the standard
-/// matrix shader. Windows-only; the GDI+ APIs it uses are not available on other
-/// platforms.
+/// matrix shader. Windows-only — the GDI+ APIs it uses are not available on other
+/// platforms, so <see cref="Generate"/> and <see cref="RasteriseAtlas"/> throw
+/// <see cref="PlatformNotSupportedException"/> when invoked off Windows. The
+/// engine-wide default text backend is <see cref="TextRenderer.Sdf"/> for that
+/// reason; pick Gdi explicitly via <see cref="TextSettings.Renderer"/> or
+/// <see cref="FontDefinition.Renderer"/> only on Windows targets.
 /// </summary>
 internal sealed class GdiFontAtlasGenerator : IFontAtlasGenerator
 {
@@ -23,15 +28,53 @@ internal sealed class GdiFontAtlasGenerator : IFontAtlasGenerator
 
     public FontAtlas Generate(FontDefinition fontDef)
     {
+        if (!OperatingSystem.IsWindows())
+        {
+            throw new PlatformNotSupportedException(
+                $"{nameof(GdiFontAtlasGenerator)} requires Windows; use {nameof(TextRenderer)}.{nameof(TextRenderer.Sdf)} or {nameof(TextRenderer)}.{nameof(TextRenderer.FreeType)} on other platforms.");
+        }
+
         (Bitmap bitmap, FontAtlasMetrics metrics) = RasteriseAtlas(fontDef);
 
         // Point (nearest) sampling, not bilinear: GDI+ is the fixed-size, grid-fitted backend, so its
         // glyphs are authored to be drawn 1:1. Bilinear filtering would resample the coverage and
         // soften the hinted edges even at scale 1; nearest keeps them crisp. (The SDF backend keeps
         // linear filtering — it relies on inter-texel blending to reconstruct its distance field.)
-        ITexture texture = new DefaultTextureFactory().GenTexture(bitmap, linearFilter: false);
+        ITexture texture = UploadBitmapAsTexture(bitmap, linearFilter: false);
         IMatrixShaderProgram shader = Shaders.Standard;
         return new FontAtlas(metrics, texture, shader);
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "GDI+ is Windows-only by design.")]
+    private static ITexture UploadBitmapAsTexture(Bitmap bmp, bool linearFilter)
+    {
+        GLThread.Ensure();
+        bmp = BitmapTools.PremultiplyAlpha(bmp);
+
+        Texture t = new(
+            handle: GL.GenTexture(),
+            width: bmp.Width,
+            height: bmp.Height);
+
+        OpenGLHelper.BindTexture(t.Handle);
+
+        var minFilter = linearFilter ? TextureMinFilter.Linear : TextureMinFilter.Nearest;
+        var magFilter = linearFilter ? TextureMagFilter.Linear : TextureMagFilter.Nearest;
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)minFilter);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)magFilter);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+
+        BitmapData bmpd = bmp.LockBits(
+            new Rectangle(0, 0, bmp.Width, bmp.Height),
+            ImageLockMode.ReadOnly,
+            System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmpd.Width, bmpd.Height, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmpd.Scan0);
+
+        bmp.UnlockBits(bmpd);
+
+        return t;
     }
 
     /// <summary>
@@ -42,6 +85,12 @@ internal sealed class GdiFontAtlasGenerator : IFontAtlasGenerator
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "GDI+ is Windows-only by design.")]
     internal (Bitmap Bitmap, FontAtlasMetrics Metrics) RasteriseAtlas(FontDefinition fontDef)
     {
+        if (!OperatingSystem.IsWindows())
+        {
+            throw new PlatformNotSupportedException(
+                $"{nameof(GdiFontAtlasGenerator)} requires Windows; use {nameof(TextRenderer)}.{nameof(TextRenderer.Sdf)} or {nameof(TextRenderer)}.{nameof(TextRenderer.FreeType)} on other platforms.");
+        }
+
         Font font = new FontLoader().LoadFont(fontDef);
         string charsToLoad = fontDef.CharactersToLoad;
 

@@ -156,7 +156,7 @@ public class ParticleSystemTests
             framesBeforeCapture: 2,
             setup: w =>
             {
-                ITexture texture = Worlds.Graphics.Textures.GenTexture(new[,] { { Colour.White } });
+                ITexture texture = Worlds.Graphics.Textures.CreateTexture(new[,] { { Colour.White } });
                 ParticleSystem system = new(
                     new PointEmitterShape(new Point(sampleX, sampleY), Point.Zero))
                 {

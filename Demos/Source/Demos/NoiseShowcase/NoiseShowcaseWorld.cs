@@ -200,7 +200,7 @@ internal sealed class NoiseShowcaseWorld : DemoWorld
         _previewTexture = null;
 
         Colour[,] pixels = RenderNoiseToPixels();
-        _previewTexture = Textures.GenTexture(pixels);
+        _previewTexture = Textures.CreateTexture(pixels);
         _previewGraphic = new TextureGraphic(_previewTexture, PreviewX, PreviewY, PreviewSize, PreviewSize, layer: 4);
         Add(_previewGraphic);
 

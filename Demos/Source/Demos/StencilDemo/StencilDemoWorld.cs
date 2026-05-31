@@ -28,8 +28,8 @@ internal class StencilDemoWorld : DemoWorld
 
     private void AddGeneratedExample(int rowY)
     {
-        var image = Textures.GenTexture(MakeCheckerboard(TextureSize, TextureSize, TileSize));
-        var mask = Textures.GenTexture(MakeCircleMask(TextureSize));
+        var image = Textures.CreateTexture(MakeCheckerboard(TextureSize, TextureSize, TileSize));
+        var mask = Textures.CreateTexture(MakeCircleMask(TextureSize));
         AddRow(rowY, image, mask, "Checkerboard (generated)", "Circle mask (generated)", "Result");
     }
 

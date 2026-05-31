@@ -21,12 +21,20 @@ public static class Textures
         Implementation.CreateSpriteTextureFromImageFile(filePath, rows, columns, linearFilter);
 
     /// <summary>
-    /// Generates a rectangular texture with a solid <paramref name="fill"/> and a border of
+    /// Creates a rectangular texture with a solid <paramref name="fill"/> and a border of
     /// <paramref name="borderThickness"/> pixels in <paramref name="border"/>.
     /// </summary>
-    public static ITexture GenBorderedRectangle(int width, int height, int borderThickness, Colour fill, Colour border) =>
-        Implementation.GenBorderedRectangle(width, height, borderThickness, fill, border);
+    public static ITexture CreateBorderedRectangle(int width, int height, int borderThickness, Colour fill, Colour border) =>
+        Implementation.CreateBorderedRectangle(width, height, borderThickness, fill, border);
 
-    /// <summary>Generates a texture from a 2D array of pixel colours.</summary>
-    public static ITexture GenTexture(Colour[,] pixels) => Implementation.GenTexture(pixels);
+    /// <summary>Creates a texture from a 2D array of pixel colours.</summary>
+    public static ITexture CreateTexture(Colour[,] pixels, bool linearFilter = true) =>
+        Implementation.CreateTexture(pixels, linearFilter);
+
+    /// <summary>
+    /// Creates a texture from a tightly-packed RGBA8 byte buffer (4 bytes per pixel, row-major).
+    /// The buffer is premultiplied internally before upload; the caller's array is not modified.
+    /// </summary>
+    public static ITexture CreateTexture(byte[] rgbaData, int width, int height, bool linearFilter = true) =>
+        Implementation.CreateTexture(rgbaData, width, height, linearFilter);
 }

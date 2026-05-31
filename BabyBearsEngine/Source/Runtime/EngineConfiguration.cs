@@ -18,7 +18,7 @@ internal static class EngineConfiguration
     // One atlas generator per backend, so a FontDefinition can pin either built-in (or a custom
     // one) independently of the engine-wide default. Resolved per font in FontTextureCache.
     private static readonly Dictionary<TextRenderer, IFontAtlasGenerator> s_atlasGenerators = [];
-    private static TextRenderer s_defaultTextRenderer = TextRenderer.Gdi;
+    private static TextRenderer s_defaultTextRenderer = TextRenderer.Sdf;
 
     private static IAudio? s_audio = null;
     private static IEngineInfo? s_engineInfo = null;
@@ -57,6 +57,15 @@ internal static class EngineConfiguration
         get => s_defaultTextRenderer;
         set
         {
+            // Fail fast at configure time (typically from GameLauncher.Run, reading
+            // ApplicationSettings.TextSettings.Renderer) rather than waiting for the first
+            // text-graphic construction or — worse — for the GDI rasteriser itself to throw.
+            if (value == TextRenderer.Gdi && !OperatingSystem.IsWindows())
+            {
+                throw new PlatformNotSupportedException(
+                    $"{nameof(TextRenderer)}.{nameof(TextRenderer.Gdi)} requires Windows; use {nameof(TextRenderer)}.{nameof(TextRenderer.Sdf)} or {nameof(TextRenderer)}.{nameof(TextRenderer.FreeType)} on other platforms.");
+            }
+
             s_defaultTextRenderer = value;
             FontTextureCache.InvalidateCache();
         }
@@ -246,7 +255,7 @@ internal static class EngineConfiguration
     {
         DefaultCameraMsaa = MsaaSamples.Disabled;
         s_atlasGenerators.Clear();
-        s_defaultTextRenderer = TextRenderer.Gdi;
+        s_defaultTextRenderer = TextRenderer.Sdf;
         s_audio = null;
         s_engineInfo = null;
         s_glLoadingContextFactory = null;

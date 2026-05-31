@@ -210,6 +210,7 @@ public class FontTextureCacheTests
         CountingGenerator sdfGenerator = new();
         EngineConfiguration.RegisterAtlasGenerator(TextRenderer.Gdi, gdiGenerator);
         EngineConfiguration.RegisterAtlasGenerator(TextRenderer.Sdf, sdfGenerator);
+        EngineConfiguration.DefaultTextRenderer = TextRenderer.Gdi;
         FontDefinition unpinnedFont = new("Arial", 12);
         FontTextureCache.GetOrCreate(unpinnedFont);
 

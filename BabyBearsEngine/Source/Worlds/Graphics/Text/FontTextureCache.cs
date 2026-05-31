@@ -20,6 +20,17 @@ internal static class FontTextureCache
 
         // A font may pin its own backend; otherwise it follows the engine-wide default.
         TextRenderer renderer = fontDefinition.Renderer ?? EngineConfiguration.DefaultTextRenderer;
+
+        // Fail fast at the moment a TextGraphic (or any cache caller) asks for an atlas, rather
+        // than deep inside the GDI rasteriser's Generate(). The configure-time setter on
+        // EngineConfiguration.DefaultTextRenderer catches the engine-default case earlier still;
+        // this branch additionally covers FontDefinition.Renderer per-font pins.
+        if (renderer == TextRenderer.Gdi && !OperatingSystem.IsWindows())
+        {
+            throw new PlatformNotSupportedException(
+                $"{nameof(TextRenderer)}.{nameof(TextRenderer.Gdi)} requires Windows; use {nameof(TextRenderer)}.{nameof(TextRenderer.Sdf)} or {nameof(TextRenderer)}.{nameof(TextRenderer.FreeType)} on other platforms.");
+        }
+
         FontAtlas atlas = EngineConfiguration.GetAtlasGenerator(renderer).Generate(fontDefinition);
         s_cache[fontDefinition] = atlas;
         return atlas;

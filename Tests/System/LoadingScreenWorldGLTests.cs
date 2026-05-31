@@ -105,7 +105,7 @@ public class LoadingScreenWorldGLTests
 
         World BuildWorld()
         {
-            texture = Textures.GenTexture(BuildSolidColourPixels(2, Colour.Red));
+            texture = Textures.CreateTexture(BuildSolidColourPixels(2, Colour.Red));
             return new DisplayWorld(texture, c => captured = c);
         }
 
@@ -128,7 +128,7 @@ public class LoadingScreenWorldGLTests
         void LoadBody()
         {
             loadingThreadId = Environment.CurrentManagedThreadId;
-            loadedTexture = Textures.GenTexture(redPixels);
+            loadedTexture = Textures.CreateTexture(redPixels);
         }
 
         World BuildLoadingWorld() => new TestLoadingWorld(

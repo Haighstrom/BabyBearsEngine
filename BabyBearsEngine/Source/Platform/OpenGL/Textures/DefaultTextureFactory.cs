@@ -7,6 +7,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
 {
     private const int SpritePadding = 2;
 
+    /// <inheritdoc />
     public ISpriteTexture CreateSpriteTextureFromImageFile(string filePath, int rows, int columns, bool linearFilter = false)
     {
         GLThread.Ensure();
@@ -35,6 +36,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
         return new SpriteTexture(texture, columns, rows, SpritePadding);
     }
 
+    /// <inheritdoc />
     public ITexture CreateTextureFromImageFile(string filePath, bool linearFilter = true)
     {
         GLThread.Ensure();
@@ -61,7 +63,8 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
         return new Texture(handle, imageData.Width, imageData.Height);
     }
 
-    public ITexture GenBorderedRectangle(int width, int height, int borderThickness, Colour fillColour, Colour borderColour)
+    /// <inheritdoc />
+    public ITexture CreateBorderedRectangle(int width, int height, int borderThickness, Colour fillColour, Colour borderColour)
     {
         var pixels = new Colour[width, height];
 
@@ -76,45 +79,21 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
             }
         }
 
-        return GenTexture(pixels);
+        return CreateTexture(pixels);
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
-    public ITexture GenTexture(System.Drawing.Bitmap bmp, bool linearFilter = true)
+    /// <inheritdoc />
+    public ITexture CreateR8Texture(byte[] r8Data, int width, int height, bool linearFilter = true)
     {
-        GLThread.Ensure();
-        bmp = BitmapTools.PremultiplyAlpha(bmp);
+        ArgumentNullException.ThrowIfNull(r8Data);
+        int expectedLength = width * height;
+        if (r8Data.Length != expectedLength)
+        {
+            throw new ArgumentException(
+                $"r8Data length ({r8Data.Length}) does not match width*height ({expectedLength}).",
+                nameof(r8Data));
+        }
 
-        Texture t = new(
-            handle: GL.GenTexture(),
-            width: bmp.Width,
-            height: bmp.Height);
-
-        OpenGLHelper.BindTexture(t.Handle);
-
-        var minFilter = linearFilter ? TextureMinFilter.Linear : TextureMinFilter.Nearest;
-        var magFilter = linearFilter ? TextureMagFilter.Linear : TextureMagFilter.Nearest;
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)minFilter);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)magFilter);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-
-        var bmpd = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmpd.Width, bmpd.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, bmpd.Scan0);
-
-        bmp.UnlockBits(bmpd);
-
-        return t;
-    }
-
-    /// <summary>
-    /// Uploads a single-channel (R8) pixel buffer as a texture. Used by the SDF text backend,
-    /// whose atlas stores distance values in one byte per texel. Linear filtering is the default
-    /// because SDF reconstruction relies on bilinear sampling between texels.
-    /// </summary>
-    public ITexture GenR8Texture(byte[] data, int width, int height, bool linearFilter = true)
-    {
         GLThread.Ensure();
         Texture t = new(
             handle: GL.GenTexture(),
@@ -126,7 +105,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
         // R8 rows are one byte per texel, so they aren't 4-byte aligned; relax the unpack
         // alignment for the upload, then restore the default so other texture paths are unaffected.
         GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
-        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R8, width, height, 0, PixelFormat.Red, PixelType.UnsignedByte, data);
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R8, width, height, 0, PixelFormat.Red, PixelType.UnsignedByte, r8Data);
         GL.PixelStore(PixelStoreParameter.UnpackAlignment, 4);
 
         var minFilter = linearFilter ? TextureMinFilter.Linear : TextureMinFilter.Nearest;
@@ -139,37 +118,65 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
         return t;
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
-    public ITexture GenTexture(Colour[,] pixels, bool linearFilter = true)
+    /// <inheritdoc />
+    public ITexture CreateTexture(Colour[,] pixels, bool linearFilter = true)
     {
         int width = pixels.GetLength(0);
         int height = pixels.GetLength(1);
+        byte[] data = new byte[width * height * 4];
 
-        System.Drawing.Bitmap bmp = new(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-        var bmpd = bmp.LockBits(
-            new System.Drawing.Rectangle(0, 0, width, height),
-            System.Drawing.Imaging.ImageLockMode.WriteOnly,
-            System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-        unsafe
+        for (int y = 0; y < height; y++)
         {
-            byte* ptr = (byte*)bmpd.Scan0;
-            for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
             {
-                for (int x = 0; x < width; x++)
-                {
-                    Colour c = pixels[x, y];
-                    byte* p = ptr + y * bmpd.Stride + x * 4;
-                    p[0] = c.B; // Format32bppArgb stores as BGRA
-                    p[1] = c.G;
-                    p[2] = c.R;
-                    p[3] = c.A;
-                }
+                Colour c = pixels[x, y];
+                int offset = (y * width + x) * 4;
+                data[offset] = c.R;
+                data[offset + 1] = c.G;
+                data[offset + 2] = c.B;
+                data[offset + 3] = c.A;
             }
         }
 
-        bmp.UnlockBits(bmpd);
-        return GenTexture(bmp, linearFilter);
+        // We just built the buffer ourselves, so premultiply in place — no caller-visible mutation.
+        Rgba8Tools.PremultiplyAlphaInPlace(data);
+        return UploadRgbaPremultiplied(data, width, height, linearFilter);
+    }
+
+    /// <inheritdoc />
+    public ITexture CreateTexture(byte[] rgbaData, int width, int height, bool linearFilter = true)
+    {
+        ArgumentNullException.ThrowIfNull(rgbaData);
+        int expectedLength = width * height * 4;
+        if (rgbaData.Length != expectedLength)
+        {
+            throw new ArgumentException(
+                $"rgbaData length ({rgbaData.Length}) does not match width*height*4 ({expectedLength}).",
+                nameof(rgbaData));
+        }
+
+        // Clone before premultiplying so the caller's buffer is not mutated.
+        byte[] data = (byte[])rgbaData.Clone();
+        Rgba8Tools.PremultiplyAlphaInPlace(data);
+        return UploadRgbaPremultiplied(data, width, height, linearFilter);
+    }
+
+    private static ITexture UploadRgbaPremultiplied(byte[] data, int width, int height, bool linearFilter)
+    {
+        GLThread.Ensure();
+        int handle = GL.GenTexture();
+        OpenGLHelper.BindTexture(handle);
+
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data);
+
+        var minFilter = linearFilter ? TextureMinFilter.Linear : TextureMinFilter.Nearest;
+        var magFilter = linearFilter ? TextureMagFilter.Linear : TextureMagFilter.Nearest;
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)minFilter);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)magFilter);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+
+        return new Texture(handle, width, height);
     }
 
     private static Rgba8ImageData CreatePaddedSpriteSheet(Rgba8ImageData orig, int columns, int rows, int padding)
