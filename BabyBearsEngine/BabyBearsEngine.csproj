@@ -21,10 +21,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Source\Worlds\Graphics\c5ktwi1a.2yx~" />
-  </ItemGroup>
-
-  <ItemGroup>
     <InternalsVisibleTo Include="BabyBearsEngine.Benchmarks" />
     <InternalsVisibleTo Include="BabyBearsEngine.Tests.System" />
     <InternalsVisibleTo Include="BabyBearsEngine.Tests.Unit" />

@@ -153,9 +153,6 @@ public class TextInputBox : Entity
     /// <summary>True when at least one character is selected.</summary>
     public bool HasSelection => _cursorIndex != _anchorIndex;
 
-    // internal so tests can verify without exposing as public API
-    internal int AnchorIndex => _anchorIndex;
-
     /// <summary>Gives this box keyboard focus, placing the cursor at the current position.</summary>
     public void Focus()
     {

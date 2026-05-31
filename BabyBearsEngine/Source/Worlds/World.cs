@@ -35,10 +35,6 @@ public class World : IWorld
     /// <inheritdoc/>
     public virtual void Unload()
     {
-        //foreach (var graphic in _graphics.ToList())
-        //{
-        //    graphic.Dispose();
-        //}
     }
 
     /// <inheritdoc/>

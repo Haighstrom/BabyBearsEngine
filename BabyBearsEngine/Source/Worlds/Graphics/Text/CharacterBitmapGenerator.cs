@@ -22,9 +22,6 @@ internal sealed class CharacterBitmapGenerator : ICharacterBitmapGenerator
 
         if (width == 0 || height == 0)
         {
-            //if (c != ' ')
-            //    Log.Warning($"Character '{c}' is alleged to have size (W:{r.W},H:{r.H}) in font {FontName}, size {FontSize}. Reverting to trying character 't'.");
-
             g.DrawString("t", font, new SolidBrush(Color.White), 0, 0, stringFormat);
 
             (x, y, width, height) = image.NonZeroAlphaRegion();
