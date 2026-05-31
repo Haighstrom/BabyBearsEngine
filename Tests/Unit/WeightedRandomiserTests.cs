@@ -14,7 +14,9 @@ public class WeightedRandomiserTests
     {
         private readonly Queue<double> _values = new(values);
 
-        public double NextDouble() => _values.Dequeue();
+        public int Int(int minInclusive, int maxExclusive) => throw new NotImplementedException("WeightedRandomiser only uses Double.");
+
+        public double Double() => _values.Dequeue();
     }
 
     // ─── Count / Clear ───

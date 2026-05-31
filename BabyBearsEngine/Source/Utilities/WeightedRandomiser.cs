@@ -54,7 +54,7 @@ public class WeightedRandomiser<T>
             throw new InvalidOperationException("Cannot select from an empty WeightedRandomiser.");
         }
 
-        double r = _random.NextDouble() * _totalWeight;
+        double r = _random.Double() * _totalWeight;
         double cumulative = 0.0;
 
         foreach (var (item, weight) in _items)
