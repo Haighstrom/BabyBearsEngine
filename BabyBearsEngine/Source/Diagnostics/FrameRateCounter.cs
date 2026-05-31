@@ -44,7 +44,9 @@ internal sealed class FrameRateCounter
 
         if (_elapsed > StallThreshold)
         {
-            Logger.Warning($"Frame took {elapsed:F2}s (>1s); FPS sample window dropped to avoid polluting subsequent samples.");
+            // Log the accumulated window duration, not just the last tick — the stall may span
+            // several frames inside the window, and the wording "frame" misleads when it doesn't.
+            Logger.Warning($"FPS sample window took {_elapsed:F2}s (>{StallThreshold}s); window dropped to avoid polluting subsequent samples.");
             _elapsed = 0.0;
         }
         else

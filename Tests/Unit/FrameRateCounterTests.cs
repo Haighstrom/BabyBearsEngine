@@ -1,3 +1,4 @@
+using System.IO;
 using BabyBearsEngine.Diagnostics;
 
 namespace BabyBearsEngine.Tests.Unit;
@@ -108,5 +109,40 @@ public class FrameRateCounterTests
         }
 
         Assert.AreEqual(4.0, counter.Fps);
+    }
+
+    [TestMethod]
+    public void Tick_StallWarning_LogsAccumulatedWindowDurationNotJustTheLastTick()
+    {
+        var originalOut = Console.Out;
+        var captured = new StringWriter();
+        Console.SetOut(captured);
+
+        Logger.Initialise(new LogSettings
+        {
+            ConsoleLevels = LogLevel.All,
+            FileLevels = LogLevel.None,
+            ErrorFileLevels = LogLevel.None,
+        }, new ConsoleSettings { ColouriseLogOutput = false });
+
+        try
+        {
+            FrameRateCounter counter = new();
+
+            // Accumulate 0.5s + 3.0s = 3.5s across two ticks. Window closes on the second tick
+            // and exceeds the 2.0s stall threshold. The warning should report the accumulated
+            // window (3.50s), not just the final tick's elapsed (3.00s).
+            counter.Tick(0.5);
+            counter.Tick(3.0);
+
+            string output = captured.ToString();
+            Assert.Contains("3.50", output);
+        }
+        finally
+        {
+            Logger.Initialise(LogSettings.Silent, ConsoleSettings.Default);
+            Console.SetOut(originalOut);
+            captured.Dispose();
+        }
     }
 }
