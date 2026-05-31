@@ -579,4 +579,64 @@ public class LoggerTests
         }
         return count;
     }
+
+    // ─── Thread safety ───
+
+    [TestMethod]
+    public void Write_ConcurrentWithReInitialise_DoesNotThrow()
+    {
+        // Use console-only settings so concurrent Initialise calls don't collide on a shared
+        // log-file handle (that's a separate test-only file-lock issue, not the race we're
+        // probing). The race we want exposed is between the null-check and dereference of
+        // a sink reference inside Write/WriteRaw.
+        var withSinks = new LogSettings
+        {
+            ConsoleLevels = LogLevel.All,
+            FileLevels = LogLevel.None,
+            ErrorFileLevels = LogLevel.None,
+        };
+        var silent = LogSettings.Silent;
+        Logger.Initialise(withSinks, PlainConsole());
+
+        var caughtException = (Exception?)null;
+        const int iterations = 2000;
+
+        var reinitTask = System.Threading.Tasks.Task.Run(() =>
+        {
+            try
+            {
+                for (int i = 0; i < iterations; i++)
+                {
+                    // Alternate between settings that produce a console sink and Silent (which
+                    // produces a null console sink). The race window without the fix is between
+                    // the null-check and the dereference inside Write/WriteRaw.
+                    Logger.Initialise(i % 2 == 0 ? silent : withSinks, PlainConsole());
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Threading.Interlocked.CompareExchange(ref caughtException, ex, null);
+            }
+        });
+
+        var writeTasks = Enumerable.Range(0, 4).Select(_ => System.Threading.Tasks.Task.Run(() =>
+        {
+            try
+            {
+                for (int i = 0; i < iterations; i++)
+                {
+                    Logger.Warning("stress");
+                    Logger.Information("stress");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Threading.Interlocked.CompareExchange(ref caughtException, ex, null);
+            }
+        })).ToArray();
+
+        System.Threading.Tasks.Task.WaitAll([reinitTask, .. writeTasks]);
+
+        Assert.IsNull(caughtException, $"Concurrent Write/Initialise threw: {caughtException?.GetType().Name}: {caughtException?.Message}");
+    }
 }

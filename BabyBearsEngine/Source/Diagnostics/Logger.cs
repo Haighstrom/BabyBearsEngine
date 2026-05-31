@@ -288,9 +288,18 @@ public static class Logger
 
     private static void Write(LogLevel level, string message, Exception? exception, string callerFilePath, int callerLineNumber, string callerMemberName)
     {
-        bool consoleAccepts = s_consoleSink is not null && s_settings.ConsoleLevels.HasFlag(level);
-        bool fileAccepts = s_fileSink is not null && s_settings.FileLevels.HasFlag(level);
-        bool errorFileAccepts = s_errorFileSink is not null && s_settings.ErrorFileLevels.HasFlag(level);
+        // Snapshot all sink references and settings into locals so a concurrent Initialise call
+        // can't swap any of them between the null-check and the dereference. Field reads of
+        // reference types are atomic in .NET, but reading the same field twice is not — without
+        // these locals, the second read could see a null assigned by another thread.
+        ConsoleSink? consoleSink = s_consoleSink;
+        FileSink? fileSink = s_fileSink;
+        FileSink? errorFileSink = s_errorFileSink;
+        LogSettings settings = s_settings;
+
+        bool consoleAccepts = consoleSink is not null && settings.ConsoleLevels.HasFlag(level);
+        bool fileAccepts = fileSink is not null && settings.FileLevels.HasFlag(level);
+        bool errorFileAccepts = errorFileSink is not null && settings.ErrorFileLevels.HasFlag(level);
 
         if (!consoleAccepts && !fileAccepts && !errorFileAccepts)
         {
@@ -301,27 +310,31 @@ public static class Logger
 
         if (consoleAccepts)
         {
-            s_consoleSink!.Write(level, formatted, exception);
+            consoleSink!.Write(level, formatted, exception);
         }
         if (fileAccepts)
         {
-            s_fileSink!.Write(level, formatted, exception);
+            fileSink!.Write(level, formatted, exception);
         }
         if (errorFileAccepts)
         {
-            s_errorFileSink!.Write(level, formatted, exception);
+            errorFileSink!.Write(level, formatted, exception);
         }
     }
 
     private static void WriteRaw(LogLevel level, string message)
     {
-        if (s_consoleSink is not null && s_settings.ConsoleLevels.HasFlag(level))
+        ConsoleSink? consoleSink = s_consoleSink;
+        FileSink? fileSink = s_fileSink;
+        LogSettings settings = s_settings;
+
+        if (consoleSink is not null && settings.ConsoleLevels.HasFlag(level))
         {
-            s_consoleSink.Write(level, message, exception: null);
+            consoleSink.Write(level, message, exception: null);
         }
-        if (s_fileSink is not null && s_settings.FileLevels.HasFlag(level))
+        if (fileSink is not null && settings.FileLevels.HasFlag(level))
         {
-            s_fileSink.Write(level, message, exception: null);
+            fileSink.Write(level, message, exception: null);
         }
     }
 }
