@@ -201,7 +201,7 @@ public struct Matrix4
     public static Matrix4 ScaleAroundPoint(ref Matrix4 mat, float scaleX, float scaleY, float x, float y)
     {
         var translate1 = CreateTranslation(x, y, 0);
-        var scale = CreateScale(scaleX, scaleY, 0);
+        var scale = CreateScale(scaleX, scaleY, 1);
         var translate2 = CreateTranslation(-x, -y, 0);
 
         var result = Multiply(ref mat, ref translate1);

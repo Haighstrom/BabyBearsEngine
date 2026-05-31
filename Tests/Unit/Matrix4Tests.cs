@@ -287,6 +287,36 @@ public class Matrix4Tests
         Assert.AreEqual(1f, result.y, Delta);
     }
 
+    // ScaleAroundPoint
+
+    [TestMethod]
+    public void ScaleAroundPoint_PreservesZ()
+    {
+        Matrix4 m = Matrix4.Identity;
+        m = Matrix4.ScaleAroundPoint(ref m, scaleX: 2f, scaleY: 3f, x: 10f, y: 20f);
+        Point4 p = new(10f, 20f, 5f, 1f);
+        Point4 result = m * p;
+
+        Assert.AreEqual(5f, result.z, Delta);
+    }
+
+    [TestMethod]
+    public void ScaleAroundPoint_ScalesXAndYAroundCentre()
+    {
+        Matrix4 m = Matrix4.Identity;
+        m = Matrix4.ScaleAroundPoint(ref m, scaleX: 2f, scaleY: 3f, x: 10f, y: 20f);
+        Point4 centre = new(10f, 20f, 0f, 1f);
+        Point4 offset = new(11f, 21f, 0f, 1f);
+
+        Point4 centreResult = m * centre;
+        Point4 offsetResult = m * offset;
+
+        Assert.AreEqual(10f, centreResult.x, Delta);
+        Assert.AreEqual(20f, centreResult.y, Delta);
+        Assert.AreEqual(12f, offsetResult.x, Delta);
+        Assert.AreEqual(23f, offsetResult.y, Delta);
+    }
+
     // FlipX / FlipY / FlipZ methods
 
     [TestMethod]
