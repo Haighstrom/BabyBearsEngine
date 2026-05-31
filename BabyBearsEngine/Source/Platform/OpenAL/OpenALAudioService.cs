@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Threading;
 using BabyBearsEngine.AudioSystem;
 using BabyBearsEngine.Diagnostics;
@@ -22,7 +22,7 @@ namespace BabyBearsEngine.Platform.OpenAL;
 /// </summary>
 internal sealed class OpenALAudioService : IAudio
 {
-    private static readonly TimeSpan PollInterval = TimeSpan.FromMilliseconds(50);
+    private static readonly TimeSpan s_pollInterval = TimeSpan.FromMilliseconds(50);
 
     private readonly Lock _channelLock = new();
     private readonly Lock _volumeLock = new();
@@ -539,7 +539,7 @@ internal sealed class OpenALAudioService : IAudio
 
             try
             {
-                Thread.Sleep(PollInterval);
+                Thread.Sleep(s_pollInterval);
             }
             catch (ThreadInterruptedException)
             {

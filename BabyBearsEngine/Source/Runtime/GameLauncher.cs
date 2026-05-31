@@ -2,6 +2,7 @@
 using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.IO;
 using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Platform;
 using BabyBearsEngine.Platform.OpenAL;
 using BabyBearsEngine.Platform.OpenTK;
 using BabyBearsEngine.Worlds;
@@ -30,6 +31,11 @@ public static class GameLauncher
         {
             throw new InvalidOperationException("Game already running.");
         }
+
+        // Pre-load any native libraries we ship (currently just OpenAL) so subsequent P/Invoke
+        // calls find them already resident. Throws on non-Windows until cross-platform binaries
+        // and probe paths are added — see #106.
+        NativeLibraryResolver.Initialise();
 
         // Open the console window (if requested) BEFORE Logger.Initialise so the console sink has
         // somewhere visible to write to. On non-Windows the call no-ops.
