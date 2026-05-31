@@ -1,3 +1,5 @@
+using BabyBearsEngine.Worlds;
+
 namespace BabyBearsEngine.Tasks;
 
 /// <summary>
@@ -29,6 +31,13 @@ public static class Tasks
     /// Returns a task that completes after <paramref name="seconds"/> have elapsed.
     /// </summary>
     public static ITask Delay(double seconds) => new WaitTask(seconds);
+
+    /// <summary>
+    /// Returns a task that removes <paramref name="thing"/> from its parent container when it
+    /// completes. <paramref name="thing"/> must have a parent at completion time (the
+    /// underlying <see cref="IAddable.Remove"/> call throws otherwise).
+    /// </summary>
+    public static ITask Remove(IAddable thing) => new Task(thing.Remove);
 
     /// <summary>
     /// Appends <paramref name="next"/> to the end of the chain rooted at <paramref name="first"/>

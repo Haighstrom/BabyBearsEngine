@@ -1,4 +1,5 @@
 using BabyBearsEngine.Tasks;
+using BabyBearsEngine.Worlds;
 using static BabyBearsEngine.Tasks.Tasks;
 
 namespace BabyBearsEngine.Tests.Unit;
@@ -76,6 +77,32 @@ public class TasksTests
         Assert.IsTrue(task.IsComplete);
     }
 
+    // Remove
+
+    [TestMethod]
+    public void Remove_OnComplete_RemovesAddableFromParent()
+    {
+        var addable = new FakeAddable { Parent = new FakeContainer() };
+        ITask task = Remove(addable);
+
+        task.Update(0.016);
+
+        Assert.IsNull(addable.Parent);
+    }
+
+    [TestMethod]
+    public void Remove_DoesNotRemoveBeforeCompletion()
+    {
+        // The Remove() call is deferred to ActionsOnComplete — constructing the task must not
+        // touch the addable.
+        var parent = new FakeContainer();
+        var addable = new FakeAddable { Parent = parent };
+
+        _ = Remove(addable);
+
+        Assert.AreSame(parent, addable.Parent);
+    }
+
     // Then
 
     [TestMethod]
@@ -111,5 +138,30 @@ public class TasksTests
 
         Assert.AreSame(b, a.NextTask);
         Assert.AreSame(c, b.NextTask);
+    }
+
+    private sealed class FakeContainer : IContainer
+    {
+        public void Add(IAddable entity) { }
+        public void Remove(IAddable entity) { }
+        public void RemoveAll() { }
+        public (float x, float y) GetWindowCoordinates(float x, float y) => (x, y);
+    }
+
+    private sealed class FakeAddable : IAddable
+    {
+        public IContainer? Parent { get; set; }
+        public bool Exists => Parent is not null;
+        public event EventHandler? Added
+        {
+            add { }
+            remove { }
+        }
+        public event EventHandler? Removed
+        {
+            add { }
+            remove { }
+        }
+        public void Remove() => Parent = null;
     }
 }

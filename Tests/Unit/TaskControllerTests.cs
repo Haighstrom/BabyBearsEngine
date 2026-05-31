@@ -27,27 +27,6 @@ public class TaskControllerTests
         }
     }
 
-    // Mirrors HappyBlacksmith's CreateTaskTask pattern: on Start, save the existing NextTask,
-    // overwrite NextTask with a newly-created task, then re-attach the original after the new one.
-    // The linked-list NextTask model exists specifically to support this kind of dynamic mid-chain
-    // insertion — see issue #64 for the discussion of why we keep it.
-    private sealed class SpliceOnStartTask(Func<ITask> taskCreator) : Task
-    {
-        public override void Start()
-        {
-            base.Start();
-
-            ITask? existingNextTask = NextTask;
-
-            NextTask = taskCreator();
-
-            if (existingNextTask is not null)
-            {
-                NextTask.NextTask = existingNextTask;
-            }
-        }
-    }
-
     private sealed class FakeContainer : IContainer
     {
         public void Add(IAddable entity) { }
@@ -163,17 +142,18 @@ public class TaskControllerTests
     }
 
     [TestMethod]
-    public void Update_TaskThatSplicesNextTaskOnStart_RunsInsertedTaskBeforeOriginalNext()
+    public void Update_CreateTaskTask_RunsInsertedTaskBeforeOriginalNext()
     {
-        // Documents and pins the dynamic mid-chain insertion supported by ITask.NextTask.
-        // A task may, during its own Start(), overwrite NextTask with a newly-created task and
-        // re-attach the originally-queued next task behind it — turning [A → C] into [A → B → C]
-        // at runtime. HappyBlacksmith's CreateTaskTask relies on exactly this behaviour. See
-        // issue #64.
+        // End-to-end check that CreateTaskTask integrates with the controller's chain-advancement
+        // logic: the splice happens during Start, then the controller walks through the inserted
+        // task and the originally-queued next task in the right order. The splice mechanics
+        // themselves are pinned in CreateTaskTaskTests.
         var inserted = new ControllableTask { ShouldComplete = true };
         var originalNext = new ControllableTask { ShouldComplete = true };
-        var splicer = new SpliceOnStartTask(() => inserted);
-        splicer.NextTask = originalNext;
+        var splicer = new CreateTaskTask(() => inserted)
+        {
+            NextTask = originalNext,
+        };
 
         var executionOrder = new List<string>();
         splicer.TaskStarted += (_, _) => executionOrder.Add("splicer");
