@@ -14,13 +14,16 @@ namespace BabyBearsEngine.Worlds.GraphicEffects;
 /// to have the effect re-fire itself at random intervals in
 /// <c>[<see cref="AutoFlashMinInterval"/>, <see cref="AutoFlashMaxInterval"/>]</c>.</para>
 ///
-/// <para>The "rest alpha" is captured at construction — whatever alpha the target had then
-/// is what it returns to between flashes (typically 0 for an overlay).</para>
+/// <para>The "rest alpha" is captured lazily on the first <see cref="Trigger"/> — whatever
+/// alpha the target has then is what it returns to between flashes (typically 0 for an
+/// overlay). Capturing at first trigger rather than at construction lets a theme or other
+/// post-construction step finalise the target's colour before the rest is locked in.</para>
 /// </remarks>
 public sealed class Flash(IGraphic target, IRandom? random = null) : UpdateableBase
 {
     private readonly IRandom _random = random ?? EngineConfiguration.RandomService;
-    private readonly byte _restAlpha = target.Colour.A;
+    private byte _restAlpha = 0;
+    private bool _restAlphaCaptured = false;
     private float _flashTime = 0f;
     private float _flashDuration = 0f;
     private float _autoTimer = 0f;
@@ -69,6 +72,12 @@ public sealed class Flash(IGraphic target, IRandom? random = null) : UpdateableB
     /// </summary>
     public void Trigger()
     {
+        if (!_restAlphaCaptured)
+        {
+            _restAlpha = target.Colour.A;
+            _restAlphaCaptured = true;
+        }
+
         _flashTime = 0f;
         _flashDuration = RiseSeconds + FallSeconds;
     }

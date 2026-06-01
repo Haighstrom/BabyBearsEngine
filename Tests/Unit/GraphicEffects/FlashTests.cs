@@ -271,4 +271,27 @@ public class FlashTests
         Assert.IsFalse(flash.IsFlashing);
         Assert.AreEqual(0, (int)target.Colour.A);
     }
+
+    [TestMethod]
+    public void RestAlpha_CapturedLazilyOnTrigger_FollowsCurrentTargetColour()
+    {
+        // Common pattern: construct Flash early (e.g. when the parent entity is built), then the
+        // target's colour is finalised later by a theme. Rest alpha should reflect the final
+        // colour, not whatever the target happened to hold at Flash construction.
+        FakeGraphic target = new() { Colour = new Colour(255, 255, 255, 0) }; // construction-time alpha = 0
+        Flash flash = new(target)
+        {
+            RiseSeconds = 0.05f,
+            FallSeconds = 0.25f,
+            PeakAlpha = 200,
+        };
+
+        // Theme applies after Flash was constructed — alpha 40 is the true rest.
+        target.Colour = new Colour(255, 255, 255, 40);
+
+        flash.Trigger();
+        flash.Update(0.05 + 0.25 + 0.01); // past the end of the fall
+
+        Assert.AreEqual(40, (int)target.Colour.A);
+    }
 }
