@@ -214,4 +214,61 @@ public class FlashTests
 
         Assert.IsFalse(flash.IsFlashing);
     }
+
+    [TestMethod]
+    public void RiseSecondsZero_FirstUpdateSetsAlphaNearPeak()
+    {
+        // Lightning use case: instant rise, long fall. The classic configuration.
+        FakeGraphic target = new() { Colour = new Colour(255, 255, 255, 0) };
+        Flash flash = new(target)
+        {
+            RiseSeconds = 0f,
+            FallSeconds = 2.0f,
+            PeakAlpha = 200,
+        };
+
+        flash.Trigger();
+        flash.Update(0.01); // 0.5% into the fall
+
+        Assert.IsGreaterThan(190, (int)target.Colour.A);
+        Assert.IsLessThanOrEqualTo(200, (int)target.Colour.A);
+    }
+
+    [TestMethod]
+    public void FallSecondsZero_FlashEndsImmediatelyAfterRise()
+    {
+        // RiseSeconds + 0 fall — flash snaps to peak at rise boundary then back to rest.
+        FakeGraphic target = new() { Colour = new Colour(255, 255, 255, 0) };
+        Flash flash = new(target)
+        {
+            RiseSeconds = 0.1f,
+            FallSeconds = 0f,
+            PeakAlpha = 200,
+        };
+
+        flash.Trigger();
+        flash.Update(0.05); // half-way through rise — alpha should be ~100, no NaN
+
+        Assert.IsGreaterThan(70, (int)target.Colour.A);
+        Assert.IsLessThan(130, (int)target.Colour.A);
+    }
+
+    [TestMethod]
+    public void BothSecondsZero_TriggerIsInert()
+    {
+        FakeGraphic target = new() { Colour = new Colour(255, 255, 255, 0) };
+        Flash flash = new(target)
+        {
+            RiseSeconds = 0f,
+            FallSeconds = 0f,
+            PeakAlpha = 200,
+        };
+
+        flash.Trigger();
+        flash.Update(0.1);
+
+        // With no duration at all, nothing should flash.
+        Assert.IsFalse(flash.IsFlashing);
+        Assert.AreEqual(0, (int)target.Colour.A);
+    }
 }
