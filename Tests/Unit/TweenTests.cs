@@ -56,6 +56,12 @@ public class TweenTests
     }
 
     [TestMethod]
+    public void Constructor_NaNDuration_Throws()
+    {
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = new CapturingTween(double.NaN));
+    }
+
+    [TestMethod]
     public void InitialState_ProgressAndLinearProgressAreZero()
     {
         var tween = new CapturingTween(1.0);

@@ -17,9 +17,12 @@ public abstract class Tween : UpdateableBase
 
     protected Tween(double duration, bool loop = false, Func<double, double>? easing = null)
     {
-        if (duration <= 0)
+        // `!(duration > 0)` rather than `duration <= 0` so NaN is also rejected — NaN compares
+        // false against everything, so the old form would let it through and produce an immortal
+        // tween whose Progress stayed NaN forever.
+        if (!(duration > 0))
         {
-            throw new ArgumentOutOfRangeException(nameof(duration), "Duration must be positive.");
+            throw new ArgumentOutOfRangeException(nameof(duration), "Duration must be positive (and not NaN).");
         }
 
         Duration = duration;
