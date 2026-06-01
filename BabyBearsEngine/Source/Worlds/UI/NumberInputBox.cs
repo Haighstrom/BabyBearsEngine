@@ -1,3 +1,4 @@
+﻿using System.Text;
 using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds.UI.Themes;
 
@@ -75,8 +76,17 @@ public class NumberInputBox : TextInputBox
     /// <summary>Optional upper bound. Not enforced during typing — apply in a <see cref="TextInputBox.Submitted"/> handler.</summary>
     public float? MaxValue { get; set; }
 
-    // -------------------------------------------------------------------------
-    // Override
+    /// <inheritdoc/>
+    /// <remarks>
+    /// The setter filters the input string char-by-char using the same rules as
+    /// <see cref="IsCharAllowed"/>, so programmatic assignment can't introduce text the user
+    /// couldn't have typed (letters, multiple decimal points, mis-placed minus, etc.).
+    /// </remarks>
+    public override string Text
+    {
+        get => base.Text;
+        set => base.Text = FilterToValidNumericText(value);
+    }
 
     /// <inheritdoc/>
     protected override bool IsCharAllowed(char c)
@@ -97,5 +107,28 @@ public class NumberInputBox : TextInputBox
         }
 
         return false;
+    }
+
+    private string FilterToValidNumericText(string input)
+    {
+        StringBuilder accepted = new(input.Length);
+        bool hasDecimal = false;
+        foreach (char c in input)
+        {
+            if (char.IsDigit(c))
+            {
+                accepted.Append(c);
+            }
+            else if (c == '.' && _allowDecimals && !hasDecimal)
+            {
+                accepted.Append(c);
+                hasDecimal = true;
+            }
+            else if (c == '-' && _allowNegative && accepted.Length == 0)
+            {
+                accepted.Append(c);
+            }
+        }
+        return accepted.ToString();
     }
 }

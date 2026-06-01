@@ -102,7 +102,7 @@ public class TextInputBox : Entity
     /// The current text content. Setting this resets the cursor to the start and fires
     /// <see cref="TextChanged"/>.
     /// </summary>
-    public string Text
+    public virtual string Text
     {
         get => _text;
         set

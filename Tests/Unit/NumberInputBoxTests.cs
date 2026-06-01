@@ -360,4 +360,89 @@ public class NumberInputBoxTests
         // Max is not clamped during typing
         Assert.AreEqual("999", box.Text);
     }
+
+    // -------------------------------------------------------------------------
+    // Text setter validation — must mirror IsCharAllowed for keystrokes
+
+    [TestMethod]
+    public void TextSetter_LettersOnly_StripsThemAndReturnsEmpty()
+    {
+        NumberInputBox box = Make();
+
+        box.Text = "abc";
+
+        Assert.AreEqual(string.Empty, box.Text);
+    }
+
+    [TestMethod]
+    public void TextSetter_MixedDigitsAndLetters_RetainsOnlyDigits()
+    {
+        NumberInputBox box = Make();
+
+        box.Text = "1a2b3";
+
+        Assert.AreEqual("123", box.Text);
+    }
+
+    [TestMethod]
+    public void TextSetter_MultipleDecimalPoints_KeepsOnlyTheFirst()
+    {
+        NumberInputBox box = Make(allowDecimals: true);
+
+        box.Text = "1.2.3";
+
+        Assert.AreEqual("1.23", box.Text);
+    }
+
+    [TestMethod]
+    public void TextSetter_DecimalPoint_WhenDecimalsDisallowed_IsStripped()
+    {
+        NumberInputBox box = Make(allowDecimals: false);
+
+        box.Text = "1.5";
+
+        Assert.AreEqual("15", box.Text);
+    }
+
+    [TestMethod]
+    public void TextSetter_LeadingMinus_WhenAllowed_IsKept()
+    {
+        NumberInputBox box = Make(allowNegative: true);
+
+        box.Text = "-5";
+
+        Assert.AreEqual("-5", box.Text);
+    }
+
+    [TestMethod]
+    public void TextSetter_LeadingMinus_WhenDisallowed_IsStripped()
+    {
+        NumberInputBox box = Make(allowNegative: false);
+
+        box.Text = "-5";
+
+        Assert.AreEqual("5", box.Text);
+    }
+
+    [TestMethod]
+    public void TextSetter_MisplacedMinusInMiddle_IsStripped()
+    {
+        NumberInputBox box = Make(allowNegative: true);
+
+        box.Text = "1-5";
+
+        Assert.AreEqual("15", box.Text);
+    }
+
+    [TestMethod]
+    public void TextSetter_AfterInvalidInput_ValueIsConsistentWithRemainingText()
+    {
+        NumberInputBox box = Make(allowDecimals: true);
+
+        box.Text = "1.2.3";
+
+        // After filtering: "1.23" → Value should be 1.23, not null
+        Assert.IsNotNull(box.Value);
+        Assert.AreEqual(1.23f, box.Value!.Value, delta: 0.001f);
+    }
 }
