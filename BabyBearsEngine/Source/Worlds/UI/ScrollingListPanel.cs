@@ -14,8 +14,12 @@ namespace BabyBearsEngine.Worlds.UI;
 /// </summary>
 /// <remarks>
 /// The content area uses GL scissor clipping — items that fall outside the panel's visible
-/// bounds are not drawn. Click detection on scrolled items is not adjusted for the scroll
-/// offset; items inside the panel are intended to be non-interactive (labels, rows, etc.).
+/// bounds are not drawn. Click detection IS adjusted for the scroll offset, so clickable
+/// items (buttons, rows) work correctly when scrolled. Note that hit detection is not
+/// scissor-clipped: an item scrolled outside the visible viewport still has a window-space
+/// hit rect at its true (scrolled) position, which lies outside the panel — clicks within the
+/// panel cannot reach it, but a click exactly where the scrolled-out item now lies on screen
+/// would still register. Use sparingly with very small panels near interactive UI.
 /// </remarks>
 public class ScrollingListPanel : Entity
 {
@@ -77,6 +81,16 @@ public class ScrollingListPanel : Entity
     public void AddItem(IAddable item) => _contentPane.Add(item);
 
     /// <summary>
+    /// Current pixel scroll offset of the content pane. Exposed internally so unit tests can
+    /// drive the scroll position directly without simulating scrollbar input.
+    /// </summary>
+    internal float ScrollOffset
+    {
+        get => _contentPane.ScrollOffset;
+        set => _contentPane.ScrollOffset = value;
+    }
+
+    /// <summary>
     /// Returns the thumb proportion for a given panel and content height. Exposed internally
     /// so unit tests can verify the calculation without constructing the full widget.
     /// </summary>
@@ -96,7 +110,9 @@ public class ScrollingListPanel : Entity
     private void UpdateScrollbar()
         => _scrollbar.ThumbProportion = CalculateThumbProportion(Height, _contentHeight);
 
-    private sealed class ContentPane : ContainerEntity
+    // Internal (not private) so unit tests can construct it directly without needing the
+    // OpenGL-backed Scrollbar that ScrollingListPanel's full constructor sets up.
+    internal sealed class ContentPane : ContainerEntity
     {
         private float _scrollOffset = 0f;
 
@@ -109,8 +125,12 @@ public class ScrollingListPanel : Entity
             set => _scrollOffset = value;
         }
 
+        // Subtract _scrollOffset consistently with Render's modelview translation so an item's
+        // window-space position (and therefore HitRect) matches where it's drawn after scrolling.
+        // Without this, clicks on visible items would route to whatever HitRect the items had
+        // at scroll=0.
         public override (float x, float y) GetWindowCoordinates(float localX, float localY) =>
-            Parent?.GetWindowCoordinates(localX + X, localY + Y) ?? throw new InvalidOperationException("GetWindowCoordinates requires Parent — content pane is not in an entity tree (never added, or removed).");
+            Parent?.GetWindowCoordinates(localX + X, localY + Y - _scrollOffset) ?? throw new InvalidOperationException("GetWindowCoordinates requires Parent — content pane is not in an entity tree (never added, or removed).");
 
         public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
         {
