@@ -113,6 +113,29 @@ public class DropdownListTests
         Assert.IsTrue(f.Dropdown.IsOpen);
     }
 
+    [TestMethod]
+    public void Open_WhenNotParented_ThrowsClearerExceptionMentioningParent()
+    {
+        StubEntity header = new();
+        DropdownList<string> dropdown = new(
+            x: 0f, y: 0f, width: 200f, height: 40f,
+            items: ["A"],
+            header: header,
+            setHeaderText: header.SetText,
+            optionFactory: (_, _) => new StubEntity(),
+            formatter: null,
+            initialIndex: 0);
+        // Note: not adding to a parent.
+
+        var ex = Assert.ThrowsExactly<InvalidOperationException>(() => dropdown.Open());
+        // Message should point at the caller's API (Open / DropdownList), not the internal
+        // GetWindowCoordinates helper that actually trips first.
+        Assert.IsTrue(
+            ex.Message.Contains("Open", System.StringComparison.OrdinalIgnoreCase)
+            || ex.Message.Contains("DropdownList", System.StringComparison.OrdinalIgnoreCase),
+            $"Expected exception message to mention Open or DropdownList, got: {ex.Message}");
+    }
+
     // Close
 
     [TestMethod]

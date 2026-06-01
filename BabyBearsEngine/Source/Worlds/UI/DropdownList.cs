@@ -132,11 +132,17 @@ public class DropdownList<T> : Entity
     }
 
     /// <summary>Opens the option list. No-op if already open.</summary>
+    /// <exception cref="InvalidOperationException">Thrown when the dropdown has not yet been added to a parent container — the option list's position depends on the header's window-space coordinates, which require a parent.</exception>
     public void Open()
     {
         if (_isOpen)
         {
             return;
+        }
+
+        if (Parent is null)
+        {
+            throw new InvalidOperationException("DropdownList.Open requires the dropdown to be in an entity tree first — the option list is positioned relative to the header's window-space coordinates, which need a parent. Add the dropdown to a container before calling Open.");
         }
 
         _isOpen = true;
