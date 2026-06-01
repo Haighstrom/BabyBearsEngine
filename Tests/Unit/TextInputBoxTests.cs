@@ -345,7 +345,9 @@ public class TextInputBoxTests
     {
         TextInputBox box = Make("bc");
         box.Focus();
-        // cursor starts at 0 (set by Text = "bc")
+        _kb.Press(Keys.Home);
+        Update(box);
+        _kb.Release();
         _kb.Press(Keys.A);
 
         Update(box);
@@ -417,7 +419,9 @@ public class TextInputBoxTests
     {
         TextInputBox box = Make("ab");
         box.Focus();
-        // cursor is at 0
+        _kb.Press(Keys.Home);
+        Update(box);
+        _kb.Release();
         _kb.Press(Keys.Backspace);
 
         Update(box);
@@ -430,7 +434,9 @@ public class TextInputBoxTests
     {
         TextInputBox box = Make("ab");
         box.Focus();
-        // cursor is at 0
+        _kb.Press(Keys.Home);
+        Update(box);
+        _kb.Release();
         _kb.Press(Keys.Delete);
 
         Update(box);
@@ -520,6 +526,9 @@ public class TextInputBoxTests
     {
         TextInputBox box = Make("ab");
         box.Focus();
+        _kb.Press(Keys.Home);
+        Update(box);
+        _kb.Release();
         _kb.Press(Keys.Left);
 
         Update(box);
@@ -532,6 +541,9 @@ public class TextInputBoxTests
     {
         TextInputBox box = Make("ab");
         box.Focus();
+        _kb.Press(Keys.Home);
+        Update(box);
+        _kb.Release();
         _kb.Press(Keys.Right);
 
         Update(box);
@@ -589,6 +601,9 @@ public class TextInputBoxTests
     {
         TextInputBox box = Make("abc");
         box.Focus();
+        _kb.Press(Keys.Home);
+        Update(box);
+        _kb.Release();
         _kb.Hold(Keys.LeftShift);
         _kb.Press(Keys.Right);
 
@@ -786,6 +801,39 @@ public class TextInputBoxTests
         Assert.AreEqual("ab", box.Text);
     }
 
+    [TestMethod]
+    public void MaxLength_EnforcedOnTextSetter()
+    {
+        TextInputBox box = Make();
+        box.MaxLength = 5;
+
+        box.Text = "hello world";
+
+        Assert.AreEqual("hello", box.Text);
+    }
+
+    [TestMethod]
+    public void MaxLength_Zero_TextSetterAcceptsAnyLength()
+    {
+        TextInputBox box = Make();
+        box.MaxLength = 0;
+
+        box.Text = new string('x', 1000);
+
+        Assert.AreEqual(1000, box.Text.Length);
+    }
+
+    [TestMethod]
+    public void Text_Set_MovesCursorToEndOfNewText()
+    {
+        TextInputBox box = Make();
+        // Cursor starts at 0; without the fix it stays at 0 after setting Text.
+
+        box.Text = "hello";
+
+        Assert.AreEqual(5, box.CursorIndex);
+    }
+
     // -------------------------------------------------------------------------
     // ReadOnly
 
@@ -822,8 +870,11 @@ public class TextInputBoxTests
     public void ReadOnly_AllowsCursorNavigation()
     {
         TextInputBox box = Make("hello");
-        box.ReadOnly = true;
         box.Focus();
+        _kb.Press(Keys.Home);
+        Update(box);
+        _kb.Release();
+        box.ReadOnly = true;
         _kb.Press(Keys.Right);
 
         Update(box);

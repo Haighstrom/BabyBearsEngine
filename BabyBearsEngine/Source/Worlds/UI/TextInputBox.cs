@@ -99,22 +99,28 @@ public class TextInputBox : Entity
     }
 
     /// <summary>
-    /// The current text content. Setting this resets the cursor to the start and fires
-    /// <see cref="TextChanged"/>.
+    /// The current text content. Setting this truncates to <see cref="MaxLength"/> (when
+    /// non-zero), moves the cursor to the end of the new text, and fires <see cref="TextChanged"/>.
     /// </summary>
     public virtual string Text
     {
         get => _text;
         set
         {
-            if (_text == value)
+            // Apply MaxLength to programmatic assignments the same way TypeChar enforces it during
+            // keystrokes, so setting Text can never bypass the limit.
+            string truncated = _maxLength > 0 && value.Length > _maxLength ? value[.._maxLength] : value;
+
+            if (_text == truncated)
             {
                 return;
             }
 
             string old = _text;
-            _text = value;
-            _cursorIndex = Math.Clamp(_cursorIndex, 0, _text.Length);
+            _text = truncated;
+            // Cursor at end of new text — the caller replaced the content, so the previous cursor
+            // position has no meaningful relationship to the new content.
+            _cursorIndex = _text.Length;
             _anchorIndex = _cursorIndex;
             _scrollOffset = 0;
             UpdateDisplay();
