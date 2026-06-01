@@ -192,17 +192,6 @@ public class TweenTests
         Assert.AreEqual(0.5, tween.LinearProgress, delta: 1e-10);
     }
 
-    [TestMethod]
-    public void Update_WhenInactive_DoesNotAdvanceProgress()
-    {
-        var tween = new CapturingTween(1.0) { Active = false };
-
-        tween.Update(0.5);
-
-        Assert.AreEqual(0.0, tween.Progress);
-        Assert.AreEqual(0, tween.ProgressUpdateCount);
-    }
-
     // TimeRemaining
 
     [TestMethod]

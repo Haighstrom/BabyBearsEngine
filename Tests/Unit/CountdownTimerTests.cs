@@ -179,18 +179,6 @@ public class CountdownTimerTests
         Assert.IsFalse(timer.Exists);
     }
 
-    [TestMethod]
-    public void Update_WhenInactive_DoesNotFireCompleted()
-    {
-        int fired = 0;
-        var timer = InContainer(new CountdownTimer(1.0) { Active = false });
-        timer.Completed += () => fired++;
-
-        timer.Update(2.0);
-
-        Assert.AreEqual(0, fired);
-    }
-
     // Ticked
 
     [TestMethod]
@@ -260,15 +248,4 @@ public class CountdownTimerTests
         Assert.AreEqual("completed", order[1]);
     }
 
-    [TestMethod]
-    public void Update_WhenInactive_DoesNotFireTicked()
-    {
-        int fired = 0;
-        var timer = InContainer(new CountdownTimer(5.0, tickInterval: 1.0) { Active = false });
-        timer.Ticked += () => fired++;
-
-        timer.Update(3.0);
-
-        Assert.AreEqual(0, fired);
-    }
 }

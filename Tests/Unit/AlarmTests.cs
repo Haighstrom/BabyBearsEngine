@@ -119,18 +119,6 @@ public class AlarmTests
     }
 
     [TestMethod]
-    public void Update_WhenInactive_DoesNotFireCompleted()
-    {
-        int fired = 0;
-        var alarm = InContainer(new Alarm(1.0) { Active = false });
-        alarm.Completed += () => fired++;
-
-        alarm.Update(2.0);
-
-        Assert.AreEqual(0, fired);
-    }
-
-    [TestMethod]
     public void Constructor_WithCallback_WiresCompletedEvent()
     {
         int fired = 0;

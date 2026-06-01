@@ -65,11 +65,6 @@ public class CountdownTimer : UpdateableBase
     /// <inheritdoc/>
     public override void Update(double elapsed)
     {
-        if (!Active)
-        {
-            return;
-        }
-
         Elapsed += elapsed;
 
         while (Elapsed >= _nextTickThreshold && _nextTickThreshold < Duration)

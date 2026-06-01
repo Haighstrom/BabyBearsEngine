@@ -65,11 +65,6 @@ public abstract class Tween : UpdateableBase
     /// <inheritdoc/>
     public sealed override void Update(double elapsed)
     {
-        if (!Active)
-        {
-            return;
-        }
-
         _elapsed += elapsed;
 
         bool cycleCompleted = _elapsed >= Duration;
