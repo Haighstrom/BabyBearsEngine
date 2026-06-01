@@ -204,6 +204,16 @@ public class TextInputBox : Entity
     public event EventHandler? FocusLost;
 
     /// <inheritdoc/>
+    protected override void OnRemoved()
+    {
+        // Container.Remove only unlinks parent — it doesn't notify us. Without this, a focused
+        // box whose owning panel is closed would keep _hasFocus = true and continue consuming
+        // keystrokes the next time it was re-added.
+        Blur();
+        base.OnRemoved();
+    }
+
+    /// <inheritdoc/>
     public override void Update(double elapsed)
     {
         base.Update(elapsed);

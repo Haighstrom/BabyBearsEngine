@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using BabyBearsEngine.Input;
+using BabyBearsEngine.Worlds;
 using BabyBearsEngine.Worlds.UI;
 
 namespace BabyBearsEngine.Tests.Unit;
@@ -108,6 +109,14 @@ public class TextInputBoxTests
         TextInputBox box = new(0, 0, 200, 30);
         box.Text = initialText;
         return box;
+    }
+
+    private sealed class FakeContainer : IContainer
+    {
+        public void Add(IAddable entity) { }
+        public void Remove(IAddable entity) => entity.Parent = null;
+        public void RemoveAll() { }
+        public (float x, float y) GetWindowCoordinates(float x, float y) => (x, y);
     }
 
     private void Update(TextInputBox box) => box.Update(0.016);
@@ -284,6 +293,33 @@ public class TextInputBoxTests
         box.Blur();
 
         Assert.AreEqual(0, count);
+    }
+
+    [TestMethod]
+    public void RemovedFromParent_WhileFocused_ClearsFocus()
+    {
+        TextInputBox box = Make();
+        box.Parent = new FakeContainer();
+        box.Focus();
+        Assert.IsTrue(box.HasFocus);
+
+        box.Parent = null;
+
+        Assert.IsFalse(box.HasFocus);
+    }
+
+    [TestMethod]
+    public void RemovedFromParent_WhileFocused_FiresFocusLost()
+    {
+        TextInputBox box = Make();
+        box.Parent = new FakeContainer();
+        box.Focus();
+        int count = 0;
+        box.FocusLost += (_, _) => count++;
+
+        box.Parent = null;
+
+        Assert.AreEqual(1, count);
     }
 
     // -------------------------------------------------------------------------

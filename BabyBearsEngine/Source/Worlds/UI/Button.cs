@@ -155,4 +155,15 @@ public class Button : Entity, IMouseInteractable
         _pressed = false;
         ApplyState();
     }
+
+    /// <inheritdoc/>
+    protected override void OnRemoved()
+    {
+        // Container.Remove doesn't notify children, so a button removed mid-interaction can
+        // keep _hovered / _pressed set and render in the wrong state when re-added later.
+        _hovered = false;
+        _pressed = false;
+        ApplyState();
+        base.OnRemoved();
+    }
 }
