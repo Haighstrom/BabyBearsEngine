@@ -11,13 +11,37 @@ namespace BabyBearsEngine.Worlds.Particles;
 /// <param name="centre">Local-space centre of the circle.</param>
 /// <param name="radius">Circle radius. Must be ≥ 0.</param>
 /// <param name="speed">Magnitude of the outward velocity applied to each particle, in units per second.</param>
-public sealed class CircleEmitterShape(Point centre, float radius, float speed) : IEmitterShape
+public sealed class CircleEmitterShape : IEmitterShape
 {
-    public Point Centre { get; set; } = centre;
+    private float _radius;
 
-    public float Radius { get; set; } = radius;
+    /// <param name="centre">Local-space centre of the circle.</param>
+    /// <param name="radius">Circle radius. Must be ≥ 0.</param>
+    /// <param name="speed">Magnitude of the outward velocity applied to each particle, in units per second.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="radius"/> is negative.</exception>
+    public CircleEmitterShape(Point centre, float radius, float speed)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(radius);
+        Centre = centre;
+        _radius = radius;
+        Speed = speed;
+    }
 
-    public float Speed { get; set; } = speed;
+    public Point Centre { get; set; }
+
+    /// <summary>Circle radius. Must be ≥ 0.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when set to a negative value.</exception>
+    public float Radius
+    {
+        get => _radius;
+        set
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(value);
+            _radius = value;
+        }
+    }
+
+    public float Speed { get; set; }
 
     /// <summary>
     /// When true, particles spawn uniformly anywhere inside the disk; when false (the default)

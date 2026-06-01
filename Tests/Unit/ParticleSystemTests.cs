@@ -379,6 +379,31 @@ public class CircleEmitterShapeTests
             Assert.IsLessThanOrEqualTo(50.001f, distance, $"Iteration {i}: distance {distance} outside circle.");
         }
     }
+
+    [TestMethod]
+    public void Constructor_NegativeRadius_Throws()
+    {
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(
+            () => new CircleEmitterShape(Point.Zero, radius: -1f, speed: 10f));
+    }
+
+    [TestMethod]
+    public void RadiusSetter_NegativeValue_Throws()
+    {
+        var shape = new CircleEmitterShape(Point.Zero, radius: 10f, speed: 1f);
+
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => shape.Radius = -1f);
+    }
+
+    [TestMethod]
+    public void RadiusSetter_Zero_IsAllowed()
+    {
+        var shape = new CircleEmitterShape(Point.Zero, radius: 10f, speed: 1f);
+
+        shape.Radius = 0f;
+
+        Assert.AreEqual(0f, shape.Radius);
+    }
 }
 
 [TestClass]
@@ -440,6 +465,47 @@ public class RectEmitterShapeTests
         ParticleSpawn spawn = shape.Sample(new SystemRandom(seed: 1));
 
         Assert.AreEqual(new Point(2, -8), spawn.Velocity);
+    }
+
+    [TestMethod]
+    public void Constructor_NegativeAreaWidth_Throws()
+    {
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(
+            () => new RectEmitterShape(new Rect(0, 0, -10, 10), Point.Zero));
+    }
+
+    [TestMethod]
+    public void Constructor_NegativeAreaHeight_Throws()
+    {
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(
+            () => new RectEmitterShape(new Rect(0, 0, 10, -10), Point.Zero));
+    }
+
+    [TestMethod]
+    public void AreaSetter_NegativeWidth_Throws()
+    {
+        var shape = new RectEmitterShape(new Rect(0, 0, 10, 10), Point.Zero);
+
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => shape.Area = new Rect(0, 0, -5, 10));
+    }
+
+    [TestMethod]
+    public void AreaSetter_NegativeHeight_Throws()
+    {
+        var shape = new RectEmitterShape(new Rect(0, 0, 10, 10), Point.Zero);
+
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => shape.Area = new Rect(0, 0, 10, -5));
+    }
+
+    [TestMethod]
+    public void AreaSetter_ZeroSize_IsAllowed()
+    {
+        var shape = new RectEmitterShape(new Rect(0, 0, 10, 10), Point.Zero);
+
+        shape.Area = new Rect(0, 0, 0, 0);
+
+        Assert.AreEqual(0f, shape.Area.W);
+        Assert.AreEqual(0f, shape.Area.H);
     }
 }
 
