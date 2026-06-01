@@ -19,6 +19,7 @@ public class DropdownList<T> : Entity
     private bool _isOpen = false;
     private readonly IReadOnlyList<T> _items;
     private readonly Func<int, string, Entity> _optionFactory;
+    private readonly List<(Entity Option, EventHandler Handler)> _optionHandlers = [];
     private Entity? _optionList;
     private readonly Action<string> _setHeaderText;
 
@@ -127,6 +128,14 @@ public class DropdownList<T> : Entity
         }
 
         _isOpen = false;
+        // Explicitly unsubscribe the per-option click handlers so option entities released to
+        // the caller can't keep firing into SelectItem (and the dropdown's SelectionChanged
+        // subscribers) after they've left the tree.
+        foreach (var (option, handler) in _optionHandlers)
+        {
+            option.LeftClicked -= handler;
+        }
+        _optionHandlers.Clear();
         Remove(_optionList);
         _optionList = null;
     }
@@ -157,11 +166,23 @@ public class DropdownList<T> : Entity
         {
             int capturedIndex = i;
             Entity option = _optionFactory(i, _formatter(_items[i]));
-            option.LeftClicked += (_, _) => SelectItem(capturedIndex);
+            EventHandler handler = (_, _) => SelectItem(capturedIndex);
+            option.LeftClicked += handler;
+            _optionHandlers.Add((option, handler));
             _optionList.Add(option);
         }
 
         Add(_optionList);
+    }
+
+    /// <inheritdoc/>
+    protected override void OnRemoved()
+    {
+        // The dropdown left the tree (or was reparented). Force the option list closed so its
+        // click handlers can't fire into a stale this and so the option list isn't left
+        // parented to a now-detached dropdown.
+        Close();
+        base.OnRemoved();
     }
 
     /// <summary>Selects the item at <paramref name="index"/>, closes the list, and raises <see cref="SelectionChanged"/>.</summary>

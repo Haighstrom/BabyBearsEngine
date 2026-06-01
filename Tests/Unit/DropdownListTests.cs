@@ -159,6 +159,34 @@ public class DropdownListTests
         Assert.IsFalse(f.Dropdown.IsOpen);
     }
 
+    [TestMethod]
+    public void RemovedFromParent_WhileOpen_ForcesClose()
+    {
+        TestFixture f = new();
+        f.Dropdown.Open();
+        Assert.IsTrue(f.Dropdown.IsOpen);
+
+        f.Dropdown.Parent = null;
+
+        Assert.IsFalse(f.Dropdown.IsOpen);
+    }
+
+    [TestMethod]
+    public void RemovedFromParent_WhileOpen_OptionClickAfterwardsDoesNotFireSelectionChanged()
+    {
+        // Initial index 0 ("Alpha"); click option 1 ("Beta") would normally fire SelectionChanged.
+        TestFixture f = new();
+        f.Dropdown.Open();
+        StubEntity secondOption = f.Options[1];
+        bool fired = false;
+        f.Dropdown.SelectionChanged += (_, _) => fired = true;
+
+        f.Dropdown.Parent = null;
+        secondOption.SimulateClick();
+
+        Assert.IsFalse(fired);
+    }
+
     // SelectItem
 
     [TestMethod]
