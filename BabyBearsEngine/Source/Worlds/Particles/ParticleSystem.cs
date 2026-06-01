@@ -161,6 +161,16 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
+        // Cap elapsed before either ageing or emission can act on it. After a long pause
+        // (debugger break, slow first frame, system hibernation) the next tick's elapsed can
+        // be many seconds, which would otherwise leap particles across the screen and dump a
+        // huge backlog into the spawn loop. Capping at one second's worth means recovery
+        // happens over the next few normal frames instead.
+        if (elapsed > MaxElapsedPerTick)
+        {
+            elapsed = MaxElapsedPerTick;
+        }
+
         AgeAndIntegrate(elapsed);
 
         if (Emitting && _particles.Count < MaxParticles)
@@ -179,6 +189,8 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
             _emitCounter = Math.Min(_emitCounter, 1);
         }
     }
+
+    private const double MaxElapsedPerTick = 1.0;
 
     /// <inheritdoc/>
     public void Render(ref Matrix3 projection, ref Matrix3 modelView)

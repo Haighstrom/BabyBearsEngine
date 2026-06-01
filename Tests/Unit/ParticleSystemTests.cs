@@ -118,6 +118,23 @@ public class ParticleSystemTests
     }
 
     [TestMethod]
+    public void Update_HugeElapsed_DoesNotFloodWithBackloggedParticles()
+    {
+        // After a debugger break or slow first frame, elapsed may be many seconds. The spawn
+        // counter would otherwise accumulate the full backlog and dump it on the recovery tick,
+        // saturating MaxParticles or spending a long while in the spawn loop.
+        var system = MakeSystem();
+        system.EmissionRate = 1000f;
+        system.Lifetime = 100f;
+        system.MaxParticles = 100_000;
+
+        system.Update(100.0); // 100 seconds — would naïvely spawn 100,000 particles
+
+        // Cap is 1 second's worth (EmissionRate=1000 → at most ~1000), with some headroom.
+        Assert.IsLessThan(2000, system.ParticleCount);
+    }
+
+    [TestMethod]
     public void Update_RemovesParticlesAfterLifetime()
     {
         var system = MakeSystem();
