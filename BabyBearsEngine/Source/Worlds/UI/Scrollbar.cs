@@ -170,6 +170,13 @@ public class Scrollbar : Entity
     /// <see cref="Entity.InterceptsMouseScroll"/> is true. Defaults to 0.1 (10% of the track).
     /// Scrolling up decreases <see cref="AmountFilled"/>; scrolling down increases it.
     /// </summary>
+    /// <remarks>
+    /// Wheel delta is mapped via <see cref="Math.Sign(float)"/>, so both horizontal and vertical
+    /// scrollbars respond to vertical wheel input — this is by design, since most mice have only
+    /// a vertical wheel and users expect either scrollbar under the cursor to react. There is no
+    /// separate horizontal-wheel binding; a vertical wheel tick adjusts whichever scrollbar
+    /// claims the scroll event via <see cref="Entity.InterceptsMouseScroll"/>.
+    /// </remarks>
     public float WheelScrollStep { get; set; } = 0.1f;
 
     /// <summary>
