@@ -613,4 +613,53 @@ public class ArcEmitterShapeTests
         Assert.AreEqual(123f, spawn.Position.X, 0.001f);
         Assert.AreEqual(456f, spawn.Position.Y, 0.001f);
     }
+
+    [TestMethod]
+    public void Constructor_NegativeMinSpeed_Throws()
+    {
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(
+            () => new ArcEmitterShape(Point.Zero, 0f, 360f, minSpeed: -1f, maxSpeed: 10f));
+    }
+
+    [TestMethod]
+    public void Constructor_MaxSpeedLessThanMinSpeed_Throws()
+    {
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(
+            () => new ArcEmitterShape(Point.Zero, 0f, 360f, minSpeed: 50f, maxSpeed: 10f));
+    }
+
+    [TestMethod]
+    public void MinSpeedSetter_Negative_Throws()
+    {
+        ArcEmitterShape shape = new(Point.Zero, 0f, 360f, minSpeed: 10f, maxSpeed: 50f);
+
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => shape.MinSpeed = -1f);
+    }
+
+    [TestMethod]
+    public void MinSpeedSetter_GreaterThanMaxSpeed_Throws()
+    {
+        ArcEmitterShape shape = new(Point.Zero, 0f, 360f, minSpeed: 10f, maxSpeed: 50f);
+
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => shape.MinSpeed = 100f);
+    }
+
+    [TestMethod]
+    public void MaxSpeedSetter_LessThanMinSpeed_Throws()
+    {
+        ArcEmitterShape shape = new(Point.Zero, 0f, 360f, minSpeed: 10f, maxSpeed: 50f);
+
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => shape.MaxSpeed = 5f);
+    }
+
+    [TestMethod]
+    public void SpeedSetters_EqualValues_AreAllowed()
+    {
+        ArcEmitterShape shape = new(Point.Zero, 0f, 360f, minSpeed: 10f, maxSpeed: 50f);
+
+        shape.MaxSpeed = 10f;
+
+        Assert.AreEqual(10f, shape.MinSpeed);
+        Assert.AreEqual(10f, shape.MaxSpeed);
+    }
 }

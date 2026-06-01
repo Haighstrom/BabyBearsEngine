@@ -26,22 +26,58 @@ namespace BabyBearsEngine.Worlds.Particles;
 /// <param name="arcSpreadDegrees">Total angular span of the arc, in degrees. 0 = beam, 360 = full circle.</param>
 /// <param name="minSpeed">Minimum velocity magnitude, in units per second. Must be ≥ 0.</param>
 /// <param name="maxSpeed">Maximum velocity magnitude, in units per second. Must be ≥ <paramref name="minSpeed"/>.</param>
-public sealed class ArcEmitterShape(
-    Point origin,
-    float arcCentreDegrees,
-    float arcSpreadDegrees,
-    float minSpeed,
-    float maxSpeed) : IEmitterShape
+public sealed class ArcEmitterShape : IEmitterShape
 {
-    public Point Origin { get; set; } = origin;
+    private float _minSpeed;
+    private float _maxSpeed;
 
-    public float ArcCentreDegrees { get; set; } = arcCentreDegrees;
+    /// <param name="origin">Local-space position every particle is emitted from.</param>
+    /// <param name="arcCentreDegrees">Centre direction of the arc, in degrees (math convention; see remarks).</param>
+    /// <param name="arcSpreadDegrees">Total angular span of the arc, in degrees. 0 = beam, 360 = full circle.</param>
+    /// <param name="minSpeed">Minimum velocity magnitude, in units per second. Must be ≥ 0.</param>
+    /// <param name="maxSpeed">Maximum velocity magnitude, in units per second. Must be ≥ <paramref name="minSpeed"/>.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="minSpeed"/> is negative or <paramref name="maxSpeed"/> is less than <paramref name="minSpeed"/>.</exception>
+    public ArcEmitterShape(Point origin, float arcCentreDegrees, float arcSpreadDegrees, float minSpeed, float maxSpeed)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(minSpeed);
+        ArgumentOutOfRangeException.ThrowIfLessThan(maxSpeed, minSpeed);
+        Origin = origin;
+        ArcCentreDegrees = arcCentreDegrees;
+        ArcSpreadDegrees = arcSpreadDegrees;
+        _minSpeed = minSpeed;
+        _maxSpeed = maxSpeed;
+    }
 
-    public float ArcSpreadDegrees { get; set; } = arcSpreadDegrees;
+    public Point Origin { get; set; }
 
-    public float MinSpeed { get; set; } = minSpeed;
+    public float ArcCentreDegrees { get; set; }
 
-    public float MaxSpeed { get; set; } = maxSpeed;
+    public float ArcSpreadDegrees { get; set; }
+
+    /// <summary>Minimum velocity magnitude, in units per second. Must be ≥ 0 and ≤ <see cref="MaxSpeed"/>.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when set to a negative value or a value greater than <see cref="MaxSpeed"/>.</exception>
+    public float MinSpeed
+    {
+        get => _minSpeed;
+        set
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(value);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(value, _maxSpeed);
+            _minSpeed = value;
+        }
+    }
+
+    /// <summary>Maximum velocity magnitude, in units per second. Must be ≥ <see cref="MinSpeed"/>.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when set to a value less than <see cref="MinSpeed"/>.</exception>
+    public float MaxSpeed
+    {
+        get => _maxSpeed;
+        set
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(value, _minSpeed);
+            _maxSpeed = value;
+        }
+    }
 
     public ParticleSpawn Sample(IRandom random)
     {
