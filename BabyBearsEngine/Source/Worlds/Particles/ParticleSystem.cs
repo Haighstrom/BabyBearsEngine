@@ -159,6 +159,8 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
     /// <inheritdoc/>
     public void Update(double elapsed)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
         AgeAndIntegrate(elapsed);
 
         if (Emitting && _particles.Count < MaxParticles)
@@ -181,6 +183,8 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
     /// <inheritdoc/>
     public void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
         if (_particles.Count == 0)
         {
             return;

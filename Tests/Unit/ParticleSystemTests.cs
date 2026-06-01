@@ -269,6 +269,30 @@ public class ParticleSystemTests
         Assert.IsNull(system.Texture);
     }
 
+    [TestMethod]
+    public void Update_AfterDispose_Throws()
+    {
+        ParticleSystem system = MakeSystem();
+        system.Dispose();
+
+        Assert.ThrowsExactly<ObjectDisposedException>(() => system.Update(0.016));
+    }
+
+    [TestMethod]
+    public void Render_AfterDispose_Throws()
+    {
+        ParticleSystem system = MakeSystem();
+        system.Dispose();
+
+        // Render takes a ref Matrix3, so call it via a local lambda.
+        Assert.ThrowsExactly<ObjectDisposedException>(() =>
+        {
+            Matrix3 proj = Matrix3.Identity;
+            Matrix3 mv = Matrix3.Identity;
+            system.Render(ref proj, ref mv);
+        });
+    }
+
     private sealed class FakeTexture : BabyBearsEngine.OpenGL.ITexture
     {
         public int Handle => 0;
