@@ -159,7 +159,12 @@ public class TextInputBox : Entity
     /// <summary>True when at least one character is selected.</summary>
     public bool HasSelection => _cursorIndex != _anchorIndex;
 
-    /// <summary>Gives this box keyboard focus, placing the cursor at the current position.</summary>
+    // Process-wide focus arbiter: at most one TextInputBox holds keyboard focus across the engine.
+    // Without this, clicking box A and then box B would leave both consuming every keystroke,
+    // since each owns an independent _hasFocus flag and polls the global keyboard.
+    private static TextInputBox? s_focusedBox;
+
+    /// <summary>Gives this box keyboard focus, placing the cursor at the current position. Blurs any other currently-focused <see cref="TextInputBox"/>.</summary>
     public void Focus()
     {
         if (_hasFocus)
@@ -167,6 +172,9 @@ public class TextInputBox : Entity
             return;
         }
 
+        s_focusedBox?.Blur();
+
+        s_focusedBox = this;
         _hasFocus = true;
         _blinkTimer = 0.0;
         UpdateDisplay();
@@ -179,6 +187,11 @@ public class TextInputBox : Entity
         if (!_hasFocus)
         {
             return;
+        }
+
+        if (s_focusedBox == this)
+        {
+            s_focusedBox = null;
         }
 
         _hasFocus = false;

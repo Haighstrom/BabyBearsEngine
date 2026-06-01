@@ -322,6 +322,55 @@ public class TextInputBoxTests
         Assert.AreEqual(1, count);
     }
 
+    [TestMethod]
+    public void Focus_OnSecondBox_BlursTheFirst()
+    {
+        TextInputBox a = Make();
+        TextInputBox b = Make();
+        a.Focus();
+
+        b.Focus();
+
+        Assert.IsFalse(a.HasFocus);
+        Assert.IsTrue(b.HasFocus);
+
+        b.Blur();
+    }
+
+    [TestMethod]
+    public void Focus_OnSecondBox_FiresFocusLostOnTheFirst()
+    {
+        TextInputBox a = Make();
+        TextInputBox b = Make();
+        a.Focus();
+        int aFocusLostCount = 0;
+        a.FocusLost += (_, _) => aFocusLostCount++;
+
+        b.Focus();
+
+        Assert.AreEqual(1, aFocusLostCount);
+
+        b.Blur();
+    }
+
+    [TestMethod]
+    public void Focus_OnSameBoxTwice_DoesNotFireSpuriousEvents()
+    {
+        TextInputBox box = Make();
+        int gained = 0;
+        int lost = 0;
+        box.FocusGained += (_, _) => gained++;
+        box.FocusLost += (_, _) => lost++;
+
+        box.Focus();
+        box.Focus();
+
+        Assert.AreEqual(1, gained);
+        Assert.AreEqual(0, lost);
+
+        box.Blur();
+    }
+
     // -------------------------------------------------------------------------
     // Keyboard ignored when not focused
 
