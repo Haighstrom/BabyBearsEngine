@@ -199,6 +199,22 @@ public class ErrorFileTrimmerTests
     }
 
     [TestMethod]
+    public void ArchivePreviousRun_RepeatedRunsAtCap_KeepsExactlyMaxRunsNeverMore()
+    {
+        const int maxRuns = 5;
+        const int totalRuns = 20;
+
+        for (int run = 1; run <= totalRuns; run++)
+        {
+            File.WriteAllText(_errorsPath, MakeRun(run));
+            ErrorFileTrimmer.ArchivePreviousRun(_errorsPath, _archivePath, maxArchiveRuns: maxRuns);
+
+            int count = CountOccurrences(ReadArchive(), ErrorFileTrimmer.RunStartMarker);
+            Assert.IsLessThanOrEqualTo(maxRuns, count, $"After run {run}, archive has {count} markers (max {maxRuns})");
+        }
+    }
+
+    [TestMethod]
     public void ArchivePreviousRun_ArchiveExceedsMaxRuns_OldestRunRemoved()
     {
         // Archive has runs 10..1 (newest first); errors.log has run 11.
