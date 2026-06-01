@@ -7,9 +7,9 @@ namespace BabyBearsEngine.Worlds.UI;
 
 /// <summary>
 /// A small floating label that's normally hidden, shown by calling <see cref="Show"/> after a
-/// hover delay and hidden by <see cref="Hide"/>. Trigger wiring is the caller's job — typically
-/// subscribe to a target's <c>MouseHovered</c> / <c>MouseHoverStopped</c> / <c>MouseExited</c>
-/// events.
+/// hover delay and hidden by <see cref="Hide"/>. Use <see cref="AttachTo"/> to wire it to a
+/// target's hover events with automatic cleanup, or subscribe to the events manually for full
+/// control.
 /// </summary>
 /// <remarks>
 /// <para>The tooltip is a standalone <see cref="Entity"/>: it does not own a "target" and does
@@ -78,5 +78,37 @@ public sealed class SimpleToolTip : Entity
     public void Hide()
     {
         Visible = false;
+    }
+
+    /// <summary>
+    /// Wires this tooltip to <paramref name="target"/>: <see cref="Show"/> on
+    /// <see cref="Entity.MouseHovered"/>, <see cref="Hide"/> on
+    /// <see cref="Entity.MouseHoverStopped"/> or <see cref="Entity.MouseExited"/>. The
+    /// subscription is torn down (and the tooltip hidden) when either the target or this
+    /// tooltip is removed from the entity tree, so a caller doesn't have to remember to
+    /// dismiss the tooltip when the trigger goes away.
+    /// </summary>
+    public void AttachTo(Entity target)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+
+        EventHandler showHandler = (_, _) => Show();
+        EventHandler hideHandler = (_, _) => Hide();
+        EventHandler? detachHandler = null;
+        detachHandler = (_, _) =>
+        {
+            target.MouseHovered -= showHandler;
+            target.MouseHoverStopped -= hideHandler;
+            target.MouseExited -= hideHandler;
+            target.Removed -= detachHandler;
+            Removed -= detachHandler;
+            Hide();
+        };
+
+        target.MouseHovered += showHandler;
+        target.MouseHoverStopped += hideHandler;
+        target.MouseExited += hideHandler;
+        target.Removed += detachHandler;
+        Removed += detachHandler;
     }
 }
