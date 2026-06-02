@@ -69,6 +69,19 @@ internal class AudioDemoWorld : DemoWorld
 
     public override string Name => "Audio Demo";
 
+    public override void Unload()
+    {
+        // Pressing Back swaps the world out via Engine.ChangeWorld, which runs this Unload —
+        // stop any music we kicked off so the demo can't leave audio playing after the user
+        // has left it. Unsubscribe too, otherwise the static Audio facade would still hold
+        // references to this dead world's handlers.
+        Audio.StopMusic();
+        Audio.Playlist.TrackChanged -= OnTrackChanged;
+        Audio.MusicStateChanged -= OnStateChanged;
+
+        base.Unload();
+    }
+
     private void LoadClips()
     {
         // Each clip is loaded individually so a single bad asset doesn't take down the whole demo —
