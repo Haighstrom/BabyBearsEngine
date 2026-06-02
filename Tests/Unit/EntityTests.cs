@@ -137,4 +137,39 @@ public class EntityTests
         Assert.AreEqual(10f, origin.X, 1e-4);
         Assert.AreEqual(20f, origin.Y, 1e-4);
     }
+
+    // Disabled (IMouseInteractable)
+
+    [TestMethod]
+    public void Disabled_Default_IsFalse()
+    {
+        var e = new Entity(0, 0, 10, 10);
+
+        Assert.IsFalse(e.Disabled);
+    }
+
+    [TestMethod]
+    public void Disabled_CanBeSetAndRead()
+    {
+        var e = new Entity(0, 0, 10, 10);
+
+        e.Disabled = true;
+
+        Assert.IsTrue(e.Disabled);
+    }
+
+    [TestMethod]
+    public void Disabled_SetThroughEntity_VisibleViaIMouseInteractable()
+    {
+        // ClickController reads target.Disabled through the IMouseInteractable interface, so the
+        // Entity's setter must propagate to the interface getter for the controller to skip the
+        // entity. Without an explicit Disabled property on Entity the interface default (false)
+        // would be returned regardless of what gameplay code tries to set.
+        var e = new Entity(0, 0, 10, 10);
+        IMouseInteractable asInterface = e;
+
+        e.Disabled = true;
+
+        Assert.IsTrue(asInterface.Disabled);
+    }
 }

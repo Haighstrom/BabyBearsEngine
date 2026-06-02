@@ -13,7 +13,6 @@ namespace BabyBearsEngine.Worlds.UI;
 public class Button : Entity, IMouseInteractable
 {
     private readonly IGraphic? _background;
-    private bool _disabled = false;
     private bool _hovered = false;
     private bool _pressed = false;
     private readonly TextGraphic? _textImage;
@@ -57,14 +56,14 @@ public class Button : Entity, IMouseInteractable
     /// When true, the button ignores all mouse interaction and renders with the theme's
     /// <see cref="ButtonTheme.Disabled"/> tint. Defaults to false.
     /// </summary>
-    public bool Disabled
+    public override bool Disabled
     {
-        get => _disabled;
+        get => base.Disabled;
         set
         {
-            if (_disabled != value)
+            if (base.Disabled != value)
             {
-                _disabled = value;
+                base.Disabled = value;
                 _hovered = false;
                 _pressed = false;
                 ApplyState();
@@ -101,7 +100,7 @@ public class Button : Entity, IMouseInteractable
             return;
         }
 
-        _background.Colour = _disabled ? _theme.Disabled
+        _background.Colour = Disabled ? _theme.Disabled
                            : _pressed ? _theme.Pressed
                            : _hovered ? _theme.Hover
                            : _theme.Idle;
@@ -109,7 +108,7 @@ public class Button : Entity, IMouseInteractable
 
     protected override void OnLeftPressed()
     {
-        if (_disabled)
+        if (Disabled)
         {
             return;
         }
@@ -121,7 +120,7 @@ public class Button : Entity, IMouseInteractable
 
     protected override void OnLeftClicked()
     {
-        if (_disabled)
+        if (Disabled)
         {
             return;
         }
@@ -133,7 +132,7 @@ public class Button : Entity, IMouseInteractable
 
     protected override void OnMouseEntered()
     {
-        if (_disabled)
+        if (Disabled)
         {
             return;
         }
@@ -145,7 +144,7 @@ public class Button : Entity, IMouseInteractable
 
     protected override void OnMouseExited()
     {
-        if (_disabled)
+        if (Disabled)
         {
             return;
         }

@@ -141,6 +141,14 @@ public class Entity : ContainerEntity, IMouseInteractable
     /// <inheritdoc cref="IMouseInteractable.HitRect"/>
     public virtual Rect HitRect => PositionOnScreen;
 
+    /// <inheritdoc cref="IMouseInteractable.Disabled"/>
+    /// <remarks>
+    /// Distinct from <see cref="IUpdateable.Active"/> — Active = false halts per-frame updates,
+    /// while Disabled = true halts mouse interaction. A common pattern is to set both on a
+    /// "frozen" entity, but either flag can be flipped independently.
+    /// </remarks>
+    public virtual bool Disabled { get; set; } = false;
+
     /// <summary>
     /// Translates a point from this entity's local space to window space by adding this entity's
     /// position and walking up the parent chain.
