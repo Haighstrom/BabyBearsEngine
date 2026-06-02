@@ -59,13 +59,18 @@ public class Camera : ContainerEntity, ICamera
 
     public float GameSpeed { get; set; } = 1;
 
-    public float MaxX { get; set; } = 0f;
+    // Default to ±Infinity rather than 0 so an unconfigured camera doesn't silently clamp.
+    // With MinX = MaxX = 0 the panning controllers (CameraMoveWhenMouseAtEdgeController et al.)
+    // would Math.Min/Max the view position against meaningless bounds and shift it to negative
+    // territory every frame the cursor is at an edge. Infinity means "no clamping" — set
+    // explicitly when you want bounded panning.
+    public float MaxX { get; set; } = float.PositiveInfinity;
 
-    public float MaxY { get; set; } = 0f;
+    public float MaxY { get; set; } = float.PositiveInfinity;
 
-    public float MinX { get; set; } = 0f;
+    public float MinX { get; set; } = float.NegativeInfinity;
 
-    public float MinY { get; set; } = 0f;
+    public float MinY { get; set; } = float.NegativeInfinity;
 
     /// <exception cref="InvalidOperationException">Thrown when <see cref="AddableBase.Parent"/> is <c>null</c> — a camera outside the entity tree has no screen viewport to test against.</exception>
     public bool MouseIntersecting

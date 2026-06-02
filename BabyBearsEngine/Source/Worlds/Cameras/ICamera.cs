@@ -14,16 +14,16 @@ public interface ICamera : IRect, IUpdateable, IRenderable, IContainer
     /// <summary>Time-scale multiplier applied to all updates within this camera. 1 = normal speed.</summary>
     float GameSpeed { get; set; }
 
-    /// <summary>Maximum X world-space coordinate of the world this camera observes.</summary>
+    /// <summary>Maximum X world-space coordinate the camera's panning controllers may scroll to. Defaults to <see cref="float.PositiveInfinity"/> (no clamping); set this to bound horizontal panning.</summary>
     float MaxX { get; set; }
 
-    /// <summary>Maximum Y world-space coordinate of the world this camera observes.</summary>
+    /// <summary>Maximum Y world-space coordinate the camera's panning controllers may scroll to. Defaults to <see cref="float.PositiveInfinity"/> (no clamping); set this to bound vertical panning.</summary>
     float MaxY { get; set; }
 
-    /// <summary>Minimum X world-space coordinate of the world this camera observes.</summary>
+    /// <summary>Minimum X world-space coordinate the camera's panning controllers may scroll to. Defaults to <see cref="float.NegativeInfinity"/> (no clamping); set this to bound horizontal panning.</summary>
     float MinX { get; set; }
 
-    /// <summary>Minimum Y world-space coordinate of the world this camera observes.</summary>
+    /// <summary>Minimum Y world-space coordinate the camera's panning controllers may scroll to. Defaults to <see cref="float.NegativeInfinity"/> (no clamping); set this to bound vertical panning.</summary>
     float MinY { get; set; }
 
     /// <summary>True when the mouse cursor is within this camera's screen-space bounds.</summary>
