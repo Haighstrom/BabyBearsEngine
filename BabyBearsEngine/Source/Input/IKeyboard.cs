@@ -5,6 +5,10 @@
 /// <c>...Down</c> means the key is currently held; <c>...Pressed</c> and <c>...Released</c>
 /// detect the single frame of a state change (edge-triggered).
 /// </summary>
+/// <remarks>
+/// <see cref="Keys.Unknown"/> is always reported as not-down / not-pressed / not-released —
+/// the platform layer treats it as a sentinel for "no mapping" rather than a queryable key.
+/// </remarks>
 public interface IKeyboard
 {
     /// <summary>Returns true if <paramref name="key"/> is currently held down.</summary>

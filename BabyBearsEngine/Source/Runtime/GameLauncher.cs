@@ -90,7 +90,7 @@ public static class GameLauncher
 
             EngineConfiguration.Initialise(
                 window: new OpenTKWindowAdapter(engine, appSettings.WindowSettings.Cursor),
-                keyboard: new OpenTKKeyboardAdapter(engine.KeyboardState),
+                keyboard: new OpenTKKeyboardAdapter(engine),
                 mouse: new OpenTKMouseAdapter(engine),
                 worldSwitcher: engine,
                 engineInfo: engine.EngineInfo,

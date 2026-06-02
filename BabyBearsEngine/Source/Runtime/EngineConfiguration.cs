@@ -270,5 +270,8 @@ internal static class EngineConfiguration
         s_worldSwitcher = null;
         GpuCapabilities.Reset();
         FontTextureCache.InvalidateCache();
+        // Clear MouseSolver's per-frame state so a second GameLauncher.Run doesn't inherit
+        // click-controller references from the previous run's disposed world.
+        Worlds.MouseSolver.Reset();
     }
 }

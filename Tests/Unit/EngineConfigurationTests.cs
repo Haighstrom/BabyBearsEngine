@@ -41,4 +41,18 @@ public class EngineConfigurationTests
 
         Assert.AreEqual(42.5, Engine.Fps);
     }
+
+    [TestMethod]
+    public void Reset_AlsoResetsMouseSolverState()
+    {
+        // Without this, a second GameLauncher.Run inherits the previous run's mouse-solver
+        // state (s_prevMousedOver holding disposed click-controllers, WheelScrollConsumed
+        // potentially still set from the last frame).
+        MouseSolver.ConsumeWheelScroll();
+        Assert.IsTrue(MouseSolver.WheelScrollConsumed);
+
+        EngineConfiguration.Reset();
+
+        Assert.IsFalse(MouseSolver.WheelScrollConsumed);
+    }
 }
