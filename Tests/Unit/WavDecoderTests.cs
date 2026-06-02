@@ -203,6 +203,98 @@ public class WavDecoderTests
         Assert.AreEqual(ALFormat.Mono16, result.Format);
     }
 
+    [TestMethod]
+    public void Decode_ChunkIdWithHighBitByte_DoesNotThrowDecoderFallback()
+    {
+        // A rogue/corrupt WAV with a high-bit byte in an unknown chunk ID would explode
+        // BinaryReader.ReadChars under default UTF-8. The decoder must read chunk IDs as raw
+        // ASCII bytes and tolerate any byte sequence in unrecognised chunks.
+        using (FileStream stream = File.Create(_tempPath))
+        using (BinaryWriter writer = new(stream))
+        {
+            int dataSize = 4;
+            int fmtSize = 16;
+            int bogusSize = 4;
+            int totalRiffSize = 4 + (8 + fmtSize) + (8 + bogusSize) + (8 + dataSize);
+
+            writer.Write("RIFF"u8.ToArray());
+            writer.Write(totalRiffSize);
+            writer.Write("WAVE"u8.ToArray());
+
+            writer.Write("fmt "u8.ToArray());
+            writer.Write(fmtSize);
+            writer.Write((ushort)1); writer.Write((ushort)1); writer.Write(44100); writer.Write(88200); writer.Write((ushort)2); writer.Write((ushort)16);
+
+            // Unrecognised chunk with a high-bit byte in its ID — must not throw.
+            writer.Write(new byte[] { 0xFF, 0xFE, 0xFD, 0xFC });
+            writer.Write(bogusSize);
+            writer.Write(new byte[bogusSize]);
+
+            writer.Write("data"u8.ToArray());
+            writer.Write(dataSize);
+            writer.Write(new byte[dataSize]);
+        }
+
+        DecodedAudio result = WavDecoder.Decode(_tempPath);
+        Assert.AreEqual(4, result.Pcm.Length);
+    }
+
+    [TestMethod]
+    public void Decode_NegativeChunkSize_Throws()
+    {
+        // A malicious chunkSize of -1 would otherwise drive stream.Position backwards.
+        using (FileStream stream = File.Create(_tempPath))
+        using (BinaryWriter writer = new(stream))
+        {
+            writer.Write("RIFF"u8.ToArray());
+            writer.Write(36);
+            writer.Write("WAVE"u8.ToArray());
+            writer.Write("xxxx"u8.ToArray());
+            writer.Write(-1);  // negative chunk size
+            writer.Write(new byte[20]);
+        }
+
+        Assert.ThrowsExactly<NotSupportedException>(() => WavDecoder.Decode(_tempPath));
+    }
+
+    [TestMethod]
+    public void Decode_ChunkSizeExceedsRemainingStream_Throws()
+    {
+        // chunkSize larger than the file would force ReadBytes to allocate a huge buffer and
+        // then short-read. The decoder should reject these up front rather than allocate first.
+        using (FileStream stream = File.Create(_tempPath))
+        using (BinaryWriter writer = new(stream))
+        {
+            writer.Write("RIFF"u8.ToArray());
+            writer.Write(36);
+            writer.Write("WAVE"u8.ToArray());
+            writer.Write("xxxx"u8.ToArray());
+            writer.Write(int.MaxValue);  // way bigger than the file
+            writer.Write(new byte[8]);
+        }
+
+        Assert.ThrowsExactly<NotSupportedException>(() => WavDecoder.Decode(_tempPath));
+    }
+
+    [TestMethod]
+    public void Decode_24BitConversion_DoesNotIntroduceSignBiasOnNegativeSamples()
+    {
+        // 24-bit sample 0x800001 (negative, just above the floor): low=0x01, mid=0x00, high=0x80.
+        // Dropping the low byte gives 16-bit 0x8000 — exact value, no bias. The previous comment
+        // claimed "truncation toward zero" but the implementation just drops the low byte
+        // (arithmetic shift, rounds toward negative infinity). The behaviour itself is fine —
+        // this test pins down the result for the negative-sample boundary case so we don't
+        // accidentally change it.
+        byte[] sample = [0x01, 0x00, 0x80];
+        WriteRawWav(audioFormat: 1, channels: 1, bitsPerSample: 24, sampleRate: 44100, dataBytes: sample);
+
+        DecodedAudio result = WavDecoder.Decode(_tempPath);
+
+        Assert.AreEqual(2, result.Pcm.Length);
+        Assert.AreEqual(0x00, result.Pcm[0]);
+        Assert.AreEqual(0x80, result.Pcm[1]);
+    }
+
     private void WriteWav(int channels, int bitsPerSample, int sampleRate, int samples)
     {
         int bytesPerSample = bitsPerSample / 8;

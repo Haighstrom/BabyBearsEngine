@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 using OpenTK.Audio.OpenAL;
 
 namespace BabyBearsEngine.Platform.OpenAL;
@@ -48,9 +49,21 @@ internal static class WavDecoder
         // scan rather than assume positions.
         while (stream.Position < stream.Length)
         {
-            string chunkId = new(reader.ReadChars(4));
+            // Read chunk IDs as raw ASCII bytes rather than ReadChars under UTF-8: RIFF chunk IDs
+            // are ASCII per spec but a corrupt/rogue file with a high-bit byte can confuse a
+            // UTF-8 BinaryReader. Plain ASCII byte slice is the strict-spec way.
+            string chunkId = Encoding.ASCII.GetString(reader.ReadBytes(4));
             int chunkSize = reader.ReadInt32();
             long chunkStart = stream.Position;
+
+            // Reject malformed chunkSize values up front — a negative size would drive
+            // stream.Position backwards, and a size larger than the remaining stream would
+            // otherwise force ReadBytes to allocate a huge buffer that short-reads.
+            if (chunkSize < 0 || chunkStart + chunkSize > stream.Length)
+            {
+                throw new NotSupportedException(
+                    $"WAV file '{path}' declares a chunk '{chunkId}' with invalid size {chunkSize} (chunkStart={chunkStart}, streamLength={stream.Length}).");
+            }
 
             switch (chunkId)
             {
@@ -139,8 +152,11 @@ internal static class WavDecoder
     private static byte[] Convert24BitTo16Bit(byte[] pcm24)
     {
         // 24-bit little-endian: each sample is 3 bytes (low, mid, high). The high two bytes already
-        // form a valid 16-bit little-endian sample once the low byte is dropped — equivalent to
-        // dividing the original 24-bit value by 256 with truncation toward zero.
+        // form a valid 16-bit little-endian sample once the low byte is dropped — equivalent to an
+        // arithmetic right shift by 8 (rounds toward negative infinity, not toward zero). The
+        // resulting sub-LSB DC bias on negative samples is well below the noise floor for game
+        // audio; proper round-to-zero or round-to-nearest would cost a branch per sample for no
+        // audible benefit.
         int sampleCount = pcm24.Length / 3;
         byte[] pcm16 = new byte[sampleCount * 2];
         for (int i = 0; i < sampleCount; i++)
