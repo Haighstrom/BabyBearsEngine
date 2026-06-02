@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
+using System.Threading;
 using BabyBearsEngine.IO;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
@@ -9,6 +10,15 @@ namespace BabyBearsEngine.Worlds.Graphics.Text;
 internal class FontLoader() : IFontLoader
 {
     private const string DEFAULT_FONT_FOLDER = "Assets/Fonts/";
+
+    // Custom fonts loaded via PrivateFontCollection are referenced by the returned Font via a
+    // FontFamily handle owned by the collection. Disposing the collection at the end of the
+    // load method (as a `using` would) invalidates that handle and the Font silently breaks —
+    // GDI+ documents this as undefined. Cache one collection per path for the lifetime of the
+    // process so the family handles stay live and the same font isn't re-loaded from disk on
+    // repeat requests.
+    private static readonly Lock s_customCacheLock = new();
+    private static readonly Dictionary<string, PrivateFontCollection> s_customCache = new(StringComparer.OrdinalIgnoreCase);
 
     public Font LoadFont(FontDefinition fontDef) => LoadFont(fontDef.FontName, fontDef.FontSize, fontDef.FontStyle);
 
@@ -50,9 +60,17 @@ internal class FontLoader() : IFontLoader
             return null;
         }
 
-        using var pfc = new PrivateFontCollection();
-
-        pfc.AddFontFile(fontPath);
+        PrivateFontCollection pfc;
+        lock (s_customCacheLock)
+        {
+            if (!s_customCache.TryGetValue(fontPath, out PrivateFontCollection? cached))
+            {
+                cached = new PrivateFontCollection();
+                cached.AddFontFile(fontPath);
+                s_customCache[fontPath] = cached;
+            }
+            pfc = cached;
+        }
 
         return new Font(pfc.Families[0], size, (System.Drawing.FontStyle)style, GraphicsUnit.Pixel);
     }
