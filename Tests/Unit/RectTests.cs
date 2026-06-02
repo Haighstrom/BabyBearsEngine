@@ -472,6 +472,30 @@ public class RectTests
         Assert.AreEqual(0f, i.H);
     }
 
+    [TestMethod]
+    public void Intersection_EdgeTouchingRects_ReturnsEmpty()
+    {
+        // Two rects sharing a single edge — Intersects returns false in non-touching mode,
+        // so the intersection is empty (matches the prior two-step impl).
+        Rect a = new(0f, 0f, 10f, 10f);
+        Rect b = new(10f, 0f, 10f, 10f);
+        var i = Rect.Intersection(a, b);
+        Assert.AreEqual(0f, i.W);
+        Assert.AreEqual(0f, i.H);
+    }
+
+    [TestMethod]
+    public void Intersection_OneInsideOther_ReturnsInner()
+    {
+        Rect outer = new(0f, 0f, 100f, 100f);
+        Rect inner = new(10f, 20f, 30f, 40f);
+        var i = Rect.Intersection(outer, inner);
+        Assert.AreEqual(10f, i.X);
+        Assert.AreEqual(20f, i.Y);
+        Assert.AreEqual(30f, i.W);
+        Assert.AreEqual(40f, i.H);
+    }
+
     // Contains(Rect)
 
     [TestMethod]

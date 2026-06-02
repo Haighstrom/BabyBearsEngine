@@ -28,19 +28,15 @@ public sealed class Rect
     /// <returns>Returns the intersecting rectangle.</returns>
     public static Rect Intersection(Rect first, Rect second)
     {
-        Rect answer = new();
+        // Compute the overlap edges once. If the rectangles don't actually overlap (or only
+        // touch at an edge in non-touching mode) the width or height comes out ≤ 0, which is
+        // the same condition the old Intersects-then-recompute version checked.
+        float x = Math.Max(first.Left, second.Left);
+        float y = Math.Max(first.Top, second.Top);
+        float w = Math.Min(first.Right, second.Right) - x;
+        float h = Math.Min(first.Bottom, second.Bottom) - y;
 
-        if (!first.Intersects(second))
-        {
-            return answer;
-        }
-
-        answer.X = Math.Max(first.Left, second.Left);
-        answer.Y = Math.Max(first.Top, second.Top);
-        answer.W = Math.Min(first.Right, second.Right) - answer.X;
-        answer.H = Math.Min(first.Bottom, second.Bottom) - answer.Y;
-
-        return answer;
+        return w > 0 && h > 0 ? new Rect(x, y, w, h) : new Rect();
     }
 
     /// <summary>Creates a rectangle from explicit top-left coordinates and size.</summary>
