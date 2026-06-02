@@ -10,11 +10,15 @@ namespace BabyBearsEngine.Platform.OpenTK;
 internal sealed class OpenTKWindowAdapter : IWindow
 {
     private readonly OpenTKGameEngine _engine;
-    private CursorShape _cursor = CursorShape.Default;
+    private CursorShape _cursor;
 
-    public OpenTKWindowAdapter(OpenTKGameEngine engine)
+    public OpenTKWindowAdapter(OpenTKGameEngine engine, CursorShape initialCursor)
     {
         _engine = engine;
+        // Seed the cursor cache from the configured initial cursor. The engine sets the same
+        // value on the underlying window in OnLoad — without this seed, the adapter's cached
+        // value would forever report Default until something writes through Cursor's setter.
+        _cursor = initialCursor;
         _engine.Resize += OnEngineResize;
     }
 

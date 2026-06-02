@@ -89,7 +89,7 @@ public static class GameLauncher
             audioService = new OpenALAudioService(appSettings.AudioSettings);
 
             EngineConfiguration.Initialise(
-                window: new OpenTKWindowAdapter(engine),
+                window: new OpenTKWindowAdapter(engine, appSettings.WindowSettings.Cursor),
                 keyboard: new OpenTKKeyboardAdapter(engine.KeyboardState),
                 mouse: new OpenTKMouseAdapter(engine.MouseState),
                 worldSwitcher: engine,

@@ -45,9 +45,16 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
             e.Cancel = true;
         }
 
-        _programmaticClose = false;
-
         base.OnClosing(e);
+
+        // Only clear the programmatic-close flag once we know the close actually proceeded.
+        // If a Closing subscriber cancelled (e.Cancel = true), the close didn't happen and the
+        // flag needs to stay set so the caller's eventual retry (e.g. after a save-prompt) is
+        // still recognised as programmatic.
+        if (!e.Cancel)
+        {
+            _programmaticClose = false;
+        }
     }
 
     protected override void OnLoad()
