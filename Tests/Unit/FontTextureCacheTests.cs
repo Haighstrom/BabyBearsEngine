@@ -11,6 +11,8 @@ public class FontTextureCacheTests
 {
     private sealed class StubTexture : ITexture
     {
+        public int DisposeCallCount { get; private set; } = 0;
+
         public int Handle => 0;
         public int Width => 0;
         public int Height => 0;
@@ -21,11 +23,14 @@ public class FontTextureCacheTests
 
         public void Dispose()
         {
+            DisposeCallCount++;
         }
     }
 
     private sealed class StubShader : IMatrixShaderProgram
     {
+        public int DisposeCallCount { get; private set; } = 0;
+
         public int Handle => 0;
 
         public void Bind()
@@ -34,6 +39,7 @@ public class FontTextureCacheTests
 
         public void Dispose()
         {
+            DisposeCallCount++;
         }
 
         public void SetModelViewMatrix(ref Matrix3 matrix)
@@ -227,5 +233,39 @@ public class FontTextureCacheTests
     {
         Assert.ThrowsExactly<ArgumentNullException>(
             () => EngineConfiguration.RegisterAtlasGenerator(TextRenderer.Sdf, null!));
+    }
+
+    [TestMethod]
+    public void InvalidateCache_DisposesEachCachedAtlasTexture()
+    {
+        // Each generated atlas owns a fresh ITexture — when the cache is cleared (e.g. backend
+        // swap) those textures need to be disposed, otherwise their GL handles leak.
+        CountingGenerator generator = new();
+        EngineConfiguration.AtlasGenerator = generator;
+        FontAtlas atlasA = FontTextureCache.GetOrCreate(new FontDefinition("Arial", 12));
+        FontAtlas atlasB = FontTextureCache.GetOrCreate(new FontDefinition("Arial", 16));
+        var textureA = (StubTexture)atlasA.Texture;
+        var textureB = (StubTexture)atlasB.Texture;
+
+        FontTextureCache.InvalidateCache();
+
+        Assert.AreEqual(1, textureA.DisposeCallCount);
+        Assert.AreEqual(1, textureB.DisposeCallCount);
+    }
+
+    [TestMethod]
+    public void InvalidateCache_DoesNotDisposeAtlasShader()
+    {
+        // Atlas shaders in production are process-wide singletons (Shaders.SdfText etc.) shared
+        // across all atlases of the same backend AND with other graphics. Disposing them would
+        // break unrelated rendering.
+        CountingGenerator generator = new();
+        EngineConfiguration.AtlasGenerator = generator;
+        FontAtlas atlas = FontTextureCache.GetOrCreate(new FontDefinition("Arial", 12));
+        var shader = (StubShader)atlas.Shader;
+
+        FontTextureCache.InvalidateCache();
+
+        Assert.AreEqual(0, shader.DisposeCallCount);
     }
 }

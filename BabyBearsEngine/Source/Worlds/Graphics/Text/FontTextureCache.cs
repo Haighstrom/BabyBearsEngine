@@ -39,7 +39,20 @@ internal static class FontTextureCache
     /// <summary>
     /// Drops all cached atlases. Called by <see cref="EngineConfiguration"/> when the
     /// generator changes or the engine is reset — cached entries reference the old
-    /// generator's GL texture and shader, so they cannot survive a backend swap.
+    /// generator's GL texture, so they cannot survive a backend swap.
     /// </summary>
-    internal static void InvalidateCache() => s_cache.Clear();
+    /// <remarks>
+    /// Each atlas owns its own <see cref="OpenGL.ITexture"/> (uploaded per font), so the
+    /// texture is disposed before the cache entry is dropped — otherwise the GL handle would
+    /// leak on every backend swap. The atlas's shader is a process-wide singleton shared with
+    /// non-text graphics (Shaders.SdfText / CoverageText / Standard) and is NOT disposed here.
+    /// </remarks>
+    internal static void InvalidateCache()
+    {
+        foreach (FontAtlas atlas in s_cache.Values)
+        {
+            atlas.Texture.Dispose();
+        }
+        s_cache.Clear();
+    }
 }
