@@ -248,4 +248,31 @@ public class CountdownTimerTests
         Assert.AreEqual("completed", order[1]);
     }
 
+    [TestMethod]
+    public void Update_AfterCompletion_DoesNotFireCompletedAgain()
+    {
+        int fired = 0;
+        var timer = InContainer(new CountdownTimer(1.0));
+        timer.Completed += () => fired++;
+
+        timer.Update(1.0); // completes
+        timer.Update(1.0); // already done — should be a no-op
+        timer.Update(1.0); // ditto
+
+        Assert.AreEqual(1, fired);
+    }
+
+    [TestMethod]
+    public void Update_NoParent_DoesNotThrow()
+    {
+        // A timer never attached to a parent should still complete cleanly without throwing
+        // from Remove(). Useful for fire-and-forget timers driven manually.
+        var timer = new CountdownTimer(1.0);
+        int fired = 0;
+        timer.Completed += () => fired++;
+
+        timer.Update(1.0);
+
+        Assert.AreEqual(1, fired);
+    }
 }

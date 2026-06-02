@@ -8,6 +8,7 @@ namespace BabyBearsEngine.Worlds;
 public class CountdownTimer : UpdateableBase
 {
     private double _nextTickThreshold;
+    private bool _completed = false;
 
     /// <param name="duration">Total time in seconds before <see cref="Completed"/> fires. Must be positive.</param>
     /// <param name="tickInterval">How often <see cref="Ticked"/> fires, in seconds. Must be positive. Defaults to 1.</param>
@@ -65,6 +66,14 @@ public class CountdownTimer : UpdateableBase
     /// <inheritdoc/>
     public override void Update(double elapsed)
     {
+        // Once Completed has fired, further Updates are no-ops — prevents Completed re-firing
+        // on every subsequent frame if the timer remains in the tree (and would otherwise
+        // re-trigger because Elapsed > Duration stays true).
+        if (_completed)
+        {
+            return;
+        }
+
         Elapsed += elapsed;
 
         while (Elapsed >= _nextTickThreshold && _nextTickThreshold < Duration)
@@ -75,8 +84,14 @@ public class CountdownTimer : UpdateableBase
 
         if (Elapsed >= Duration)
         {
+            _completed = true;
             Completed?.Invoke();
-            Remove();
+            // Guard Remove against the no-parent case — a fire-and-forget timer driven
+            // manually has no parent to detach from but should still complete cleanly.
+            if (Parent is not null)
+            {
+                Remove();
+            }
         }
     }
 }
