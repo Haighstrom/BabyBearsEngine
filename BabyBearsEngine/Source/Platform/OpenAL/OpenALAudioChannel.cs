@@ -23,8 +23,10 @@ internal sealed class OpenALAudioChannel : IDisposable
     public OpenALAudioChannel()
     {
         _source = AL.GenSource();
+        OpenALErrorCheck.Check(nameof(AL.GenSource));
         AL.Source(_source, ALSourcef.Gain, 1f);
         AL.Source(_source, ALSourceb.Looping, false);
+        OpenALErrorCheck.Check("AL.Source(init)");
     }
 
     /// <summary>The clip currently bound to this channel, or null if the channel is idle.</summary>
@@ -43,6 +45,7 @@ internal sealed class OpenALAudioChannel : IDisposable
         AL.Source(_source, ALSourcei.Buffer, clip.BufferId);
         AL.Source(_source, ALSourcef.Gain, gain);
         AL.SourcePlay(_source);
+        OpenALErrorCheck.Check(nameof(AL.SourcePlay));
         _currentClip = clip;
     }
 

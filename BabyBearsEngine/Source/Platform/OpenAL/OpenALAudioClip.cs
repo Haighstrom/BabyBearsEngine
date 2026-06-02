@@ -21,7 +21,9 @@ internal abstract class OpenALAudioClip : IAudioClip
         Duration = decoded.Duration;
 
         _bufferId = AL.GenBuffer();
+        OpenALErrorCheck.Check(nameof(AL.GenBuffer));
         AL.BufferData(_bufferId, decoded.Format, decoded.Pcm, decoded.SampleRate);
+        OpenALErrorCheck.Check(nameof(AL.BufferData));
     }
 
     public string Path { get; }

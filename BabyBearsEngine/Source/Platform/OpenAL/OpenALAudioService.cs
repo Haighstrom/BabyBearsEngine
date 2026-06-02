@@ -44,6 +44,12 @@ internal sealed class OpenALAudioService : IAudio
     private float _sfxVolume;
     private AudioState _musicState = AudioState.Stopped;
     private bool _paused = false;
+    // Two flags rather than one: _disposing is set immediately under the lock so the poll
+    // thread, PlayMusicClipInternal, and other code paths see the shutdown in progress and
+    // bail out before touching AL resources mid-teardown. _disposed is set only after a full
+    // successful teardown, so that if anything throws during Dispose a retry can attempt the
+    // cleanup again instead of silently leaking the device/context/sources/buffers.
+    private bool _disposing = false;
     private bool _disposed = false;
 
     public OpenALAudioService(AudioSettings settings)
@@ -351,16 +357,26 @@ internal sealed class OpenALAudioService : IAudio
 
     public void Dispose()
     {
-        if (_disposed)
+        // Mark "disposing" under the lock so the poll thread (next time it acquires the lock
+        // for CheckMusicChannelForAdvancement) sees it and bails before touching channels, and
+        // so any concurrent PlayMusicClipInternal call won't kick off new playback after the
+        // teardown started.
+        lock (_channelLock)
         {
-            return;
+            if (_disposed || _disposing)
+            {
+                return;
+            }
+            _disposing = true;
         }
-        _disposed = true;
 
         _pollCts?.Cancel();
         try
         {
-            _pollThread?.Join(TimeSpan.FromSeconds(1));
+            // No timeout — the poll thread sleeps for ~50ms between ticks so cancellation is
+            // already responsive, and we'd rather block briefly than race the thread by
+            // proceeding with teardown while it may still be in CheckMusicChannelForAdvancement.
+            _pollThread?.Join();
         }
         catch
         {
@@ -368,38 +384,62 @@ internal sealed class OpenALAudioService : IAudio
         }
         _pollCts?.Dispose();
 
-        if (_initialised)
+        try
         {
-            lock (_channelLock)
+            if (_initialised)
             {
-                _musicChannel?.Stop();
-                foreach (OpenALAudioChannel channel in _sfxChannels)
+                lock (_channelLock)
                 {
-                    channel.Stop();
+                    TryAl(() => _musicChannel?.Stop());
+                    foreach (OpenALAudioChannel channel in _sfxChannels)
+                    {
+                        TryAl(channel.Stop);
+                    }
+
+                    foreach (OpenALAudioClip clip in _ownedClips)
+                    {
+                        TryAl(clip.Dispose);
+                    }
+                    _ownedClips.Clear();
+
+                    TryAl(() => _musicChannel?.Dispose());
+                    foreach (OpenALAudioChannel channel in _sfxChannels)
+                    {
+                        TryAl(channel.Dispose);
+                    }
                 }
 
-                foreach (OpenALAudioClip clip in _ownedClips)
+                TryAl(() => ALC.MakeContextCurrent(ALContext.Null));
+                if (_context != ALContext.Null)
                 {
-                    clip.Dispose();
+                    TryAl(() => ALC.DestroyContext(_context));
                 }
-                _ownedClips.Clear();
-
-                _musicChannel?.Dispose();
-                foreach (OpenALAudioChannel channel in _sfxChannels)
+                if (_device != ALDevice.Null)
                 {
-                    channel.Dispose();
+                    TryAl(() => ALC.CloseDevice(_device));
                 }
             }
 
-            ALC.MakeContextCurrent(ALContext.Null);
-            if (_context != ALContext.Null)
-            {
-                ALC.DestroyContext(_context);
-            }
-            if (_device != ALDevice.Null)
-            {
-                ALC.CloseDevice(_device);
-            }
+            _disposed = true;
+        }
+        finally
+        {
+            // Clear _disposing whether or not we succeeded — if anything threw above, _disposed
+            // stays false and a caller can retry. If everything succeeded, _disposed is true
+            // and the next Dispose call short-circuits at the top.
+            _disposing = false;
+        }
+    }
+
+    private static void TryAl(Action action)
+    {
+        try
+        {
+            action();
+        }
+        catch (Exception ex)
+        {
+            Logger.Warning($"Audio: AL teardown step failed ({ex.GetType().Name}: {ex.Message}); continuing.");
         }
     }
 
@@ -420,6 +460,12 @@ internal sealed class OpenALAudioService : IAudio
 
         lock (_channelLock)
         {
+            // Dispose started after the poll thread queued an OnTrackFinished — bail before
+            // touching the music channel (which is about to be / has been torn down).
+            if (_disposing || _disposed)
+            {
+                return;
+            }
             _musicChannel.Play(openAlClip, ComputeMusicGainUnlocked());
             _paused = false;
             TransitionMusicStateUnlocked(AudioState.Playing);
@@ -553,7 +599,10 @@ internal sealed class OpenALAudioService : IAudio
         bool finished;
         lock (_channelLock)
         {
-            if (_musicChannel is null || _paused || _musicState != AudioState.Playing)
+            // Bail out if Dispose has started — _musicChannel and clips may be torn down at any
+            // moment from here on, so we must not call OnTrackFinished (which would re-enter
+            // PlayMusicClipInternal and touch them).
+            if (_disposing || _disposed || _musicChannel is null || _paused || _musicState != AudioState.Playing)
             {
                 return;
             }
