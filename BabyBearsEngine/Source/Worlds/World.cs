@@ -137,19 +137,25 @@ public class World : IWorld
 
     private static void TickAll(Container container, double elapsed)
     {
+        // GetUpdatables returns a snapshot, so a sibling that's detached by an earlier sibling's
+        // Update would otherwise still get its Update called from this loop. Skip detached
+        // entries — Entity.Update would throw on Parent.GetWindowCoordinates if it ran on a
+        // subtree whose ancestor was just removed. ContainerEntity.Update does the same check.
         foreach (var updateable in container.GetUpdatables())
         {
-            if (updateable.Active)
+            if (!updateable.Active || !updateable.Exists)
             {
-                updateable.Update(elapsed);
+                continue;
             }
+            updateable.Update(elapsed);
         }
         foreach (var updateable in container.GetUpdatablesLast())
         {
-            if (updateable.Active)
+            if (!updateable.Active || !updateable.Exists)
             {
-                updateable.Update(elapsed);
+                continue;
             }
+            updateable.Update(elapsed);
         }
     }
 

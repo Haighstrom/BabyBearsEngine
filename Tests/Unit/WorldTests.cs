@@ -341,4 +341,53 @@ public class WorldTests
         Assert.IsNull(graphic.Parent);
         Assert.IsNull(ticker.Parent);
     }
+
+    // Update — siblings removed mid-tick must be skipped (Update iterates a snapshot)
+
+    private sealed class SiblingRemover(IUpdateable target) : AddableBase, IUpdateable
+    {
+        public bool Active { get; set; } = true;
+
+        public void Update(double elapsed)
+        {
+            // Remove a sibling mid-tick. The sibling is still in TickAll's snapshot, so without
+            // an Exists check the loop would still invoke its Update.
+            target.Remove();
+        }
+    }
+
+    private sealed class TickThatThrowsOnDetached : AddableBase, IUpdateable
+    {
+        public bool Active { get; set; } = true;
+        public int UpdateCalls { get; private set; }
+
+        public void Update(double elapsed)
+        {
+            UpdateCalls++;
+            // Mirror real ContainerEntity / Entity behaviour: if my parent chain is broken I
+            // can't read screen-space coords, so accessing Parent.GetWindowCoordinates throws.
+            if (Parent is null)
+            {
+                throw new InvalidOperationException("Updated after removal");
+            }
+        }
+    }
+
+    [TestMethod]
+    public void Update_SiblingRemovedMidTick_DoesNotInvokeRemovedSibling()
+    {
+        // Remover added FIRST so it ticks before victim — that's what surfaces the bug:
+        // remover detaches victim, then TickAll's snapshot still tries to invoke victim's
+        // Update. A real Entity.Update would throw InvalidOperationException when accessing
+        // Parent.GetWindowCoordinates on a detached subtree; we simulate the same here.
+        var world = new World();
+        var victim = new TickThatThrowsOnDetached();
+        world.Add(new SiblingRemover(victim));
+        world.Add(victim);
+
+        world.Update(0.016);
+
+        // After the fix, victim is skipped once detached — UpdateCalls stays at 0.
+        Assert.AreEqual(0, victim.UpdateCalls);
+    }
 }
