@@ -152,6 +152,28 @@ public class ParticleSystemTests
     }
 
     [TestMethod]
+    public void Update_ParticleSurvivesOneFrameAtExactlyEndOfLifetime()
+    {
+        // Lifetime=0.5, single Update(0.5). The particle's RemainingLifetime hits exactly 0;
+        // it should survive long enough to be rendered at t=1 before being culled next tick.
+        var shape = new FakeEmitterShape(new Point(0, 0), new Point(0, 0));
+        var system = MakeSystem(shape);
+        system.EmissionRate = 0f;
+        system.Emitting = false;
+        system.Lifetime = 0.5f;
+        system.EmitBurst(1);
+        Assert.AreEqual(1, system.ParticleCount);
+
+        system.Update(0.5);
+
+        Assert.AreEqual(1, system.ParticleCount);
+
+        // Next tick, even a tiny step, removes it.
+        system.Update(0.001);
+        Assert.AreEqual(0, system.ParticleCount);
+    }
+
+    [TestMethod]
     public void Update_IntegratesParticlePositionByVelocity()
     {
         var shape = new FakeEmitterShape(new Point(0, 0), new Point(100, -50));

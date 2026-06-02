@@ -232,7 +232,11 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
         {
             Particle particle = _particles[i];
             particle.RemainingLifetime -= (float)elapsed;
-            if (particle.RemainingLifetime <= 0)
+            // Cull on strictly negative remaining lifetime, not <= 0, so a particle whose age
+            // lands exactly on its TotalLifetime gets one frame rendered at t=1 before being
+            // removed. BuildVertices clamps t to [0, 1], so a slightly-negative RemainingLifetime
+            // still renders as t=1 — the next tick culls it.
+            if (particle.RemainingLifetime < 0)
             {
                 _particles.RemoveAt(i);
                 continue;
