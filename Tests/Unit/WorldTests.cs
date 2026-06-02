@@ -272,4 +272,73 @@ public class WorldTests
         Assert.HasCount(1, order);
         Assert.AreEqual("regular", order[0]);
     }
+
+    // Unload — must dispose IDisposable children so GL resources don't leak on world swap.
+
+    private sealed class DisposableRenderable : AddableBase, IRenderable, IDisposable
+    {
+        public bool Visible { get; set; } = true;
+        public int DisposeCallCount { get; private set; }
+        public void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
+        public void Dispose() => DisposeCallCount++;
+    }
+
+    private sealed class DisposableUpdateable : AddableBase, IUpdateable, IDisposable
+    {
+        public bool Active { get; set; } = true;
+        public int DisposeCallCount { get; private set; }
+        public void Update(double elapsed) { }
+        public void Dispose() => DisposeCallCount++;
+    }
+
+    [TestMethod]
+    public void Unload_DisposesDisposableRenderableChildren()
+    {
+        var world = new World();
+        var graphic = new DisposableRenderable();
+        world.Add(graphic);
+
+        world.Unload();
+
+        Assert.AreEqual(1, graphic.DisposeCallCount);
+    }
+
+    [TestMethod]
+    public void Unload_DisposesDisposableUpdateableChildren()
+    {
+        var world = new World();
+        var ticker = new DisposableUpdateable();
+        world.Add(ticker);
+
+        world.Unload();
+
+        Assert.AreEqual(1, ticker.DisposeCallCount);
+    }
+
+    [TestMethod]
+    public void Unload_DisposesOverlayChildren()
+    {
+        var world = new World();
+        var overlayGraphic = new DisposableRenderable();
+        world.Overlay.Add(overlayGraphic);
+
+        world.Unload();
+
+        Assert.AreEqual(1, overlayGraphic.DisposeCallCount);
+    }
+
+    [TestMethod]
+    public void Unload_RemovesAllChildrenSoTheirParentIsCleared()
+    {
+        var world = new World();
+        var graphic = new DisposableRenderable();
+        var ticker = new DisposableUpdateable();
+        world.Add(graphic);
+        world.Add(ticker);
+
+        world.Unload();
+
+        Assert.IsNull(graphic.Parent);
+        Assert.IsNull(ticker.Parent);
+    }
 }

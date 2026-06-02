@@ -33,8 +33,68 @@ public class World : IWorld
     }
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// Walks every descendant of the main container and the overlay, disposes anything that
+    /// implements <see cref="IDisposable"/> (Cameras, TextureGraphics, ColourGraphics, any
+    /// user-added GL-resource-owning entity), then clears both containers. Without this, every
+    /// world swap leaks the previous world's GL handles and the orphaned subtrees retain their
+    /// LayerChanged subscriptions until the GC catches them.
+    /// </remarks>
     public virtual void Unload()
     {
+        DisposeAllDescendants(_container);
+        DisposeAllDescendants(_overlay);
+        _container.RemoveAll();
+        _overlay.RemoveAll();
+    }
+
+    private static void DisposeAllDescendants(IContainer container)
+    {
+        // An entity that is both IUpdateable and IRenderable would appear in both lists — use a
+        // visited set to avoid double-dispose. Reference equality is the right semantic here.
+        HashSet<object> visited = [];
+
+        foreach (IRenderable r in container.GetRenderables())
+        {
+            DisposeRecursive(r, visited);
+        }
+        foreach (IUpdateable u in container.GetUpdatables())
+        {
+            DisposeRecursive(u, visited);
+        }
+        foreach (IUpdateable u in container.GetUpdatablesLast())
+        {
+            DisposeRecursive(u, visited);
+        }
+    }
+
+    private static void DisposeRecursive(object item, HashSet<object> visited)
+    {
+        if (!visited.Add(item))
+        {
+            return;
+        }
+
+        if (item is IContainer childContainer)
+        {
+            foreach (IRenderable r in childContainer.GetRenderables())
+            {
+                DisposeRecursive(r, visited);
+            }
+            foreach (IUpdateable u in childContainer.GetUpdatables())
+            {
+                DisposeRecursive(u, visited);
+            }
+            foreach (IUpdateable u in childContainer.GetUpdatablesLast())
+            {
+                DisposeRecursive(u, visited);
+            }
+        }
+
+        if (item is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
     }
 
     /// <inheritdoc/>
