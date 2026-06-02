@@ -14,16 +14,16 @@ namespace BabyBearsEngine.Worlds.GraphicEffects;
 /// to have the effect re-fire itself at random intervals in
 /// <c>[<see cref="AutoFlashMinInterval"/>, <see cref="AutoFlashMaxInterval"/>]</c>.</para>
 ///
-/// <para>The "rest alpha" is captured lazily on the first <see cref="Trigger"/> — whatever
-/// alpha the target has then is what it returns to between flashes (typically 0 for an
-/// overlay). Capturing at first trigger rather than at construction lets a theme or other
-/// post-construction step finalise the target's colour before the rest is locked in.</para>
+/// <para>The "rest alpha" is re-sampled at the start of every <see cref="Trigger"/> from the
+/// target's current alpha — so external code (themes, highlights, selection state) can change
+/// the rest alpha between flashes and the next flash will respect it. Captured per-Trigger
+/// rather than at construction so a target whose colour is finalised after the Flash is built
+/// still works correctly.</para>
 /// </remarks>
 public sealed class Flash(IGraphic target, IRandom? random = null) : UpdateableBase
 {
     private readonly IRandom _random = random ?? EngineConfiguration.RandomService;
     private byte _restAlpha = 0;
-    private bool _restAlphaCaptured = false;
     private float _flashTime = 0f;
     private float _flashDuration = 0f;
     private float _autoTimer = 0f;
@@ -72,10 +72,14 @@ public sealed class Flash(IGraphic target, IRandom? random = null) : UpdateableB
     /// </summary>
     public void Trigger()
     {
-        if (!_restAlphaCaptured)
+        // Re-sample on every Trigger so external alpha changes between flashes (themes,
+        // highlight toggles, selection state) are picked up. Only sample when the previous
+        // flash has finished (or hasn't started yet) — re-triggering mid-flash should restart
+        // the rise from the same rest alpha, not snapshot the current mid-flash alpha as the
+        // new rest.
+        if (_flashDuration == 0f)
         {
             _restAlpha = target.Colour.A;
-            _restAlphaCaptured = true;
         }
 
         _flashTime = 0f;

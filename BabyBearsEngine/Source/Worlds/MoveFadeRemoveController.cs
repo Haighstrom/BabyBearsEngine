@@ -32,6 +32,15 @@ public class MoveFadeRemoveController(IGraphic target, float velocityX, float ve
             return;
         }
 
+        // Something else removed the target mid-tween — stop writing to the detached graphic
+        // but still raise Completed once so subscribers can clean up.
+        if (!target.Exists)
+        {
+            _done = true;
+            Completed?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
         _elapsed += elapsed;
 
         float progress = (float)Math.Min(_elapsed / duration, 1.0);
@@ -44,8 +53,10 @@ public class MoveFadeRemoveController(IGraphic target, float velocityX, float ve
         if (_elapsed >= duration)
         {
             _done = true;
-            target.Remove();
+            // Raise Completed BEFORE removing so subscribers can inspect the target's final
+            // position/colour. After the event, the target is detached.
             Completed?.Invoke(this, EventArgs.Empty);
+            target.Remove();
         }
     }
 }

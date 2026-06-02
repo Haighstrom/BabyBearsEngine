@@ -294,4 +294,31 @@ public class FlashTests
 
         Assert.AreEqual(40, (int)target.Colour.A);
     }
+
+    [TestMethod]
+    public void RestAlpha_ReSampledOnEveryTrigger_PicksUpExternalAlphaChangesBetweenFlashes()
+    {
+        // First Trigger captures rest alpha = 0. Between flashes, external code raises the
+        // target's alpha to 50 (e.g. selection highlight switched on). Next Trigger should
+        // re-sample so the flash returns to 50, not the original 0.
+        FakeGraphic target = new() { Colour = new Colour(255, 255, 255, 0) };
+        Flash flash = new(target)
+        {
+            RiseSeconds = 0.05f,
+            FallSeconds = 0.25f,
+            PeakAlpha = 200,
+        };
+
+        flash.Trigger();
+        flash.Update(0.05 + 0.25 + 0.01); // first flash completes, returns to 0
+        Assert.AreEqual(0, (int)target.Colour.A);
+
+        // External code changes the rest state between flashes.
+        target.Colour = new Colour(255, 255, 255, 50);
+
+        flash.Trigger();
+        flash.Update(0.05 + 0.25 + 0.01); // second flash completes — should return to the new rest
+
+        Assert.AreEqual(50, (int)target.Colour.A);
+    }
 }

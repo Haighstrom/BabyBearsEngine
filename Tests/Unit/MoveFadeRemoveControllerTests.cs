@@ -129,4 +129,36 @@ public class MoveFadeRemoveControllerTests
 
         Assert.AreEqual(100f, target.X, delta: 0.001f);
     }
+
+    [TestMethod]
+    public void Completed_FiresBeforeTargetIsRemoved()
+    {
+        FakeGraphic target = new() { X = 50f, Y = 25f };
+        MoveFadeRemoveController controller = new(target, 0f, 0f, duration: 1.0);
+        bool targetWasStillParentedWhenCompletedFired = false;
+        controller.Completed += (_, _) => targetWasStillParentedWhenCompletedFired = target.Parent is not null;
+
+        controller.Update(1.0);
+
+        Assert.IsTrue(targetWasStillParentedWhenCompletedFired);
+    }
+
+    [TestMethod]
+    public void Update_TargetRemovedExternally_StillFiresCompletedOnce()
+    {
+        FakeGraphic target = new();
+        MoveFadeRemoveController controller = new(target, 0f, 0f, duration: 1.0);
+        int completedCount = 0;
+        controller.Completed += (_, _) => completedCount++;
+
+        // Mid-tween, something else removes the target. The controller should still raise
+        // Completed exactly once so subscribers can clean up, and stop modifying the detached
+        // graphic on subsequent ticks.
+        controller.Update(0.2);
+        target.Parent = null;
+        controller.Update(0.2);
+        controller.Update(0.2);
+
+        Assert.AreEqual(1, completedCount);
+    }
 }
