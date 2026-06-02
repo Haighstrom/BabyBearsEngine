@@ -108,6 +108,18 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
         // and is treated the same as disabled.
         if (target.Disabled || (target is IAddable addable && !addable.Exists))
         {
+            // If we were mid-interaction, signal cancellation so subscribers that latched on
+            // LeftPressed / Hovered without seeing a matching exit don't leave the UI stuck
+            // in a "pressed" or "highlighted" appearance.
+            if (_clickState == ClickState.Hovering)
+            {
+                HoverCancelled?.Invoke();
+            }
+            if (_clickState != ClickState.None)
+            {
+                MouseExited?.Invoke();
+            }
+
             _clickState = ClickState.None;
             _rightClickState = RightClickState.None;
             return;

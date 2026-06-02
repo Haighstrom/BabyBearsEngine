@@ -51,9 +51,11 @@ public class ClickControllerTests
         // Mouse position is always (999, 999) so this rect never contains it —
         // prevents the controller from registering with MouseSolver during tests.
         public Rect PositionOnScreen { get; } = new(0f, 0f, 10f, 10f);
+        public bool Disabled { get; set; } = false;
     }
 
     private FakeMouse _mouse = null!;
+    private FakeTarget _target = null!;
     private ClickController _controller = null!;
     private List<string> _events = null!;
 
@@ -62,7 +64,8 @@ public class ClickControllerTests
     {
         _mouse = new();
         EngineConfiguration.MouseService = _mouse;
-        _controller = new(new FakeTarget());
+        _target = new FakeTarget();
+        _controller = new(_target);
         _events = [];
 
         _controller.HoverCancelled += () => _events.Add("HoverCancelled");
@@ -561,5 +564,61 @@ public class ClickControllerTests
         Frame(isOver: true);
 
         Assert.IsFalse(MouseSolver.WheelScrollConsumed);
+    }
+
+    // Cancellation on disable / detach
+
+    [TestMethod]
+    public void Update_DisabledMidPress_FiresMouseExitedSoButtonDoesntStickPressed()
+    {
+        // Enter then press to land in MouseDownInside.
+        Frame(isOver: true, leftPressed: true);
+        _events.Clear();
+
+        // Target is disabled mid-press — controller should signal cancellation rather than
+        // silently zero the state, otherwise subscribers that latched on LeftPressed without
+        // a matching MouseExited would stay "highlighted" forever.
+        _target.Disabled = true;
+        Frame(isOver: true);
+
+        Assert.Contains("MouseExited", _events);
+    }
+
+    [TestMethod]
+    public void Update_DisabledMidHover_FiresHoverCancelledAndMouseExited()
+    {
+        // Enter and hold past the hover delay (default 0.5s) to land in Hovering.
+        Frame(isOver: true);
+        Frame(isOver: true, elapsed: 1.0);
+        _events.Clear();
+
+        _target.Disabled = true;
+        Frame(isOver: true);
+
+        Assert.Contains("HoverCancelled", _events);
+        Assert.Contains("MouseExited", _events);
+    }
+
+    [TestMethod]
+    public void Update_DisabledWhileJustOver_FiresMouseExited()
+    {
+        // Land in MouseOver (entered but not hovering yet, not pressed).
+        Frame(isOver: true);
+        _events.Clear();
+
+        _target.Disabled = true;
+        Frame(isOver: true);
+
+        Assert.Contains("MouseExited", _events);
+    }
+
+    [TestMethod]
+    public void Update_DisabledFromNoneState_RaisesNoEvents()
+    {
+        // Never entered — no state to cancel.
+        _target.Disabled = true;
+        Frame(isOver: false);
+
+        Assert.IsEmpty(_events);
     }
 }
