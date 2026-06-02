@@ -4,7 +4,7 @@ namespace BabyBearsEngine.Worlds;
 
 /// <summary>
 /// Anything drawn by the engine each frame. Containers iterate their renderables in layer order
-/// and call <see cref="Render"/> on each visible one.
+/// (see <see cref="IContainer.GetRenderables"/>) and call <see cref="Render"/> on each visible one.
 /// </summary>
 public interface IRenderable : IAddable
 {

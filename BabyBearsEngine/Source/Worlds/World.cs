@@ -53,6 +53,15 @@ public class World : IWorld
     public (float x, float y) GetWindowCoordinates(float x, float y) => (x, y);
 
     /// <inheritdoc/>
+    public IList<IRenderable> GetRenderables() => _container.GetRenderables();
+
+    /// <inheritdoc/>
+    public IList<IUpdateable> GetUpdatables() => _container.GetUpdatables();
+
+    /// <inheritdoc/>
+    public IList<IUpdateable> GetUpdatablesLast() => _container.GetUpdatablesLast();
+
+    /// <inheritdoc/>
     /// <remarks>
     /// Updates the main container fully (regular pass then <see cref="IUpdateable.UpdateLast"/>
     /// post-pass) before doing the same for the overlay. The overlay completes its own two

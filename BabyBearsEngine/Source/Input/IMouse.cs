@@ -95,7 +95,21 @@ public interface IMouse
     /// <summary>The cursor's Y coordinate in client (window) space, measured from the top edge.</summary>
     int ClientY { get; }
 
-    /// <summary>Vertical scroll wheel movement this frame. Positive values scroll up, negative down.</summary>
+    /// <summary>
+    /// Vertical scroll wheel movement this frame, in raw platform-native units. Positive values
+    /// scroll up, negative down.
+    /// </summary>
+    /// <remarks>
+    /// The magnitude is platform- and device-dependent and is NOT guaranteed to be a whole number
+    /// of detents:
+    /// <list type="bullet">
+    /// <item><description>Windows mice typically report <c>1.0</c> per wheel detent.</description></item>
+    /// <item><description>macOS trackpads and high-precision Windows mice report fractional values for sub-detent gestures.</description></item>
+    /// </list>
+    /// Treat sign as direction and magnitude as a relative "how much"; for discrete click-counting,
+    /// accumulate <see cref="WheelDelta"/> until it crosses a threshold rather than expecting
+    /// <c>1.0</c> exactly.
+    /// </remarks>
     float WheelDelta { get; }
 
     /// <summary>Cursor X movement this frame, in pixels.</summary>

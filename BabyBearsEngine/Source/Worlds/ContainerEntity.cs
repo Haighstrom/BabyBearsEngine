@@ -60,14 +60,14 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
     /// <inheritdoc/>
     public event EventHandler<LayerChangedEventArgs>? LayerChanged;
 
-    /// <summary>Returns a snapshot of the child <see cref="IUpdateable"/>s in update order (highest layer first, so the top-most child updates last). Excludes children that opted into the post-pass via <see cref="IUpdateable.UpdateLast"/> — use <see cref="GetUpdatablesLast"/> for those. Safe to mutate the container while iterating the returned list.</summary>
-    protected IList<IUpdateable> GetUpdatables() => _container.GetUpdatables();
+    /// <inheritdoc/>
+    public IList<IUpdateable> GetUpdatables() => _container.GetUpdatables();
 
-    /// <summary>Returns a snapshot of the child post-pass <see cref="IUpdateable"/>s (those with <see cref="IUpdateable.UpdateLast"/> = <c>true</c>) in update order. Ticked after every regular child in <see cref="GetUpdatables"/> has finished. Safe to mutate the container while iterating.</summary>
-    protected IList<IUpdateable> GetUpdatablesLast() => _container.GetUpdatablesLast();
+    /// <inheritdoc/>
+    public IList<IUpdateable> GetUpdatablesLast() => _container.GetUpdatablesLast();
 
-    /// <summary>Returns a snapshot of the child <see cref="IRenderable"/>s in render order (highest layer first). Safe to mutate the container while iterating.</summary>
-    protected IList<IRenderable> GetRenderables() => _container.GetRenderables();
+    /// <inheritdoc/>
+    public IList<IRenderable> GetRenderables() => _container.GetRenderables();
 
     /// <summary>
     /// Updates every active child <see cref="IUpdateable"/> that is part of the entity tree. Children with

@@ -28,10 +28,13 @@ internal class Container(IContainer realParent) : IContainer
     // once everything else has moved this frame. Routed by UpdateLast snapshotted at Add.
     private readonly List<IUpdateable> _updateablesLast = [];
 
+    /// <inheritdoc/>
     public IList<IUpdateable> GetUpdatables() => [.. _updateables];
 
+    /// <inheritdoc/>
     public IList<IUpdateable> GetUpdatablesLast() => [.. _updateablesLast];
 
+    /// <inheritdoc/>
     public IList<IRenderable> GetRenderables() => [.. _graphics];
 
     public (float x, float y) GetWindowCoordinates(float x, float y) =>

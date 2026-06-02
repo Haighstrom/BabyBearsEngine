@@ -7,6 +7,13 @@ namespace BabyBearsEngine.Platform.OpenAL;
 /// buffers and channels just bind a buffer at play time. Used both for the dedicated music channel
 /// and for each entry in the SFX channel pool.
 /// </summary>
+/// <remarks>
+/// <para>Not thread-safe. Concurrent calls into a single channel's methods are not guarded; callers
+/// must serialise access. In production, <see cref="OpenALAudioService"/> owns every channel and
+/// serialises all entry points via its internal <c>_channelLock</c>, so callers of the public
+/// audio facade get safe behaviour automatically. Don't share a channel across threads outside
+/// that path.</para>
+/// </remarks>
 internal sealed class OpenALAudioChannel : IDisposable
 {
     private readonly int _source;
