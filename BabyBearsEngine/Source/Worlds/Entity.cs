@@ -7,6 +7,17 @@ namespace BabyBearsEngine.Worlds;
 /// can hold child entities/graphics (inherited from <see cref="ContainerEntity"/>), and
 /// optionally exposes mouse interaction events when constructed with <c>clickable: true</c>.
 /// </summary>
+/// <remarks>
+/// When <c>clickable: true</c> the entity owns an internal <c>ClickController</c> child and wires
+/// nine event subscriptions from controller-event → entity-method. These subscriptions are
+/// installed once at construction and are never unwired — the controller is private and
+/// inseparable from this entity for its whole lifetime: the two are constructed together, share
+/// a parent-child link, and are released to GC together. Don't reparent the controller, and
+/// don't read or store it externally — there's no supported path that would survive the entity.
+/// Removing the entity from its tree leaves the controller as a child of the (now-detached)
+/// entity, so re-adding the entity re-introduces the controller and the subscriptions still
+/// point at the same entity methods.
+/// </remarks>
 public class Entity : ContainerEntity, IMouseInteractable
 {
     private readonly ClickController? _clickController = null;
