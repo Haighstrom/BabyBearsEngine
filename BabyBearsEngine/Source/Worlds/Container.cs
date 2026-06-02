@@ -16,8 +16,7 @@ internal class Container(IContainer realParent) : IContainer
     // the back rather than on top.
     private const int NonLayeredLayer = int.MaxValue;
 
-    // Authoritative collection of added items. Other lists are derived
-    // convenience views for rendering and updating.
+    // Membership only — insertion order, not z-order. Use _graphics / _updateables for layer-sorted iteration.
     private readonly List<IAddable> _children = [];
     private readonly List<IRenderable> _graphics = [];
     private readonly List<IUpdateable> _updateables = [];
