@@ -25,10 +25,8 @@ internal static class BitmapTools
 
     public unsafe static Bitmap PremultiplyAlpha(Bitmap bitmap)
     {
-        //todo: put some tries here as this fucks up sometimes
-
-        // Lock the entire bitmap for Read/Write access as we'll be reading the pixel
-        // colour values and altering them in-place.
+        // LockBits has historically been flaky under GDI+ contention — the Repeat.TryMethod wrapper
+        // retries up to 5 times before giving up.
         var bmlock = Repeat.TryMethod(() => bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, bitmap.PixelFormat), 5, new TimeSpan(5));
 
         // This code only works with 32bit argb images - assume no alpha if not this format
@@ -49,9 +47,12 @@ internal static class BitmapTools
 
                 float alphaFloat = (*color).Alpha / 255.0f;
 
-                (*color).Red = Convert.ToByte(alphaFloat * (*color).Red);
-                (*color).Green = Convert.ToByte(alphaFloat * (*color).Green);
-                (*color).Blue = Convert.ToByte(alphaFloat * (*color).Blue);
+                // (byte)(value + 0.5f) is round-half-up — equivalent to Convert.ToByte for our
+                // domain (alpha/255 * channel ∈ [0, 255]) but avoids the overflow check and the
+                // banker's-rounding tie-break behaviour, neither of which we want here.
+                (*color).Red = (byte)(alphaFloat * (*color).Red + 0.5f);
+                (*color).Green = (byte)(alphaFloat * (*color).Green + 0.5f);
+                (*color).Blue = (byte)(alphaFloat * (*color).Blue + 0.5f);
             }
         }
 
