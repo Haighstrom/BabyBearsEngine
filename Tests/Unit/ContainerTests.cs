@@ -457,4 +457,42 @@ public class ContainerTests
         Assert.AreEqual(123f, x);
         Assert.AreEqual(456f, y);
     }
+
+    // Equal-layer tie-break: later-added overlays earlier-added (matches IRenderable doc).
+
+    [TestMethod]
+    public void GetRenderables_EqualLayer_LaterAddedRendersLater_SoItOverlaysEarlier()
+    {
+        var container = CreateContainer(out _);
+        var first = new StubLayeredRenderable(5);
+        var second = new StubLayeredRenderable(5);
+
+        container.Add(first);
+        container.Add(second);
+
+        // GetRenderables iterates back-to-front: index 0 renders first (drawn behind),
+        // index 1 renders second (drawn on top). Later-added must be at the higher index.
+        var ordered = container.GetRenderables();
+        Assert.HasCount(2, ordered);
+        Assert.AreSame(first, ordered[0]);
+        Assert.AreSame(second, ordered[1]);
+    }
+
+    [TestMethod]
+    public void GetUpdatables_EqualLayer_LaterAddedUpdatesLast_SoItWinsMouseInputArbitration()
+    {
+        // MouseSolver registers the LAST-updated entity as topmost in the click stack — so the
+        // same "later-added overlays" rule applies to updateable ordering.
+        var container = CreateContainer(out _);
+        var first = new StubLayeredUpdateable(5);
+        var second = new StubLayeredUpdateable(5);
+
+        container.Add(first);
+        container.Add(second);
+
+        var ordered = container.GetUpdatables();
+        Assert.HasCount(2, ordered);
+        Assert.AreSame(first, ordered[0]);
+        Assert.AreSame(second, ordered[1]);
+    }
 }
