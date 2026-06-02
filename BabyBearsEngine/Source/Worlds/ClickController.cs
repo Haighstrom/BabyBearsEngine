@@ -106,7 +106,7 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
         // its events nor any subclass OnLeftClicked override fire. A target whose parent
         // chain doesn't reach a tree root is detached, has no screen position to hit-test,
         // and is treated the same as disabled.
-        if (target.Disabled || (target is IAddable addable && !addable.IsConnectedToTree))
+        if (target.Disabled || (target is IAddable addable && !addable.Exists))
         {
             _clickState = ClickState.None;
             _rightClickState = RightClickState.None;

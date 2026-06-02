@@ -173,7 +173,7 @@ public class ContainerEntityTests
     public void Update_WhenGrandchildDetachesAncestor_StopsIteratingRemainingChildrenAtSiblingLevel()
     {
         // Topology: root → ce (grandparent) → middle → [detacher, laterSibling]
-        // detacher removes ce from root. middle.IsConnectedToTree is then false (chain broken at ce),
+        // detacher removes ce from root. middle.Exists is then false (chain broken at ce),
         // so middle's loop must break before reaching laterSibling.
         var root = new FakeParent { Translation = (0f, 0f) };
         var ce = new TestContainerEntity();
@@ -305,7 +305,7 @@ public class ContainerEntityTests
     [TestMethod]
     public void Update_TicksRegularChildrenBeforeUpdateLastChildren_RegardlessOfAddOrder()
     {
-        // ContainerEntity.Update checks each child's IsConnectedToTree, so the entity itself
+        // ContainerEntity.Update checks each child's Exists, so the entity itself
         // needs a parent. Use a real World to root the tree.
         var world = new World();
         var ce = new TestContainerEntity();

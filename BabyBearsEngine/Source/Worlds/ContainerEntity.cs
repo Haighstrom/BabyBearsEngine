@@ -71,7 +71,7 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
 
     /// <summary>
     /// Updates every active child <see cref="IUpdateable"/> that is part of the entity tree. Children with
-    /// <see cref="IUpdateable.Active"/> = false, or whose <see cref="AddableBase.IsConnectedToTree"/> is false,
+    /// <see cref="IUpdateable.Active"/> = false, or whose <see cref="IAddable.Exists"/> is false,
     /// are skipped. Override to insert custom per-frame logic; remember to call <c>base.Update(elapsed)</c> if
     /// you still want children to update.
     /// <para>Runs in two passes: every regular child first, then every child that opted into the post-pass
@@ -87,14 +87,14 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
     {
         foreach (var entity in GetUpdatables())
         {
-            if (!entity.Active || !entity.IsConnectedToTree)
+            if (!entity.Active || !entity.Exists)
             {
                 continue;
             }
 
             entity.Update(elapsed);
 
-            if (!IsConnectedToTree)
+            if (!Exists)
             {
                 break;
             }
@@ -102,14 +102,14 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
 
         foreach (var entity in GetUpdatablesLast())
         {
-            if (!entity.Active || !entity.IsConnectedToTree)
+            if (!entity.Active || !entity.Exists)
             {
                 continue;
             }
 
             entity.Update(elapsed);
 
-            if (!IsConnectedToTree)
+            if (!Exists)
             {
                 break;
             }

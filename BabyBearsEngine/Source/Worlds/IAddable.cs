@@ -13,33 +13,21 @@ public interface IAddable
     /// </summary>
     IContainer? Parent { get; set; }
 
-    /// <summary>True when this addable is currently inside a container (equivalent to <see cref="Parent"/> being non-null).</summary>
-    bool Exists { get; }
-
     /// <summary>
-    /// True when walking the parent chain from this addable reaches a tree root (a non-<see cref="IAddable"/>
-    /// <see cref="IContainer"/>, e.g. a <c>World</c>). False when any link in the chain is <c>null</c> — i.e.
-    /// this addable, or one of its ancestors, has been detached. Distinct from <see cref="Exists"/>, which only
-    /// checks the immediate parent.
+    /// True when this addable is part of a live entity tree — i.e. walking the parent chain
+    /// reaches a tree root (a non-<see cref="IAddable"/> <see cref="IContainer"/>, e.g. a
+    /// <c>World</c>). False if this addable, or any of its ancestors, has been detached.
     /// </summary>
     /// <remarks>
-    /// Cost is O(depth-of-tree) per call — a pointer-chase up the parent chain. At typical scene depths
-    /// this is negligible; revisit if profiling shows otherwise.
+    /// <para>For a leaf attached directly to a root container this matches "<see cref="Parent"/>
+    /// is not null". For deeper trees it also catches the "I have a parent, but my parent (or
+    /// further up) was detached" case — useful for skipping per-frame work on entities that are
+    /// orphaned mid-update.</para>
+    /// <para>Cost is O(depth-of-tree) per call — a pointer-chase up the parent chain. At
+    /// typical scene depths this is negligible; if you only need the immediate-parent check
+    /// inside a hot loop, test <c>Parent is not null</c> directly.</para>
     /// </remarks>
-    bool IsConnectedToTree
-    {
-        get
-        {
-            for (IAddable? current = this; current is not null; current = current.Parent as IAddable)
-            {
-                if (current.Parent is null)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
+    bool Exists { get; }
 
     /// <summary>Raised immediately after this addable has been attached to a parent container.</summary>
     event EventHandler? Added;

@@ -36,10 +36,7 @@ public abstract class AddableBase : IAddable
     }
 
     /// <inheritdoc/>
-    public bool Exists => _parent is not null;
-
-    /// <inheritdoc/>
-    public bool IsConnectedToTree
+    public bool Exists
     {
         get
         {

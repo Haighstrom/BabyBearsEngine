@@ -71,7 +71,6 @@ public class PathingControllerTests
         public bool UpdateLast => false;
         public IContainer? Parent { get; set; } = null;
         public bool Exists => Parent is not null;
-        public bool IsConnectedToTree => false;
         public event EventHandler? Added;
         public event EventHandler? Removed;
         public void Remove() => throw new NotSupportedException();
