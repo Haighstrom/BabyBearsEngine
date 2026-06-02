@@ -85,8 +85,6 @@ public sealed class TextureGraphic(ITexture texture, float x, float y, float wid
         get => _sourceArea;
         set
         {
-            ArgumentNullException.ThrowIfNull(value);
-
             if (value.X < 0f || value.Y < 0f || value.W < 0f || value.H < 0f
                 || value.Right > 1f || value.Bottom > 1f)
             {
