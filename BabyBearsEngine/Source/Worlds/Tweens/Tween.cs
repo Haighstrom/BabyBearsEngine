@@ -1,4 +1,4 @@
-namespace BabyBearsEngine.Worlds.Tweens;
+﻿namespace BabyBearsEngine.Worlds.Tweens;
 
 /// <summary>
 /// Base class for all tweens. Tracks elapsed time and drives a <see cref="Progress"/> value
@@ -86,10 +86,21 @@ public abstract class Tween : UpdateableBase
 
         if (Loop)
         {
+            // Wrap the overshoot into the next cycle and re-emit progress in-frame, so a tween
+            // driving e.g. NumTween(0,100) doesn't visibly hold at 100 for one frame before
+            // snapping back. Without this second OnProgressUpdated, the next Update would start
+            // from a Progress that suddenly jumped from 1 down to the wrapped position.
             _elapsed %= Duration;
+            LinearProgress = _elapsed / Duration;
+            Progress = _easing is not null ? _easing(LinearProgress) : LinearProgress;
+            OnProgressUpdated();
         }
-        else
+        else if (Parent is not null)
         {
+            // The Completed handler may have already detached the tween — only call Remove when
+            // the tween is still parented. Re-adding a tween to a different parent from inside
+            // Completed is not supported: the engine's Remove() would then unparent it from the
+            // new parent. Use Loop or a fresh Tween instance for repeat/chain patterns.
             Remove();
         }
     }

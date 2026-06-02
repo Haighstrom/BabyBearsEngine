@@ -198,6 +198,50 @@ public class TweenTests
         Assert.AreEqual(0.5, tween.LinearProgress, delta: 1e-10);
     }
 
+    [TestMethod]
+    public void Update_Loop_OvershootFrame_ProgressWrapsWithinSameFrame()
+    {
+        // Duration 1. First Update advances to 0.7 — mid-cycle.
+        // Second Update is 0.7 — overshoots the cycle end by 0.4. Without the fix, this frame
+        // reports LinearProgress = 1, and the wrap only takes effect next frame (snapping
+        // visibly from 1 → ~0.4). With the fix, the wrap happens in-frame: LinearProgress = 0.4.
+        var tween = InContainer(new CapturingTween(1.0, loop: true));
+        tween.Update(0.7);
+
+        tween.Update(0.7);
+
+        Assert.AreEqual(0.4, tween.LinearProgress, delta: 1e-10);
+    }
+
+    [TestMethod]
+    public void Update_Loop_OvershootFrame_StillFiresCompletedOnce()
+    {
+        var tween = InContainer(new CapturingTween(1.0, loop: true));
+        int fired = 0;
+        tween.Completed += () => fired++;
+        tween.Update(0.7);
+
+        tween.Update(0.7);
+
+        Assert.AreEqual(1, fired);
+    }
+
+    [TestMethod]
+    public void Update_NonLoop_CompletedHandlerDetachesParent_DoesNotThrow()
+    {
+        // A handler that manually unparents the tween must not blow up when the engine then
+        // tries to also remove it. Documented policy: re-adding from inside Completed is not
+        // supported, but detaching from inside Completed must be safe.
+        var container = new FakeContainer();
+        var tween = new CapturingTween(1.0) { Parent = container };
+        tween.Completed += () => tween.Parent = null;
+
+        // Should not throw — Parent is null by the time the engine tries to Remove.
+        tween.Update(1.0);
+
+        Assert.IsFalse(tween.Exists);
+    }
+
     // TimeRemaining
 
     [TestMethod]
