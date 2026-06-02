@@ -33,7 +33,7 @@ public class MusicPlaylistTests
         _trackB = new FakeMusicClip("BBB");
         _trackC = new FakeMusicClip("CCC");
         _playlist = new MusicPlaylist(
-            playTrack: clip => _played.Add(clip),
+            playTrack: (clip, _) => _played.Add(clip),
             stopMusic: () => _stopCount++,
             loop: true,
             shuffle: false);
@@ -229,6 +229,27 @@ public class MusicPlaylistTests
         Assert.HasCount(2, events);
         Assert.AreEqual(_trackA, events[1].Previous);
         Assert.AreEqual(_trackB, events[1].Current);
+    }
+
+    [TestMethod]
+    public void TrackChanged_AfterNotifyStopped_PreviousIsNull()
+    {
+        var events = new List<MusicTrackChangedEventArgs>();
+        _playlist.SetTracks(_trackA, _trackB);
+        _playlist.Play();
+        _playlist.TrackChanged += events.Add;
+
+        // Simulate an external StopMusic by notifying the playlist directly.
+        _playlist.NotifyStopped();
+
+        _playlist.Play();
+
+        // Without the fix the playlist would report _trackA as Previous (because _currentIndex
+        // is still set to 0). After NotifyStopped, the playlist knows nothing was actually
+        // playing and reports null.
+        Assert.HasCount(1, events);
+        Assert.IsNull(events[0].Previous);
+        Assert.AreEqual(_trackA, events[0].Current);
     }
 
     [TestMethod]

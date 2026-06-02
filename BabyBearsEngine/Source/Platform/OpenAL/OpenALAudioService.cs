@@ -62,7 +62,7 @@ internal sealed class OpenALAudioService : IAudio
         _sfxChannels = [];
 
         _playlist = new MusicPlaylist(
-            playTrack: clip => PlayMusicClipInternal(clip),
+            playTrack: (clip, autoAdvance) => PlayMusicClipInternal(clip, autoAdvance),
             stopMusic: () => StopMusic(),
             loop: settings.LoopMusic,
             shuffle: settings.ShuffleMusic);
@@ -285,10 +285,13 @@ internal sealed class OpenALAudioService : IAudio
                 return;
             }
 
+            // Music pauses (so it resumes from the same point), but SFX are stopped — pausing
+            // transient one-shot SFX would cause them all to restart simultaneously on Resume,
+            // mixed with whatever the game is doing at that point. Stop is the standard policy.
             _musicChannel?.Pause();
             foreach (OpenALAudioChannel channel in _sfxChannels)
             {
-                channel.Pause();
+                channel.Stop();
             }
             _paused = true;
             TransitionMusicStateUnlocked(_musicState == AudioState.Playing ? AudioState.Paused : _musicState);
@@ -309,11 +312,8 @@ internal sealed class OpenALAudioService : IAudio
                 return;
             }
 
+            // SFX were stopped on Pause, not paused — there's nothing to resume on those channels.
             _musicChannel?.Resume();
-            foreach (OpenALAudioChannel channel in _sfxChannels)
-            {
-                channel.Resume();
-            }
             _paused = false;
             TransitionMusicStateUnlocked(_musicState == AudioState.Paused ? AudioState.Playing : _musicState);
         }
@@ -331,6 +331,9 @@ internal sealed class OpenALAudioService : IAudio
             _musicChannel?.Stop();
             TransitionMusicStateUnlocked(AudioState.Stopped);
         }
+        // Tell the playlist so its next TrackChanged event reports Previous = null rather than
+        // the now-stopped clip. Done outside the channel lock — playlist has its own lock.
+        _playlist.NotifyStopped();
     }
 
     public void StopSfx()
@@ -398,7 +401,7 @@ internal sealed class OpenALAudioService : IAudio
 
                     foreach (OpenALAudioClip clip in _ownedClips)
                     {
-                        TryAl(clip.Dispose);
+                        TryAl(clip.Destroy);
                     }
                     _ownedClips.Clear();
 
@@ -443,7 +446,7 @@ internal sealed class OpenALAudioService : IAudio
         }
     }
 
-    private void PlayMusicClipInternal(IMusicClip clip)
+    private void PlayMusicClipInternal(IMusicClip clip, bool autoAdvance = false)
     {
         if (!_initialised || _musicChannel is null)
         {
@@ -463,6 +466,13 @@ internal sealed class OpenALAudioService : IAudio
             // Dispose started after the poll thread queued an OnTrackFinished — bail before
             // touching the music channel (which is about to be / has been torn down).
             if (_disposing || _disposed)
+            {
+                return;
+            }
+            // Auto-advance from the poll thread loses to a concurrent user StopMusic: if the
+            // user has already set the state to Stopped between the poll detecting end-of-track
+            // and this call, honour their intent rather than restarting playback.
+            if (autoAdvance && _musicState != AudioState.Playing)
             {
                 return;
             }

@@ -10,6 +10,15 @@ namespace BabyBearsEngine;
 /// Music navigation (next/previous track, name lookup, track listing) lives on
 /// <see cref="Playlist"/>; play / volume / stop convenience methods live directly on this class.
 /// </summary>
+/// <remarks>
+/// <para>The underlying <c>EngineConfiguration.AudioService</c> must be installed once at game
+/// startup (via <c>GameLauncher.Run</c>) and not swapped at runtime. The facade's event
+/// pass-throughs (<see cref="MusicStateChanged"/>, <see cref="TrackChanged"/>) resolve the
+/// service at subscription time, so a runtime swap would route subscription on instance A and
+/// unsubscription on instance B — the subscription on A leaks. Tests may substitute fakes
+/// safely because they call <c>EngineConfiguration.Reset</c> in cleanup, which clears any
+/// dangling subscriptions along with the service reference.</para>
+/// </remarks>
 public static class Audio
 {
     private static IAudio Implementation => EngineConfiguration.AudioService;

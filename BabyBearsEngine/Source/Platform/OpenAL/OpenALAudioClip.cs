@@ -33,7 +33,21 @@ internal abstract class OpenALAudioClip : IAudioClip
     /// <summary>The AL buffer holding this clip's PCM data. Bound to a source at play time.</summary>
     public int BufferId => _bufferId;
 
+    /// <summary>
+    /// Clip lifetime is managed by the audio service: it tracks every clip it loads and frees
+    /// them all on its own <see cref="OpenALAudioService.Dispose"/>. Calling <c>Dispose</c> on
+    /// an individual clip is a no-op — otherwise a user-initiated <c>AL.DeleteBuffer</c> while
+    /// the buffer is still bound to a playing source would fail silently (OpenAL specifies
+    /// <c>AL_INVALID_OPERATION</c> and leaves the buffer alive but orphaned).
+    /// </summary>
     public void Dispose()
+    {
+        // Intentionally a no-op for public callers; the audio service calls Destroy() on
+        // teardown, by which point every channel has already been stopped and unbound.
+    }
+
+    /// <summary>Frees the underlying AL buffer. Called by <see cref="OpenALAudioService.Dispose"/> after every channel has been stopped.</summary>
+    internal void Destroy()
     {
         if (_disposed)
         {
@@ -41,6 +55,7 @@ internal abstract class OpenALAudioClip : IAudioClip
         }
 
         AL.DeleteBuffer(_bufferId);
+        OpenALErrorCheck.Check(nameof(AL.DeleteBuffer));
         _disposed = true;
     }
 }

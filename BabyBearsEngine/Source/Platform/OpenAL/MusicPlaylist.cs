@@ -12,19 +12,27 @@ namespace BabyBearsEngine.Platform.OpenAL;
 internal sealed class MusicPlaylist : IPlaylist
 {
     private readonly Lock _lock = new();
-    private readonly Action<IMusicClip> _playTrack;
+    // The bool flag distinguishes user-initiated play (false) from poll-thread auto-advance
+    // (true). The service uses this to bail out of auto-advance if the user called StopMusic
+    // between the poll detecting end-of-track and the service-side play actually running.
+    private readonly Action<IMusicClip, bool> _playTrack;
     private readonly Action _stopMusic;
 
     private List<IMusicClip> _tracks = [];
     private int _currentIndex = -1;
+    // True while a track is actively playing — set when StartTrack fires, cleared when the
+    // service tells us via NotifyStopped. Without this, the playlist's "previous track"
+    // calculation for TrackChanged keeps returning the now-stopped clip after the user calls
+    // StopMusic, so subscribers keying off "Previous != null means we were playing" mis-update.
+    private bool _isPlaying = false;
     private bool _loop;
     private bool _shuffle;
 
-    /// <param name="playTrack">Callback invoked when the playlist decides which track to play next. The callback is responsible for actually starting AL playback.</param>
+    /// <param name="playTrack">Callback invoked when the playlist decides which track to play next. The bool argument is true when the call originates from the poll thread's auto-advance and false when it originates from a user-initiated Play call — the service uses it to drop auto-advance plays that race with a user StopMusic.</param>
     /// <param name="stopMusic">Callback invoked when the playlist transitions to a stopped state (e.g. non-looping playlist reaching its end).</param>
     /// <param name="loop">Initial value of <see cref="Loop"/>.</param>
     /// <param name="shuffle">Initial value of <see cref="Shuffle"/>.</param>
-    public MusicPlaylist(Action<IMusicClip> playTrack, Action stopMusic, bool loop, bool shuffle)
+    public MusicPlaylist(Action<IMusicClip, bool> playTrack, Action stopMusic, bool loop, bool shuffle)
     {
         _playTrack = playTrack;
         _stopMusic = stopMusic;
@@ -121,6 +129,7 @@ internal sealed class MusicPlaylist : IPlaylist
         {
             _tracks.Clear();
             _currentIndex = -1;
+            _isPlaying = false;
         }
         _stopMusic();
     }
@@ -141,7 +150,7 @@ internal sealed class MusicPlaylist : IPlaylist
                 ShuffleTracks();
             }
 
-            previous = CurrentTrackUnlocked();
+            previous = PreviousForChangeEventUnlocked();
             _currentIndex = 0;
             toPlay = _tracks[_currentIndex];
         }
@@ -159,7 +168,7 @@ internal sealed class MusicPlaylist : IPlaylist
                 return;
             }
 
-            previous = CurrentTrackUnlocked();
+            previous = PreviousForChangeEventUnlocked();
             int wrapped = ((index % _tracks.Count) + _tracks.Count) % _tracks.Count;
             _currentIndex = wrapped;
             toPlay = _tracks[_currentIndex];
@@ -189,7 +198,7 @@ internal sealed class MusicPlaylist : IPlaylist
                 throw new KeyNotFoundException($"No track named '{trackName}' in the playlist.");
             }
 
-            previous = CurrentTrackUnlocked();
+            previous = PreviousForChangeEventUnlocked();
             _currentIndex = index;
             toPlay = _tracks[_currentIndex];
         }
@@ -209,7 +218,7 @@ internal sealed class MusicPlaylist : IPlaylist
                 throw new ArgumentException("Clip is not present in the playlist; add it via SetTracks first.", nameof(clip));
             }
 
-            previous = CurrentTrackUnlocked();
+            previous = PreviousForChangeEventUnlocked();
             _currentIndex = index;
             toPlay = _tracks[_currentIndex];
         }
@@ -227,7 +236,7 @@ internal sealed class MusicPlaylist : IPlaylist
                 return;
             }
 
-            previous = CurrentTrackUnlocked();
+            previous = PreviousForChangeEventUnlocked();
             _currentIndex = _currentIndex < 0 ? 0 : (_currentIndex + 1) % _tracks.Count;
             toPlay = _tracks[_currentIndex];
         }
@@ -245,7 +254,7 @@ internal sealed class MusicPlaylist : IPlaylist
                 return;
             }
 
-            previous = CurrentTrackUnlocked();
+            previous = PreviousForChangeEventUnlocked();
             _currentIndex = _currentIndex <= 0 ? _tracks.Count - 1 : _currentIndex - 1;
             toPlay = _tracks[_currentIndex];
         }
@@ -268,13 +277,14 @@ internal sealed class MusicPlaylist : IPlaylist
                 return;
             }
 
-            previous = CurrentTrackUnlocked();
+            previous = PreviousForChangeEventUnlocked();
             int nextIndex = _currentIndex + 1;
             if (nextIndex >= _tracks.Count)
             {
                 if (!_loop)
                 {
                     _currentIndex = -1;
+                    _isPlaying = false;
                     shouldStop = true;
                 }
                 else
@@ -308,18 +318,42 @@ internal sealed class MusicPlaylist : IPlaylist
         }
         else if (toPlay is not null)
         {
-            StartTrack(toPlay, previous);
+            StartTrack(toPlay, previous, autoAdvance: true);
         }
     }
 
-    private void StartTrack(IMusicClip toPlay, IMusicClip? previous)
+    private void StartTrack(IMusicClip toPlay, IMusicClip? previous, bool autoAdvance = false)
     {
-        _playTrack(toPlay);
+        // Mark playing BEFORE the callback — _playTrack synchronously triggers a state
+        // transition that subscribers may key off, and they should see the playlist as live by
+        // then. lock-free safe: only the calling thread touches _isPlaying here.
+        lock (_lock)
+        {
+            _isPlaying = true;
+        }
+        _playTrack(toPlay, autoAdvance);
         TrackChanged?.Invoke(new MusicTrackChangedEventArgs(previous, toPlay));
+    }
+
+    /// <summary>
+    /// Called by the audio service after an external <c>StopMusic</c> so the playlist's idea of
+    /// "previous track" for the next <see cref="TrackChanged"/> can correctly say "nothing was
+    /// playing" rather than the now-stopped clip.
+    /// </summary>
+    internal void NotifyStopped()
+    {
+        lock (_lock)
+        {
+            _isPlaying = false;
+        }
     }
 
     private IMusicClip? CurrentTrackUnlocked()
         => _currentIndex >= 0 && _currentIndex < _tracks.Count ? _tracks[_currentIndex] : null;
+
+    /// <summary>Returns the current track only when a track is actually playing; null otherwise (e.g. just after StopMusic). Used for the <c>Previous</c> field of <see cref="MusicTrackChangedEventArgs"/>.</summary>
+    private IMusicClip? PreviousForChangeEventUnlocked()
+        => _isPlaying ? CurrentTrackUnlocked() : null;
 
     private void ShuffleTracks()
     {
