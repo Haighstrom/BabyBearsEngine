@@ -114,6 +114,15 @@ public class Tab : Entity
 
             _contentPanel = null;
         }
+
+        // Reset visibility / activity flags we may have flipped while this tab was inactive, so
+        // the items come out with clean defaults and can be re-added elsewhere without each one
+        // needing to be un-hidden by the caller.
+        foreach (IAddable item in _content)
+        {
+            if (item is IRenderable r) { r.Visible = true; }
+            if (item is IUpdateable u) { u.Active = true; }
+        }
     }
 
     internal void Activate()

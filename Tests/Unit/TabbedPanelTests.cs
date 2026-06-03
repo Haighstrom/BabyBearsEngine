@@ -1,5 +1,6 @@
 using System;
 using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Worlds;
 using BabyBearsEngine.Worlds.Graphics;
 using BabyBearsEngine.Worlds.UI;
 using BabyBearsEngine.Worlds.UI.Themes;
@@ -14,6 +15,15 @@ public class TabbedPanelTests
         public Colour Colour { get; set; }
         public float Angle { get; set; } = 0f;
         public override void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
+    }
+
+    private sealed class FakeContent : AddableBase, IRenderable, IUpdateable
+    {
+        public bool Visible { get; set; } = true;
+        public bool Active { get; set; } = true;
+
+        public void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
+        public void Update(double elapsed) { }
     }
 
     private static TabbedPanelTheme StubTheme() => new()
@@ -254,5 +264,30 @@ public class TabbedPanelTests
         panel.RemoveTab(outsider);
 
         Assert.HasCount(1, panel.Tabs);
+    }
+
+    [TestMethod]
+    public void RemoveTab_InactiveTab_RestoresContentItemVisibleAndActive()
+    {
+        // An inactive tab's content items are hidden / paused while the tab is unselected. When
+        // the tab is detached from the panel they should come back to a clean default (visible
+        // + active) so the caller can re-add them somewhere else without first un-hiding each.
+        TabbedPanel panel = MakePanel();
+        Tab first = MakeTab();
+        Tab second = MakeTab();
+        panel.AddTab(first);  // first becomes active
+        panel.AddTab(second); // inactive
+
+        FakeContent content = new();
+        second.AddContent(content);
+
+        // Sanity — while second is inactive, its content should be hidden + paused.
+        Assert.IsFalse(content.Visible);
+        Assert.IsFalse(content.Active);
+
+        panel.RemoveTab(second);
+
+        Assert.IsTrue(content.Visible);
+        Assert.IsTrue(content.Active);
     }
 }
