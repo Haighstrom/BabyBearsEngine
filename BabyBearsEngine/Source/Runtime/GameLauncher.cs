@@ -37,10 +37,15 @@ public static class GameLauncher
         // and probe paths are added — see #106.
         NativeLibraryResolver.Initialise();
 
-        // Open the console window (if requested) BEFORE Logger.Initialise so the console sink has
-        // somewhere visible to write to. On non-Windows the call no-ops.
+        // Open the console window (if requested AND supported) BEFORE Logger.Initialise so the
+        // console sink has somewhere visible to write to. We gate on IsSupported here rather than
+        // letting ConsoleWindow.Open no-op so we don't trigger its unsupported-platform warning,
+        // which would route to the un-initialised default Logger (creating a stray log.log in
+        // CWD). The deferred Logger.Warning below replaces that emission once the user's sinks
+        // are bound.
         var cs = appSettings.ConsoleSettings;
-        if (cs.ShowConsoleWindow)
+        bool consoleRequestedButUnsupported = cs.ShowConsoleWindow && !ConsoleWindow.IsSupported;
+        if (cs.ShowConsoleWindow && ConsoleWindow.IsSupported)
         {
             ConsoleWindow.Open(cs.X, cs.Y, cs.Width, cs.Height);
             string game = Assembly.GetEntryAssembly()?.GetName().Name ?? "unknown";
@@ -50,6 +55,11 @@ public static class GameLauncher
         Files.Settings = appSettings.IoSettings;
 
         Logger.Initialise(appSettings.LogSettings, appSettings.ConsoleSettings);
+
+        if (consoleRequestedButUnsupported)
+        {
+            Logger.Warning("ConsoleSettings.ShowConsoleWindow is true but the platform doesn't support console window allocation. Skipping.");
+        }
 
         EngineDiagnostics.LogSystemInformation();
 
