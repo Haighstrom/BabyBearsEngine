@@ -134,4 +134,46 @@ public class MenuGroupTests
         Assert.AreEqual(1, a.CloseCalls);
         Assert.AreEqual(1, b.CloseCalls);
     }
+
+    // Deduplication
+
+    [TestMethod]
+    public void Register_SameMenuTwiceInSeparateCalls_OpeningAnotherClosesItOnce()
+    {
+        MenuGroup group = new();
+        FakeMenu a = new();
+        FakeMenu b = new();
+        group.Register(a);
+        group.Register(a); // duplicate registration
+        group.Register(b);
+
+        group.Open(b);
+
+        Assert.AreEqual(1, a.CloseCalls);
+    }
+
+    [TestMethod]
+    public void Register_SameMenuTwiceInOneCall_OpeningAnotherClosesItOnce()
+    {
+        MenuGroup group = new();
+        FakeMenu a = new();
+        FakeMenu b = new();
+        group.Register(a, a, b); // duplicate within the params array
+
+        group.Open(b);
+
+        Assert.AreEqual(1, a.CloseCalls);
+    }
+
+    [TestMethod]
+    public void Register_SameMenuTwice_CloseAllCallsCloseOnce()
+    {
+        MenuGroup group = new();
+        FakeMenu a = new();
+        group.Register(a, a);
+
+        group.CloseAll();
+
+        Assert.AreEqual(1, a.CloseCalls);
+    }
 }

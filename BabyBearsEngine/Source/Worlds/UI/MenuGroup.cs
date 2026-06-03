@@ -12,7 +12,10 @@ public class MenuGroup : IMenuGroup
     {
         foreach (var menu in menus)
         {
-            _menus.Add(menu);
+            if (!_menus.Contains(menu))
+            {
+                _menus.Add(menu);
+            }
         }
     }
 
