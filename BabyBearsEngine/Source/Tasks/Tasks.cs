@@ -43,6 +43,12 @@ public static class Tasks
     /// Appends <paramref name="next"/> to the end of the chain rooted at <paramref name="first"/>
     /// and returns <paramref name="first"/> so calls can be fluently chained.
     /// </summary>
+    /// <remarks>
+    /// Cost is O(chain length) per call — building a chain of N tasks with fluent
+    /// <c>.Then(x).Then(y)...</c> is therefore O(N²). Fine for typical short chains (a handful of
+    /// steps). For very long chains, build manually by holding a tail reference and assigning
+    /// <see cref="ITask.NextTask"/> directly.
+    /// </remarks>
     public static ITask Then(this ITask first, ITask next)
     {
         ITask current = first;
