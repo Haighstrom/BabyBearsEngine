@@ -295,4 +295,42 @@ public class CsvTests
             }
         }
     }
+
+    // Conversion-failure diagnostics
+
+    [TestMethod]
+    public void Deserialize_BadValue_ThrowsWithRowAndColumnInMessage()
+    {
+        // 1-indexed file lines, 1-indexed columns. Row 2 column 2 holds "oops".
+        string csv = "1,2,3\n4,oops,6";
+
+        FormatException ex = Assert.ThrowsExactly<FormatException>(() => Csv.Deserialize<int>(csv));
+
+        Assert.Contains("row 2", ex.Message);
+        Assert.Contains("column 2", ex.Message);
+        Assert.Contains("oops", ex.Message);
+    }
+
+    [TestMethod]
+    public void DeserializeWithHeader_BadValue_ThrowsWithHeaderNameAndFileLineInMessage()
+    {
+        // File line 1 is the header; the bad cell sits on file line 2 under column "b".
+        string csv = "a,b,c\n1,oops,3";
+
+        FormatException ex = Assert.ThrowsExactly<FormatException>(() => Csv.DeserializeWithHeader<int>(csv));
+
+        Assert.Contains("row 2", ex.Message);
+        Assert.Contains("'b'", ex.Message);
+        Assert.Contains("oops", ex.Message);
+    }
+
+    [TestMethod]
+    public void Deserialize_BadValue_PreservesOriginalExceptionAsInner()
+    {
+        string csv = "1,2,3\n4,oops,6";
+
+        FormatException ex = Assert.ThrowsExactly<FormatException>(() => Csv.Deserialize<int>(csv));
+
+        Assert.IsNotNull(ex.InnerException);
+    }
 }

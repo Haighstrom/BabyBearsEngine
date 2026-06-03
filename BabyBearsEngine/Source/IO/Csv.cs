@@ -104,7 +104,7 @@ public static class Csv
 
         string[] headers = [.. rows[0]];
         List<List<string>> dataRows = [.. rows.Skip(1)];
-        T[,] data = BuildArray<T>(dataRows);
+        T[,] data = BuildArray<T>(dataRows, headers, fileLineOffset: 1);
         return (headers, data);
     }
 
@@ -224,7 +224,7 @@ public static class Csv
         return rows;
     }
 
-    private static T[,] BuildArray<T>(List<List<string>> rows) where T : IConvertible
+    private static T[,] BuildArray<T>(List<List<string>> rows, string[]? headers = null, int fileLineOffset = 0) where T : IConvertible
     {
         int rowCount = rows.Count;
         if (rowCount == 0)
@@ -240,7 +240,20 @@ public static class Csv
             List<string> source = rows[row];
             for (int col = 0; col < source.Count; col++)
             {
-                result[row, col] = (T)Convert.ChangeType(source[col], typeof(T), CultureInfo.InvariantCulture);
+                try
+                {
+                    result[row, col] = (T)Convert.ChangeType(source[col], typeof(T), CultureInfo.InvariantCulture);
+                }
+                catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException)
+                {
+                    // 1-indexed row matches the user's CSV file lines (including any header
+                    // skipped by DeserializeWithHeader). Column is the header name when
+                    // available, otherwise a 1-indexed numeric position.
+                    string columnLabel = headers is not null && col < headers.Length
+                        ? $"'{headers[col]}'"
+                        : $"{col + 1}";
+                    throw new FormatException($"Csv: failed to convert row {row + fileLineOffset + 1}, column {columnLabel}: '{source[col]}' is not a valid {typeof(T).Name}.", ex);
+                }
             }
         }
 
