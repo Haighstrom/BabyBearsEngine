@@ -5,8 +5,9 @@ namespace BabyBearsEngine.IO;
 
 /// <summary>
 /// Static facade for file and directory operations. All file reads and writes are retried on
-/// <see cref="IOException"/> according to <see cref="Settings"/>, which guards against transient
-/// file locks from antivirus software, sync tools, etc.
+/// <see cref="IOException"/> or <see cref="UnauthorizedAccessException"/> according to
+/// <see cref="Settings"/>, which guards against transient file locks from antivirus software,
+/// sync tools, etc. (Some lock failures surface as UAE on Windows — most notably File.Copy.)
 /// </summary>
 public static class Files
 {
@@ -199,9 +200,9 @@ public static class Files
     public static T ReadXmlFile<T>(string path) =>
         Xml.Deserialize<T>(ReadText(path));
 
-    // Retry (private)
+    // Retry (internal — exposed to the test project; not part of the public API)
 
-    private static void Retry(Action action)
+    internal static void Retry(Action action)
     {
         int remaining = Settings.RetryCount;
         while (true)
@@ -211,14 +212,14 @@ public static class Files
                 action();
                 return;
             }
-            catch (IOException) when (remaining-- > 0)
+            catch (Exception ex) when ((ex is IOException || ex is UnauthorizedAccessException) && remaining-- > 0)
             {
                 Thread.Sleep(Settings.RetryDelay);
             }
         }
     }
 
-    private static T Retry<T>(Func<T> action)
+    internal static T Retry<T>(Func<T> action)
     {
         int remaining = Settings.RetryCount;
         while (true)
@@ -227,7 +228,7 @@ public static class Files
             {
                 return action();
             }
-            catch (IOException) when (remaining-- > 0)
+            catch (Exception ex) when ((ex is IOException || ex is UnauthorizedAccessException) && remaining-- > 0)
             {
                 Thread.Sleep(Settings.RetryDelay);
             }

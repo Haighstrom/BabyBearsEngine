@@ -299,4 +299,82 @@ public class FilesTests
     {
         Assert.IsGreaterThan(0, Files.Settings.RetryCount);
     }
+
+    // Retry
+
+    [TestMethod]
+    public void Retry_ActionThrowsUnauthorizedAccessExceptionThenSucceeds_RetriesAndCompletes()
+    {
+        // UAE is the form locked-by-AV / locked-by-sync failures take on Windows for many
+        // File.* methods — most notably File.Copy. Without UAE in the retry filter, the very
+        // first failure escapes and the retry budget is wasted.
+        var original = Files.Settings;
+        try
+        {
+            Files.Settings = new IoSettings { RetryCount = 3, RetryDelay = TimeSpan.FromMilliseconds(1) };
+
+            int attempts = 0;
+            Files.Retry(() =>
+            {
+                attempts++;
+                if (attempts == 1)
+                {
+                    throw new UnauthorizedAccessException("simulated transient AV lock");
+                }
+            });
+
+            Assert.AreEqual(2, attempts);
+        }
+        finally
+        {
+            Files.Settings = original;
+        }
+    }
+
+    [TestMethod]
+    public void Retry_FuncThrowsUnauthorizedAccessExceptionThenSucceeds_RetriesAndReturnsValue()
+    {
+        var original = Files.Settings;
+        try
+        {
+            Files.Settings = new IoSettings { RetryCount = 3, RetryDelay = TimeSpan.FromMilliseconds(1) };
+
+            int attempts = 0;
+            int result = Files.Retry(() =>
+            {
+                attempts++;
+                if (attempts == 1)
+                {
+                    throw new UnauthorizedAccessException("simulated transient AV lock");
+                }
+                return 42;
+            });
+
+            Assert.AreEqual(2, attempts);
+            Assert.AreEqual(42, result);
+        }
+        finally
+        {
+            Files.Settings = original;
+        }
+    }
+
+    [TestMethod]
+    public void Retry_UnauthorizedAccessExceptionExceedsRetryBudget_Surfaces()
+    {
+        var original = Files.Settings;
+        try
+        {
+            Files.Settings = new IoSettings { RetryCount = 2, RetryDelay = TimeSpan.FromMilliseconds(1) };
+
+            Assert.ThrowsExactly<UnauthorizedAccessException>(() => Files.Retry(() =>
+            {
+                throw new UnauthorizedAccessException("permanent");
+            }));
+        }
+        finally
+        {
+            Files.Settings = original;
+        }
+    }
 }
