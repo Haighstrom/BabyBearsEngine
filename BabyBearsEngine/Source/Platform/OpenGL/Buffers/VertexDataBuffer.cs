@@ -29,8 +29,18 @@ internal sealed class VertexDataBuffer<TVertex> : IDisposable where TVertex : st
 
     public void SetNewVertices(TVertex[] vertices)
     {
+        SetNewVertices(vertices, vertices.Length);
+    }
+
+    /// <summary>
+    /// Uploads the first <paramref name="count"/> elements of <paramref name="vertices"/>.
+    /// Lets callers use a cached high-water-marked array and pass the active element count
+    /// separately, avoiding the per-frame allocation that .Length-based sizing would force.
+    /// </summary>
+    public void SetNewVertices(TVertex[] vertices, int count)
+    {
         VBO.Bind();
-        GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * TVertex.Stride, vertices, _bufferUsageHint);
+        GL.BufferData(BufferTarget.ArrayBuffer, count * TVertex.Stride, vertices, _bufferUsageHint);
     }
 
     public void Dispose()

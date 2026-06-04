@@ -243,6 +243,33 @@ public class ParticleSystemTests
     }
 
     [TestMethod]
+    public void Update_FullBurstExpiresInOneFrame_AllRemoved_AndOrderPreservedForSurvivors()
+    {
+        // Lock down the two-pointer compact: a burst that ALL expire on the same tick must
+        // leave the list empty; and a mix of expiries / survivors must keep the survivors alive
+        // and accessible. Disable emission so the test isolates the cull path.
+        var system = MakeSystem();
+        system.Emitting = false;
+        system.Lifetime = 0.5f;
+        system.EmitBurst(50);
+        Assert.AreEqual(50, system.ParticleCount);
+
+        system.Update(1.0); // every particle's RemainingLifetime drops to -0.5
+
+        Assert.AreEqual(0, system.ParticleCount);
+
+        // Mixed case: 10 short-lived particles plus 10 long-lived ones. After a tick that kills
+        // the short batch but not the long batch, exactly 10 should remain.
+        system.Lifetime = 0.5f;
+        system.EmitBurst(10);
+        system.Lifetime = 5f;
+        system.EmitBurst(10);
+        system.Update(1.0); // first batch dies, second batch loses 1s of its 5s
+
+        Assert.AreEqual(10, system.ParticleCount);
+    }
+
+    [TestMethod]
     public void Update_WithEmissionPausedThenResumed_DoesNotDumpBacklog()
     {
         var system = MakeSystem();

@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Geometry;
+﻿using System.Runtime.InteropServices;
+using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
 using OpenTK.Graphics.OpenGL4;
 
@@ -27,6 +28,7 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
     private readonly List<Particle> _particles = [];
     private readonly IRandom _random;
     private VertexDataBuffer<ParticleVertex>? _vertexDataBuffer = null;
+    private ParticleVertex[] _vertexBuffer = [];
     private IEmitterShape _emitterShape;
     private double _emitCounter = 0;
     private int _layer = int.MaxValue;
@@ -215,36 +217,50 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
         _vertexDataBuffer.Bind();
         Texture?.Bind();
 
-        ParticleVertex[] vertices = BuildVertices();
-        _vertexDataBuffer.SetNewVertices(vertices);
+        int vertexCount = BuildVertices();
+        _vertexDataBuffer.SetNewVertices(_vertexBuffer, vertexCount);
 
         var mv = Matrix3.Translate(ref modelView, X, Y);
         activeShader.SetProjectionMatrix(ref projection);
         activeShader.SetModelViewMatrix(ref mv);
 
-        GL.DrawArrays(PrimitiveType.Points, 0, vertices.Length);
+        GL.DrawArrays(PrimitiveType.Points, 0, vertexCount);
     }
 
     private void AgeAndIntegrate(double elapsed)
     {
-        // Iterate in reverse so RemoveAt(i) doesn't shift indices we still need to visit.
-        for (int i = _particles.Count - 1; i >= 0; i--)
+        // Two-pointer compact: scan forward, copy survivors down to the write index in place,
+        // then trim the tail. Avoids the O(n²) shift behaviour of List.RemoveAt for the case
+        // where a large burst of particles all expire on the same frame. Iterating the
+        // backing array as a span lets us mutate each particle in place by ref instead of
+        // copying the struct in and out of the list (~32 bytes/particle).
+        float dt = (float)elapsed;
+        Span<Particle> particles = CollectionsMarshal.AsSpan(_particles);
+        int writeIndex = 0;
+        for (int readIndex = 0; readIndex < particles.Length; readIndex++)
         {
-            Particle particle = _particles[i];
-            particle.RemainingLifetime -= (float)elapsed;
+            ref Particle particle = ref particles[readIndex];
+            particle.RemainingLifetime -= dt;
             // Cull on strictly negative remaining lifetime, not <= 0, so a particle whose age
             // lands exactly on its TotalLifetime gets one frame rendered at t=1 before being
             // removed. BuildVertices clamps t to [0, 1], so a slightly-negative RemainingLifetime
             // still renders as t=1 — the next tick culls it.
             if (particle.RemainingLifetime < 0)
             {
-                _particles.RemoveAt(i);
                 continue;
             }
             particle.Position = new Point(
-                particle.Position.X + particle.Velocity.X * (float)elapsed,
-                particle.Position.Y + particle.Velocity.Y * (float)elapsed);
-            _particles[i] = particle;
+                particle.Position.X + particle.Velocity.X * dt,
+                particle.Position.Y + particle.Velocity.Y * dt);
+            if (writeIndex != readIndex)
+            {
+                particles[writeIndex] = particle;
+            }
+            writeIndex++;
+        }
+        if (writeIndex < _particles.Count)
+        {
+            _particles.RemoveRange(writeIndex, _particles.Count - writeIndex);
         }
     }
 
@@ -262,25 +278,33 @@ public sealed class ParticleSystem : AddableRectBase, IUpdateable, IRenderable, 
         };
     }
 
-    private ParticleVertex[] BuildVertices()
+    private int BuildVertices()
     {
-        var vertices = new ParticleVertex[_particles.Count];
-        for (int i = 0; i < _particles.Count; i++)
+        // Fill a cached, high-water-marked vertex buffer in place so we don't allocate
+        // ~5000*Stride bytes per render frame per system. Iterate the particles span by ref
+        // (readonly) to skip ~32 bytes of struct copy per particle.
+        int count = _particles.Count;
+        if (_vertexBuffer.Length < count)
         {
-            Particle particle = _particles[i];
+            Array.Resize(ref _vertexBuffer, count);
+        }
+        ReadOnlySpan<Particle> particles = CollectionsMarshal.AsSpan(_particles);
+        for (int i = 0; i < count; i++)
+        {
+            ref readonly Particle particle = ref particles[i];
             float t = particle.TotalLifetime > 0
                 ? Math.Clamp(1f - particle.RemainingLifetime / particle.TotalLifetime, 0f, 1f)
                 : 1f;
             Colour currentColour = ColourOverLife(t, particle.StartColour);
             Point currentSize = SizeOverLife(t, particle.StartSize);
-            vertices[i] = new ParticleVertex(
+            _vertexBuffer[i] = new ParticleVertex(
                 particle.Position.X,
                 particle.Position.Y,
                 currentColour.ToOpenTK(),
                 currentSize.X,
                 currentSize.Y);
         }
-        return vertices;
+        return count;
     }
 
     private void Dispose(bool disposing)
