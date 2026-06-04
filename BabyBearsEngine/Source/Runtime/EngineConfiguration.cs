@@ -253,6 +253,12 @@ internal static class EngineConfiguration
 
     public static void Reset()
     {
+        // Invalidate the font texture cache FIRST — each cached atlas's Texture.Dispose calls
+        // through GPUResourceDeletion, which reads EngineConfiguration.GPUResourceDeletionService.
+        // If we null services before this runs, dispose throws and crashes the teardown path
+        // inside GameLauncher.Run's finally block (observed when closing the window).
+        FontTextureCache.InvalidateCache();
+
         DefaultCameraMsaa = MsaaSamples.Disabled;
         s_atlasGenerators.Clear();
         s_defaultTextRenderer = TextRenderer.Sdf;
@@ -269,7 +275,6 @@ internal static class EngineConfiguration
         s_window = null;
         s_worldSwitcher = null;
         GpuCapabilities.Reset();
-        FontTextureCache.InvalidateCache();
         // Clear MouseSolver's per-frame state so a second GameLauncher.Run doesn't inherit
         // click-controller references from the previous run's disposed world.
         Worlds.MouseSolver.Reset();

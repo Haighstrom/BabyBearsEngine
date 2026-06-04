@@ -116,8 +116,23 @@ public static class GameLauncher
         }
         finally
         {
-            EngineTeardown.ResetForNextRun(audioService);
-            s_running = false;
+            // Best-effort teardown — never let a cleanup failure escape this finally. If it did
+            // it would either crash the process on a clean shutdown, OR (worse) replace whatever
+            // original exception came out of the engine loop, hiding the real diagnostic. The
+            // inner finally guarantees s_running gets reset even if Logger.Error itself throws,
+            // so a future GameLauncher.Run isn't locked out by the s_running guard.
+            try
+            {
+                EngineTeardown.ResetForNextRun(audioService);
+            }
+            catch (Exception teardownEx)
+            {
+                Logger.Error("Exception during EngineTeardown.ResetForNextRun.", teardownEx);
+            }
+            finally
+            {
+                s_running = false;
+            }
         }
     }
 }

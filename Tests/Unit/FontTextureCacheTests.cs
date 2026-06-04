@@ -27,6 +27,63 @@ public class FontTextureCacheTests
         }
     }
 
+    /// <summary>
+    /// A texture whose Dispose reads the live EngineConfiguration.GPUResourceDeletionService —
+    /// matches what the real OpenGL.Texture.Dispose does. Lets us verify that Reset() doesn't
+    /// null the service before InvalidateCache runs.
+    /// </summary>
+    private sealed class ServiceProbingTexture : ITexture
+    {
+        public bool DisposeRan { get; private set; } = false;
+        public bool ServiceAvailableDuringDispose { get; private set; } = false;
+
+        public int Handle => 0;
+        public int Width => 0;
+        public int Height => 0;
+
+        public void Bind(TextureTarget textureTarget = TextureTarget.Texture2D, TextureUnit textureUnit = TextureUnit.Texture0)
+        {
+        }
+
+        public void Dispose()
+        {
+            DisposeRan = true;
+            try
+            {
+                _ = EngineConfiguration.GPUResourceDeletionService;
+                ServiceAvailableDuringDispose = true;
+            }
+            catch (InvalidOperationException)
+            {
+                ServiceAvailableDuringDispose = false;
+            }
+        }
+    }
+
+    private sealed class FakeDeletionService : IGPUResourceDeletionService
+    {
+        public void QueueShaderDelete(int handle) { }
+        public void QueueTextureDelete(int handle) { }
+        public void QueueVertexArrayDelete(int handle) { }
+        public void QueueVBODelete(int handle) { }
+        public void QueueEBODelete(int handle) { }
+        public void QueueFramebufferDelete(int handle) { }
+        public void ProcessDeletes() { }
+    }
+
+    private sealed class ProbingTextureGenerator : IFontAtlasGenerator
+    {
+        public ServiceProbingTexture? LastTexture { get; private set; }
+
+        public FontAtlas Generate(FontDefinition fontDef)
+        {
+            ServiceProbingTexture texture = new();
+            LastTexture = texture;
+            FontAtlasMetrics metrics = new(0, 0, [], []);
+            return new FontAtlas(metrics, texture, new StubShader());
+        }
+    }
+
     private sealed class StubShader : IMatrixShaderProgram
     {
         public int DisposeCallCount { get; private set; } = 0;
@@ -251,6 +308,28 @@ public class FontTextureCacheTests
 
         Assert.AreEqual(1, textureA.DisposeCallCount);
         Assert.AreEqual(1, textureB.DisposeCallCount);
+    }
+
+    [TestMethod]
+    public void Reset_DisposesFontTexturesWhileGPUDeletionServiceIsStillSet()
+    {
+        // Reproduces the close-window crash: EngineConfiguration.Reset() invalidates the font
+        // texture cache, which disposes each cached atlas's texture. Real Texture.Dispose reads
+        // EngineConfiguration.GPUResourceDeletionService — if Reset nulls the service BEFORE
+        // calling InvalidateCache, the dispose throws InvalidOperationException and crashes the
+        // teardown path inside GameLauncher.Run's finally block.
+        EngineConfiguration.GPUResourceDeletionService = new FakeDeletionService();
+        ProbingTextureGenerator generator = new();
+        EngineConfiguration.AtlasGenerator = generator;
+        FontTextureCache.GetOrCreate(new FontDefinition("Arial", 12));
+        ServiceProbingTexture? texture = generator.LastTexture;
+        Assert.IsNotNull(texture);
+
+        EngineConfiguration.Reset();
+
+        Assert.IsTrue(texture.DisposeRan, "Reset should have disposed the cached font texture.");
+        Assert.IsTrue(texture.ServiceAvailableDuringDispose,
+            "GPUResourceDeletionService was null when font textures were disposed during Reset.");
     }
 
     [TestMethod]
