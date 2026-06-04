@@ -56,7 +56,7 @@ internal static class LoggerFactory
             return null;
         }
 
-        string? resolvedPath = ResolveFilePath(logSettings.FilePath, logSettings.FileMode);
+        string? resolvedPath = ResolveFilePath(logSettings.FilePath, logSettings.FileMode, logSettings.NewFilePerRunMaxFiles);
         // No preamble — the banner is written by Logger.Initialise via a normal write so it
         // reaches both console and file sinks. The error file still uses a preamble for laziness.
         return resolvedPath is null ? null : new FileSink(resolvedPath);
@@ -91,7 +91,7 @@ internal static class LoggerFactory
              + $"{sep}{nl}";
     }
 
-    private static string? ResolveFilePath(string basePath, LogFileMode mode)
+    private static string? ResolveFilePath(string basePath, LogFileMode mode, int newFilePerRunMaxFiles)
     {
         switch (mode)
         {
@@ -109,11 +109,47 @@ internal static class LoggerFactory
                 string dir = Path.GetDirectoryName(basePath) ?? string.Empty;
                 string name = Path.GetFileNameWithoutExtension(basePath);
                 string ext = Path.GetExtension(basePath);
+                TrimOldRunFiles(dir, name, ext, newFilePerRunMaxFiles);
                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
                 return Path.Combine(dir, $"{name}_{timestamp}{ext}");
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(mode));
+        }
+    }
+
+    /// <summary>
+    /// Deletes oldest <c>{name}_*{ext}</c> files in <paramref name="dir"/> so that, after the
+    /// caller writes the next run's file, the directory holds at most <paramref name="maxFiles"/>
+    /// matching files. No-op when <paramref name="maxFiles"/> is ≤ 0 or the directory doesn't
+    /// exist. Files are ranked by filename — the timestamp suffix sorts lexicographically.
+    /// </summary>
+    internal static void TrimOldRunFiles(string dir, string name, string ext, int maxFiles)
+    {
+        if (maxFiles <= 0 || string.IsNullOrEmpty(dir) || !Directory.Exists(dir))
+        {
+            return;
+        }
+
+        string[] matching = Directory.GetFiles(dir, $"{name}_*{ext}");
+        if (matching.Length + 1 <= maxFiles)
+        {
+            return;
+        }
+
+        Array.Sort(matching, StringComparer.Ordinal);
+        int toDelete = matching.Length + 1 - maxFiles;
+        for (int i = 0; i < toDelete; i++)
+        {
+            try
+            {
+                File.Delete(matching[i]);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // Best-effort cleanup — if a file is locked by another process we just leave it
+                // and let the trim catch up on a future run.
+            }
         }
     }
 }

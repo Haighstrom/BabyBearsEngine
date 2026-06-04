@@ -76,6 +76,14 @@ public record class LogSettings()
     public LogFileMode FileMode { get; init; } = LogFileMode.OverwriteExisting;
 
     /// <summary>
+    /// Maximum number of per-run log files retained when <see cref="FileMode"/> is
+    /// <see cref="LogFileMode.NewFilePerRun"/>. At startup, older matching files are deleted
+    /// (oldest first by filename timestamp) so the total count after the new run's file is
+    /// written sits at this limit. Defaults to 50. Set to 0 or negative to disable trimming.
+    /// </summary>
+    public int NewFilePerRunMaxFiles { get; init; } = 50;
+
+    /// <summary>
     /// Mask of severities written to <see cref="FilePath"/>. Defaults to
     /// <see cref="LogLevel.AllButErrors"/> on the assumption that errors will be captured by the
     /// dedicated <see cref="ErrorFilePath"/>; set to <see cref="LogLevel.All"/> if you want errors
