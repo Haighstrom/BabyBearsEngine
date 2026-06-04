@@ -83,8 +83,21 @@ internal static class OpenTkMappings
     public static OpenTKMouseButton ToOpenTK(this MouseButton button) => (OpenTKMouseButton)button;
     public static MouseButton ToMouseButton(this OpenTKMouseButton button) => (MouseButton)button;
 
-    public static OpenTKWindowBorder ToOpenTK(this WindowBorder border) => (OpenTKWindowBorder)border;
-    public static WindowBorder ToWindowBorder(this OpenTKWindowBorder border) => (WindowBorder)border;
+    public static OpenTKWindowBorder ToOpenTK(this WindowBorder border) => border switch
+    {
+        WindowBorder.Resizable => OpenTKWindowBorder.Resizable,
+        WindowBorder.Fixed     => OpenTKWindowBorder.Fixed,
+        WindowBorder.Hidden    => OpenTKWindowBorder.Hidden,
+        _ => throw new ArgumentOutOfRangeException(nameof(border), border, "Unknown WindowBorder."),
+    };
+
+    public static WindowBorder ToWindowBorder(this OpenTKWindowBorder border) => border switch
+    {
+        OpenTKWindowBorder.Resizable => WindowBorder.Resizable,
+        OpenTKWindowBorder.Fixed     => WindowBorder.Fixed,
+        OpenTKWindowBorder.Hidden    => WindowBorder.Hidden,
+        _ => throw new ArgumentOutOfRangeException(nameof(border), border, "Unknown OpenTK WindowBorder."),
+    };
 
     public static OpenTKWindowState ToOpenTK(this WindowState state) => (OpenTKWindowState)state;
     public static WindowState ToWindowState(this OpenTKWindowState state) => (WindowState)state;
