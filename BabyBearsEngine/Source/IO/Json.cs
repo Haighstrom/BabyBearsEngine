@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using BabyBearsEngine.Diagnostics;
 
 namespace BabyBearsEngine.IO;
 
@@ -63,8 +64,9 @@ public static class Json
         {
             return Deserialize<T>(json);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Logger.Warning($"Json.TryDeserialize<{typeof(T).Name}> swallowed {ex.GetType().Name}: {ex.Message}");
             return default;
         }
     }
@@ -79,8 +81,9 @@ public static class Json
         {
             return Deserialize<T>(json, options);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Logger.Warning($"Json.TryDeserialize<{typeof(T).Name}> swallowed {ex.GetType().Name}: {ex.Message}");
             return default;
         }
     }

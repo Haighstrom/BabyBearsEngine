@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Threading;
+using BabyBearsEngine.Diagnostics;
 
 namespace BabyBearsEngine.IO;
 
@@ -247,8 +248,9 @@ public static class Files
         {
             return ReadJsonFile<T>(path);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Logger.Warning($"TryReadJsonFile('{path}') swallowed {ex.GetType().Name}: {ex.Message}");
             return default;
         }
     }
@@ -263,8 +265,9 @@ public static class Files
         {
             return ReadText(path);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Logger.Warning($"TryReadText('{path}') swallowed {ex.GetType().Name}: {ex.Message}");
             return null;
         }
     }
@@ -279,8 +282,9 @@ public static class Files
         {
             return ReadXmlFile<T>(path);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Logger.Warning($"TryReadXmlFile('{path}') swallowed {ex.GetType().Name}: {ex.Message}");
             return default;
         }
     }
