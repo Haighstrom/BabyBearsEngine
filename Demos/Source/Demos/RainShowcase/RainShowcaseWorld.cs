@@ -29,6 +29,7 @@ internal sealed class RainShowcaseWorld : DemoWorld
     private const string BackgroundPath = "Assets/RainShowcase/background.png";
     private const string RaindropPath = "Assets/RainShowcase/raindrop.png";
     private const string RainMusicPath = "Assets/Audio/Music/rain-loop.wav";
+    private const string LightningSFXPath = "Assets/Audio/Sfx/lightning.wav";
     private const string SplashMaskPath = "Assets/RainShowcase/rain_splash_locations.png";
 
     // Mask sampling: walk every Nth pixel and weight each candidate by its alpha. Alpha is
@@ -62,6 +63,7 @@ internal sealed class RainShowcaseWorld : DemoWorld
     private readonly ColourGraphic _lightningOverlay;
     private readonly SplashSpawner _splashSpawner;
     private IMusicClip? _rainClip = null;
+    private ISfxClip? _lightningSfx = null;
     private float _wind = 0f;
     private float _intensity = DefaultIntensity;
 
@@ -96,6 +98,7 @@ internal sealed class RainShowcaseWorld : DemoWorld
         BuildTitle();
         BuildControlsPanel();
         LoadAndStartMusic();
+        LoadLightningSfx();
         ApplyWind();
         ApplyIntensity();
     }
@@ -334,7 +337,14 @@ internal sealed class RainShowcaseWorld : DemoWorld
         float buttonH = 28f;
         Button lightningButton = new(rowX, rowY + 4, buttonW, buttonH,
             ButtonTheme.FromColour(s_panelAccent), "Lightning!");
-        lightningButton.LeftClicked += (_, _) => _lightning.Trigger();
+        lightningButton.LeftClicked += (_, _) =>
+        {
+            _lightning.Trigger();
+            if (_lightningSfx is not null)
+            {
+                Audio.PlaySfx(_lightningSfx);
+            }
+        };
         Add(lightningButton);
 
         float boxX = rowX + buttonW + 14;
@@ -402,6 +412,24 @@ internal sealed class RainShowcaseWorld : DemoWorld
         Audio.Playlist.SetTracks(_rainClip);
         Audio.Playlist.Loop = true;
         Audio.Playlist.Play();
+    }
+
+    private void LoadLightningSfx()
+    {
+        if (!File.Exists(LightningSFXPath))
+        {
+            Logger.Warning($"RainShowcase: lightning sfx not found at '{LightningSFXPath}' — manual lightning button will be silent.");
+            return;
+        }
+
+        try
+        {
+            _lightningSfx = Audio.LoadSfx(LightningSFXPath);
+        }
+        catch (Exception ex)
+        {
+            Logger.Warning($"RainShowcase: failed to load lightning sfx: {ex.Message}");
+        }
     }
 
     private void ApplyWind()
