@@ -48,11 +48,7 @@ public sealed record InputBoxTheme
         return new()
         {
             BackgroundFactory = r => new ColourGraphic(backgroundColour, r.X, r.Y, r.W, r.H),
-            Text = new TextTheme(
-                new FontDefinition("Times New Roman", 16),
-                Colour.Black,
-                HAlignment.Left,
-                VAlignment.Centred),
+            Text = TextTheme.Default with { HAlignment = HAlignment.Left, VAlignment = VAlignment.Centred },
             CursorColour = Colour.Black,
             SelectionColour = new Colour(100, 160, 255, 100),
         };
