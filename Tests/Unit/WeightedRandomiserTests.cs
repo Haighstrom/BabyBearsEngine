@@ -148,6 +148,34 @@ public class WeightedRandomiserTests
     }
 
     [TestMethod]
+    public void Next_RollLandingExactlyOnBoundary_SelectsRightHandItem()
+    {
+        // Weights A=1, B=1, total=2. roll=0.5 → r=1.0 — exactly at the A/B boundary.
+        // The original code treats this as "r < cumulative is false at A" so we move on to B.
+        // Important: when the refactored code uses binary search with duplicate cumulatives
+        // around zero-weight items, the tie-break has to keep matching this contract.
+        WeightedRandomiser<string> wr = new(new StubRandom(0.5));
+        wr.Add("A", 1);
+        wr.Add("B", 1);
+
+        Assert.AreEqual("B", wr.Next());
+    }
+
+    [TestMethod]
+    public void Next_ZeroWeightInMiddle_RollAtItsCumulative_SkipsToNextRealItem()
+    {
+        // Weights A=1, B=0, C=1, total=2. Cumulative = [1, 1, 2]. roll=0.5 → r=1.0.
+        // Walking: A's cum=1, 1<1 false; B's cum=1, 1<1 false; C's cum=2, 1<2 true → C.
+        // The binary-search refactor must skip past the duplicate cumulative around B.
+        WeightedRandomiser<string> wr = new(new StubRandom(0.5));
+        wr.Add("A", 1);
+        wr.Add("B", 0);
+        wr.Add("C", 1);
+
+        Assert.AreEqual("C", wr.Next());
+    }
+
+    [TestMethod]
     public void Next_ThreeItems_CorrectItemSelectedForEachRegion()
     {
         // Weights: A=1, B=2, C=1. Total=4. Regions: A=[0,1), B=[1,3), C=[3,4)

@@ -44,7 +44,9 @@ public class WeightedRandomiser<T>
     }
 
     /// <summary>
-    /// Returns a randomly selected item, biased by weight.
+    /// Returns a randomly selected item, biased by weight. O(N) per call — typical use is small
+    /// item counts (loot tables, etc.); for very large N consider a prefix-sum + lower-bound
+    /// binary search instead.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown when the randomiser is empty.</exception>
     public T Next()
