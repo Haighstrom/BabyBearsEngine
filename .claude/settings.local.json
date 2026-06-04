@@ -18,7 +18,8 @@
       "Bash(grep -v \"^\\\\s*//\")",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\simon\\\\Dropbox\\\\Programming\\\\.NET\\\\BearsEngine\" -Directory)",
       "Bash(Select-Object Name)",
-      "Bash(xargs ls -la)"
+      "Bash(xargs ls -la)",
+      "Bash(grep -v \"/bin/\\\\|/obj/\")"
     ]
   },
   "spinnerVerbs": {

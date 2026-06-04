@@ -1,37 +1,35 @@
-using System.Threading;
-
 namespace BabyBearsEngine.Diagnostics;
 
+/// <remarks>
+/// Not internally thread-safe — the surrounding <see cref="Logger"/> serialises calls into the
+/// sink via its own lock. Removing the per-sink lock dropped two-thirds of the lock acquisitions
+/// from each log call (three sinks each taking their own lock → one lock around all three).
+/// </remarks>
 internal sealed class ConsoleSink(bool colourise) : ILogSink
 {
-    private static readonly Lock s_lock = new();
-
     public void Write(LogLevel level, string message, Exception? exception)
     {
-        lock (s_lock)
+        ConsoleColor previous = Console.ForegroundColor;
+
+        try
         {
-            ConsoleColor previous = Console.ForegroundColor;
-
-            try
+            if (colourise)
             {
-                if (colourise)
-                {
-                    Console.ForegroundColor = ColourFor(level);
-                }
-
-                Console.WriteLine(message);
-
-                if (exception is not null)
-                {
-                    Console.WriteLine(exception);
-                }
+                Console.ForegroundColor = ColourFor(level);
             }
-            finally
+
+            Console.WriteLine(message);
+
+            if (exception is not null)
             {
-                if (colourise)
-                {
-                    Console.ForegroundColor = previous;
-                }
+                Console.WriteLine(exception);
+            }
+        }
+        finally
+        {
+            if (colourise)
+            {
+                Console.ForegroundColor = previous;
             }
         }
     }

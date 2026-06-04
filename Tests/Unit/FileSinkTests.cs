@@ -31,7 +31,15 @@ public class FileSinkTests
         }
     }
 
-    private string ReadFile() => File.ReadAllText(_filePath);
+    // FileSink now holds a FileAccess.Write handle for the sink's lifetime, so a reader needs
+    // FileShare.ReadWrite to coexist (matches what Notepad++ / tail / etc. do externally).
+    // File.ReadAllText defaults to FileShare.Read, which conflicts and throws IOException.
+    private string ReadFile()
+    {
+        using FileStream stream = new(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        using StreamReader reader = new(stream);
+        return reader.ReadToEnd();
+    }
 
     [TestMethod]
     public void Write_NoPreamble_AppendsMessageWithTrailingNewline()
@@ -97,6 +105,34 @@ public class FileSinkTests
         _ = new FileSink(_filePath, "PREAMBLE\n");
 
         Assert.IsFalse(File.Exists(_filePath), "FileSink construction alone must not create the file.");
+    }
+
+    [TestMethod]
+    public void Write_ContentVisibleImmediately_BeforeSinkDisposal()
+    {
+        // The held-StreamWriter implementation must AutoFlush so each line lands on disk before
+        // the sink is disposed — otherwise external tools tailing the log see nothing until the
+        // process exits, defeating the point of crash-safety.
+        using var sink = new FileSink(_filePath);
+
+        sink.Write(LogLevel.Information, "midflight", exception: null);
+
+        Assert.Contains("midflight", ReadFile());
+    }
+
+    [TestMethod]
+    public void Dispose_FlushesAndReleasesHandle()
+    {
+        // After Dispose, an external process must be able to take an exclusive lock on the file —
+        // the held StreamWriter must have released its handle.
+        var sink = new FileSink(_filePath);
+        sink.Write(LogLevel.Information, "before-dispose", exception: null);
+
+        sink.Dispose();
+
+        // Opening exclusively should succeed only if the sink let go of the handle.
+        using FileStream exclusive = new(_filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+        Assert.IsGreaterThan(0, exclusive.Length);
     }
 
     private static int CountOccurrences(string haystack, string needle)

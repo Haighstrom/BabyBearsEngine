@@ -72,8 +72,18 @@ public class LoggerTests
     private static ConsoleSettings PlainConsole() => new() { ColouriseLogOutput = false };
 
     private string ConsoleOutput => _capturedConsole.ToString();
-    private string LogFileContent => File.Exists(_logPath) ? File.ReadAllText(_logPath) : string.Empty;
-    private string ErrorFileContent => File.Exists(_errorLogPath) ? File.ReadAllText(_errorLogPath) : string.Empty;
+    private string LogFileContent => File.Exists(_logPath) ? ReadShared(_logPath) : string.Empty;
+    private string ErrorFileContent => File.Exists(_errorLogPath) ? ReadShared(_errorLogPath) : string.Empty;
+
+    // FileSink now holds a FileAccess.Write handle for its lifetime, so a reader needs
+    // FileShare.ReadWrite to coexist while the sink is still live (matches the pattern external
+    // log-tailing tools use). File.ReadAllText defaults to FileShare.Read and would conflict.
+    private static string ReadShared(string path)
+    {
+        using FileStream stream = new(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        using StreamReader reader = new(stream);
+        return reader.ReadToEnd();
+    }
 
     // ─── Severity wrappers ───
 
@@ -563,7 +573,7 @@ public class LoggerTests
 
         string[] siblings = Directory.GetFiles(_tempDir, "log_*.log");
         Assert.HasCount(1, siblings, "Expected exactly one timestamped sibling file.");
-        Assert.Contains("new", File.ReadAllText(siblings[0]));
+        Assert.Contains("new", ReadShared(siblings[0]));
     }
 
     // ─── Helpers ───

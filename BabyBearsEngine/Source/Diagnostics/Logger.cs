@@ -52,6 +52,12 @@ public static class Logger
 
         lock (s_lock)
         {
+            // FileSink now holds a StreamWriter for its lifetime — flush+close the previous
+            // ones before swapping so we don't leak file handles across Initialise calls
+            // (tests reinitialise repeatedly, and Logger.Initialise can be called per Run).
+            s_fileSink?.Dispose();
+            s_errorFileSink?.Dispose();
+
             s_settings = logSettings;
             var sinks = LoggerFactory.BuildSinks(logSettings, consoleSettings);
             s_consoleSink = sinks.Console;
@@ -308,17 +314,23 @@ public static class Logger
 
         string formatted = FormatMessage(level, message, callerFilePath, callerLineNumber, callerMemberName);
 
-        if (consoleAccepts)
+        // One lock around all sink writes — atomic console+file ordering, and sinks themselves
+        // no longer need internal locks. FileSink also relies on this serialisation since its
+        // held StreamWriter isn't thread-safe.
+        lock (s_lock)
         {
-            consoleSink!.Write(level, formatted, exception);
-        }
-        if (fileAccepts)
-        {
-            fileSink!.Write(level, formatted, exception);
-        }
-        if (errorFileAccepts)
-        {
-            errorFileSink!.Write(level, formatted, exception);
+            if (consoleAccepts)
+            {
+                consoleSink!.Write(level, formatted, exception);
+            }
+            if (fileAccepts)
+            {
+                fileSink!.Write(level, formatted, exception);
+            }
+            if (errorFileAccepts)
+            {
+                errorFileSink!.Write(level, formatted, exception);
+            }
         }
     }
 
@@ -328,13 +340,24 @@ public static class Logger
         FileSink? fileSink = s_fileSink;
         LogSettings settings = s_settings;
 
-        if (consoleSink is not null && settings.ConsoleLevels.HasFlag(level))
+        bool consoleAccepts = consoleSink is not null && settings.ConsoleLevels.HasFlag(level);
+        bool fileAccepts = fileSink is not null && settings.FileLevels.HasFlag(level);
+
+        if (!consoleAccepts && !fileAccepts)
         {
-            consoleSink.Write(level, message, exception: null);
+            return;
         }
-        if (fileSink is not null && settings.FileLevels.HasFlag(level))
+
+        lock (s_lock)
         {
-            fileSink.Write(level, message, exception: null);
+            if (consoleAccepts)
+            {
+                consoleSink!.Write(level, message, exception: null);
+            }
+            if (fileAccepts)
+            {
+                fileSink!.Write(level, message, exception: null);
+            }
         }
     }
 }
