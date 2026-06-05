@@ -18,13 +18,32 @@ internal static class OpenGLHelper
     public static (int X, int Y, int Width, int Height) LastViewport { get; private set; } = (0, 0, 0, 0);
 
     /// <summary>
-    /// Resets the bind cache to its initial uninitialised state. Must be called whenever the
-    /// GL context is recreated (e.g. between consecutive test runs each spinning up their own
-    /// <see cref="GameLauncher.Run"/>) — otherwise a stale handle from the previous context
-    /// can match a freshly-generated handle in the new context and cause Bind calls to be
-    /// silently skipped.
+    /// Resets every cached GL state field — bind handles, active texture unit, last-bound FBO,
+    /// and the tracked viewport. Use when a fresh GL context has been created (e.g. between
+    /// consecutive test runs each spinning up their own <see cref="GameLauncher.Run"/>), where
+    /// nothing in the new context has been set yet so every cached value is potentially stale.
+    /// For the narrower case where only the bind cache needs invalidating — e.g. after a
+    /// cross-context texture sync, where the same context's viewport is still valid — call
+    /// <see cref="ResetBindCache"/> instead so the tracked viewport isn't wiped.
     /// </summary>
     public static void ResetCache()
+    {
+        ResetBindCache();
+        LastBoundFBO = 0;
+        LastViewport = (0, 0, 0, 0);
+    }
+
+    /// <summary>
+    /// Resets only the bind-handle cache (shader / VAO / VBO / EBO / texture handle + active
+    /// texture unit). Use after a cross-context operation where the same GL context's viewport
+    /// and FBO bindings remain valid but the next Bind call must definitely hit GL — for
+    /// example, after <see cref="LoadingScreenWorld"/> finishes a shared-context texture load,
+    /// the bind cache must be invalidated so the next <see cref="BindTexture"/> issues a real
+    /// glBindTexture and the driver refreshes its view of the shared texture; the viewport
+    /// itself was untouched and must stay tracked. The full-context-reset case
+    /// (<see cref="ResetCache"/>) wipes both.
+    /// </summary>
+    public static void ResetBindCache()
     {
         s_lastBoundShader = -1;
         s_lastBoundVAO = -1;
@@ -32,8 +51,6 @@ internal static class OpenGLHelper
         s_lastBoundEBO = -1;
         s_lastBoundTexture = -1;
         s_lastActiveTextureUnit = TextureUnit.Texture0;
-        LastBoundFBO = 0;
-        LastViewport = (0, 0, 0, 0);
     }
 
     public static void BindFBO(int fboHandle)

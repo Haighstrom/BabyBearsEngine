@@ -196,8 +196,10 @@ public abstract class LoadingScreenWorld : World
 
         // Invalidate the bind cache so the next render-path BindTexture call definitely hits
         // glBindTexture in the main context — that re-bind from a different context is what
-        // tells the driver to refresh its cached view of the shared texture.
-        OpenGLHelper.ResetCache();
+        // tells the driver to refresh its cached view of the shared texture. Use the
+        // bind-only variant: the same context's viewport tracking must stay intact so that
+        // viewport-dependent code (e.g. ScrollingListPanel scissor calc) keeps working.
+        OpenGLHelper.ResetBindCache();
 
         DisposeWorkerGLContext();
 
