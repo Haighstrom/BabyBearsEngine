@@ -132,9 +132,15 @@ public class ScrollingListPanel : Entity
         public override (float x, float y) GetWindowCoordinates(float localX, float localY) =>
             Parent?.GetWindowCoordinates(localX + X, localY + Y - _scrollOffset) ?? throw new InvalidOperationException("GetWindowCoordinates requires Parent — content pane is not in an entity tree (never added, or removed).");
 
+        // The pane's on-screen position, ignoring scroll. Used by Render to anchor the scissor
+        // box to where the viewport actually sits — the viewport itself does not move when
+        // content scrolls, only the content drawn inside it does.
+        internal (float x, float y) GetUnscrolledWindowPosition() =>
+            Parent?.GetWindowCoordinates(X, Y) ?? throw new InvalidOperationException("GetUnscrolledWindowPosition requires Parent — content pane is not in an entity tree (never added, or removed).");
+
         public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
         {
-            var (wx, wy) = GetWindowCoordinates(0f, 0f);
+            var (wx, wy) = GetUnscrolledWindowPosition();
             var (_, _, _, vpH) = OpenGLHelper.LastViewport;
 
             int scissorX = (int)wx;

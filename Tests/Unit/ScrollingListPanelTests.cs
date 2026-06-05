@@ -143,4 +143,41 @@ public class ScrollingListPanelTests
         Assert.AreEqual(70f, x);
         Assert.AreEqual(150f, y);
     }
+
+    // GetUnscrolledWindowPosition — the scissor anchor must not move with scroll, since the
+    // viewport itself stays put while only the content inside it scrolls. Regression test for
+    // a bug where the scissor used the scroll-adjusted GetWindowCoordinates and so the
+    // clipped area drifted off the panel as the user scrolled, leaving items visible outside
+    // the panel bounds.
+
+    [TestMethod]
+    public void ContentPane_GetUnscrolledWindowPosition_IgnoresScrollOffset()
+    {
+        var pane = new ScrollingListPanel.ContentPane(50f, 100f, 200f, 300f)
+        {
+            Parent = new FakeWindow(),
+            ScrollOffset = 150f,
+        };
+
+        var (x, y) = pane.GetUnscrolledWindowPosition();
+
+        Assert.AreEqual(50f, x);
+        Assert.AreEqual(100f, y);
+    }
+
+    [TestMethod]
+    public void ContentPane_GetUnscrolledWindowPosition_MatchesZeroScrollGetWindowCoordinates()
+    {
+        var pane = new ScrollingListPanel.ContentPane(50f, 100f, 200f, 300f)
+        {
+            Parent = new FakeWindow(),
+            ScrollOffset = 0f,
+        };
+
+        var (gwcX, gwcY) = pane.GetWindowCoordinates(0f, 0f);
+        var (unscrolledX, unscrolledY) = pane.GetUnscrolledWindowPosition();
+
+        Assert.AreEqual(gwcX, unscrolledX);
+        Assert.AreEqual(gwcY, unscrolledY);
+    }
 }
