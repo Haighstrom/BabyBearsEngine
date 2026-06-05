@@ -18,7 +18,7 @@ internal static class EngineConfiguration
     // One atlas generator per backend, so a FontDefinition can pin either built-in (or a custom
     // one) independently of the engine-wide default. Resolved per font in FontTextureCache.
     private static readonly Dictionary<TextRenderer, IFontAtlasGenerator> s_atlasGenerators = [];
-    private static TextRenderer s_defaultTextRenderer = TextRenderer.Sdf;
+    private static TextRenderer s_defaultTextRenderer = TextRenderer.FreeType;
 
     private static IAudio? s_audio = null;
     private static IEngineInfo? s_engineInfo = null;
@@ -261,7 +261,7 @@ internal static class EngineConfiguration
 
         DefaultCameraMsaa = MsaaSamples.Disabled;
         s_atlasGenerators.Clear();
-        s_defaultTextRenderer = TextRenderer.Sdf;
+        s_defaultTextRenderer = TextRenderer.FreeType;
         s_audio = null;
         s_engineInfo = null;
         s_glLoadingContextFactory = null;

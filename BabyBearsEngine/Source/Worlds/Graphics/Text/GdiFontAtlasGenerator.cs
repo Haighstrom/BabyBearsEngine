@@ -14,9 +14,10 @@ namespace BabyBearsEngine.Worlds.Graphics.Text;
 /// matrix shader. Windows-only — the GDI+ APIs it uses are not available on other
 /// platforms, so <see cref="Generate"/> and <see cref="RasteriseAtlas"/> throw
 /// <see cref="PlatformNotSupportedException"/> when invoked off Windows. The
-/// engine-wide default text backend is <see cref="TextRenderer.Sdf"/> for that
-/// reason; pick Gdi explicitly via <see cref="TextSettings.Renderer"/> or
-/// <see cref="FontDefinition.Renderer"/> only on Windows targets.
+/// engine-wide default text backend is <see cref="TextRenderer.FreeType"/> (also
+/// cross-platform) for that reason; pick Gdi explicitly via
+/// <see cref="TextSettings.Renderer"/> or <see cref="FontDefinition.Renderer"/>
+/// only on Windows targets.
 /// </summary>
 internal sealed class GdiFontAtlasGenerator : IFontAtlasGenerator
 {
