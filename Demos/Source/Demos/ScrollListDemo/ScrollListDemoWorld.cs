@@ -8,9 +8,11 @@ internal class ScrollListDemoWorld : DemoWorld
     private const float ItemHeight = 44f;
     private const float PanelHeight = 300f;
     private const float PanelWidth = 300f;
-    private const float PanelX = 250f;
+    private const float ScrollablePanelX = 80f;
+    private const float ShortPanelX = 420f;
     private const float PanelY = 130f;
     private const int TotalItems = 15;
+    private const int ShortPanelItems = 3;
 
     private static readonly FontDefinition s_font = new("Times New Roman", 15);
     private static readonly FontDefinition s_titleFont = new("Times New Roman", 18);
@@ -43,8 +45,8 @@ internal class ScrollListDemoWorld : DemoWorld
             HAlignment = HAlignment.Centred,
         });
 
-        Add(new TextGraphic(s_font, "Drag the scrollbar thumb to scroll", new Colour(100, 100, 100),
-            0f, 82f, 800f, 20f)
+        Add(new TextGraphic(s_font, "Left: scroll the list. Right: fewer items than fill the panel (no scrolling).",
+            new Colour(100, 100, 100), 0f, 82f, 800f, 20f)
         {
             HAlignment = HAlignment.Centred,
         });
@@ -54,10 +56,16 @@ internal class ScrollListDemoWorld : DemoWorld
             track: new Colour(30, 30, 30),
             thumb: new Colour(130, 130, 130));
 
-        ScrollingListPanel panel = new(PanelX, PanelY, PanelWidth, PanelHeight, theme);
+        AddPanel(ScrollablePanelX, theme, TotalItems);
+        AddPanel(ShortPanelX, theme, ShortPanelItems);
+    }
+
+    private void AddPanel(float x, ScrollingListPanelTheme theme, int itemCount)
+    {
+        ScrollingListPanel panel = new(x, PanelY, PanelWidth, PanelHeight, theme);
 
         float itemWidth = PanelWidth - 20f; // leave room for scrollbar
-        for (int i = 0; i < TotalItems; i++)
+        for (int i = 0; i < itemCount; i++)
         {
             var (label, bg, fg) = s_items[i];
             float y = i * ItemHeight;
@@ -70,7 +78,7 @@ internal class ScrollListDemoWorld : DemoWorld
             panel.AddItem(item);
         }
 
-        panel.ContentHeight = TotalItems * ItemHeight;
+        panel.ContentHeight = itemCount * ItemHeight;
         Add(panel);
     }
 
