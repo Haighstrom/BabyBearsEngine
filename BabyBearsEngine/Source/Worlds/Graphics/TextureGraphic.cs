@@ -31,6 +31,18 @@ public sealed class TextureGraphic(ITexture texture, float x, float y, float wid
     {
     }
 
+    /// <summary>
+    /// The texture sampled when rendering. Never null; assigning null throws
+    /// <see cref="ArgumentNullException"/>. Not owned by this graphic — assigning a new texture
+    /// does not dispose the previous one, and the assigned texture is not disposed with the graphic.
+    /// Swapping the texture keeps the current position, size, tint, and <see cref="SourceArea"/>.
+    /// </summary>
+    public ITexture Texture
+    {
+        get => _graphicRenderer.Texture;
+        set => _graphicRenderer.Texture = value;
+    }
+
     /// <summary>Tint colour multiplied with the texture sample. Defaults to <see cref="Colour.White"/> (no tint).</summary>
     public Colour Colour
     {
