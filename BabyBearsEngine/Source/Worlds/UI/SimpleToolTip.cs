@@ -42,6 +42,7 @@ public sealed class SimpleToolTip : Entity
         {
             HAlignment = theme.Text.HAlignment,
             VAlignment = theme.Text.VAlignment,
+            Multiline = true,
         };
         Add(_text);
     }
