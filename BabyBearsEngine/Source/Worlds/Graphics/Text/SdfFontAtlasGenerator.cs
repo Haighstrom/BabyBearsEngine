@@ -72,7 +72,7 @@ internal sealed class SdfFontAtlasGenerator : IFontAtlasGenerator
         float scale = StbTrueType.stbtt_ScaleForPixelHeight(font, sourcePixelHeight);
 
         var glyphs = new GlyphBitmap?[charCount];
-        var advances = new int[charCount];
+        int[] advances = new int[charCount];
         int baselineRow;
         int emBoxHeight;
 
