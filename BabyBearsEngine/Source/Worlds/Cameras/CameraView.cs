@@ -21,6 +21,11 @@ public abstract class CameraView(Func<float> getCameraWidth, Func<float> getCame
         get => _x;
         set
         {
+            if (_x == value)
+            {
+                return;
+            }
+
             _x = value;
             RaiseViewChanged();
         }
@@ -31,6 +36,11 @@ public abstract class CameraView(Func<float> getCameraWidth, Func<float> getCame
         get => _y;
         set
         {
+            if (_y == value)
+            {
+                return;
+            }
+
             _y = value;
             RaiseViewChanged();
         }

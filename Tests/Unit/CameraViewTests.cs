@@ -133,6 +133,32 @@ public class CameraViewTests
         Assert.AreEqual(1, raised);
     }
 
+    [TestMethod]
+    public void FixedTileSize_SetX_ToSameValue_DoesNotRaiseViewChanged()
+    {
+        FixedTileSizeCameraView view = new(32f, 32f, () => 800f, () => 600f);
+        view.X = 10f;
+        int raised = 0;
+        view.ViewChanged += (_, _) => raised++;
+
+        view.X = 10f;
+
+        Assert.AreEqual(0, raised);
+    }
+
+    [TestMethod]
+    public void FixedTileSize_SetY_ToSameValue_DoesNotRaiseViewChanged()
+    {
+        FixedTileSizeCameraView view = new(32f, 32f, () => 800f, () => 600f);
+        view.Y = 10f;
+        int raised = 0;
+        view.ViewChanged += (_, _) => raised++;
+
+        view.Y = 10f;
+
+        Assert.AreEqual(0, raised);
+    }
+
     // FreeCameraView
 
     [TestMethod]
