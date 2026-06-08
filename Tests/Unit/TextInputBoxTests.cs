@@ -987,4 +987,68 @@ public class TextInputBoxTests
         internal TestInputBox() : base(0, 0, 200, 30) { }
         internal void FireClick() => OnLeftClicked();
     }
+
+    // -------------------------------------------------------------------------
+    // HitTestCursorIndex — cursor placement from a click X (fixed 10px/char fake metric)
+
+    private static float TenPixelsPerChar(string measured) => measured.Length * 10f;
+
+    [TestMethod]
+    public void HitTest_ClickBeforeFirstChar_ReturnsScrollOffset()
+    {
+        int index = TextInputBox.HitTestCursorIndex("hello", 0, -5f, TenPixelsPerChar);
+
+        Assert.AreEqual(0, index);
+    }
+
+    [TestMethod]
+    public void HitTest_ClickInFirstCharLeftHalf_ReturnsZero()
+    {
+        int index = TextInputBox.HitTestCursorIndex("hello", 0, 4f, TenPixelsPerChar);
+
+        Assert.AreEqual(0, index);
+    }
+
+    [TestMethod]
+    public void HitTest_ClickInFirstCharRightHalf_ReturnsOne()
+    {
+        int index = TextInputBox.HitTestCursorIndex("hello", 0, 6f, TenPixelsPerChar);
+
+        Assert.AreEqual(1, index);
+    }
+
+    [TestMethod]
+    public void HitTest_ClickNearThirdCharBoundary_ReturnsThree()
+    {
+        // Char 2 spans 20..30 (midpoint 25); a click at 26 lands past it → cursor before char 3.
+        int index = TextInputBox.HitTestCursorIndex("hello", 0, 26f, TenPixelsPerChar);
+
+        Assert.AreEqual(3, index);
+    }
+
+    [TestMethod]
+    public void HitTest_ClickPastEnd_ReturnsTextLength()
+    {
+        int index = TextInputBox.HitTestCursorIndex("hello", 0, 1000f, TenPixelsPerChar);
+
+        Assert.AreEqual(5, index);
+    }
+
+    [TestMethod]
+    public void HitTest_WithScrollOffset_ExcludesScrolledOffCharacters()
+    {
+        // First two chars scrolled off; localX is measured from the first visible char ("l").
+        // localX 6 lands in the right half of "l" (spans 0..10) → cursor before the next char (index 3).
+        int index = TextInputBox.HitTestCursorIndex("hello", 2, 6f, TenPixelsPerChar);
+
+        Assert.AreEqual(3, index);
+    }
+
+    [TestMethod]
+    public void HitTest_EmptyText_ReturnsZero()
+    {
+        int index = TextInputBox.HitTestCursorIndex("", 0, 50f, TenPixelsPerChar);
+
+        Assert.AreEqual(0, index);
+    }
 }

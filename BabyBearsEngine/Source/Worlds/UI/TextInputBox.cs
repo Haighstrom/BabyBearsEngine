@@ -247,6 +247,7 @@ public class TextInputBox : Entity
     {
         base.OnLeftClicked();
         Focus();
+        PlaceCursorAtMouse();
     }
 
     /// <inheritdoc/>
@@ -462,6 +463,52 @@ public class TextInputBox : Entity
 
         _blinkTimer = 0.0;
         UpdateDisplay();
+    }
+
+    private void PlaceCursorAtMouse()
+    {
+        if (_textGraphic is null)
+        {
+            return;
+        }
+
+        // PositionOnScreen and the visible text both live in window space, so the click's distance
+        // from the text area's left edge gives the local X to hit-test against character widths.
+        float textAreaLeft = PositionOnScreen.X + ContentPadding;
+        float localX = Mouse.ClientX - textAreaLeft;
+
+        int index = HitTestCursorIndex(_text, _scrollOffset, localX, measured => _textGraphic.MeasureString(measured).X);
+
+        _cursorIndex = index;
+        _anchorIndex = index;
+        _blinkTimer = 0.0;
+        UpdateDisplay();
+    }
+
+    /// <summary>
+    /// Returns the cursor index whose boundary is closest to <paramref name="localX"/> — the X offset
+    /// (in pixels) from the left edge of the visible text. Characters before <paramref name="scrollOffset"/>
+    /// are scrolled off-screen and excluded. The cursor lands before a character when the click falls
+    /// left of that character's horizontal midpoint, matching standard text-field hit-testing.
+    /// </summary>
+    internal static int HitTestCursorIndex(string text, int scrollOffset, float localX, Func<string, float> measureWidth)
+    {
+        float widthToPrevious = 0f;
+
+        for (int index = scrollOffset; index < text.Length; index++)
+        {
+            float widthToNext = measureWidth(text.Substring(scrollOffset, index + 1 - scrollOffset));
+            float characterMidpoint = (widthToPrevious + widthToNext) / 2f;
+
+            if (localX < characterMidpoint)
+            {
+                return index;
+            }
+
+            widthToPrevious = widthToNext;
+        }
+
+        return text.Length;
     }
 
     private void MoveHome(bool shift)
