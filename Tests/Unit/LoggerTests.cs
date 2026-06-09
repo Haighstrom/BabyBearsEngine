@@ -451,6 +451,36 @@ public class LoggerTests
     }
 
     [TestMethod]
+    public void SectionHeader_CentresNameBetweenDashes_AtFullWidth()
+    {
+        Logger.Initialise(TestSettings(metadata: LogMetadata.None), PlainConsole());
+        _capturedConsole.GetStringBuilder().Clear();
+
+        Logger.SectionHeader("MyTitle");
+
+        string output = ConsoleOutput.Trim();
+        Assert.Contains("MyTitle", output);
+        Assert.StartsWith("-", output);
+        Assert.EndsWith("-", output);
+        // Short names pad out to exactly SectionWidth (70) — the span slice must match the old
+        // `new string('-', n)` output width.
+        Assert.HasCount(70, output);
+    }
+
+    [TestMethod]
+    public void SectionBreak_EmitsSingleLineOfDashes()
+    {
+        Logger.Initialise(TestSettings(metadata: LogMetadata.None), PlainConsole());
+        _capturedConsole.GetStringBuilder().Clear();
+
+        Logger.SectionBreak();
+
+        string output = ConsoleOutput.Trim();
+        Assert.IsTrue(output.All(c => c == '-'), $"SectionBreak should output only '-' characters, got: {output}");
+        Assert.HasCount(70, output);
+    }
+
+    [TestMethod]
     public void NewLine_EmitsEmptyLine()
     {
         Logger.Initialise(TestSettings(metadata: LogMetadata.None), PlainConsole());

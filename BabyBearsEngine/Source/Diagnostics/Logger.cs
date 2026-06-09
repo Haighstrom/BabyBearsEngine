@@ -27,6 +27,11 @@ public static class Logger
     private static readonly Lock s_lock = new();
     private static readonly HashSet<(string CallerFilePath, int CallerLineNumber)> s_dedupeKeys = [];
 
+    // Full-width divider runs, built once. Dividers use the whole string; padded headers slice a
+    // span of the required length from it, so neither path allocates a per-call char run.
+    private static readonly string s_dashRun = new('-', SectionWidth);
+    private static readonly string s_equalsRun = new('=', SectionWidth);
+
     private static ConsoleSink? s_consoleSink;
     private static FileSink? s_errorFileSink;
     private static FileSink? s_fileSink;
@@ -173,7 +178,7 @@ public static class Logger
         int padTotal = Math.Max(2, SectionWidth - name.Length - 2);
         int padLeft = padTotal / 2;
         int padRight = padTotal - padLeft;
-        string text = $"{new string('-', padLeft)} {name} {new string('-', padRight)}";
+        string text = $"{s_dashRun.AsSpan(0, padLeft)} {name} {s_dashRun.AsSpan(0, padRight)}";
 
         WriteRaw(level, text);
     }
@@ -181,7 +186,7 @@ public static class Logger
     /// <summary>Writes a horizontal divider line (no metadata prefix). Routed only to console and main file sinks (never the error file).</summary>
     public static void SectionBreak(LogLevel level = LogLevel.Information)
     {
-        WriteRaw(level, new string('-', SectionWidth));
+        WriteRaw(level, s_dashRun);
     }
 
     /// <summary>Writes a blank line (no metadata prefix). Routed only to console and main file sinks (never the error file).</summary>
@@ -211,7 +216,7 @@ public static class Logger
             return;
         }
 
-        WriteRaw(level, new string('=', SectionWidth));
+        WriteRaw(level, s_equalsRun);
         WriteRaw(level, $" {title}");
         foreach (string line in lines)
         {
@@ -226,7 +231,7 @@ public static class Logger
     /// </summary>
     public static void SectionDivider(LogLevel level = LogLevel.Information)
     {
-        WriteRaw(level, new string('=', SectionWidth));
+        WriteRaw(level, s_equalsRun);
     }
 
     /// <summary>
@@ -241,7 +246,7 @@ public static class Logger
         int padTotal = Math.Max(2, SectionWidth - text.Length - 2);
         int padLeft = padTotal / 2;
         int padRight = padTotal - padLeft;
-        WriteRaw(level, $"{new string('=', padLeft)} {text} {new string('=', padRight)}");
+        WriteRaw(level, $"{s_equalsRun.AsSpan(0, padLeft)} {text} {s_equalsRun.AsSpan(0, padRight)}");
     }
 
     private static string FormatLevel(LogLevel level) => level switch
