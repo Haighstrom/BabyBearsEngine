@@ -85,6 +85,45 @@ public class ContainerTests
         public void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
     }
 
+    // Pathological renderable whose Layer getter pokes a sibling's layer the first time it is read
+    // after being armed. Used to simulate a layer change happening while the container is mid-sort,
+    // which OnLayerChanged's re-entrancy guard must reject rather than silently corrupt the list.
+    private sealed class ReentrantLayeredRenderable : AddableBase, IRenderable, ILayered
+    {
+        private int _layer = 0;
+        private bool _poked = false;
+
+        public ILayered? SiblingToPoke { get; set; } = null;
+        public bool Visible { get; set; } = true;
+
+        public int Layer
+        {
+            get
+            {
+                if (!_poked && SiblingToPoke is not null)
+                {
+                    _poked = true;
+                    SiblingToPoke.Layer = 7;
+                }
+
+                return _layer;
+            }
+            set
+            {
+                int old = _layer;
+                _layer = value;
+                if (old != value)
+                {
+                    LayerChanged?.Invoke(this, new LayerChangedEventArgs(old, value));
+                }
+            }
+        }
+
+        public event EventHandler<LayerChangedEventArgs>? LayerChanged;
+
+        public void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
+    }
+
     private sealed class FakeRealParent : IContainer
     {
         public (float x, float y) GetWindowCoordinatesReturn { get; set; } = (0f, 0f);
@@ -342,6 +381,23 @@ public class ContainerTests
         var reordered = container.GetRenderables().ToList();
         Assert.AreSame(a, reordered[0]);
         Assert.AreSame(b, reordered[1]);
+    }
+
+    [TestMethod]
+    public void LayerChanged_ReentrantLayerChangeMidResort_Throws()
+    {
+        var container = CreateContainer(out _);
+        var sibling = new StubLayeredRenderable(1);
+        var reentrant = new ReentrantLayeredRenderable();
+        container.Add(sibling);
+        container.Add(reentrant);
+        // Arm AFTER the adds so the poke fires during the re-sort, not during Add.
+        reentrant.SiblingToPoke = sibling;
+
+        // Changing reentrant's layer re-sorts the container; mid-sort its Layer getter pokes the
+        // sibling's layer, re-entering OnLayerChanged. The guard must throw rather than leave the
+        // graphics list partially sorted.
+        Assert.ThrowsExactly<InvalidOperationException>(() => reentrant.Layer = 5);
     }
 
     [TestMethod]

@@ -30,6 +30,11 @@ internal class Container(IContainer realParent) : IContainer
     // once everything else has moved this frame. Routed by UpdateLast snapshotted at Add.
     private readonly List<IUpdateable> _updateablesLast = [];
 
+    // Guards OnLayerChanged against re-entrant layer mutation. OnLayerChanged re-sorts the lists in
+    // place; if a layer is changed again while it is mid-sort (a LayerChanged handler that writes
+    // another layer, or a side-effecting Layer getter), the list would be left partially sorted.
+    private bool _resorting = false;
+
     /// <inheritdoc/>
     public IList<IUpdateable> GetUpdatables() => [.. _updateables];
 
@@ -183,6 +188,17 @@ internal class Container(IContainer realParent) : IContainer
 
     private void OnLayerChanged(object? sender, LayerChangedEventArgs _)
     {
+        // Fail loudly rather than silently corrupting render/update order if a layer is changed
+        // while this handler is mid-sort. Nothing in the engine does this today, but a future
+        // controller that writes a layer from inside a LayerChanged handler would otherwise leave
+        // a list partially sorted with no symptom until something renders in the wrong order.
+        if (_resorting)
+        {
+            throw new InvalidOperationException("A child's Layer changed while the container was already re-sorting after a layer change. Re-entrant layer changes from within a LayerChanged handler are not supported — defer the change (e.g. to the next Update).");
+        }
+
+        _resorting = true;
+
         if (sender is IRenderable renderable)
         {
             _graphics.Remove(renderable);
@@ -202,5 +218,7 @@ internal class Container(IContainer realParent) : IContainer
                 InsertUpdateable(updateable, _updateablesLast);
             }
         }
+
+        _resorting = false;
     }
 }
