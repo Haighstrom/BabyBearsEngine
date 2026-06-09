@@ -11,14 +11,19 @@ internal sealed class OpenTKWindowAdapter : IWindow
 {
     private readonly OpenTKGameEngine _engine;
     private CursorShape _cursor;
+    private WindowIcon _icon;
 
-    public OpenTKWindowAdapter(OpenTKGameEngine engine, CursorShape initialCursor)
+    public OpenTKWindowAdapter(OpenTKGameEngine engine, CursorShape initialCursor, WindowIcon initialIcon)
     {
         _engine = engine;
         // Seed the cursor cache from the configured initial cursor. The engine sets the same
         // value on the underlying window in OnLoad — without this seed, the adapter's cached
         // value would forever report Default until something writes through Cursor's setter.
         _cursor = initialCursor;
+        // Seed the icon cache from the configured initial icon (set on the engine from
+        // WindowSettings, not through this adapter's setter). The getter then returns this cached
+        // instance instead of rebuilding a WindowIcon and re-wrapping pixel data on every read.
+        _icon = initialIcon;
         _engine.Resize += OnEngineResize;
     }
 
@@ -66,8 +71,12 @@ internal sealed class OpenTKWindowAdapter : IWindow
 
     public WindowIcon Icon
     {
-        get => _engine.Icon?.ToWindowIcon() ?? new WindowIcon();
-        set => _engine.Icon = value.ToOpenTK();
+        get => _icon;
+        set
+        {
+            _icon = value;
+            _engine.Icon = value.ToOpenTK();
+        }
     }
 
     public Point MaxClientSize
