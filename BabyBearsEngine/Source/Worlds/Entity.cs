@@ -138,6 +138,13 @@ public class Entity : ContainerEntity, IMouseInteractable
         }
     }
 
+    /// <summary>
+    /// True when this entity was constructed with <c>clickable: true</c> and therefore owns a
+    /// click controller. Exposed internally so tests can assert click-blocking behaviour without
+    /// driving the full mouse pipeline.
+    /// </summary>
+    internal bool IsClickable => _clickController is not null;
+
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Thrown when <see cref="AddableBase.Parent"/> is <c>null</c> — an entity outside the entity tree has no screen position.</exception>
     public Rect PositionOnScreen

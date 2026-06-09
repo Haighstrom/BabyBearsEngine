@@ -116,6 +116,12 @@ public class DropdownList<T> : Entity
     /// <summary>Whether the option list is currently open.</summary>
     public bool IsOpen => _isOpen;
 
+    /// <summary>
+    /// The transient option-list container, or null when closed. Exposed internally so unit tests
+    /// can assert it is click-blocking without driving the full mouse pipeline.
+    /// </summary>
+    internal Entity? OpenOptionList => _optionList;
+
     /// <summary>Raised when the selection changes. Not raised when the same item is selected again.</summary>
     public event EventHandler<SelectionChangedEventArgs<T>>? SelectionChanged;
 
@@ -160,7 +166,10 @@ public class DropdownList<T> : Entity
         var (_, headerBottomWindowY) = GetWindowCoordinates(0f, Height);
         float localListY = CalculateListLocalY(Height, listHeight, headerBottomWindowY, _getViewportHeight());
 
-        _optionList = new Entity(0f, localListY, Width, listHeight);
+        // clickable: true makes the option list click-blocking so clicks landing in the gaps
+        // between option rows are absorbed rather than falling through to whatever sits behind
+        // the open dropdown.
+        _optionList = new Entity(0f, localListY, Width, listHeight, clickable: true);
 
         for (int i = 0; i < _items.Count; i++)
         {

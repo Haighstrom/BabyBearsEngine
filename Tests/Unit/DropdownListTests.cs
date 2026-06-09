@@ -114,6 +114,19 @@ public class DropdownListTests
     }
 
     [TestMethod]
+    public void Open_OptionListIsClickBlocking()
+    {
+        // The option list must be clickable so clicks landing in the gaps between option rows are
+        // absorbed instead of falling through to whatever sits behind the open dropdown.
+        TestFixture f = new();
+
+        f.Dropdown.Open();
+
+        Assert.IsNotNull(f.Dropdown.OpenOptionList);
+        Assert.IsTrue(f.Dropdown.OpenOptionList.IsClickable);
+    }
+
+    [TestMethod]
     public void Open_WhenNotParented_ThrowsClearerExceptionMentioningParent()
     {
         StubEntity header = new();
