@@ -18,6 +18,9 @@ internal class Container(IContainer realParent) : IContainer
 
     // Membership only — insertion order, not z-order. Use _graphics / _updateables for layer-sorted iteration.
     private readonly List<IAddable> _children = [];
+    // Mirrors _children for O(1) membership tests on Add/Remove, avoiding a linear scan per call
+    // (which adds up when spawning thousands of small entities). Kept in lock-step with _children.
+    private readonly HashSet<IAddable> _childrenSet = [];
     private readonly List<IRenderable> _graphics = [];
     private readonly List<IUpdateable> _updateables = [];
 
@@ -52,12 +55,13 @@ internal class Container(IContainer realParent) : IContainer
         ArgumentNullException.ThrowIfNull(entity);
 
         // Reject duplicate adds — caller should not add the same entity twice.
-        if (_children.Contains(entity))
+        if (_childrenSet.Contains(entity))
         {
             throw new InvalidOperationException("Entity is already added to this container.");
         }
 
         _children.Add(entity);
+        _childrenSet.Add(entity);
 
         if (entity is IUpdateable updatable)
         {
@@ -83,12 +87,13 @@ internal class Container(IContainer realParent) : IContainer
         ArgumentNullException.ThrowIfNull(entity);
 
         // If the entity isn't tracked, that's a misuse of the API — throw.
-        if (!_children.Contains(entity))
+        if (!_childrenSet.Contains(entity))
         {
             throw new InvalidOperationException("Entity is not present in this container.");
         }
 
         _children.Remove(entity);
+        _childrenSet.Remove(entity);
 
         if (entity is IUpdateable updatable)
         {
@@ -127,7 +132,7 @@ internal class Container(IContainer realParent) : IContainer
         // Remove(child). Surface this during development rather than
         // silently masking it. Still clear the lists to keep runtime state
         // consistent.
-        if (_children.Count != 0 || _updateables.Count != 0 || _updateablesLast.Count != 0 || _graphics.Count != 0)
+        if (_children.Count != 0 || _childrenSet.Count != 0 || _updateables.Count != 0 || _updateablesLast.Count != 0 || _graphics.Count != 0)
         {
             Debug.Fail("RemoveAll: internal lists not empty after Remove(child) loop");
         }
@@ -137,6 +142,7 @@ internal class Container(IContainer realParent) : IContainer
         _updateablesLast.Clear();
         _graphics.Clear();
         _children.Clear();
+        _childrenSet.Clear();
     }
 
     private void InsertRenderable(IRenderable renderable)

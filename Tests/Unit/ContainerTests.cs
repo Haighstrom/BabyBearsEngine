@@ -232,7 +232,36 @@ public class ContainerTests
         Assert.IsEmpty(container.GetRenderables());
     }
 
+    [TestMethod]
+    public void Remove_ThenReaddSameEntity_Succeeds()
+    {
+        // The membership set must drop the entity on Remove, otherwise re-adding the same
+        // instance would wrongly throw "already added".
+        var container = CreateContainer(out var realParent);
+        var entity = new StubAddable();
+        container.Add(entity);
+        container.Remove(entity);
+
+        container.Add(entity);
+
+        Assert.AreSame(realParent, entity.Parent);
+    }
+
     // RemoveAll
+
+    [TestMethod]
+    public void RemoveAll_ThenReaddEntity_Succeeds()
+    {
+        // RemoveAll must clear the membership set too, so previously-held entities can be re-added.
+        var container = CreateContainer(out var realParent);
+        var entity = new StubAddable();
+        container.Add(entity);
+        container.RemoveAll();
+
+        container.Add(entity);
+
+        Assert.AreSame(realParent, entity.Parent);
+    }
 
     [TestMethod]
     public void RemoveAll_DetachesEveryChild()
