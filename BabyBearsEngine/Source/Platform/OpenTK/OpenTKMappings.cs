@@ -1,4 +1,4 @@
-using BabyBearsEngine.Input;
+﻿using BabyBearsEngine.Input;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;
@@ -108,7 +108,10 @@ internal static class OpenTkMappings
         {
             return new OpenTKWindowIcon();
         }
-        return new OpenTKWindowIcon(new OpenTKImage(icon.Width, icon.Height, icon.Pixels));
+
+        OpenTKImage[] images = [.. icon.Images.Select(image => new OpenTKImage(image.Width, image.Height, image.Pixels))];
+
+        return new OpenTKWindowIcon(images);
     }
 
     public static WindowIcon ToWindowIcon(this OpenTKWindowIcon icon)
@@ -117,7 +120,9 @@ internal static class OpenTkMappings
         {
             return new WindowIcon();
         }
-        var first = icon.Images[0];
-        return new WindowIcon(first.Width, first.Height, first.Data);
+
+        WindowIconImage[] images = [.. icon.Images.Select(image => new WindowIconImage(image.Width, image.Height, image.Data))];
+
+        return new WindowIcon(images);
     }
 }
