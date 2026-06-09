@@ -11,7 +11,7 @@ internal static class MouseSolver
     // While the button is held and this set is non-empty, only these controllers can
     // receive mouse-over state — preventing unrelated controls from highlighting or
     // receiving hover events while the user is dragging.
-    private static List<IClickController> s_lockedSet = [];
+    private static HashSet<IClickController> s_lockedSet = [];
 
     /// <summary>
     /// True when an entity with <see cref="ClickController.InterceptsMouseScroll"/> consumed the
