@@ -1,4 +1,6 @@
-﻿using BabyBearsEngine.Platform.OpenTK;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using BabyBearsEngine.Platform.OpenTK;
 
 using OpenTKColor4 = OpenTK.Mathematics.Color4;
 
@@ -295,5 +297,29 @@ public class ColourTests
     {
         Colour transparent = Colour.Transparent;
         Assert.AreEqual((byte)0, transparent.A);
+    }
+
+    // Memory layout — load-bearing for OpenTKScreenCaptureAdapter, which reads GL pixels
+    // (PixelFormat.Rgba, UnsignedByte) straight into a Colour[]. That reinterpret only works while
+    // Colour stays exactly four bytes laid out R, G, B, A with no padding. These tests fail loudly
+    // if a field is added/reordered or the StructLayout is removed.
+
+    [TestMethod]
+    public void Layout_IsExactlyFourBytes()
+    {
+        Assert.AreEqual(4, Unsafe.SizeOf<Colour>());
+    }
+
+    [TestMethod]
+    public void Layout_BytesMapToRgbaInOrder()
+    {
+        byte[] bytes = [10, 20, 30, 40];
+
+        Colour colour = MemoryMarshal.Read<Colour>(bytes);
+
+        Assert.AreEqual((byte)10, colour.R);
+        Assert.AreEqual((byte)20, colour.G);
+        Assert.AreEqual((byte)30, colour.B);
+        Assert.AreEqual((byte)40, colour.A);
     }
 }

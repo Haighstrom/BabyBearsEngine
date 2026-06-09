@@ -8,7 +8,12 @@ namespace BabyBearsEngine;
 /// <param name="G">Green component, 0–255.</param>
 /// <param name="B">Blue component, 0–255.</param>
 /// <param name="A">Alpha component, 0–255. Defaults to 255 (fully opaque).</param>
-[StructLayout(LayoutKind.Sequential)]
+/// <remarks>
+/// The <see cref="StructLayoutAttribute"/> (sequential, packed) is load-bearing:
+/// <c>OpenTKScreenCaptureAdapter</c> reads GL pixels straight into a <c>Colour[]</c>, which only
+/// works while <c>Colour</c> stays exactly four bytes laid out R, G, B, A. A unit test pins this.
+/// </remarks>
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public partial record struct Colour(byte R, byte G, byte B, byte A = 255) : IEquatable<Colour>
 {
     private static byte FloatToByte(float value, string componentName)
