@@ -1,4 +1,4 @@
-﻿namespace BabyBearsEngine.Pathfinding;
+namespace BabyBearsEngine.Pathfinding;
 
 /// <summary>
 /// A* graph-search solver. Finds the lowest-cost path from <c>start</c> to <c>end</c>
@@ -9,14 +9,25 @@
 public sealed class AStarSolver<TNode> : IPathSolver<TNode>
     where TNode : IPathfindNode<TNode>
 {
-    private sealed record AStarData(float F, float G);
+    // Mutable per-node scratch holder. Allocated once the first time a node is seen and then
+    // mutated in place on each relaxation, rather than allocating a fresh record per visit. F is
+    // the priority used to order the open set; G is the accumulated cost from the start node.
+    private sealed class AStarData
+    {
+        public float F { get; set; } = 0f;
+        public float G { get; set; } = 0f;
+    }
 
     private readonly TNode _start;
     private readonly TNode _end;
     private readonly Func<TNode, TNode, bool> _passableTest;
     private readonly Func<TNode, TNode, float> _heuristic;
-    private readonly List<TNode> _openNodes = [];
-    private readonly List<TNode> _closedNodes = [];
+    // Min-heap of candidate nodes keyed by F. A node may appear more than once after its F is
+    // lowered; the stale (higher-F) entries are discarded on dequeue via _openSet membership
+    // (lazy deletion), which is far cheaper than a decrease-key or re-sorting the whole open set.
+    private readonly PriorityQueue<TNode, float> _openQueue = new();
+    private readonly HashSet<TNode> _openSet = [];
+    private readonly HashSet<TNode> _closedSet = [];
     private readonly IPathBuilder<TNode> _pathBuilder = new PathBuilder<TNode>();
     private TNode _currentNode;
     private SolveStatus _state = SolveStatus.NotStarted;
@@ -28,7 +39,7 @@ public sealed class AStarSolver<TNode> : IPathSolver<TNode>
     public AStarSolver(TNode start, TNode end, Func<TNode, TNode, bool> passableTest, Func<TNode, TNode, float> heuristic)
     {
         _currentNode = _start = start;
-        _currentNode.GraphSearchData = new AStarData(F: 0, G: 0);
+        _currentNode.GraphSearchData = new AStarData { F = 0f, G = 0f };
         _end = end;
         _passableTest = passableTest;
         _heuristic = heuristic;
@@ -37,7 +48,7 @@ public sealed class AStarSolver<TNode> : IPathSolver<TNode>
     }
 
     /// <inheritdoc/>
-    public (IList<TNode> ExploredNodes, IList<TNode> NodesToExplore, SolveStatus SolveStatus) State => (_closedNodes, _openNodes, _state);
+    public (IList<TNode> ExploredNodes, IList<TNode> NodesToExplore, SolveStatus SolveStatus) State => ([.. _closedSet], [.. _openSet], _state);
 
     /// <inheritdoc/>
     public IList<TNode> Path => _pathBuilder.BuildPath(_start, _currentNode);
@@ -59,17 +70,34 @@ public sealed class AStarSolver<TNode> : IPathSolver<TNode>
             float h = _heuristic(testNode, _end);
             float f = g + h;
 
-            bool unseen = !_openNodes.Contains(testNode) && !_closedNodes.Contains(testNode);
+            bool inOpen = _openSet.Contains(testNode);
+            bool unseen = !inOpen && !_closedSet.Contains(testNode);
 
-            if (unseen || f < ((AStarData)testNode.GraphSearchData!).F)
+            AStarData? data = (AStarData?)testNode.GraphSearchData;
+
+            if (unseen || f < data!.F)
             {
-                testNode.GraphSearchData = new AStarData(F: f, G: g);
+                if (data is null)
+                {
+                    data = new AStarData();
+                    testNode.GraphSearchData = data;
+                }
+
+                data.F = f;
+                data.G = g;
                 testNode.ParentNode = _currentNode;
-            }
 
-            if (unseen)
-            {
-                _openNodes.Add(testNode);
+                if (unseen)
+                {
+                    _openSet.Add(testNode);
+                    _openQueue.Enqueue(testNode, f);
+                }
+                else if (inOpen)
+                {
+                    // F lowered for a node still queued — push a fresh entry at the better priority.
+                    // The earlier, higher-priority entry is skipped via lazy deletion when dequeued.
+                    _openQueue.Enqueue(testNode, f);
+                }
             }
         }
     }
@@ -82,17 +110,23 @@ public sealed class AStarSolver<TNode> : IPathSolver<TNode>
             return _state = SolveStatus.Success;
         }
 
-        _closedNodes.Add(_currentNode);
+        _closedSet.Add(_currentNode);
 
-        if (_openNodes.Count == 0)
+        // Pop the lowest-F genuinely-open node, discarding stale duplicate entries left behind when
+        // a node's F was lowered (lazy deletion). An exhausted queue means no path remains.
+        while (true)
         {
-            return _state = SolveStatus.Failure;
-        }
+            if (!_openQueue.TryDequeue(out TNode? candidate, out _))
+            {
+                return _state = SolveStatus.Failure;
+            }
 
-        // TODO: priority queue. For now we sort the open list each step.
-        _openNodes.Sort((n1, n2) => ((AStarData)n2.GraphSearchData!).F.CompareTo(((AStarData)n1.GraphSearchData!).F));
-        _currentNode = _openNodes[^1];
-        _openNodes.RemoveAt(_openNodes.Count - 1);
+            if (_openSet.Remove(candidate))
+            {
+                _currentNode = candidate;
+                break;
+            }
+        }
 
         IdentifyOpenNodes();
 

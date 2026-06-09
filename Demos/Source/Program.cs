@@ -1,5 +1,6 @@
 ﻿using System;
 using BabyBearsEngine.Demos.Source.Demos.AnimationDemo;
+using BabyBearsEngine.Demos.Source.Demos.AStarDemo;
 using BabyBearsEngine.Demos.Source.Demos.AudioDemo;
 using BabyBearsEngine.Demos.Source.Demos.BorderDemo;
 using BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
@@ -105,6 +106,7 @@ inputSubmenuFactory = () => new MenuWorld(
 
 showcasesSubmenuFactory = () => new MenuWorld(
 [
+    new("A* Pathfinding",    () => new AStarDemoWorld(getShowcasesSubmenu)),
     new("Bear Spinner 3000", () => new BearSpinnerWorld(getShowcasesSubmenu)),
     new("Click The Bear",    () => new ClickTheBearDemoWorld(getShowcasesSubmenu)),
     new("Noise Showcase",    () => new NoiseShowcaseWorld(getShowcasesSubmenu)),
