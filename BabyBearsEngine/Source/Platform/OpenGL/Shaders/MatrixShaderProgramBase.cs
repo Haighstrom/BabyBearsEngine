@@ -40,7 +40,9 @@ public abstract class MatrixShaderProgramBase : ShaderProgramBase, IMatrixShader
 
         unsafe
         {
-            fixed (float* valuePointer = matrix.Values)
+            Span<float> values = stackalloc float[9];
+            matrix.WriteTo(values);
+            fixed (float* valuePointer = values)
             {
                 GL.UniformMatrix3(_mvMatrixLocation, 1, false, valuePointer);
             }
@@ -53,7 +55,9 @@ public abstract class MatrixShaderProgramBase : ShaderProgramBase, IMatrixShader
 
         unsafe
         {
-            fixed (float* valuePointer = matrix.Values)
+            Span<float> values = stackalloc float[9];
+            matrix.WriteTo(values);
+            fixed (float* valuePointer = values)
             {
                 GL.UniformMatrix3(_pMatrixLocation, 1, false, valuePointer);
             }

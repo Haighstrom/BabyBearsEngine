@@ -202,6 +202,26 @@ public struct Matrix2
     /// </summary>
     public float[] Values => new float[] { _m0, _m1, _m2, _m3 };
 
+    /// <summary>
+    /// Writes the 4 matrix elements in column-major order into <paramref name="destination"/>
+    /// without allocating — the non-allocating counterpart to <see cref="Values"/> for hot paths
+    /// such as per-draw GL uniform uploads.
+    /// </summary>
+    /// <param name="destination">Receives the elements; must be at least 4 long.</param>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="destination"/> is shorter than 4.</exception>
+    public readonly void WriteTo(Span<float> destination)
+    {
+        if (destination.Length < 4)
+        {
+            throw new ArgumentException("Destination must be at least 4 elements long.", nameof(destination));
+        }
+
+        destination[0] = _m0;
+        destination[1] = _m1;
+        destination[2] = _m2;
+        destination[3] = _m3;
+    }
+
     /// <summary>Gets the determinant of this matrix.</summary>
     public float Determinant => _m0 * _m3 - _m1 * _m2;
 

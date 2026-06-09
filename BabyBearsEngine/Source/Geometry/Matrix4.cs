@@ -470,6 +470,38 @@ public struct Matrix4
         _m12, _m13, _m14, _m15
     };
 
+    /// <summary>
+    /// Writes the 16 matrix elements in column-major order into <paramref name="destination"/>
+    /// without allocating — the non-allocating counterpart to <see cref="Values"/> for hot paths
+    /// such as per-draw GL uniform uploads.
+    /// </summary>
+    /// <param name="destination">Receives the elements; must be at least 16 long.</param>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="destination"/> is shorter than 16.</exception>
+    public readonly void WriteTo(Span<float> destination)
+    {
+        if (destination.Length < 16)
+        {
+            throw new ArgumentException("Destination must be at least 16 elements long.", nameof(destination));
+        }
+
+        destination[0] = _m0;
+        destination[1] = _m1;
+        destination[2] = _m2;
+        destination[3] = _m3;
+        destination[4] = _m4;
+        destination[5] = _m5;
+        destination[6] = _m6;
+        destination[7] = _m7;
+        destination[8] = _m8;
+        destination[9] = _m9;
+        destination[10] = _m10;
+        destination[11] = _m11;
+        destination[12] = _m12;
+        destination[13] = _m13;
+        destination[14] = _m14;
+        destination[15] = _m15;
+    }
+
     /// <summary>Gets the determinant of this matrix.</summary>
     public float Determinant
     {

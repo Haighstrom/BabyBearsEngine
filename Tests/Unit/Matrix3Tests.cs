@@ -399,6 +399,30 @@ public class Matrix3Tests
     }
 
     [TestMethod]
+    public void WriteTo_WritesSameElementsAsValues()
+    {
+        var m = new Matrix3(new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+        Span<float> destination = stackalloc float[9];
+
+        m.WriteTo(destination);
+
+        float[] expected = m.Values;
+        for (int i = 0; i < 9; i++)
+        {
+            Assert.AreEqual(expected[i], destination[i], $"Element {i} mismatch.");
+        }
+    }
+
+    [TestMethod]
+    public void WriteTo_DestinationTooShort_Throws()
+    {
+        var m = Matrix3.Identity;
+        float[] tooShort = new float[8];
+
+        Assert.ThrowsExactly<ArgumentException>(() => m.WriteTo(tooShort));
+    }
+
+    [TestMethod]
     public void ArrayConstructor_MutatingSourceArray_DoesNotAffectMatrix()
     {
         float[] arr = new float[] { 1, 0, 0, 0, 1, 0, 0, 0, 1 };

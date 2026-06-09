@@ -441,4 +441,28 @@ public class Matrix4Tests
 
         Assert.AreEqual(1f, original[0, 0], Delta);
     }
+
+    [TestMethod]
+    public void WriteTo_WritesSameElementsAsValues()
+    {
+        Matrix4 m = new(new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 });
+        Span<float> destination = stackalloc float[16];
+
+        m.WriteTo(destination);
+
+        float[] expected = m.Values;
+        for (int i = 0; i < 16; i++)
+        {
+            Assert.AreEqual(expected[i], destination[i], $"Element {i} mismatch.");
+        }
+    }
+
+    [TestMethod]
+    public void WriteTo_DestinationTooShort_Throws()
+    {
+        Matrix4 m = Matrix4.Identity;
+        float[] tooShort = new float[15];
+
+        Assert.ThrowsExactly<ArgumentException>(() => m.WriteTo(tooShort));
+    }
 }
