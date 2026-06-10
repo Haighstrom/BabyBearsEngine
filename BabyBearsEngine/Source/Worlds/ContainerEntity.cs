@@ -69,6 +69,13 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
     /// <inheritdoc/>
     public IList<IRenderable> GetRenderables() => _container.GetRenderables();
 
+    // Non-allocating, reused-buffer counterparts to the Get* accessors for the per-frame loops
+    // below (and Camera). See Container's snapshot notes — the result must be iterated before the
+    // next call and not retained or mutated.
+    internal List<IUpdateable> SnapshotUpdatables() => _container.SnapshotUpdatables();
+    internal List<IUpdateable> SnapshotUpdatablesLast() => _container.SnapshotUpdatablesLast();
+    internal List<IRenderable> SnapshotRenderables() => _container.SnapshotRenderables();
+
     /// <summary>
     /// Updates every active child <see cref="IUpdateable"/> that is part of the entity tree. Children with
     /// <see cref="IUpdateable.Active"/> = false, or whose <see cref="IAddable.Exists"/> is false,
@@ -85,7 +92,7 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
     /// <param name="elapsed">Seconds since the last update.</param>
     public virtual void Update(double elapsed)
     {
-        foreach (var entity in GetUpdatables())
+        foreach (var entity in SnapshotUpdatables())
         {
             if (!entity.Active || !entity.Exists)
             {
@@ -100,7 +107,7 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
             }
         }
 
-        foreach (var entity in GetUpdatablesLast())
+        foreach (var entity in SnapshotUpdatablesLast())
         {
             if (!entity.Active || !entity.Exists)
             {
@@ -122,7 +129,7 @@ public abstract class ContainerEntity : AddableRectBase, IEntity, IContainer, IL
     /// </summary>
     public virtual void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
-        foreach (var entity in GetRenderables())
+        foreach (var entity in SnapshotRenderables())
         {
             if (!entity.Visible)
             {

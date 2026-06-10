@@ -580,4 +580,42 @@ public class ContainerTests
         Assert.AreSame(first, ordered[0]);
         Assert.AreSame(second, ordered[1]);
     }
+
+    // Snapshot accessors — non-allocating reused-buffer counterparts to Get* for the per-frame loops
+
+    [TestMethod]
+    public void SnapshotRenderables_MatchesGetRenderablesInLayerOrder()
+    {
+        var container = CreateContainer(out _);
+        var a = new StubLayeredRenderable(1);
+        var b = new StubLayeredRenderable(5);
+        container.Add(a);
+        container.Add(b);
+
+        CollectionAssert.AreEqual(container.GetRenderables().ToList(), container.SnapshotRenderables());
+    }
+
+    [TestMethod]
+    public void SnapshotUpdatables_ReusesSameBufferInstanceAcrossCalls()
+    {
+        var container = CreateContainer(out _);
+        container.Add(new StubUpdateable());
+
+        Assert.AreSame(container.SnapshotUpdatables(), container.SnapshotUpdatables());
+    }
+
+    [TestMethod]
+    public void SnapshotUpdatables_RefillsToReflectCurrentContents()
+    {
+        var container = CreateContainer(out _);
+        container.Add(new StubUpdateable());
+        container.SnapshotUpdatables();
+
+        var second = new StubUpdateable();
+        container.Add(second);
+        var snapshot = container.SnapshotUpdatables();
+
+        Assert.HasCount(2, snapshot);
+        Assert.Contains(second, snapshot);
+    }
 }

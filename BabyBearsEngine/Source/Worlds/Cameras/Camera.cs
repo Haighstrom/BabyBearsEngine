@@ -108,5 +108,5 @@ public class Camera : ContainerEntity, ICamera
 
     public override void Update(double elapsed) => base.Update(elapsed * GameSpeed);
 
-    public override void Render(ref Matrix3 projection, ref Matrix3 modelView) => _renderer.Render(this, GetRenderables(), ref projection, ref modelView);
+    public override void Render(ref Matrix3 projection, ref Matrix3 modelView) => _renderer.Render(this, SnapshotRenderables(), ref projection, ref modelView);
 }

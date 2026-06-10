@@ -141,7 +141,7 @@ public class World : IWorld
         // Update would otherwise still get its Update called from this loop. Skip detached
         // entries — Entity.Update would throw on Parent.GetWindowCoordinates if it ran on a
         // subtree whose ancestor was just removed. ContainerEntity.Update does the same check.
-        foreach (var updateable in container.GetUpdatables())
+        foreach (var updateable in container.SnapshotUpdatables())
         {
             if (!updateable.Active || !updateable.Exists)
             {
@@ -149,7 +149,7 @@ public class World : IWorld
             }
             updateable.Update(elapsed);
         }
-        foreach (var updateable in container.GetUpdatablesLast())
+        foreach (var updateable in container.SnapshotUpdatablesLast())
         {
             if (!updateable.Active || !updateable.Exists)
             {
@@ -168,7 +168,7 @@ public class World : IWorld
         var projection = Matrix3.CreateOrtho(Window.Width, Window.Height);
         var modelView = Matrix3.Identity;
 
-        foreach (var graphic in _container.GetRenderables())
+        foreach (var graphic in _container.SnapshotRenderables())
         {
             if (!graphic.Visible)
             {
@@ -177,7 +177,7 @@ public class World : IWorld
             graphic.Render(ref projection, ref modelView);
         }
 
-        foreach (var graphic in _overlay.GetRenderables())
+        foreach (var graphic in _overlay.SnapshotRenderables())
         {
             if (!graphic.Visible)
             {

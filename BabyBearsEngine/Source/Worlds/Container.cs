@@ -30,6 +30,15 @@ internal class Container(IContainer realParent) : IContainer
     // once everything else has moved this frame. Routed by UpdateLast snapshotted at Add.
     private readonly List<IUpdateable> _updateablesLast = [];
 
+    // Reused scratch buffers for the Snapshot* accessors, so the per-frame Update/Render loops
+    // don't allocate a fresh List per container per frame. Each is refilled on demand and is only
+    // valid until the next call to the same accessor — safe because no caller re-enters the same
+    // container's same accessor while iterating it (the loops descend into child containers, each
+    // of which has its own buffers).
+    private readonly List<IUpdateable> _updateablesSnapshot = [];
+    private readonly List<IUpdateable> _updateablesLastSnapshot = [];
+    private readonly List<IRenderable> _graphicsSnapshot = [];
+
     // Guards OnLayerChanged against re-entrant layer mutation. OnLayerChanged re-sorts the lists in
     // place; if a layer is changed again while it is mid-sort (a LayerChanged handler that writes
     // another layer, or a side-effecting Layer getter), the list would be left partially sorted.
@@ -43,6 +52,31 @@ internal class Container(IContainer realParent) : IContainer
 
     /// <inheritdoc/>
     public IList<IRenderable> GetRenderables() => [.. _graphics];
+
+    // Internal hot-path counterparts to the public Get* accessors above. They return a reused
+    // buffer (see the snapshot field notes) instead of allocating a fresh List each frame, so the
+    // caller must iterate the result before the next call to the same accessor and must not retain
+    // or mutate it. Used by the per-frame Update/Render loops in ContainerEntity and World.
+    internal List<IUpdateable> SnapshotUpdatables()
+    {
+        _updateablesSnapshot.Clear();
+        _updateablesSnapshot.AddRange(_updateables);
+        return _updateablesSnapshot;
+    }
+
+    internal List<IUpdateable> SnapshotUpdatablesLast()
+    {
+        _updateablesLastSnapshot.Clear();
+        _updateablesLastSnapshot.AddRange(_updateablesLast);
+        return _updateablesLastSnapshot;
+    }
+
+    internal List<IRenderable> SnapshotRenderables()
+    {
+        _graphicsSnapshot.Clear();
+        _graphicsSnapshot.AddRange(_graphics);
+        return _graphicsSnapshot;
+    }
 
     public (float x, float y) GetWindowCoordinates(float x, float y) =>
         realParent.GetWindowCoordinates(x, y);
