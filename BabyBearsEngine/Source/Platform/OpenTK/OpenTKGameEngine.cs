@@ -145,6 +145,9 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
 
         _world.Update(args.Time);
 
+        // Must run after World.Update: the world drives every ClickController.Update, which registers
+        // the controllers under the cursor this frame. MouseSolver then resolves mouse-over state and
+        // the drag lock set from those registrations (see MouseSolver.Update's ordering contract).
         MouseSolver.Update();
     }
 

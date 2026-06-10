@@ -27,6 +27,18 @@ internal static class MouseSolver
         s_currentMousedOver.Add(clickController);
     }
 
+    /// <summary>
+    /// Resolves mouse-over state for the frame: clears last frame's moused-over controllers, then
+    /// notifies the top-most controller(s) currently under the cursor, honouring the drag lock set.
+    /// </summary>
+    /// <remarks>
+    /// <strong>Ordering contract:</strong> call this once per frame <em>after</em> every
+    /// <see cref="ClickController.Update"/> has run. Those calls populate the current moused-over set
+    /// via <see cref="RegisterMouseOver"/>; both the lock-set capture (on the press frame) and the
+    /// top-most resolution read that set, so running this before the controllers have registered
+    /// would see an empty or stale set. The engine guarantees the order by calling it after
+    /// <c>World.Update</c> in <c>OpenTKGameEngine.OnUpdateFrame</c>.
+    /// </remarks>
     public static void Update()
     {
         // Capture the locked set on the frame the left button first goes down.
