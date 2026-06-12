@@ -19,7 +19,10 @@ internal static class OpenTkMappings
 {
     public static GameWindowSettings ToOpenTK(this GameLoopSettings settings) => new()
     {
-        UpdateFrequency = settings.TargetFramesPerSecond
+        // UpdateFrequency caps the whole loop: this OpenTK version unified the update and render
+        // rates (RenderFrequency is obsolete), so OnRenderFrame fires at this rate too rather than
+        // spinning unbounded. This matches TargetFramesPerSecond's documented "update and render".
+        UpdateFrequency = settings.TargetFramesPerSecond,
     };
 
     public static NativeWindowSettings ToOpenTK(this WindowSettings settings)

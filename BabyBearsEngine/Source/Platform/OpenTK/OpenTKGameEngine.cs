@@ -103,6 +103,14 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
     {
         base.OnRenderFrame(args);
 
+        // OpenTK keeps calling OnRenderFrame on a minimised window. There's nothing to display, so
+        // skip the frame's GPU work entirely rather than burn it on an invisible surface. (Anything
+        // queued for GPU deletion is processed on the next visible frame instead.)
+        if (WindowState == OpenTK.Windowing.Common.WindowState.Minimized)
+        {
+            return;
+        }
+
         _engineInfo.Tick(args.Time);
 
         GL.Clear(ClearBufferMask.ColorBufferBit);
