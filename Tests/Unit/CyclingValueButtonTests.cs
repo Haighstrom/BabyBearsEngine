@@ -9,7 +9,7 @@ public class CyclingValueButtonTests
     private sealed class TestCyclingButton<T> : CyclingValueButton<T>
     {
         internal TestCyclingButton(IReadOnlyList<T> values, int initialIndex = 0)
-            : base(values, initialIndex) { }
+            : base(values, new StubTextGraphic(), initialIndex) { }
         internal void FireLeftClicked() => OnLeftClicked();
     }
 

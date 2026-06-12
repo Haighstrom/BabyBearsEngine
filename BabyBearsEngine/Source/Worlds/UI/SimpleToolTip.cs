@@ -66,7 +66,15 @@ public sealed class SimpleToolTip : Entity
     public string Text
     {
         get => _text?.Text ?? string.Empty;
-        set { _text?.Text = value; }
+        set
+        {
+            if (_text is null)
+            {
+                throw new InvalidOperationException("This SimpleToolTip has no text graphic (it was created via the internal test constructor); Text cannot be set.");
+            }
+
+            _text.Text = value;
+        }
     }
 
     /// <summary>Make the tooltip visible.</summary>

@@ -81,13 +81,13 @@ public class SimpleToolTipTests
     // Text property
 
     [TestMethod]
-    public void Text_Set_IsNoOpWithoutTextGraphic()
+    public void Text_Set_WithoutTextGraphic_Throws()
     {
+        // The test ctor leaves the text graphic null; setting Text must fail loudly rather than
+        // silently discard the assignment.
         SimpleToolTip tip = Make();
 
-        tip.Text = "Hello";
-
-        Assert.AreEqual(string.Empty, tip.Text);
+        Assert.ThrowsExactly<InvalidOperationException>(() => tip.Text = "Hello");
     }
 
     // AttachTo

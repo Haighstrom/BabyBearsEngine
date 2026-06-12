@@ -15,7 +15,7 @@ public class Button : Entity, IMouseInteractable
     private readonly IGraphic? _background;
     private bool _hovered = false;
     private bool _pressed = false;
-    private readonly TextGraphic? _textImage;
+    private readonly ITextGraphic? _textImage;
     private readonly ButtonTheme? _theme;
 
     /// <param name="x">X position relative to the parent container.</param>
@@ -49,8 +49,19 @@ public class Button : Entity, IMouseInteractable
     {
     }
 
+    // Test constructor with no text graphic — for buttons that never carry a label (e.g. a
+    // Scrollbar thumb) and for interaction-only tests. Setting Text on such an instance throws.
     internal Button(float x, float y, float width, float height)
         : base(x, y, width, height, clickable: true) { }
+
+    // Test constructor that injects the text graphic (a fake in tests), so Text assignments take
+    // effect and a subclass that writes Text works without a real GL TextGraphic.
+    internal Button(float x, float y, float width, float height, ITextGraphic textImage)
+        : base(x, y, width, height, clickable: true)
+    {
+        _textImage = textImage;
+        Add(_textImage);
+    }
 
     /// <summary>
     /// When true, the button ignores all mouse interaction and renders with the theme's
@@ -75,21 +86,31 @@ public class Button : Entity, IMouseInteractable
     public string Text
     {
         get => _textImage?.Text ?? string.Empty;
-        set { _textImage?.Text = value; }
+        set
+        {
+            if (_textImage is null)
+            {
+                throw new InvalidOperationException("This Button has no text graphic (it was created via the internal no-text test constructor); Text cannot be set.");
+            }
+
+            _textImage.Text = value;
+        }
     }
 
     protected override void OnSizeChanged()
     {
         base.OnSizeChanged();
+
         if (_background is not null)
         {
             _background.Width = Width;
             _background.Height = Height;
-            if (_textImage is not null)
-            {
-                _textImage.Width = Width;
-                _textImage.Height = Height;
-            }
+        }
+
+        if (_textImage is not null)
+        {
+            _textImage.Width = Width;
+            _textImage.Height = Height;
         }
     }
 

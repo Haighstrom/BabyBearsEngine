@@ -1,4 +1,5 @@
 ﻿using BabyBearsEngine.Geometry;
+using BabyBearsEngine.Worlds.Graphics.Text;
 using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Worlds.UI;
@@ -66,8 +67,8 @@ public class CyclingValueButton<T> : Button
     {
     }
 
-    internal CyclingValueButton(IReadOnlyList<T> values, int initialIndex = 0)
-        : base(0, 0, 100, 30)
+    internal CyclingValueButton(IReadOnlyList<T> values, ITextGraphic textImage, int initialIndex = 0)
+        : base(0, 0, 100, 30, textImage)
     {
         _values = values;
         _formatter = v => v?.ToString() ?? string.Empty;

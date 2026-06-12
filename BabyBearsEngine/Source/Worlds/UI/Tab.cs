@@ -63,7 +63,15 @@ public class Tab : Entity
     public string Title
     {
         get => _titleGraphic?.Text ?? string.Empty;
-        set { _titleGraphic?.Text = value; }
+        set
+        {
+            if (_titleGraphic is null)
+            {
+                throw new InvalidOperationException("This Tab has no title graphic (it was created via the internal test constructor); Title cannot be set.");
+            }
+
+            _titleGraphic.Text = value;
+        }
     }
 
     /// <summary>

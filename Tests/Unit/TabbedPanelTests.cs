@@ -290,4 +290,16 @@ public class TabbedPanelTests
         Assert.IsTrue(content.Visible);
         Assert.IsTrue(content.Active);
     }
+
+    // Title
+
+    [TestMethod]
+    public void Title_Set_WithoutTitleGraphic_Throws()
+    {
+        // MakeTab uses the internal test ctor, which leaves the title graphic null; setting Title
+        // must fail loudly rather than silently discard the assignment.
+        Tab tab = MakeTab();
+
+        Assert.ThrowsExactly<InvalidOperationException>(() => tab.Title = "Hello");
+    }
 }

@@ -25,13 +25,23 @@ public class ButtonTests
     }
 
     [TestMethod]
-    public void Text_Set_IsNoOpWithoutTextGraphic()
+    public void Text_Set_WithoutTextGraphic_Throws()
     {
+        // The no-text test ctor leaves the text graphic null; setting Text must fail loudly rather
+        // than silently discard the assignment.
         TestButton button = new();
+
+        Assert.ThrowsExactly<InvalidOperationException>(() => button.Text = "Hello");
+    }
+
+    [TestMethod]
+    public void Text_Set_WithTextGraphic_RoundTrips()
+    {
+        Button button = new(0, 0, 100, 30, new StubTextGraphic());
 
         button.Text = "Hello";
 
-        Assert.AreEqual(string.Empty, button.Text);
+        Assert.AreEqual("Hello", button.Text);
     }
 
     // Events

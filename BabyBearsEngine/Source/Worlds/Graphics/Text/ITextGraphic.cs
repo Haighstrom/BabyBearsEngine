@@ -3,7 +3,7 @@ using BabyBearsEngine.Worlds.Cameras;
 
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 
-public interface ITextGraphic : IRenderable, IAddable
+public interface ITextGraphic : IRenderable, IRectAddable
 {
     /// <summary>Rotation angle in degrees, applied around the graphic's centre.</summary>
     float Angle { get; set; }
