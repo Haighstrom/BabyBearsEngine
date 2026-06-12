@@ -37,10 +37,16 @@ internal sealed class OpenTKWindowAdapter : IWindow
         set => _engine.WindowBorder = value.ToOpenTK();
     }
 
+    // Lock and visibility are independent dimensions, but OpenTK packs both into a single
+    // CursorState. The four states cover the 2x2: Normal (visible+free), Hidden (hidden+free),
+    // Grabbed (hidden+locked), Confined (visible+locked). Each setter preserves the other
+    // dimension's current value, so neither write is ever silently dropped.
     public bool CursorLockedToWindow
     {
-        get => _engine.CursorState == OpenTKCursorState.Grabbed;
-        set => _engine.CursorState = value ? OpenTKCursorState.Grabbed : OpenTKCursorState.Normal;
+        get => _engine.CursorState is OpenTKCursorState.Grabbed or OpenTKCursorState.Confined;
+        set => _engine.CursorState = value
+            ? (CursorVisible ? OpenTKCursorState.Confined : OpenTKCursorState.Grabbed)
+            : (CursorVisible ? OpenTKCursorState.Normal : OpenTKCursorState.Hidden);
     }
 
     public CursorShape Cursor
@@ -55,14 +61,10 @@ internal sealed class OpenTKWindowAdapter : IWindow
 
     public bool CursorVisible
     {
-        get => _engine.CursorState == OpenTKCursorState.Normal;
-        set
-        {
-            if (_engine.CursorState != OpenTKCursorState.Grabbed)
-            {
-                _engine.CursorState = value ? OpenTKCursorState.Normal : OpenTKCursorState.Hidden;
-            }
-        }
+        get => _engine.CursorState is OpenTKCursorState.Normal or OpenTKCursorState.Confined;
+        set => _engine.CursorState = value
+            ? (CursorLockedToWindow ? OpenTKCursorState.Confined : OpenTKCursorState.Normal)
+            : (CursorLockedToWindow ? OpenTKCursorState.Grabbed : OpenTKCursorState.Hidden);
     }
 
     public bool CloseOnXButton

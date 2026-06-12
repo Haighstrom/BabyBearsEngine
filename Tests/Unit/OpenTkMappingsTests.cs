@@ -1,4 +1,5 @@
 using BabyBearsEngine.Platform.OpenTK;
+using OpenTKCursorState = OpenTK.Windowing.Common.CursorState;
 using OpenTKImage = OpenTK.Windowing.Common.Input.Image;
 using OpenTKWindowBorder = OpenTK.Windowing.Common.WindowBorder;
 using OpenTKWindowIcon = OpenTK.Windowing.Common.Input.WindowIcon;
@@ -88,5 +89,41 @@ public class OpenTkMappingsTests
         WindowIcon mapped = new OpenTKWindowIcon().ToWindowIcon();
 
         Assert.IsTrue(mapped.IsEmpty);
+    }
+
+    // ToCursorState — lock and visibility are independent (the 2x2 onto OpenTK's four states)
+
+    [TestMethod]
+    public void ToCursorState_VisibleAndFree_IsNormal()
+    {
+        WindowSettings settings = new() { CursorVisible = true, CursorLockedToWindow = false };
+
+        Assert.AreEqual(OpenTKCursorState.Normal, settings.ToCursorState());
+    }
+
+    [TestMethod]
+    public void ToCursorState_HiddenAndFree_IsHidden()
+    {
+        WindowSettings settings = new() { CursorVisible = false, CursorLockedToWindow = false };
+
+        Assert.AreEqual(OpenTKCursorState.Hidden, settings.ToCursorState());
+    }
+
+    [TestMethod]
+    public void ToCursorState_HiddenAndLocked_IsGrabbed()
+    {
+        WindowSettings settings = new() { CursorVisible = false, CursorLockedToWindow = true };
+
+        Assert.AreEqual(OpenTKCursorState.Grabbed, settings.ToCursorState());
+    }
+
+    [TestMethod]
+    public void ToCursorState_VisibleAndLocked_IsConfined()
+    {
+        // The bug fix: an explicit CursorVisible = true is honoured even while locked (Confined),
+        // rather than being overridden to Grabbed (hidden) by the lock.
+        WindowSettings settings = new() { CursorVisible = true, CursorLockedToWindow = true };
+
+        Assert.AreEqual(OpenTKCursorState.Confined, settings.ToCursorState());
     }
 }

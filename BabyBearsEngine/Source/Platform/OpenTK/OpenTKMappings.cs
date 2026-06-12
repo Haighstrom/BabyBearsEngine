@@ -47,15 +47,15 @@ internal static class OpenTkMappings
 
     public static OpenTKCursorState ToCursorState(this WindowSettings settings)
     {
+        // Lock and visibility are independent — map the 2x2 onto OpenTK's four states so an
+        // explicit CursorVisible = true is honoured even when the cursor is locked (Confined),
+        // rather than being overridden by the lock (Grabbed).
         if (settings.CursorLockedToWindow)
         {
-            return OpenTKCursorState.Grabbed;
+            return settings.CursorVisible ? OpenTKCursorState.Confined : OpenTKCursorState.Grabbed;
         }
-        if (!settings.CursorVisible)
-        {
-            return OpenTKCursorState.Hidden;
-        }
-        return OpenTKCursorState.Normal;
+
+        return settings.CursorVisible ? OpenTKCursorState.Normal : OpenTKCursorState.Hidden;
     }
 
     public static MouseCursor ToOpenTK(this CursorShape shape) => shape switch
