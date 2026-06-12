@@ -531,6 +531,15 @@ internal sealed class OpenALAudioService : IAudio
         };
     }
 
+    // A volume change happens in two steps that are deliberately NOT held under a single lock: the
+    // setter stores the new value under _volumeLock, then this method re-reads it (under _volumeLock)
+    // to compute the gain and applies it under _channelLock. Holding _volumeLock across the whole
+    // update would force a _volumeLock -> _channelLock ordering, but PlaySfx already nests the other
+    // way (_channelLock -> _volumeLock, via ComputeSfxGainUnlocked) — so doing so would risk a
+    // deadlock. The cost of keeping them separate is that under genuinely concurrent volume writes
+    // (in practice volume is only set from the main thread) it is last-write-wins on the field, and
+    // a channel's gain can momentarily lag the field until the next volume change. That transient
+    // mismatch is harmless for volume.
     private void ApplyVolumes()
     {
         if (!_initialised)
