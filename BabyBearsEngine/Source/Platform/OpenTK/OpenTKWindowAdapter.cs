@@ -24,6 +24,10 @@ internal sealed class OpenTKWindowAdapter : IWindow
         // WindowSettings, not through this adapter's setter). The getter then returns this cached
         // instance instead of rebuilding a WindowIcon and re-wrapping pixel data on every read.
         _icon = initialIcon;
+        // Deliberately never unsubscribed: the adapter and the engine share a lifetime (the adapter
+        // is created once in GameLauncher and lives until shutdown), so the handler dies with both.
+        // If the window service is ever made swappable at runtime, give this adapter an IDisposable
+        // that does `_engine.Resize -= OnEngineResize`, and dispose the old one on swap.
         _engine.Resize += OnEngineResize;
     }
 
