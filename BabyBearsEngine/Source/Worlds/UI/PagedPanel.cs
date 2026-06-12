@@ -15,10 +15,8 @@ namespace BabyBearsEngine.Worlds.UI;
 public class PagedPanel : Entity
 {
     private int _currentPage = 0;
-    private readonly Button? _nextButton;
     private readonly TextGraphic _pageLabel;
     private readonly IReadOnlyList<Entity> _pages;
-    private readonly Button? _previousButton;
 
     /// <param name="pages">The content pages, shown one at a time in order. May be empty.</param>
     /// <param name="previousButton">Position and size of the "previous page" arrow button.</param>
@@ -53,16 +51,17 @@ public class PagedPanel : Entity
         _pageLabel = new TextGraphic(pageLabelTheme, "", pageLabel, layer);
         Add(_pageLabel);
 
-        // The arrows only earn their place when there is somewhere to page to.
+        // The arrows only earn their place when there is somewhere to page to. They're added as
+        // children (so the panel owns them) and never referenced again, so locals suffice.
         if (_pages.Count > 1)
         {
-            _previousButton = new Button(previousButton, previousButtonTheme, previousButtonText, layer);
-            _previousButton.LeftClicked += (_, _) => PreviousPage();
-            Add(_previousButton);
+            Button previousPageButton = new(previousButton, previousButtonTheme, previousButtonText, layer);
+            previousPageButton.LeftClicked += (_, _) => PreviousPage();
+            Add(previousPageButton);
 
-            _nextButton = new Button(nextButton, nextButtonTheme, nextButtonText, layer);
-            _nextButton.LeftClicked += (_, _) => NextPage();
-            Add(_nextButton);
+            Button nextPageButton = new(nextButton, nextButtonTheme, nextButtonText, layer);
+            nextPageButton.LeftClicked += (_, _) => NextPage();
+            Add(nextPageButton);
         }
 
         ShowCurrentPage();
