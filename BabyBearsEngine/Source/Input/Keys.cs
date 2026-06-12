@@ -129,5 +129,12 @@ public enum Keys
     RightAlt = 346,
     RightSuper = 347,
     Menu = 348,
+
+    /// <summary>
+    /// Alias for the highest-valued key (<see cref="Menu"/>, 348). This is the largest key
+    /// <em>value</em>, not a key <em>count</em> — the values are sparse (large gaps between ranges),
+    /// so do not use it as an array size or loop bound; iterate <c>Enum.GetValues&lt;Keys&gt;()</c>
+    /// instead.
+    /// </summary>
     LastKey = Menu,
 }
