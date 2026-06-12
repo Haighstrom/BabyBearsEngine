@@ -347,7 +347,14 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     public VAlignment VAlignment { get; set; } = VAlignment.Centred;
 
     /// <inheritdoc/>
-    public Point MeasureString(string text)
+    public Point MeasureString(string text) => MeasureString(text.AsSpan());
+
+    /// <summary>
+    /// Returns the rendered size of <paramref name="text"/> in pixels at the current scale.
+    /// Allocation-free overload — callers measuring a slice of a larger string can pass an
+    /// <c>AsSpan</c> view instead of allocating a <c>Substring</c>.
+    /// </summary>
+    public Point MeasureString(ReadOnlySpan<char> text)
     {
         var raw = _metrics.MeasureString(text);
         return new Point(raw.X * ScaleX, raw.Y * ScaleY);

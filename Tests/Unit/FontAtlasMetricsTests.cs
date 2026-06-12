@@ -89,6 +89,33 @@ public class FontAtlasMetricsTests
         Assert.AreEqual(25, metrics.MeasureString("xx").Y);
     }
 
+    // MeasureString(ReadOnlySpan<char>)
+
+    [TestMethod]
+    public void MeasureString_Span_MatchesStringOverloadForSlice()
+    {
+        FontAtlasMetrics metrics = MakeMetrics(15, MakePositions(('A', 10), ('B', 8), ('C', 12)));
+
+        // Measuring a slice via span must equal measuring the equivalent substring.
+        Vector2i span = metrics.MeasureString("ABC".AsSpan(0, 2));
+        Vector2i str = metrics.MeasureString("AB");
+
+        Assert.AreEqual(str.X, span.X);
+        Assert.AreEqual(18, span.X);
+        Assert.AreEqual(str.Y, span.Y);
+    }
+
+    [TestMethod]
+    public void MeasureString_EmptySpan_ReturnsZeroWidthAndHighestChar()
+    {
+        FontAtlasMetrics metrics = MakeMetrics(20, MakePositions());
+
+        Vector2i result = metrics.MeasureString(System.ReadOnlySpan<char>.Empty);
+
+        Assert.AreEqual(0, result.X);
+        Assert.AreEqual(20, result.Y);
+    }
+
     // GetCharAdvance
 
     [TestMethod]

@@ -109,7 +109,9 @@ internal record class FontAtlasMetrics(
 
     public Vector2i MeasureString(char c) => new(GetCharAdvance(c), HighestChar);
 
-    public Vector2i MeasureString(string s)
+    public Vector2i MeasureString(string s) => MeasureString(s.AsSpan());
+
+    public Vector2i MeasureString(ReadOnlySpan<char> s)
     {
         int length = 0;
 

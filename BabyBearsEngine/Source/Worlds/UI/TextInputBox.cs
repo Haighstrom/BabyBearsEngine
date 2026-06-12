@@ -552,9 +552,8 @@ public class TextInputBox : Entity
         _textGraphic.Text = _text;
 
         // Cursor X — distance from left edge of the text area to the cursor
-        string beforeCursor = _text.Substring(_scrollOffset,
-            Math.Max(0, _cursorIndex - _scrollOffset));
-        float cursorX = ContentPadding + _textGraphic.MeasureString(beforeCursor).X;
+        float cursorX = ContentPadding + _textGraphic.MeasureString(
+            _text.AsSpan(_scrollOffset, Math.Max(0, _cursorIndex - _scrollOffset))).X;
 
         _cursorGraphic?.X = cursorX;
 
@@ -567,9 +566,9 @@ public class TextInputBox : Entity
                 int visEnd = SelectionEnd;
 
                 float selStartX = ContentPadding + _textGraphic.MeasureString(
-                    _text.Substring(_scrollOffset, Math.Max(0, visStart - _scrollOffset))).X;
+                    _text.AsSpan(_scrollOffset, Math.Max(0, visStart - _scrollOffset))).X;
                 float selEndX = ContentPadding + _textGraphic.MeasureString(
-                    _text.Substring(_scrollOffset, Math.Max(0, visEnd - _scrollOffset))).X;
+                    _text.AsSpan(_scrollOffset, Math.Max(0, visEnd - _scrollOffset))).X;
 
                 _selectionGraphic.X = selStartX;
                 _selectionGraphic.Width = Math.Max(0f, selEndX - selStartX);
@@ -599,14 +598,12 @@ public class TextInputBox : Entity
 
         float availableWidth = Width - 2f * ContentPadding;
 
-        string visibleBeforeCursor = _text[_scrollOffset.._cursorIndex];
-        float cursorX = _textGraphic.MeasureString(visibleBeforeCursor).X;
+        float cursorX = _textGraphic.MeasureString(_text.AsSpan(_scrollOffset, _cursorIndex - _scrollOffset)).X;
 
         while (cursorX > availableWidth && _scrollOffset < _cursorIndex)
         {
             _scrollOffset++;
-            visibleBeforeCursor = _text[_scrollOffset.._cursorIndex];
-            cursorX = _textGraphic.MeasureString(visibleBeforeCursor).X;
+            cursorX = _textGraphic.MeasureString(_text.AsSpan(_scrollOffset, _cursorIndex - _scrollOffset)).X;
         }
     }
 
