@@ -36,7 +36,7 @@ internal class BearTarget : Entity
 
         if (_lifeRemaining <= FadeStartAt)
         {
-            _image.Alpha = (float)Math.Max(0, _lifeRemaining / FadeStartAt);
+            _image.Alpha = (byte)(255 * Math.Max(0, _lifeRemaining / FadeStartAt));
         }
 
         if (_lifeRemaining <= 0)

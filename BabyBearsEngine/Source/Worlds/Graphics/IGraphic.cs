@@ -17,13 +17,13 @@ public interface IGraphic : IRenderable, ILayered, IRectAddable
     Colour Colour { get; set; }
 
     /// <summary>
-    /// Convenience accessor for the alpha component of <see cref="Colour"/>, expressed as a
-    /// normalised float (0–1) on set; raw byte (0–255) on get.
+    /// Convenience accessor for the alpha (opacity) component of <see cref="Colour"/>, as a raw
+    /// byte (0–255) matching <see cref="Colour.A"/>.
     /// </summary>
-    float Alpha
+    byte Alpha
     {
         get => Colour.A;
-        set => Colour = new(Colour.R, Colour.G, Colour.B, (byte)Math.Round(value * 255f));
+        set => Colour = Colour.WithAlpha(value);
     }
 
     /// <summary>

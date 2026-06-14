@@ -150,11 +150,11 @@ Direct keyboard and mouse polling via [`IKeyboard`](BabyBearsEngine/Source/Input
 ### Tweens & easings
 
 ```csharp
-NumTween fade = new(from: 0, to: 1, duration: 2.0, easing: Easings.EaseInOutSine);
+NumTween fade = new(from: 0, to: 255, duration: 2.0, easing: Easings.EaseInOutSine);
 Add(fade);
 
 // later, in Update:
-sprite.Alpha = (float)fade.Value;
+sprite.Alpha = (byte)fade.Value;
 ```
 
 Built-in easings include linear, quad, sine, bounce, and back variants (`EaseIn`/`EaseOut`/`EaseInOut`). `ColourTween` interpolates colour values directly. See [`Source/Worlds/Tweens/`](BabyBearsEngine/Source/Worlds/Tweens/).

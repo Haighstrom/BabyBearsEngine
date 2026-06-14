@@ -32,7 +32,7 @@ internal class BearEntity : Entity
     {
         base.Update(elapsed);
         _totalElapsed += elapsed;
-        _graphic.Alpha = (1 + (float)Math.Sin(_alphaShift + _alphaSpeed * _totalElapsed)) / 2;
+        _graphic.Alpha = (byte)(255 * (1 + (float)Math.Sin(_alphaShift + _alphaSpeed * _totalElapsed)) / 2);
         _graphic.Angle += _rotateSpeed * (float)elapsed;
 
         X = _startX + _xSway * (float)Math.Sin(_swaySpeed * _totalElapsed);

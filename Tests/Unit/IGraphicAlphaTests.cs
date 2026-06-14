@@ -49,7 +49,7 @@ public class IGraphicAlphaTests
     {
         IGraphic g = new FakeGraphic { Colour = new(10, 20, 30, 128) };
 
-        Assert.AreEqual(128f, g.Alpha);
+        Assert.AreEqual((byte)128, g.Alpha);
     }
 
     [TestMethod]
@@ -57,15 +57,15 @@ public class IGraphicAlphaTests
     {
         IGraphic g = new FakeGraphic();
 
-        Assert.AreEqual(255f, g.Alpha);
+        Assert.AreEqual((byte)255, g.Alpha);
     }
 
     [TestMethod]
-    public void Alpha_Set_To1_ProducesFullyOpaque()
+    public void Alpha_Set_To255_ProducesFullyOpaque()
     {
         IGraphic g = new FakeGraphic { Colour = new(10, 20, 30, 0) };
 
-        g.Alpha = 1f;
+        g.Alpha = 255;
 
         Assert.AreEqual(new Colour(10, 20, 30, 255), g.Colour);
     }
@@ -75,7 +75,7 @@ public class IGraphicAlphaTests
     {
         IGraphic g = new FakeGraphic { Colour = new(10, 20, 30, 255) };
 
-        g.Alpha = 0f;
+        g.Alpha = 0;
 
         Assert.AreEqual(new Colour(10, 20, 30, 0), g.Colour);
     }
@@ -85,7 +85,7 @@ public class IGraphicAlphaTests
     {
         IGraphic g = new FakeGraphic { Colour = new(11, 22, 33, 44) };
 
-        g.Alpha = 0.5f;
+        g.Alpha = 128;
 
         Assert.AreEqual((byte)11, g.Colour.R);
         Assert.AreEqual((byte)22, g.Colour.G);
@@ -93,23 +93,23 @@ public class IGraphicAlphaTests
     }
 
     [TestMethod]
-    public void Alpha_Set_RoundsToNearestByte()
+    public void Alpha_Set_StoresByteVerbatim()
     {
         IGraphic g = new FakeGraphic();
 
-        g.Alpha = 0.5f;
+        g.Alpha = 128;
 
         Assert.AreEqual((byte)128, g.Colour.A);
     }
 
     [TestMethod]
-    public void Alpha_Set_HalfwayBelow_RoundsDown()
+    public void Alpha_ReadModifyWrite_HalvesSymmetrically()
     {
-        IGraphic g = new FakeGraphic();
+        IGraphic g = new FakeGraphic { Colour = new(10, 20, 30, 200) };
 
-        g.Alpha = 0.001f;
+        g.Alpha = (byte)(g.Alpha / 2);
 
-        Assert.AreEqual((byte)0, g.Colour.A);
+        Assert.AreEqual((byte)100, g.Colour.A);
     }
 
     [TestMethod]
@@ -118,7 +118,7 @@ public class IGraphicAlphaTests
         FakeGraphic concrete = new() { Colour = new(50, 60, 70, 80) };
         IGraphic asInterface = concrete;
 
-        asInterface.Alpha = 1f;
+        asInterface.Alpha = 255;
 
         Assert.AreEqual((byte)255, concrete.Colour.A);
         Assert.AreEqual((byte)50, concrete.Colour.R);
