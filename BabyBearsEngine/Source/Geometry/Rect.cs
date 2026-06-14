@@ -8,7 +8,7 @@ namespace BabyBearsEngine.Geometry;
 /// An axis-aligned rectangle defined by its top-left corner (<see cref="X"/>, <see cref="Y"/>) and its size (<see cref="W"/>, <see cref="H"/>).
 /// Coordinates use a top-left origin: increasing <see cref="Y"/> moves downward, so <see cref="Top"/> is the smaller Y and <see cref="Bottom"/> is the larger Y.
 /// </summary>
-public sealed class Rect
+public sealed record Rect
 {
     /// <summary>
     /// A rectangle with top left (0,0) and nil width and height.
@@ -69,8 +69,11 @@ public sealed class Rect
     /// <summary>Creates a rectangle as a copy of another.</summary>
     /// <param name="rect">The rectangle to copy.</param>
     public Rect(Rect rect)
-        : this(rect.X, rect.Y, rect.W, rect.H)
     {
+        X = rect.X;
+        Y = rect.Y;
+        W = rect.W;
+        H = rect.H;
     }
 
     /// <summary>Creates a rectangle from a top-left position and explicit size.</summary>
@@ -494,21 +497,6 @@ public sealed class Rect
     /// </summary>
     /// <returns>Returns a list of four points.</returns>
     public List<Point> ToVertices() => [TopLeft, TopRight, BottomRight, BottomLeft];
-
-    public override int GetHashCode() => HashCode.Combine(X, Y, W, H);
-
-    public override bool Equals(object? o) => o switch
-    {
-        null => false,
-        Rect r => X == r.X && Y == r.Y && W == r.W && H == r.H,
-        _ => false,
-    };
-
-    /// <summary>Value equality: two rectangles are equal when their X, Y, W, and H all match.</summary>
-    public static bool operator ==(Rect r1, Rect? r2) => r1.Equals(r2);
-
-    /// <summary>Negation of <see cref="op_Equality"/>.</summary>
-    public static bool operator !=(Rect r1, Rect? r2) => !r1.Equals(r2);
 
     /// <summary>Returns a new rectangle translated by <paramref name="p"/>. Width and height are unchanged.</summary>
     public static Rect operator +(Rect r, Point p) => new(r.X + p.X, r.Y + p.Y, r.W, r.H);

@@ -236,6 +236,15 @@ public class Point4Tests
     }
 
     [TestMethod]
+    public void GetHashCode_EqualPoints_SameHash()
+    {
+        Point4 a = new(1f, 2f, 3f, 4f);
+        Point4 b = new(1f, 2f, 3f, 4f);
+
+        Assert.AreEqual(a.GetHashCode(), b.GetHashCode());
+    }
+
+    [TestMethod]
     public void Equals_DifferentW_ReturnsFalse()
     {
         Point4 a = new(1f, 2f, 3f, 4f);

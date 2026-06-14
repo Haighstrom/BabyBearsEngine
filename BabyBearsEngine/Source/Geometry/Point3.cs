@@ -7,7 +7,7 @@ namespace BabyBearsEngine.Geometry;
 /// Provides common vector operations such as dot/cross products, normalization and basic arithmetic.
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
-public struct Point3(float x, float y, float z) : IEquatable<Point3>
+public record struct Point3(float X, float Y, float Z)
 {
     /// <summary>
     /// A <see cref="Point3"/> with all components set to zero.
@@ -34,21 +34,6 @@ public struct Point3(float x, float y, float z) : IEquatable<Point3>
             a.Z * b.X - a.X * b.Z,
             a.X * b.Y - a.Y * b.X
         );
-
-    /// <summary>
-    /// The X component of the point.
-    /// </summary>
-    public float X { get; set; } = x;
-
-    /// <summary>
-    /// The Y component of the point.
-    /// </summary>
-    public float Y { get; set; } = y;
-
-    /// <summary>
-    /// The Z component of the point.
-    /// </summary>
-    public float Z { get; set; } = z;
 
     /// <summary>
     /// The Euclidean length (magnitude) of the vector represented by this point.
@@ -130,13 +115,6 @@ public struct Point3(float x, float y, float z) : IEquatable<Point3>
     public readonly float[] ToArray() => [X, Y, Z];
 
     /// <summary>
-    /// Determines whether this instance is equal to another <see cref="Point3"/>.
-    /// Uses exact floating-point equality.
-    /// </summary>
-    /// <param name="other">The other point to compare.</param>
-    public readonly bool Equals(Point3 other) => X == other.X && Y == other.Y && Z == other.Z;
-
-    /// <summary>
     /// Adds two <see cref="Point3"/> values component-wise.
     /// </summary>
     public static Point3 operator +(Point3 p1, Point3 p2) => new(p1.X + p2.X, p1.Y + p2.Y, p1.Z + p2.Z);
@@ -160,26 +138,6 @@ public struct Point3(float x, float y, float z) : IEquatable<Point3>
     /// Divides a <see cref="Point3"/> by a scalar.
     /// </summary>
     public static Point3 operator /(Point3 p, float f) => new(p.X / f, p.Y / f, p.Z / f);
-
-    /// <summary>
-    /// Determines whether two <see cref="Point3"/> values are equal (component-wise exact equality).
-    /// </summary>
-    public static bool operator ==(Point3 p1, Point3 p2) => p1.X == p2.X && p1.Y == p2.Y && p1.Z == p2.Z;
-
-    /// <summary>
-    /// Determines whether two <see cref="Point3"/> values are not equal (component-wise exact inequality).
-    /// </summary>
-    public static bool operator !=(Point3 p1, Point3 p2) => p1.X != p2.X || p1.Y != p2.Y || p1.Z != p2.Z;
-
-    /// <summary>
-    /// Determines whether this instance is equal to another object.
-    /// </summary>
-    public override readonly bool Equals(object? o) => o is Point3 p && Equals(p);
-
-    /// <summary>
-    /// Returns a hash code for this instance.
-    /// </summary>
-    public override readonly int GetHashCode() => HashCode.Combine(X, Y, Z);
 
     /// <summary>
     /// Returns a string representation of the point.

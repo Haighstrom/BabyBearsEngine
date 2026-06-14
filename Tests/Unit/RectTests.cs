@@ -643,6 +643,33 @@ public class RectTests
         Assert.AreNotEqual(a.GetHashCode(), b.GetHashCode());
     }
 
+    [TestMethod]
+    public void Equality_NullLeftOperand_DoesNotThrowAndIsNotEqual()
+    {
+        Rect? a = null;
+        Rect b = new(1f, 2f, 3f, 4f);
+        Assert.IsFalse(a == b);
+        Assert.IsTrue(a != b);
+    }
+
+    [TestMethod]
+    public void Equality_NullRightOperand_IsNotEqual()
+    {
+        Rect a = new(1f, 2f, 3f, 4f);
+        Rect? b = null;
+        Assert.IsFalse(a == b);
+        Assert.IsTrue(a != b);
+    }
+
+    [TestMethod]
+    public void Equality_BothNull_AreEqual()
+    {
+        Rect? a = null;
+        Rect? b = null;
+        Assert.IsTrue(a == b);
+        Assert.IsFalse(a != b);
+    }
+
     // Operators
 
     [TestMethod]

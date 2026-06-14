@@ -7,7 +7,7 @@ namespace BabyBearsEngine.Geometry;
 /// </summary>
 /// <remarks>Initialises a new <see cref="Point4"/> with the given components.</remarks>
 [StructLayout(LayoutKind.Sequential)]
-public struct Point4(float x, float y, float z, float w) : IEquatable<Point4>
+public record struct Point4(float X, float Y, float Z, float W)
 {
     /// <summary>A <see cref="Point4"/> with all components set to zero.</summary>
     public static readonly Point4 Zero = new();
@@ -17,18 +17,6 @@ public struct Point4(float x, float y, float z, float w) : IEquatable<Point4>
     {
         return p1.DotProduct(p2);
     }
-
-    /// <summary>Gets or sets the X component.</summary>
-    public float X { get; set; } = x;
-
-    /// <summary>Gets or sets the Y component.</summary>
-    public float Y { get; set; } = y;
-
-    /// <summary>Gets or sets the Z component.</summary>
-    public float Z { get; set; } = z;
-
-    /// <summary>Gets or sets the W component.</summary>
-    public float W { get; set; } = w;
 
     /// <summary>Gets the Euclidean length (magnitude) of this vector.</summary>
     public readonly float Length => (float)Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
@@ -135,10 +123,6 @@ public struct Point4(float x, float y, float z, float w) : IEquatable<Point4>
     /// <summary>Returns a new array containing the four components in order: [X, Y, Z, W].</summary>
     public readonly float[] ToArray() => [X, Y, Z, W];
 
-    /// <summary>Returns <see langword="true"/> when all four components are equal to those of <paramref name="other"/>.</summary>
-    public readonly bool Equals(Point4 other) => X == other.X && Y == other.Y && Z == other.Z && W == other.W;
-
-
     /// <summary>Component-wise addition.</summary>
     public static Point4 operator +(Point4 p1, Point4 p2) { return new Point4(p1.X + p2.X, p1.Y + p2.Y, p1.Z + p2.Z, p1.W + p2.W); }
 
@@ -153,18 +137,6 @@ public struct Point4(float x, float y, float z, float w) : IEquatable<Point4>
 
     /// <summary>Scalar division.</summary>
     public static Point4 operator /(Point4 p, float f) { return new Point4(p.X / f, p.Y / f, p.Z / f, p.W / f); }
-
-    /// <summary>Returns <see langword="true"/> when all four components of <paramref name="p1"/> equal those of <paramref name="p2"/>.</summary>
-    public static bool operator ==(Point4 p1, Point4 p2) { return p1.X == p2.X && p1.Y == p2.Y && p1.Z == p2.Z && p1.W == p2.W; }
-
-    /// <summary>Returns <see langword="true"/> when any component of <paramref name="p1"/> differs from the corresponding component of <paramref name="p2"/>.</summary>
-    public static bool operator !=(Point4 p1, Point4 p2) { return p1.X != p2.X || p1.Y != p2.Y || p1.Z != p2.Z || p1.W != p2.W; }
-
-    /// <inheritdoc/>
-    public override readonly bool Equals(object? o) => o is Point4 other && Equals(other);
-
-    /// <inheritdoc/>
-    public override readonly int GetHashCode() => base.GetHashCode();
 
     /// <summary>Returns a string representation of this vector in the form <c>(X : x Y : y Z : z W : w)</c>.</summary>
     public override readonly string ToString() => FormattableString.Invariant($"(X : {X} Y : {Y} Z : {Z} W : {W})");
