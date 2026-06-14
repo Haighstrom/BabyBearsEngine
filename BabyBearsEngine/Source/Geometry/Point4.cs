@@ -138,6 +138,6 @@ public record struct Point4(float X, float Y, float Z, float W)
     /// <summary>Scalar division.</summary>
     public static Point4 operator /(Point4 p, float f) { return new Point4(p.X / f, p.Y / f, p.Z / f, p.W / f); }
 
-    /// <summary>Returns a string representation of this vector in the form <c>(X : x Y : y Z : z W : w)</c>.</summary>
-    public override readonly string ToString() => FormattableString.Invariant($"(X : {X} Y : {Y} Z : {Z} W : {W})");
+    /// <summary>Returns a string representation of this vector in the form <c>(X:x,Y:y,Z:z,W:w)</c>.</summary>
+    public override readonly string ToString() => FormattableString.Invariant($"(X:{X},Y:{Y},Z:{Z},W:{W})");
 }

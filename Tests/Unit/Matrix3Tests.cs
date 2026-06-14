@@ -456,4 +456,12 @@ public class Matrix3Tests
 
         Assert.AreEqual(1f, m[0, 0]);
     }
+
+    // ToString
+
+    [TestMethod]
+    public void ToString_ReturnsRowPerLineGrid()
+    {
+        Assert.AreEqual("(1 0 0)\n(0 1 0)\n(0 0 1)\n", Matrix3.Identity.ToString());
+    }
 }

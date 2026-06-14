@@ -380,4 +380,12 @@ public class Matrix2Tests
 
         Assert.ThrowsExactly<ArgumentException>(() => m.WriteTo(tooShort));
     }
+
+    // ToString
+
+    [TestMethod]
+    public void ToString_ReturnsRowPerLineGrid()
+    {
+        Assert.AreEqual("(1 0)\n(0 1)\n", Matrix2.Identity.ToString());
+    }
 }

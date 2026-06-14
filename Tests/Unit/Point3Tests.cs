@@ -283,12 +283,8 @@ public class Point3Tests
     // ToString
 
     [TestMethod]
-    public void ToString_ContainsComponents()
+    public void ToString_ReturnsExpectedFormat()
     {
-        string s = new Point3(1f, 2f, 3f).ToString();
-
-        Assert.IsTrue(s.Contains('1'));
-        Assert.IsTrue(s.Contains('2'));
-        Assert.IsTrue(s.Contains('3'));
+        Assert.AreEqual("(X:1,Y:2,Z:3)", new Point3(1f, 2f, 3f).ToString());
     }
 }

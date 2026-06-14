@@ -142,5 +142,5 @@ public record struct Point3(float X, float Y, float Z)
     /// <summary>
     /// Returns a string representation of the point.
     /// </summary>
-    public override readonly string ToString() => $"(X : {X} Y : {Y} Z : {Z})";
+    public override readonly string ToString() => FormattableString.Invariant($"(X:{X},Y:{Y},Z:{Z})");
 }

@@ -298,4 +298,9 @@ public struct Matrix2
     /// <returns>A new <see cref="Matrix2"/> holding the component-wise difference.</returns>
     public static Matrix2 operator -(Matrix2 left, Matrix2 right) => Subtract(ref left, ref right);
 
+    /// <summary>Returns a human-readable representation of this matrix with one row per line.</summary>
+    public override string ToString()
+    {
+        return FormattableString.Invariant($"({_m0} {_m2})\n({_m1} {_m3})\n");
+    }
 }

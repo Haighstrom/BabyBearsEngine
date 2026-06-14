@@ -519,5 +519,9 @@ public struct Matrix3
     /// <returns>A new Matrix3 which holds the result of the subtraction</returns>
     public static Matrix3 operator -(Matrix3 left, Matrix3 right) => Subtract(ref left, ref right);
 
-
+    /// <summary>Returns a human-readable representation of this matrix with one row per line.</summary>
+    public override string ToString()
+    {
+        return FormattableString.Invariant($"({_m0} {_m3} {_m6})\n({_m1} {_m4} {_m7})\n({_m2} {_m5} {_m8})\n");
+    }
 }

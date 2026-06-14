@@ -608,7 +608,7 @@ public struct Matrix4
     /// <summary>Returns a human-readable representation of this matrix with one row per line.</summary>
     public override string ToString()
     {
-        return $"({_m0} {_m4} {_m8} {_m12})\n({_m1} {_m5} {_m9} {_m13})\n({_m2} {_m6} {_m10} {_m14})\n({_m3} {_m7} {_m11} {_m15})\n";
+        return FormattableString.Invariant($"({_m0} {_m4} {_m8} {_m12})\n({_m1} {_m5} {_m9} {_m13})\n({_m2} {_m6} {_m10} {_m14})\n({_m3} {_m7} {_m11} {_m15})\n");
     }
 
 }

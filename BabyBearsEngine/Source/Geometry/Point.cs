@@ -133,5 +133,5 @@ public record struct Point(float X, float Y) : IPosition
 
     public static Point operator -(Point p) => new(-p.X, -p.Y);
 
-    public override readonly string ToString() => $"(X:{X},Y:{Y})";
+    public override readonly string ToString() => FormattableString.Invariant($"(X:{X},Y:{Y})");
 }
