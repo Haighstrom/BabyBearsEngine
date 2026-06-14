@@ -19,16 +19,16 @@ public struct Point4(float x, float y, float z, float w) : IEquatable<Point4>
     }
 
     /// <summary>Gets or sets the X component.</summary>
-    public float X { readonly get => x; set => x = value; }
+    public float X { get; set; } = x;
 
     /// <summary>Gets or sets the Y component.</summary>
-    public float Y { readonly get => y; set => y = value; }
+    public float Y { get; set; } = y;
 
     /// <summary>Gets or sets the Z component.</summary>
-    public float Z { readonly get => z; set => z = value; }
+    public float Z { get; set; } = z;
 
     /// <summary>Gets or sets the W component.</summary>
-    public float W { readonly get => w; set => w = value; }
+    public float W { get; set; } = w;
 
     /// <summary>Gets the Euclidean length (magnitude) of this vector.</summary>
     public readonly float Length => (float)Math.Sqrt(X * X + Y * Y + Z * Z + W * W);

@@ -38,17 +38,17 @@ public struct Point3(float x, float y, float z) : IEquatable<Point3>
     /// <summary>
     /// The X component of the point.
     /// </summary>
-    public float X { readonly get => x; set => x = value; }
+    public float X { get; set; } = x;
 
     /// <summary>
     /// The Y component of the point.
     /// </summary>
-    public float Y { readonly get => y; set => y = value; }
+    public float Y { get; set; } = y;
 
     /// <summary>
     /// The Z component of the point.
     /// </summary>
-    public float Z { readonly get => z; set => z = value; }
+    public float Z { get; set; } = z;
 
     /// <summary>
     /// The Euclidean length (magnitude) of the vector represented by this point.
