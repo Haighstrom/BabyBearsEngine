@@ -14,30 +14,36 @@ public class Point4Tests
     {
         Point4 p = new(1f, 2f, 3f, 4f);
 
-        Assert.AreEqual(1f, p.x, Delta);
-        Assert.AreEqual(2f, p.y, Delta);
-        Assert.AreEqual(3f, p.z, Delta);
-        Assert.AreEqual(4f, p.w, Delta);
+        Assert.AreEqual(1f, p.X, Delta);
+        Assert.AreEqual(2f, p.Y, Delta);
+        Assert.AreEqual(3f, p.Z, Delta);
+        Assert.AreEqual(4f, p.W, Delta);
     }
 
     [TestMethod]
-    public void IntProperties_TruncateFloat()
+    public void Properties_PreserveFloatPrecision()
     {
         Point4 p = new(1.9f, 2.1f, 3.7f, 4.5f);
 
-        Assert.AreEqual(1, p.X);
-        Assert.AreEqual(2, p.Y);
-        Assert.AreEqual(3, p.Z);
-        Assert.AreEqual(4, p.W);
+        Assert.AreEqual(1.9f, p.X, Delta);
+        Assert.AreEqual(2.1f, p.Y, Delta);
+        Assert.AreEqual(3.7f, p.Z, Delta);
+        Assert.AreEqual(4.5f, p.W, Delta);
     }
 
     [TestMethod]
-    public void IntProperties_SetConvertsToFloat()
+    public void Properties_AreSettable()
     {
         Point4 p = new(0f, 0f, 0f, 0f);
-        p.X = 7;
+        p.X = 7.5f;
+        p.Y = 8.5f;
+        p.Z = 9.5f;
+        p.W = 10.5f;
 
-        Assert.AreEqual(7f, p.x, Delta);
+        Assert.AreEqual(7.5f, p.X, Delta);
+        Assert.AreEqual(8.5f, p.Y, Delta);
+        Assert.AreEqual(9.5f, p.Z, Delta);
+        Assert.AreEqual(10.5f, p.W, Delta);
     }
 
     [TestMethod]
@@ -45,10 +51,10 @@ public class Point4Tests
     {
         Point4 z = Point4.Zero;
 
-        Assert.AreEqual(0f, z.x, Delta);
-        Assert.AreEqual(0f, z.y, Delta);
-        Assert.AreEqual(0f, z.z, Delta);
-        Assert.AreEqual(0f, z.w, Delta);
+        Assert.AreEqual(0f, z.X, Delta);
+        Assert.AreEqual(0f, z.Y, Delta);
+        Assert.AreEqual(0f, z.Z, Delta);
+        Assert.AreEqual(0f, z.W, Delta);
     }
 
     // Length / LengthSquared
@@ -85,10 +91,10 @@ public class Point4Tests
     {
         Point4 n = Point4.Zero.Normal;
 
-        Assert.AreEqual(0f, n.x, Delta);
-        Assert.AreEqual(0f, n.y, Delta);
-        Assert.AreEqual(0f, n.z, Delta);
-        Assert.AreEqual(0f, n.w, Delta);
+        Assert.AreEqual(0f, n.X, Delta);
+        Assert.AreEqual(0f, n.Y, Delta);
+        Assert.AreEqual(0f, n.Z, Delta);
+        Assert.AreEqual(0f, n.W, Delta);
     }
 
     // Normalize
@@ -108,8 +114,8 @@ public class Point4Tests
         Point4 p = Point4.Zero;
         p.Normalize();
 
-        Assert.AreEqual(0f, p.x, Delta);
-        Assert.AreEqual(0f, p.y, Delta);
+        Assert.AreEqual(0f, p.X, Delta);
+        Assert.AreEqual(0f, p.Y, Delta);
     }
 
     // Clamp
@@ -161,9 +167,9 @@ public class Point4Tests
         Point4 p = new(1f, 2f, 3f, 1f);
         Point4 result = p.Transform(identity);
 
-        Assert.AreEqual(1f, result.x, Delta);
-        Assert.AreEqual(2f, result.y, Delta);
-        Assert.AreEqual(3f, result.z, Delta);
+        Assert.AreEqual(1f, result.X, Delta);
+        Assert.AreEqual(2f, result.Y, Delta);
+        Assert.AreEqual(3f, result.Z, Delta);
     }
 
     [TestMethod]
@@ -173,9 +179,9 @@ public class Point4Tests
         Point4 p = new(1f, 2f, 3f, 1f);
         Point4 result = p.Transform(ref identity);
 
-        Assert.AreEqual(1f, result.x, Delta);
-        Assert.AreEqual(2f, result.y, Delta);
-        Assert.AreEqual(3f, result.z, Delta);
+        Assert.AreEqual(1f, result.X, Delta);
+        Assert.AreEqual(2f, result.Y, Delta);
+        Assert.AreEqual(3f, result.Z, Delta);
     }
 
     // ToPoint
@@ -245,10 +251,10 @@ public class Point4Tests
     {
         Point4 result = new Point4(1f, 2f, 3f, 4f) + new Point4(5f, 6f, 7f, 8f);
 
-        Assert.AreEqual(6f, result.x, Delta);
-        Assert.AreEqual(8f, result.y, Delta);
-        Assert.AreEqual(10f, result.z, Delta);
-        Assert.AreEqual(12f, result.w, Delta);
+        Assert.AreEqual(6f, result.X, Delta);
+        Assert.AreEqual(8f, result.Y, Delta);
+        Assert.AreEqual(10f, result.Z, Delta);
+        Assert.AreEqual(12f, result.W, Delta);
     }
 
     [TestMethod]
@@ -256,10 +262,10 @@ public class Point4Tests
     {
         Point4 result = new Point4(5f, 6f, 7f, 8f) - new Point4(1f, 2f, 3f, 4f);
 
-        Assert.AreEqual(4f, result.x, Delta);
-        Assert.AreEqual(4f, result.y, Delta);
-        Assert.AreEqual(4f, result.z, Delta);
-        Assert.AreEqual(4f, result.w, Delta);
+        Assert.AreEqual(4f, result.X, Delta);
+        Assert.AreEqual(4f, result.Y, Delta);
+        Assert.AreEqual(4f, result.Z, Delta);
+        Assert.AreEqual(4f, result.W, Delta);
     }
 
     [TestMethod]
@@ -267,10 +273,10 @@ public class Point4Tests
     {
         Point4 result = new Point4(1f, 2f, 3f, 4f) * 2f;
 
-        Assert.AreEqual(2f, result.x, Delta);
-        Assert.AreEqual(4f, result.y, Delta);
-        Assert.AreEqual(6f, result.z, Delta);
-        Assert.AreEqual(8f, result.w, Delta);
+        Assert.AreEqual(2f, result.X, Delta);
+        Assert.AreEqual(4f, result.Y, Delta);
+        Assert.AreEqual(6f, result.Z, Delta);
+        Assert.AreEqual(8f, result.W, Delta);
     }
 
     [TestMethod]
@@ -278,10 +284,10 @@ public class Point4Tests
     {
         Point4 result = new Point4(4f, 6f, 8f, 10f) / 2f;
 
-        Assert.AreEqual(2f, result.x, Delta);
-        Assert.AreEqual(3f, result.y, Delta);
-        Assert.AreEqual(4f, result.z, Delta);
-        Assert.AreEqual(5f, result.w, Delta);
+        Assert.AreEqual(2f, result.X, Delta);
+        Assert.AreEqual(3f, result.Y, Delta);
+        Assert.AreEqual(4f, result.Z, Delta);
+        Assert.AreEqual(5f, result.W, Delta);
     }
 
     [TestMethod]

@@ -1,13 +1,9 @@
-﻿using System.Runtime.InteropServices;
-using System.Text.Json.Serialization;
-using System.Xml.Serialization;
+using System.Runtime.InteropServices;
 
 namespace BabyBearsEngine.Geometry;
 
 /// <summary>
-/// A four-component vector (x, y, z, w) used for 3D homogeneous coordinates and matrix transformation.
-/// Floating-point components are exposed as lowercase <c>x</c>/<c>y</c>/<c>z</c>/<c>w</c> properties;
-/// integer-truncating aliases are exposed as uppercase <c>X</c>/<c>Y</c>/<c>Z</c>/<c>W</c>.
+/// A four-component vector (X, Y, Z, W) used for 3D homogeneous coordinates and matrix transformation.
 /// </summary>
 /// <remarks>Initialises a new <see cref="Point4"/> with the given components.</remarks>
 [StructLayout(LayoutKind.Sequential)]
@@ -22,63 +18,39 @@ public struct Point4(float x, float y, float z, float w) : IEquatable<Point4>
         return p1.DotProduct(p2);
     }
 
+    /// <summary>Gets or sets the X component.</summary>
+    public float X { readonly get => x; set => x = value; }
 
-    private float _x = x, _y = y, _z = z, _w = w;
+    /// <summary>Gets or sets the Y component.</summary>
+    public float Y { readonly get => y; set => y = value; }
 
+    /// <summary>Gets or sets the Z component.</summary>
+    public float Z { readonly get => z; set => z = value; }
 
-    /// <summary>Gets or sets the X component as a <see langword="float"/>.</summary>
-    public float x { get => _x; set => _x = value; }
-
-    /// <summary>Gets or sets the Y component as a <see langword="float"/>.</summary>
-    public float y { get => _y; set => _y = value; }
-
-    /// <summary>Gets or sets the Z component as a <see langword="float"/>.</summary>
-    public float z { get => _z; set => _z = value; }
-
-    /// <summary>Gets or sets the W component as a <see langword="float"/>.</summary>
-    public float w { get => _w; set => _w = value; }
-
-    /// <summary>Gets or sets the X component as a truncated <see langword="int"/>. Setting converts the integer to <see langword="float"/>.</summary>
-    [JsonIgnore]
-    [XmlIgnore]
-    public int X { get => (int)x; set => x = value; }
-
-    /// <summary>Gets or sets the Y component as a truncated <see langword="int"/>. Setting converts the integer to <see langword="float"/>.</summary>
-    [JsonIgnore]
-    [XmlIgnore]
-    public int Y { get => (int)y; set => y = value; }
-
-    /// <summary>Gets or sets the Z component as a truncated <see langword="int"/>. Setting converts the integer to <see langword="float"/>.</summary>
-    [JsonIgnore]
-    [XmlIgnore]
-    public int Z { get => (int)z; set => z = value; }
-
-    /// <summary>Gets or sets the W component as a truncated <see langword="int"/>. Setting converts the integer to <see langword="float"/>.</summary>
-    [JsonIgnore]
-    [XmlIgnore]
-    public int W { get => (int)w; set => w = value; }
+    /// <summary>Gets or sets the W component.</summary>
+    public float W { readonly get => w; set => w = value; }
 
     /// <summary>Gets the Euclidean length (magnitude) of this vector.</summary>
-    public float Length => (float)Math.Sqrt(x * x + y * y + z * z + w * w);
+    public readonly float Length => (float)Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
 
     /// <summary>Gets the squared Euclidean length of this vector. Cheaper than <see cref="Length"/> when only relative comparisons are needed.</summary>
-    public float LengthSquared => x * x + y * y + z * z + w * w;
+    public readonly float LengthSquared => X * X + Y * Y + Z * Z + W * W;
 
     /// <summary>
     /// Returns a copy this Point, but with magnitude 1. Does not modify this Point.
     /// </summary>
-    public Point4 Normal
+    public readonly Point4 Normal
     {
         get
         {
-            if (x == 0 && y == 0 && z == 0 && w == 0)
+            if (X == 0 && Y == 0 && Z == 0 && W == 0)
             {
                 return new Point4();
             }
 
-            float l = Length;
+            float length = Length;
 
-            return new Point4(x / l, y / l, z / l, w / l);
+            return new Point4(X / length, Y / length, Z / length, W / length);
         }
     }
 
@@ -88,19 +60,19 @@ public struct Point4(float x, float y, float z, float w) : IEquatable<Point4>
     /// </summary>
     public void Normalize()
     {
-        float l = Length;
-        if (l == 0)
+        float length = Length;
+        if (length == 0)
         {
-            x = 0;
-            y = 0;
-            z = 0;
-            w = 0;
+            X = 0;
+            Y = 0;
+            Z = 0;
+            W = 0;
             return;
         }
-        x /= l;
-        y /= l;
-        z /= l;
-        w /= l;
+        X /= length;
+        Y /= length;
+        Z /= length;
+        W /= length;
     }
 
 
@@ -110,14 +82,14 @@ public struct Point4(float x, float y, float z, float w) : IEquatable<Point4>
     /// <param name="maxLength"></param>
     public Point4 Clamp(float maxLength)
     {
-        float l = Length;
+        float length = Length;
 
-        if (l > maxLength)
+        if (length > maxLength)
         {
-            x = x * maxLength / l;
-            y = y * maxLength / l;
-            z = z * maxLength / l;
-            w = w * maxLength / l;
+            X = X * maxLength / length;
+            Y = Y * maxLength / length;
+            Z = Z * maxLength / length;
+            W = W * maxLength / length;
         }
 
         return this;
@@ -127,9 +99,9 @@ public struct Point4(float x, float y, float z, float w) : IEquatable<Point4>
     /// <summary>
     /// Returns dot product (scalar product) with another point
     /// </summary>
-    public float DotProduct(Point4 other)
+    public readonly float DotProduct(Point4 other)
     {
-        return x * other.x + y * other.y + z * other.z + w * other.w;
+        return X * other.X + Y * other.Y + Z * other.Z + W * other.W;
     }
 
 
@@ -138,7 +110,7 @@ public struct Point4(float x, float y, float z, float w) : IEquatable<Point4>
     /// </summary>
     /// <param name="transformMatrix"></param>
     /// <returns></returns>
-    public Point4 Transform(Matrix4 transformMatrix)
+    public readonly Point4 Transform(Matrix4 transformMatrix)
     {
         return Matrix4.Multiply(ref transformMatrix, this);
     }
@@ -155,45 +127,45 @@ public struct Point4(float x, float y, float z, float w) : IEquatable<Point4>
 
 
     /// <summary>Returns a <see cref="Point"/> containing the X and Y components of this vector.</summary>
-    public Point ToPoint() => new Point(x, y);
+    public readonly Point ToPoint() => new(X, Y);
 
     /// <summary>Returns a <see cref="Point3"/> containing the X, Y, and Z components of this vector.</summary>
-    public Point3 ToPoint3() => new Point3(x, y, z);
+    public readonly Point3 ToPoint3() => new(X, Y, Z);
 
-    /// <summary>Returns a new array containing the four components in order: [x, y, z, w].</summary>
-    public float[] ToArray() => [x, y, z, w];
+    /// <summary>Returns a new array containing the four components in order: [X, Y, Z, W].</summary>
+    public readonly float[] ToArray() => [X, Y, Z, W];
 
     /// <summary>Returns <see langword="true"/> when all four components are equal to those of <paramref name="other"/>.</summary>
-    public bool Equals(Point4 other) => x == other.x && y == other.y && z == other.z && w == other.w;
+    public readonly bool Equals(Point4 other) => X == other.X && Y == other.Y && Z == other.Z && W == other.W;
 
 
     /// <summary>Component-wise addition.</summary>
-    public static Point4 operator +(Point4 p1, Point4 p2) { return new Point4(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z, p1.w + p2.w); }
+    public static Point4 operator +(Point4 p1, Point4 p2) { return new Point4(p1.X + p2.X, p1.Y + p2.Y, p1.Z + p2.Z, p1.W + p2.W); }
 
     /// <summary>Component-wise subtraction.</summary>
-    public static Point4 operator -(Point4 p1, Point4 p2) { return new Point4(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z, p1.w - p2.w); }
+    public static Point4 operator -(Point4 p1, Point4 p2) { return new Point4(p1.X - p2.X, p1.Y - p2.Y, p1.Z - p2.Z, p1.W - p2.W); }
 
     /// <summary>Scalar multiplication (scalar on left).</summary>
-    public static Point4 operator *(float f, Point4 p) { return new Point4(p.x * f, p.y * f, p.z * f, p.w * f); }
+    public static Point4 operator *(float f, Point4 p) { return new Point4(p.X * f, p.Y * f, p.Z * f, p.W * f); }
 
     /// <summary>Scalar multiplication (scalar on right).</summary>
-    public static Point4 operator *(Point4 p, float f) { return new Point4(p.x * f, p.y * f, p.z * f, p.w * f); }
+    public static Point4 operator *(Point4 p, float f) { return new Point4(p.X * f, p.Y * f, p.Z * f, p.W * f); }
 
     /// <summary>Scalar division.</summary>
-    public static Point4 operator /(Point4 p, float f) { return new Point4(p.x / f, p.y / f, p.z / f, p.w / f); }
+    public static Point4 operator /(Point4 p, float f) { return new Point4(p.X / f, p.Y / f, p.Z / f, p.W / f); }
 
     /// <summary>Returns <see langword="true"/> when all four components of <paramref name="p1"/> equal those of <paramref name="p2"/>.</summary>
-    public static bool operator ==(Point4 p1, Point4 p2) { return p1.x == p2.x && p1.y == p2.y && p1.z == p2.z && p1.w == p2.w; }
+    public static bool operator ==(Point4 p1, Point4 p2) { return p1.X == p2.X && p1.Y == p2.Y && p1.Z == p2.Z && p1.W == p2.W; }
 
     /// <summary>Returns <see langword="true"/> when any component of <paramref name="p1"/> differs from the corresponding component of <paramref name="p2"/>.</summary>
-    public static bool operator !=(Point4 p1, Point4 p2) { return p1.x != p2.x || p1.y != p2.y || p1.z != p2.z || p1.w != p2.w; }
+    public static bool operator !=(Point4 p1, Point4 p2) { return p1.X != p2.X || p1.Y != p2.Y || p1.Z != p2.Z || p1.W != p2.W; }
 
     /// <inheritdoc/>
-    public override bool Equals(object? o) => o is Point4 other && Equals(other);
+    public override readonly bool Equals(object? o) => o is Point4 other && Equals(other);
 
     /// <inheritdoc/>
     public override readonly int GetHashCode() => base.GetHashCode();
 
     /// <summary>Returns a string representation of this vector in the form <c>(X : x Y : y Z : z W : w)</c>.</summary>
-    public override string ToString() => FormattableString.Invariant($"(X : {x} Y : {y} Z : {z} W : {w})");
+    public override readonly string ToString() => FormattableString.Invariant($"(X : {X} Y : {Y} Z : {Z} W : {W})");
 }

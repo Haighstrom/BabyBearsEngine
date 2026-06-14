@@ -74,9 +74,9 @@ public class Matrix4Tests
         Point4 p = new(3f, 4f, 5f, 1f);
         Point4 result = flip * p;
 
-        Assert.AreEqual(-3f, result.x, Delta);
-        Assert.AreEqual(4f, result.y, Delta);
-        Assert.AreEqual(5f, result.z, Delta);
+        Assert.AreEqual(-3f, result.X, Delta);
+        Assert.AreEqual(4f, result.Y, Delta);
+        Assert.AreEqual(5f, result.Z, Delta);
     }
 
     [TestMethod]
@@ -86,9 +86,9 @@ public class Matrix4Tests
         Point4 p = new(3f, 4f, 5f, 1f);
         Point4 result = flip * p;
 
-        Assert.AreEqual(3f, result.x, Delta);
-        Assert.AreEqual(-4f, result.y, Delta);
-        Assert.AreEqual(5f, result.z, Delta);
+        Assert.AreEqual(3f, result.X, Delta);
+        Assert.AreEqual(-4f, result.Y, Delta);
+        Assert.AreEqual(5f, result.Z, Delta);
     }
 
     [TestMethod]
@@ -98,9 +98,9 @@ public class Matrix4Tests
         Point4 p = new(3f, 4f, 5f, 1f);
         Point4 result = flip * p;
 
-        Assert.AreEqual(3f, result.x, Delta);
-        Assert.AreEqual(4f, result.y, Delta);
-        Assert.AreEqual(-5f, result.z, Delta);
+        Assert.AreEqual(3f, result.X, Delta);
+        Assert.AreEqual(4f, result.Y, Delta);
+        Assert.AreEqual(-5f, result.Z, Delta);
     }
 
     // Copy constructor — no aliasing
@@ -124,9 +124,9 @@ public class Matrix4Tests
         Point4 p = new(0f, 0f, 0f, 1f);
         Point4 result = t * p;
 
-        Assert.AreEqual(3f, result.x, Delta);
-        Assert.AreEqual(5f, result.y, Delta);
-        Assert.AreEqual(7f, result.z, Delta);
+        Assert.AreEqual(3f, result.X, Delta);
+        Assert.AreEqual(5f, result.Y, Delta);
+        Assert.AreEqual(7f, result.Z, Delta);
     }
 
     [TestMethod]
@@ -160,9 +160,9 @@ public class Matrix4Tests
         Point4 p = new(1f, 0f, 0f, 1f);
         Point4 result = m * p;
 
-        Assert.AreEqual(0f, result.x, Delta);
-        Assert.AreEqual(1f, result.y, Delta);
-        Assert.AreEqual(0f, result.z, Delta);
+        Assert.AreEqual(0f, result.X, Delta);
+        Assert.AreEqual(1f, result.Y, Delta);
+        Assert.AreEqual(0f, result.Z, Delta);
     }
 
     // CreateScale
@@ -252,10 +252,10 @@ public class Matrix4Tests
         Point4 p = new(3f, 5f, 7f, 1f);
         Point4 result = m * p;
 
-        Assert.AreEqual(3f, result.x, Delta);
-        Assert.AreEqual(5f, result.y, Delta);
-        Assert.AreEqual(7f, result.z, Delta);
-        Assert.AreEqual(1f, result.w, Delta);
+        Assert.AreEqual(3f, result.X, Delta);
+        Assert.AreEqual(5f, result.Y, Delta);
+        Assert.AreEqual(7f, result.Z, Delta);
+        Assert.AreEqual(1f, result.W, Delta);
     }
 
     // Translate
@@ -268,9 +268,9 @@ public class Matrix4Tests
         Point4 p = new(0f, 0f, 0f, 1f);
         Point4 result = m * p;
 
-        Assert.AreEqual(5f, result.x, Delta);
-        Assert.AreEqual(3f, result.y, Delta);
-        Assert.AreEqual(1f, result.z, Delta);
+        Assert.AreEqual(5f, result.X, Delta);
+        Assert.AreEqual(3f, result.Y, Delta);
+        Assert.AreEqual(1f, result.Z, Delta);
     }
 
     // RotateAroundZ
@@ -283,8 +283,8 @@ public class Matrix4Tests
         Point4 p = new(1f, 0f, 0f, 1f);
         Point4 result = m * p;
 
-        Assert.AreEqual(0f, result.x, Delta);
-        Assert.AreEqual(1f, result.y, Delta);
+        Assert.AreEqual(0f, result.X, Delta);
+        Assert.AreEqual(1f, result.Y, Delta);
     }
 
     // ScaleAroundPoint
@@ -297,7 +297,7 @@ public class Matrix4Tests
         Point4 p = new(10f, 20f, 5f, 1f);
         Point4 result = m * p;
 
-        Assert.AreEqual(5f, result.z, Delta);
+        Assert.AreEqual(5f, result.Z, Delta);
     }
 
     [TestMethod]
@@ -311,10 +311,10 @@ public class Matrix4Tests
         Point4 centreResult = m * centre;
         Point4 offsetResult = m * offset;
 
-        Assert.AreEqual(10f, centreResult.x, Delta);
-        Assert.AreEqual(20f, centreResult.y, Delta);
-        Assert.AreEqual(12f, offsetResult.x, Delta);
-        Assert.AreEqual(23f, offsetResult.y, Delta);
+        Assert.AreEqual(10f, centreResult.X, Delta);
+        Assert.AreEqual(20f, centreResult.Y, Delta);
+        Assert.AreEqual(12f, offsetResult.X, Delta);
+        Assert.AreEqual(23f, offsetResult.Y, Delta);
     }
 
     // FlipX / FlipY / FlipZ methods
@@ -327,8 +327,8 @@ public class Matrix4Tests
         Point4 p = new(3f, 4f, 5f, 1f);
         Point4 result = m * p;
 
-        Assert.AreEqual(-3f, result.x, Delta);
-        Assert.AreEqual(4f, result.y, Delta);
+        Assert.AreEqual(-3f, result.X, Delta);
+        Assert.AreEqual(4f, result.Y, Delta);
     }
 
     [TestMethod]
@@ -339,8 +339,8 @@ public class Matrix4Tests
         Point4 p = new(3f, 4f, 5f, 1f);
         Point4 result = m * p;
 
-        Assert.AreEqual(3f, result.x, Delta);
-        Assert.AreEqual(-4f, result.y, Delta);
+        Assert.AreEqual(3f, result.X, Delta);
+        Assert.AreEqual(-4f, result.Y, Delta);
     }
 
     [TestMethod]
@@ -351,9 +351,9 @@ public class Matrix4Tests
         Point4 p = new(3f, 4f, 5f, 1f);
         Point4 result = m * p;
 
-        Assert.AreEqual(3f, result.x, Delta);
-        Assert.AreEqual(4f, result.y, Delta);
-        Assert.AreEqual(-5f, result.z, Delta);
+        Assert.AreEqual(3f, result.X, Delta);
+        Assert.AreEqual(4f, result.Y, Delta);
+        Assert.AreEqual(-5f, result.Z, Delta);
     }
 
     // Transpose

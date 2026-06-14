@@ -175,10 +175,10 @@ public class Point3Tests
         Point3 p = new(1f, 2f, 3f);
         var result = p.ToPoint4();
 
-        Assert.AreEqual(1f, result.x, Delta);
-        Assert.AreEqual(2f, result.y, Delta);
-        Assert.AreEqual(3f, result.z, Delta);
-        Assert.AreEqual(1f, result.w, Delta);
+        Assert.AreEqual(1f, result.X, Delta);
+        Assert.AreEqual(2f, result.Y, Delta);
+        Assert.AreEqual(3f, result.Z, Delta);
+        Assert.AreEqual(1f, result.W, Delta);
     }
 
     // ToArray

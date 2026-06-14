@@ -139,10 +139,10 @@ public struct Matrix4
     {
         return new Point4
             (
-                mat._m0 * p.x + mat._m4 * p.y + mat._m8  * p.z + mat._m12 * p.w,
-                mat._m1 * p.x + mat._m5 * p.y + mat._m9  * p.z + mat._m13 * p.w,
-                mat._m2 * p.x + mat._m6 * p.y + mat._m10 * p.z + mat._m14 * p.w,
-                mat._m3 * p.x + mat._m7 * p.y + mat._m11 * p.z + mat._m15 * p.w
+                mat._m0 * p.X + mat._m4 * p.Y + mat._m8  * p.Z + mat._m12 * p.W,
+                mat._m1 * p.X + mat._m5 * p.Y + mat._m9  * p.Z + mat._m13 * p.W,
+                mat._m2 * p.X + mat._m6 * p.Y + mat._m10 * p.Z + mat._m14 * p.W,
+                mat._m3 * p.X + mat._m7 * p.Y + mat._m11 * p.Z + mat._m15 * p.W
             );
     }
 
