@@ -110,4 +110,24 @@ public class CheckboxTests
         cb.FireLeftClicked();
         cb.FireLeftClicked();
     }
+
+    // Label
+    // The real-theme label path builds a TextGraphic, which needs GL + a font atlas and so cannot
+    // run headless. These cover the GL-free behaviour of the Label API on the no-theme checkbox.
+
+    [TestMethod]
+    public void Label_Default_IsEmpty()
+    {
+        TestCheckbox cb = new();
+
+        Assert.AreEqual(string.Empty, cb.Label);
+    }
+
+    [TestMethod]
+    public void Label_SetWithoutTheme_Throws()
+    {
+        TestCheckbox cb = new();
+
+        Assert.ThrowsExactly<InvalidOperationException>(() => cb.Label = "Enable sound");
+    }
 }

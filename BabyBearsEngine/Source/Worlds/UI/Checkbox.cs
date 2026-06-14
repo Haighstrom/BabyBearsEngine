@@ -1,5 +1,6 @@
 ﻿using BabyBearsEngine.Geometry;
 using BabyBearsEngine.Worlds.Graphics;
+using BabyBearsEngine.Worlds.Graphics.Text;
 using BabyBearsEngine.Worlds.UI.Themes;
 
 namespace BabyBearsEngine.Worlds.UI;
@@ -12,7 +13,13 @@ namespace BabyBearsEngine.Worlds.UI;
 /// </summary>
 public class Checkbox : Button
 {
+    // Gap in pixels between the right edge of the box and the start of the label text.
+    private const float LabelGap = 5f;
+
     private readonly IGraphic? _tick;
+    // Null for the internal no-theme constructor — Label cannot be set in that case.
+    private readonly TextTheme? _labelTextTheme;
+    private TextGraphic? _label = null;
     private bool _isChecked = false;
 
     /// <param name="x">X position relative to the parent container.</param>
@@ -21,21 +28,26 @@ public class Checkbox : Button
     /// <param name="height">Height in pixels.</param>
     /// <param name="theme">Visual styling for the checkbox.</param>
     /// <param name="isChecked">Initial check state. Defaults to <c>false</c>.</param>
-    public Checkbox(float x, float y, float width, float height, CheckboxTheme theme, bool isChecked = false)
+    /// <param name="label">Optional text shown to the right of the box; can also be changed at runtime via <see cref="Label"/>. Defaults to empty.</param>
+    public Checkbox(float x, float y, float width, float height, CheckboxTheme theme, bool isChecked = false, string label = "")
         : base(x, y, width, height, theme.Box)
     {
         _isChecked = isChecked;
+        _labelTextTheme = theme.Box.Text;
 
         _tick = theme.TickFactory(new Rect(0, 0, width, height));
         _tick.Visible = isChecked;
         Add(_tick);
+
+        Label = label;
     }
 
     /// <param name="rect">Position and size relative to the parent container.</param>
     /// <param name="theme">Visual styling for the checkbox.</param>
     /// <param name="isChecked">Initial check state. Defaults to <c>false</c>.</param>
-    public Checkbox(Rect rect, CheckboxTheme theme, bool isChecked = false)
-        : this(rect.X, rect.Y, rect.W, rect.H, theme, isChecked)
+    /// <param name="label">Optional text shown to the right of the box; can also be changed at runtime via <see cref="Label"/>. Defaults to empty.</param>
+    public Checkbox(Rect rect, CheckboxTheme theme, bool isChecked = false, string label = "")
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, isChecked, label)
     {
     }
 
@@ -69,6 +81,44 @@ public class Checkbox : Button
                 OnUnchecked();
                 Unchecked?.Invoke(this, EventArgs.Empty);
             }
+        }
+    }
+
+    /// <summary>
+    /// Optional text shown immediately to the right of the box, vertically centred against it and
+    /// styled from the checkbox theme's box text. Setting an empty string hides the label.
+    /// Throws if the checkbox was created via the internal no-theme constructor.
+    /// </summary>
+    public string Label
+    {
+        get => _label?.Text ?? string.Empty;
+        set
+        {
+            if (_labelTextTheme is null)
+            {
+                throw new InvalidOperationException("This Checkbox has no text theme (it was created via the internal no-theme constructor); Label cannot be set.");
+            }
+
+            if (_label is null)
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    return;
+                }
+
+                _label = new TextGraphic(_labelTextTheme, value, Width + LabelGap, 0, 0, Height)
+                {
+                    HAlignment = HAlignment.Left,
+                    VAlignment = VAlignment.Centred,
+                };
+                Add(_label);
+            }
+            else
+            {
+                _label.Text = value;
+            }
+
+            _label.Width = _label.MeasureString().X;
         }
     }
 
