@@ -210,10 +210,10 @@ public class Matrix2Tests
     // Inverse
 
     [TestMethod]
-    public void Inverse_MultiplyByOriginal_GivesIdentity()
+    public void Invert_MultiplyByOriginal_GivesIdentity()
     {
         Matrix2 m = new(1, 2, 3, 4);
-        var inv = Matrix2.Inverse(ref m);
+        Matrix2 inv = Matrix2.Invert(ref m);
         Matrix2 product = m * inv;
 
         Assert.AreEqual(1f, product[0, 0], Delta);
@@ -223,13 +223,45 @@ public class Matrix2Tests
     }
 
     [TestMethod]
-    public void Inverse_SingularMatrix_ReturnsSelf()
+    public void Invert_SingularMatrix_Throws()
     {
         Matrix2 singular = new(1, 2, 2, 4);
-        var result = Matrix2.Inverse(ref singular);
 
-        Assert.AreEqual(singular[0, 0], result[0, 0], Delta);
-        Assert.AreEqual(singular[1, 1], result[1, 1], Delta);
+        Assert.ThrowsExactly<InvalidOperationException>(() => Matrix2.Invert(singular));
+    }
+
+    [TestMethod]
+    public void TryInvert_SingularMatrix_ReturnsFalse()
+    {
+        Matrix2 singular = new(1, 2, 2, 4);
+
+        Assert.IsFalse(Matrix2.TryInvert(singular, out _));
+    }
+
+    [TestMethod]
+    public void TryInvert_InvertibleMatrix_ReturnsTrueWithInverse()
+    {
+        Matrix2 m = new(1, 2, 3, 4);
+
+        Assert.IsTrue(Matrix2.TryInvert(m, out Matrix2 inv));
+
+        Matrix2 product = m * inv;
+        Assert.AreEqual(1f, product[0, 0], Delta);
+        Assert.AreEqual(0f, product[0, 1], Delta);
+        Assert.AreEqual(0f, product[1, 0], Delta);
+        Assert.AreEqual(1f, product[1, 1], Delta);
+    }
+
+    [TestMethod]
+    public void Inverse_Instance_MultiplyByOriginal_GivesIdentity()
+    {
+        Matrix2 m = new(1, 2, 3, 4);
+        Matrix2 product = m * m.Inverse();
+
+        Assert.AreEqual(1f, product[0, 0], Delta);
+        Assert.AreEqual(0f, product[0, 1], Delta);
+        Assert.AreEqual(0f, product[1, 0], Delta);
+        Assert.AreEqual(1f, product[1, 1], Delta);
     }
 
     // Indexer

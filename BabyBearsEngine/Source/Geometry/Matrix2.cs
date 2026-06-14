@@ -95,27 +95,53 @@ public struct Matrix2
         return Multiply(ref mat, ref scaleMat);
     }
 
-    /// <summary>
-    /// Returns the inverse of <paramref name="mat"/>. If the matrix is singular (determinant is zero), returns <paramref name="mat"/> unchanged.
-    /// </summary>
-    public static Matrix2 Inverse(ref Matrix2 mat)
+    /// <summary>Returns the inverse of <paramref name="mat"/>.</summary>
+    /// <exception cref="InvalidOperationException">Thrown when the matrix is singular (determinant is zero) and has no inverse.</exception>
+    public static Matrix2 Invert(Matrix2 mat) => Invert(ref mat);
+
+    /// <summary>Returns the inverse of <paramref name="mat"/>. Pass-by-reference variant for performance.</summary>
+    /// <exception cref="InvalidOperationException">Thrown when the matrix is singular (determinant is zero) and has no inverse.</exception>
+    public static Matrix2 Invert(ref Matrix2 mat)
+    {
+        if (!TryInvert(ref mat, out Matrix2 result))
+        {
+            throw new InvalidOperationException("Matrix is singular and cannot be inverted.");
+        }
+
+        return result;
+    }
+
+    /// <summary>Attempts to invert <paramref name="mat"/>, returning <see langword="false"/> instead of throwing when it is singular.</summary>
+    /// <param name="mat">The matrix to invert.</param>
+    /// <param name="result">The inverse if this returns <see langword="true"/>; otherwise the zero matrix.</param>
+    /// <returns><see langword="true"/> if <paramref name="mat"/> was inverted; <see langword="false"/> if it is singular.</returns>
+    public static bool TryInvert(Matrix2 mat, out Matrix2 result) => TryInvert(ref mat, out result);
+
+    /// <summary>Attempts to invert <paramref name="mat"/>, returning <see langword="false"/> instead of throwing when it is singular. Pass-by-reference variant for performance.</summary>
+    /// <param name="mat">The matrix to invert.</param>
+    /// <param name="result">The inverse if this returns <see langword="true"/>; otherwise the zero matrix.</param>
+    /// <returns><see langword="true"/> if <paramref name="mat"/> was inverted; <see langword="false"/> if it is singular.</returns>
+    public static bool TryInvert(ref Matrix2 mat, out Matrix2 result)
     {
         float det = mat.Determinant;
 
         if (det == 0)
         {
-            return mat;
+            result = default;
+            return false;
         }
 
         float invDet = 1 / det;
 
-        return new Matrix2
+        result = new Matrix2
             (
                 mat._m3 * invDet,
                 -mat._m1 * invDet,
                 -mat._m2 * invDet,
                 mat._m0 * invDet
             );
+
+        return true;
     }
 
 
@@ -224,6 +250,10 @@ public struct Matrix2
 
     /// <summary>Gets the determinant of this matrix.</summary>
     public float Determinant => _m0 * _m3 - _m1 * _m2;
+
+    /// <summary>Returns the inverse of this matrix.</summary>
+    /// <exception cref="InvalidOperationException">Thrown when the matrix is singular (determinant is zero) and has no inverse.</exception>
+    public Matrix2 Inverse() => Invert(this);
 
     /// <summary>Returns the transpose of this matrix — elements mirrored across the main diagonal. Does not modify this instance.</summary>
     public Matrix2 Transpose()

@@ -389,7 +389,28 @@ public class Matrix4Tests
     {
         Matrix4 singular = Matrix4.Zero;
 
-        Assert.ThrowsExactly<Exception>(() => Matrix4.Invert(singular));
+        Assert.ThrowsExactly<InvalidOperationException>(() => Matrix4.Invert(singular));
+    }
+
+    [TestMethod]
+    public void TryInvert_SingularMatrix_ReturnsFalse()
+    {
+        Matrix4 singular = Matrix4.Zero;
+
+        Assert.IsFalse(Matrix4.TryInvert(singular, out _));
+    }
+
+    [TestMethod]
+    public void TryInvert_InvertibleMatrix_ReturnsTrueWithInverse()
+    {
+        var m = Matrix4.CreateScale(2f, 3f, 4f);
+
+        Assert.IsTrue(Matrix4.TryInvert(m, out Matrix4 inv));
+
+        Matrix4 product = m * inv;
+        Assert.AreEqual(1f, product[0, 0], Delta);
+        Assert.AreEqual(1f, product[1, 1], Delta);
+        Assert.AreEqual(1f, product[2, 2], Delta);
     }
 
     // Determinant

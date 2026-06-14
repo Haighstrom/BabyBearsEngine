@@ -232,13 +232,33 @@ public struct Matrix4
         return Multiply(ref mat, ref flip);
     }
 
-    /// <summary>
-    /// Returns the inverse of <paramref name="mat"/> using Gauss-Jordan elimination.
-    /// If the matrix is singular, returns <paramref name="mat"/> unchanged where singular detection succeeds,
-    /// or throws if a zero pivot is encountered.
-    /// </summary>
-    /// <exception cref="Exception">Thrown when the matrix is singular and cannot be inverted.</exception>
-    public static Matrix4 Invert(Matrix4 mat)
+    /// <summary>Returns the inverse of <paramref name="mat"/> using Gauss-Jordan elimination.</summary>
+    /// <exception cref="InvalidOperationException">Thrown when the matrix is singular and cannot be inverted.</exception>
+    public static Matrix4 Invert(Matrix4 mat) => Invert(ref mat);
+
+    /// <summary>Returns the inverse of <paramref name="mat"/> using Gauss-Jordan elimination. Pass-by-reference variant for performance.</summary>
+    /// <exception cref="InvalidOperationException">Thrown when the matrix is singular and cannot be inverted.</exception>
+    public static Matrix4 Invert(ref Matrix4 mat)
+    {
+        if (!TryInvert(ref mat, out Matrix4 result))
+        {
+            throw new InvalidOperationException("Matrix is singular and cannot be inverted.");
+        }
+
+        return result;
+    }
+
+    /// <summary>Attempts to invert <paramref name="mat"/>, returning <see langword="false"/> instead of throwing when it is singular.</summary>
+    /// <param name="mat">The matrix to invert.</param>
+    /// <param name="result">The inverse if this returns <see langword="true"/>; otherwise the zero matrix.</param>
+    /// <returns><see langword="true"/> if <paramref name="mat"/> was inverted; <see langword="false"/> if it is singular.</returns>
+    public static bool TryInvert(Matrix4 mat, out Matrix4 result) => TryInvert(ref mat, out result);
+
+    /// <summary>Attempts to invert <paramref name="mat"/> using Gauss-Jordan elimination, returning <see langword="false"/> instead of throwing when it is singular. Pass-by-reference variant for performance.</summary>
+    /// <param name="mat">The matrix to invert.</param>
+    /// <param name="result">The inverse if this returns <see langword="true"/>; otherwise the zero matrix.</param>
+    /// <returns><see langword="true"/> if <paramref name="mat"/> was inverted; <see langword="false"/> if it is singular.</returns>
+    public static bool TryInvert(ref Matrix4 mat, out Matrix4 result)
     {
         int[] colIdx = { 0, 0, 0, 0 };
         int[] rowIdx = { 0, 0, 0, 0 };
@@ -273,7 +293,8 @@ public struct Matrix4
                         }
                         else if (pivotIdx[k] > 0)
                         {
-                            return mat;
+                            result = default;
+                            return false;
                         }
                     }
                 }
@@ -299,7 +320,8 @@ public struct Matrix4
             // check for singular matrix
             if (pivot == 0.0f)
             {
-                throw new Exception("Matrix is singular and cannot be inverted.");
+                result = default;
+                return false;
             }
 
             // Scale row so it has a unit diagonal
@@ -338,7 +360,7 @@ public struct Matrix4
             }
         }
 
-        return new Matrix4(
+        result = new Matrix4(
                             inverse[0, 0],
                             inverse[1, 0],
                             inverse[2, 0],
@@ -356,6 +378,8 @@ public struct Matrix4
                             inverse[2, 3],
                             inverse[3, 3]
                            );
+
+        return true;
     }
 
 
@@ -530,7 +554,7 @@ public struct Matrix4
     }
 
     /// <summary>Returns the inverse of this matrix. Singular matrices throw an exception.</summary>
-    /// <exception cref="Exception">Thrown when the matrix is singular and cannot be inverted.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the matrix is singular and cannot be inverted.</exception>
     public Matrix4 Inverse()
     {
         return Invert(this);

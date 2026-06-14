@@ -203,6 +203,26 @@ public struct Matrix3
     /// <exception cref="InvalidOperationException">Thrown when the matrix is singular (has no inverse).</exception>
     public static Matrix3 Invert(ref Matrix3 mat)
     {
+        if (!TryInvert(ref mat, out Matrix3 result))
+        {
+            throw new InvalidOperationException("Matrix is singular and cannot be inverted.");
+        }
+
+        return result;
+    }
+
+    /// <summary>Attempts to invert <paramref name="mat"/>, returning <see langword="false"/> instead of throwing when it is singular.</summary>
+    /// <param name="mat">The matrix to invert.</param>
+    /// <param name="result">The inverse if this returns <see langword="true"/>; otherwise the zero matrix.</param>
+    /// <returns><see langword="true"/> if <paramref name="mat"/> was inverted; <see langword="false"/> if it is singular.</returns>
+    public static bool TryInvert(Matrix3 mat, out Matrix3 result) => TryInvert(ref mat, out result);
+
+    /// <summary>Attempts to invert <paramref name="mat"/>, returning <see langword="false"/> instead of throwing when it is singular. Pass-by-reference variant for performance.</summary>
+    /// <param name="mat">The matrix to invert.</param>
+    /// <param name="result">The inverse if this returns <see langword="true"/>; otherwise the zero matrix.</param>
+    /// <returns><see langword="true"/> if <paramref name="mat"/> was inverted; <see langword="false"/> if it is singular.</returns>
+    public static bool TryInvert(ref Matrix3 mat, out Matrix3 result)
+    {
         int[] colIdx = { 0, 0, 0 };
         int[] rowIdx = { 0, 0, 0 };
         int[] pivotIdx = { -1, -1, -1 };
@@ -234,7 +254,8 @@ public struct Matrix3
                         }
                         else if (pivotIdx[k] > 0)
                         {
-                            return mat;
+                            result = default;
+                            return false;
                         }
                     }
                 }
@@ -259,7 +280,8 @@ public struct Matrix3
 
             if (pivot == 0.0f)
             {
-                throw new InvalidOperationException("Matrix is singular and cannot be inverted.");
+                result = default;
+                return false;
             }
 
             float oneOverPivot = 1.0f / pivot;
@@ -295,7 +317,7 @@ public struct Matrix3
             }
         }
 
-        return new Matrix3
+        result = new Matrix3
             (
                 inverse[0, 0],
                 inverse[1, 0],
@@ -307,6 +329,8 @@ public struct Matrix3
                 inverse[1, 2],
                 inverse[2, 2]
             );
+
+        return true;
     }
 
     private float _m0 = 0f;

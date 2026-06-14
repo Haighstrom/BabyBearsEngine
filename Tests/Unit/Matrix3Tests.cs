@@ -311,6 +311,31 @@ public class Matrix3Tests
     }
 
     [TestMethod]
+    public void Invert_SingularMatrix_Throws()
+    {
+        Matrix3 singular = Matrix3.Zero;
+
+        Assert.ThrowsExactly<InvalidOperationException>(() => Matrix3.Invert(singular));
+    }
+
+    [TestMethod]
+    public void TryInvert_SingularMatrix_ReturnsFalse()
+    {
+        Matrix3 singular = Matrix3.Zero;
+
+        Assert.IsFalse(Matrix3.TryInvert(singular, out _));
+    }
+
+    [TestMethod]
+    public void TryInvert_InvertibleMatrix_ReturnsTrueWithInverse()
+    {
+        var m = new Matrix3(2, 0, 0, 0, 3, 0, 1, 1, 1);
+
+        Assert.IsTrue(Matrix3.TryInvert(m, out Matrix3 inv));
+        AssertMatricesEqual(Matrix3.Invert(m), inv);
+    }
+
+    [TestMethod]
     public void Transpose_MirrorsAcrossDiagonal()
     {
         var m = new Matrix3(0, 1, 2, 3, 4, 5, 6, 7, 8);
