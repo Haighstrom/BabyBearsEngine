@@ -7,7 +7,10 @@ namespace BabyBearsEngine.AudioSystem;
 /// </summary>
 public interface IPlaylist
 {
-    /// <summary>The tracks currently in the playlist, in playback order.</summary>
+    /// <summary>
+    /// The tracks currently in the playlist, in the order they were supplied to <see cref="SetTracks(IReadOnlyList{IMusicClip})"/>.
+    /// This order is stable: <see cref="Shuffle"/> changes the playback sequence internally but never reorders this list.
+    /// </summary>
     IReadOnlyList<IMusicClip> Tracks { get; }
 
     /// <summary>

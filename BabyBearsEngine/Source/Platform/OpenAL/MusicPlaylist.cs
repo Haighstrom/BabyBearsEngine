@@ -19,7 +19,13 @@ internal sealed class MusicPlaylist : IPlaylist
     private readonly Action _stopMusic;
 
     private List<IMusicClip> _tracks = [];
-    private int _currentIndex = -1;
+    // Playback order expressed as indices into _tracks: identity ([0,1,2,...]) when not shuffling,
+    // a shuffled permutation otherwise. Holding the shuffle here rather than reordering _tracks is
+    // what lets Tracks always report the stable order the caller supplied, even mid-playthrough.
+    private readonly List<int> _playOrder = [];
+    // Playback head as a position WITHIN _playOrder, not a direct index into _tracks. -1 before
+    // anything has played. The public CurrentIndex maps this back to a _tracks index via _playOrder.
+    private int _position = -1;
     // True while a track is actively playing — set when StartTrack fires, cleared when the
     // service tells us via NotifyStopped. Without this, the playlist's "previous track"
     // calculation for TrackChanged keeps returning the now-stopped clip after the user calls
@@ -57,7 +63,7 @@ internal sealed class MusicPlaylist : IPlaylist
         {
             lock (_lock)
             {
-                return _currentIndex;
+                return CurrentMasterIndexUnlocked();
             }
         }
     }
@@ -68,7 +74,7 @@ internal sealed class MusicPlaylist : IPlaylist
         {
             lock (_lock)
             {
-                return _currentIndex >= 0 && _currentIndex < _tracks.Count ? _tracks[_currentIndex] : null;
+                return CurrentTrackUnlocked();
             }
         }
     }
@@ -117,7 +123,8 @@ internal sealed class MusicPlaylist : IPlaylist
         lock (_lock)
         {
             _tracks = [.. tracks];
-            _currentIndex = -1;
+            ResetPlayOrderUnlocked();
+            _position = -1;
         }
     }
 
@@ -128,7 +135,8 @@ internal sealed class MusicPlaylist : IPlaylist
         lock (_lock)
         {
             _tracks.Clear();
-            _currentIndex = -1;
+            _playOrder.Clear();
+            _position = -1;
             _isPlaying = false;
         }
         _stopMusic();
@@ -147,12 +155,12 @@ internal sealed class MusicPlaylist : IPlaylist
 
             if (_shuffle)
             {
-                ShuffleTracks();
+                ShufflePlayOrder();
             }
 
             previous = PreviousForChangeEventUnlocked();
-            _currentIndex = 0;
-            toPlay = _tracks[_currentIndex];
+            _position = 0;
+            toPlay = _tracks[_playOrder[_position]];
         }
         StartTrack(toPlay, previous);
     }
@@ -169,9 +177,9 @@ internal sealed class MusicPlaylist : IPlaylist
             }
 
             previous = PreviousForChangeEventUnlocked();
-            int wrapped = ((index % _tracks.Count) + _tracks.Count) % _tracks.Count;
-            _currentIndex = wrapped;
-            toPlay = _tracks[_currentIndex];
+            int masterIndex = ((index % _tracks.Count) + _tracks.Count) % _tracks.Count;
+            _position = _playOrder.IndexOf(masterIndex);
+            toPlay = _tracks[masterIndex];
         }
         StartTrack(toPlay, previous);
     }
@@ -183,24 +191,24 @@ internal sealed class MusicPlaylist : IPlaylist
         IMusicClip? previous;
         lock (_lock)
         {
-            int index = -1;
+            int masterIndex = -1;
             for (int i = 0; i < _tracks.Count; i++)
             {
                 if (string.Equals(_tracks[i].TrackName, trackName, StringComparison.OrdinalIgnoreCase))
                 {
-                    index = i;
+                    masterIndex = i;
                     break;
                 }
             }
 
-            if (index < 0)
+            if (masterIndex < 0)
             {
                 throw new KeyNotFoundException($"No track named '{trackName}' in the playlist.");
             }
 
             previous = PreviousForChangeEventUnlocked();
-            _currentIndex = index;
-            toPlay = _tracks[_currentIndex];
+            _position = _playOrder.IndexOf(masterIndex);
+            toPlay = _tracks[masterIndex];
         }
         StartTrack(toPlay, previous);
     }
@@ -212,15 +220,15 @@ internal sealed class MusicPlaylist : IPlaylist
         IMusicClip? previous;
         lock (_lock)
         {
-            int index = _tracks.IndexOf(clip);
-            if (index < 0)
+            int masterIndex = _tracks.IndexOf(clip);
+            if (masterIndex < 0)
             {
                 throw new ArgumentException("Clip is not present in the playlist; add it via SetTracks first.", nameof(clip));
             }
 
             previous = PreviousForChangeEventUnlocked();
-            _currentIndex = index;
-            toPlay = _tracks[_currentIndex];
+            _position = _playOrder.IndexOf(masterIndex);
+            toPlay = _tracks[masterIndex];
         }
         StartTrack(toPlay, previous);
     }
@@ -237,8 +245,8 @@ internal sealed class MusicPlaylist : IPlaylist
             }
 
             previous = PreviousForChangeEventUnlocked();
-            _currentIndex = _currentIndex < 0 ? 0 : (_currentIndex + 1) % _tracks.Count;
-            toPlay = _tracks[_currentIndex];
+            _position = _position < 0 ? 0 : (_position + 1) % _tracks.Count;
+            toPlay = _tracks[_playOrder[_position]];
         }
         StartTrack(toPlay, previous);
     }
@@ -255,8 +263,8 @@ internal sealed class MusicPlaylist : IPlaylist
             }
 
             previous = PreviousForChangeEventUnlocked();
-            _currentIndex = _currentIndex <= 0 ? _tracks.Count - 1 : _currentIndex - 1;
-            toPlay = _tracks[_currentIndex];
+            _position = _position <= 0 ? _tracks.Count - 1 : _position - 1;
+            toPlay = _tracks[_playOrder[_position]];
         }
         StartTrack(toPlay, previous);
     }
@@ -278,12 +286,12 @@ internal sealed class MusicPlaylist : IPlaylist
             }
 
             previous = PreviousForChangeEventUnlocked();
-            int nextIndex = _currentIndex + 1;
-            if (nextIndex >= _tracks.Count)
+            int nextPosition = _position + 1;
+            if (nextPosition >= _tracks.Count)
             {
                 if (!_loop)
                 {
-                    _currentIndex = -1;
+                    _position = -1;
                     _isPlaying = false;
                     shouldStop = true;
                 }
@@ -295,20 +303,20 @@ internal sealed class MusicPlaylist : IPlaylist
                         // track that just ended, reshuffle again so listeners don't hear it twice in
                         // a row. With Count > 1 we're guaranteed a shuffle exists that doesn't lead
                         // with `previous`.
-                        ShuffleTracks();
-                        while (_tracks.Count > 1 && previous is not null && ReferenceEquals(_tracks[0], previous))
+                        ShufflePlayOrder();
+                        while (_tracks.Count > 1 && previous is not null && ReferenceEquals(_tracks[_playOrder[0]], previous))
                         {
-                            ShuffleTracks();
+                            ShufflePlayOrder();
                         }
                     }
-                    _currentIndex = 0;
-                    toPlay = _tracks[_currentIndex];
+                    _position = 0;
+                    toPlay = _tracks[_playOrder[_position]];
                 }
             }
             else
             {
-                _currentIndex = nextIndex;
-                toPlay = _tracks[_currentIndex];
+                _position = nextPosition;
+                toPlay = _tracks[_playOrder[_position]];
             }
         }
 
@@ -348,17 +356,34 @@ internal sealed class MusicPlaylist : IPlaylist
         }
     }
 
+    /// <summary>Maps the playback head (<see cref="_position"/>) back to an index into <see cref="_tracks"/>, or -1 when nothing is current.</summary>
+    private int CurrentMasterIndexUnlocked()
+        => _position >= 0 && _position < _playOrder.Count ? _playOrder[_position] : -1;
+
     private IMusicClip? CurrentTrackUnlocked()
-        => _currentIndex >= 0 && _currentIndex < _tracks.Count ? _tracks[_currentIndex] : null;
+    {
+        int masterIndex = CurrentMasterIndexUnlocked();
+        return masterIndex >= 0 ? _tracks[masterIndex] : null;
+    }
 
     /// <summary>Returns the current track only when a track is actually playing; null otherwise (e.g. just after StopMusic). Used for the <c>Previous</c> field of <see cref="MusicTrackChangedEventArgs"/>.</summary>
     private IMusicClip? PreviousForChangeEventUnlocked()
         => _isPlaying ? CurrentTrackUnlocked() : null;
 
-    private void ShuffleTracks()
+    /// <summary>Resets <see cref="_playOrder"/> to the identity sequence (0, 1, 2, …) matching the current <see cref="_tracks"/>. Caller holds <see cref="_lock"/>.</summary>
+    private void ResetPlayOrderUnlocked()
+    {
+        _playOrder.Clear();
+        for (int i = 0; i < _tracks.Count; i++)
+        {
+            _playOrder.Add(i);
+        }
+    }
+
+    private void ShufflePlayOrder()
     {
         // _lock is held by the caller. Routes through the engine-wide IRandom so tests can
         // substitute a deterministic source via EngineConfiguration.RandomService.
-        Randomisation.Shuffle(_tracks);
+        Randomisation.Shuffle(_playOrder);
     }
 }

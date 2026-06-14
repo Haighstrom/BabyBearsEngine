@@ -265,27 +265,54 @@ public class MusicPlaylistTests
     }
 
     [TestMethod]
-    public void Shuffle_ShufflesTracksOnPlay()
+    public void Shuffle_DoesNotReorderTracksProperty()
     {
-        // With 5+ tracks, the chance of a no-op shuffle by accident is 1/120, low enough to ignore.
         _playlist.Shuffle = true;
         var clips = Enumerable.Range(0, 8).Select(i => new FakeMusicClip($"Track{i}")).ToArray();
-        var originalOrder = clips.ToArray();
         _playlist.SetTracks(clips);
         _playlist.Play();
 
-        // Tracks property reflects current playback order (which may differ from initial order).
-        IReadOnlyList<IMusicClip> shuffled = _playlist.Tracks;
-        Assert.HasCount(8, shuffled);
-        bool anyDifference = false;
-        for (int i = 0; i < shuffled.Count; i++)
+        // Tracks reports the stable supplied order regardless of shuffle.
+        CollectionAssert.AreEqual(clips, _playlist.Tracks.ToArray());
+    }
+
+    [TestMethod]
+    public void Shuffle_PlaysFullPassInShuffledOrder()
+    {
+        // With 8 tracks the chance of a shuffle coincidentally matching the supplied order is 1/8!.
+        _playlist.Shuffle = true;
+        var clips = Enumerable.Range(0, 8).Select(i => new FakeMusicClip($"Track{i}")).ToArray();
+        _playlist.SetTracks(clips);
+        _playlist.Play();
+        for (int i = 0; i < clips.Length - 1; i++)
         {
-            if (!ReferenceEquals(shuffled[i], originalOrder[i]))
+            _playlist.NextTrack();
+        }
+
+        // Every track plays exactly once...
+        CollectionAssert.AreEquivalent(clips, _played);
+        // ...but not in the supplied order.
+        bool anyDifference = false;
+        for (int i = 0; i < clips.Length; i++)
+        {
+            if (!ReferenceEquals(_played[i], clips[i]))
             {
                 anyDifference = true;
                 break;
             }
         }
-        Assert.IsTrue(anyDifference, "Expected shuffle to reorder tracks.");
+        Assert.IsTrue(anyDifference, "Expected shuffle to play tracks in a different order.");
+    }
+
+    [TestMethod]
+    public void Shuffle_CurrentIndexMapsToTracksPosition()
+    {
+        _playlist.Shuffle = true;
+        var clips = Enumerable.Range(0, 8).Select(i => new FakeMusicClip($"Track{i}")).ToArray();
+        _playlist.SetTracks(clips);
+        _playlist.Play();
+
+        // CurrentIndex indexes into the stable Tracks list, so it round-trips to CurrentTrack.
+        Assert.AreEqual(_playlist.CurrentTrack, _playlist.Tracks[_playlist.CurrentIndex]);
     }
 }
