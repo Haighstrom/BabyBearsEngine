@@ -81,6 +81,8 @@ internal class Container(IContainer realParent) : IContainer
     public (float x, float y) GetWindowCoordinates(float x, float y) =>
         realParent.GetWindowCoordinates(x, y);
 
+    public bool Contains(IAddable addable) => _childrenSet.Contains(addable);
+
     public void Add(params IAddable[] children)
     {
         foreach (var child in children)

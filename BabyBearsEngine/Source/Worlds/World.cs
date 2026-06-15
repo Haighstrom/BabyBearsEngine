@@ -109,6 +109,9 @@ public class World : IWorld
     /// <inheritdoc/>
     public void RemoveAll() => _container.RemoveAll();
 
+    /// <inheritdoc/>
+    public bool Contains(IAddable entity) => _container.Contains(entity) || _overlay.Contains(entity);
+
     /// <summary>For the world (the root container), local coordinates are window coordinates — returns the input unchanged.</summary>
     public (float x, float y) GetWindowCoordinates(float x, float y) => (x, y);
 

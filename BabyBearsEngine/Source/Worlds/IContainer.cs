@@ -29,6 +29,15 @@ public interface IContainer
     /// <summary>Removes every child from this container.</summary>
     void RemoveAll();
 
+    /// <summary>Returns whether <paramref name="addable"/> is currently a child of this container.</summary>
+    /// <remarks>
+    /// Defaults to <see langword="true"/> (permissive): a container that doesn't track membership is trusted.
+    /// Containers with real child storage (e.g. <see cref="Container"/>) override this so the
+    /// <see cref="IAddable.Parent"/> guard can reject a direct <c>Parent = container</c> that bypassed
+    /// <see cref="Add(IAddable)"/>.
+    /// </remarks>
+    bool Contains(IAddable addable) => true;
+
     /// <summary>
     /// Translates a local (container-relative) point into window coordinates by walking up the parent chain.
     /// Each container adds its own offset and delegates upward; the root (typically the <see cref="IWorld"/>)

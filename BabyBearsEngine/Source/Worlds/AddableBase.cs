@@ -9,7 +9,7 @@ public abstract class AddableBase : IAddable
     private IContainer? _parent;
 
     /// <inheritdoc/>
-    /// <exception cref="InvalidOperationException">Thrown when assigning a non-null parent while <see cref="Parent"/> is already set — cannot switch parents directly; detach first by setting to <c>null</c>.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when assigning a non-null parent while <see cref="Parent"/> is already set (cannot switch parents directly; detach first by setting to <c>null</c>), or when the target container does not already contain this addable (attach via <see cref="IContainer.Add(IAddable)"/> instead of assigning <see cref="Parent"/> directly).</exception>
     /// <exception cref="NullReferenceException">Thrown when assigning <c>null</c> while <see cref="Parent"/> is already <c>null</c> — already detached.</exception>
     public IContainer? Parent
     {
@@ -28,6 +28,17 @@ public abstract class AddableBase : IAddable
             else
             {
                 Ensure.IsNull(_parent);
+
+                // Guard the tree invariant: a container's child list and its children's Parent
+                // pointers must agree. Containers add to their list before assigning Parent, so by
+                // the time this runs the container already contains us. A direct external
+                // Parent = container that skipped Add would leave the container unaware of us.
+                if (!value.Contains(this))
+                {
+                    throw new InvalidOperationException(
+                        "Cannot attach to a container that has not added this object. Use IContainer.Add rather than assigning Parent directly.");
+                }
+
                 _parent = value;
                 OnAdded();
                 Added?.Invoke(this, EventArgs.Empty);

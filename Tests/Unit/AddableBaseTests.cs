@@ -36,6 +36,17 @@ public class AddableBaseTests
         public (float x, float y) GetWindowCoordinates(float x, float y) => (x, y);
     }
 
+    // A container that reports it contains nothing — models a real Container rejecting a direct
+    // Parent assignment that bypassed Add.
+    private sealed class NonMemberContainer : IContainer
+    {
+        public void Add(IAddable entity) { }
+        public void Remove(IAddable entity) { }
+        public void RemoveAll() { }
+        public (float x, float y) GetWindowCoordinates(float x, float y) => (x, y);
+        public bool Contains(IAddable addable) => false;
+    }
+
     // Initial state
 
     [TestMethod]
@@ -88,6 +99,14 @@ public class AddableBaseTests
         var a = new TestAddable();
 
         Assert.ThrowsExactly<NullReferenceException>(() => a.Parent = null);
+    }
+
+    [TestMethod]
+    public void Parent_SetContainerThatHasNotAddedIt_Throws()
+    {
+        var a = new TestAddable();
+
+        Assert.ThrowsExactly<InvalidOperationException>(() => a.Parent = new NonMemberContainer());
     }
 
     // Remove

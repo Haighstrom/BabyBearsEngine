@@ -8,7 +8,10 @@ public interface IAddable
 {
     /// <summary>
     /// The container this addable currently belongs to, or <c>null</c> if it has not been added.
-    /// Containers assign this on add/remove; gameplay code should not assign it directly.
+    /// Containers assign this on add/remove; gameplay code should attach via
+    /// <see cref="IContainer.Add(IAddable)"/> / <see cref="Remove"/> rather than assigning directly.
+    /// Assigning a non-null container that has not already added this addable throws, so a stray
+    /// <c>Parent = container</c> cannot desync the container's child list from its children's parents.
     /// Switching directly from one parent to another is not allowed — set to <c>null</c> first.
     /// </summary>
     IContainer? Parent { get; set; }
