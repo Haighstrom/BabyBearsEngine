@@ -7,6 +7,10 @@ namespace BabyBearsEngine;
 /// <c>EngineConfiguration.KeyboardService</c>; tests substitute a fake there to exercise consumers
 /// without a real input device. Throws <see cref="InvalidOperationException"/> if accessed before the engine is initialised.
 /// </summary>
+/// <remarks>
+/// The engine supports a single window per process, so there is one shared keyboard state; running
+/// two games concurrently in the same process is not supported.
+/// </remarks>
 public static class Keyboard
 {
     private static IKeyboard Implementation => EngineConfiguration.KeyboardService;

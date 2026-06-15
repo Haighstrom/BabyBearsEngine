@@ -7,6 +7,10 @@ namespace BabyBearsEngine;
 /// <c>EngineConfiguration.WindowService</c>; tests substitute a fake there to exercise consumers
 /// without a real window. Throws <see cref="InvalidOperationException"/> if accessed before the engine is initialised.
 /// </summary>
+/// <remarks>
+/// The engine supports a single window per process: there is one shared window, and running two
+/// games concurrently in the same process is not supported.
+/// </remarks>
 public static class Window
 {
     private static IWindow Implementation => EngineConfiguration.WindowService;
