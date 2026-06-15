@@ -180,4 +180,20 @@ public class ScrollingListPanelTests
         Assert.AreEqual(gwcX, unscrolledX);
         Assert.AreEqual(gwcY, unscrolledY);
     }
+
+    // Theme — ScrollbarWidth
+
+    [TestMethod]
+    public void Theme_ScrollbarWidth_DefaultsTo20()
+    {
+        Assert.AreEqual(20f, ScrollingListPanelTheme.Default.ScrollbarWidth);
+    }
+
+    [TestMethod]
+    public void Theme_ScrollbarWidth_IsOverridable()
+    {
+        ScrollingListPanelTheme theme = ScrollingListPanelTheme.Default with { ScrollbarWidth = 32f };
+
+        Assert.AreEqual(32f, theme.ScrollbarWidth);
+    }
 }

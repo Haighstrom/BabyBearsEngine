@@ -23,8 +23,6 @@ namespace BabyBearsEngine.Worlds.UI;
 /// </remarks>
 public class ScrollingListPanel : Entity
 {
-    private const float ScrollbarWidth = 20f;
-
     private readonly ContentPane _contentPane;
     private float _contentHeight = 0f;
     private readonly Scrollbar _scrollbar;
@@ -38,7 +36,7 @@ public class ScrollingListPanel : Entity
     public ScrollingListPanel(float x, float y, float width, float height, ScrollingListPanelTheme theme, int layer = 0)
         : base(x, y, width, height, layer: layer)
     {
-        float paneWidth = width - ScrollbarWidth;
+        float paneWidth = width - theme.ScrollbarWidth;
 
         if (theme.BackgroundColour.HasValue)
         {
@@ -48,7 +46,7 @@ public class ScrollingListPanel : Entity
         _contentPane = new ContentPane(0f, 0f, paneWidth, height);
         Add(_contentPane);
 
-        _scrollbar = new Scrollbar(paneWidth, 0f, ScrollbarWidth, height, ScrollbarDirection.Vertical, theme.Scrollbar);
+        _scrollbar = new Scrollbar(paneWidth, 0f, theme.ScrollbarWidth, height, ScrollbarDirection.Vertical, theme.Scrollbar);
         _scrollbar.ScrollChanged += OnScrollChanged;
         Add(_scrollbar);
     }

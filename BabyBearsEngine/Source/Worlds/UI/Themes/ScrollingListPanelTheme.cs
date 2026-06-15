@@ -16,6 +16,9 @@ public sealed record ScrollingListPanelTheme
     /// <summary>Visual styling for the vertical scrollbar.</summary>
     public required ScrollbarTheme Scrollbar { get; init; }
 
+    /// <summary>Width in pixels of the vertical scrollbar and the strip reserved for it on the right edge. Defaults to 20.</summary>
+    public float ScrollbarWidth { get; init; } = 20f;
+
     /// <summary>Bland placeholder theme — dark background, darker track, mid-grey thumb. Prototyping only.</summary>
     public static readonly ScrollingListPanelTheme Default = new()
     {
