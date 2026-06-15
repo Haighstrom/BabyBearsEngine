@@ -48,6 +48,13 @@ public class ClickControllerDoubleClickTests
     private sealed class FakeTarget : IMouseInteractable
     {
         public Rect PositionOnScreen { get; } = new(0f, 0f, 10f, 10f);
+
+        // IAddable surface — Exists is true so the controller treats the target as tree-connected.
+        public IContainer? Parent { get; set; } = null;
+        public bool Exists => true;
+        public event EventHandler? Added;
+        public event EventHandler? Removed;
+        public void Remove() { }
     }
 
     private FakeMouse _mouse = null!;

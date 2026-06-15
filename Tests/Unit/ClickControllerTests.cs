@@ -52,6 +52,14 @@ public class ClickControllerTests
         // prevents the controller from registering with MouseSolver during tests.
         public Rect PositionOnScreen { get; } = new(0f, 0f, 10f, 10f);
         public bool Disabled { get; set; } = false;
+
+        // IAddable surface. Exists defaults to true so the controller treats the target as
+        // tree-connected; flip it to exercise the detached-target suppression path.
+        public IContainer? Parent { get; set; } = null;
+        public bool Exists { get; set; } = true;
+        public event EventHandler? Added;
+        public event EventHandler? Removed;
+        public void Remove() { }
     }
 
     private FakeMouse _mouse = null!;
@@ -617,6 +625,44 @@ public class ClickControllerTests
     {
         // Never entered — no state to cancel.
         _target.Disabled = true;
+        Frame(isOver: false);
+
+        Assert.IsEmpty(_events);
+    }
+
+    [TestMethod]
+    public void Update_DetachedMidPress_FiresMouseExitedSoButtonDoesntStickPressed()
+    {
+        // Enter then press to land in MouseDownInside.
+        Frame(isOver: true, leftPressed: true);
+        _events.Clear();
+
+        // Target detaches from the tree mid-press (Exists becomes false) — treated the same as
+        // disabled: signal cancellation rather than leaving subscribers stuck "pressed".
+        _target.Exists = false;
+        Frame(isOver: true);
+
+        Assert.Contains("MouseExited", _events);
+    }
+
+    [TestMethod]
+    public void Update_DetachedWhileJustOver_FiresMouseExited()
+    {
+        // Land in MouseOver (entered but not hovering yet, not pressed).
+        Frame(isOver: true);
+        _events.Clear();
+
+        _target.Exists = false;
+        Frame(isOver: true);
+
+        Assert.Contains("MouseExited", _events);
+    }
+
+    [TestMethod]
+    public void Update_DetachedFromNoneState_RaisesNoEvents()
+    {
+        // Never entered — no state to cancel.
+        _target.Exists = false;
         Frame(isOver: false);
 
         Assert.IsEmpty(_events);

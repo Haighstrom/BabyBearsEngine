@@ -106,7 +106,7 @@ internal sealed class ClickController(IMouseInteractable target, double timeToTr
         // its events nor any subclass OnLeftClicked override fire. A target whose parent
         // chain doesn't reach a tree root is detached, has no screen position to hit-test,
         // and is treated the same as disabled.
-        if (target.Disabled || (target is IAddable addable && !addable.Exists))
+        if (target.Disabled || !target.Exists)
         {
             // If we were mid-interaction, signal cancellation so subscribers that latched on
             // LeftPressed / Hovered without seeing a matching exit don't leave the UI stuck
