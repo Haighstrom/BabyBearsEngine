@@ -38,7 +38,7 @@ public class KeyboardExtensionsTests
     {
         StatefulFakeKeyboard keyboard = new();
         keyboard.Held.Add(Keys.S);
-        Assert.IsTrue(keyboard.CombinationDown(new KeyCombination(Keys.S)));
+        Assert.IsTrue(keyboard.CombinationDown(new KeyCombination(KeyModifiers.None, Keys.S)));
     }
 
     [TestMethod]
@@ -46,7 +46,7 @@ public class KeyboardExtensionsTests
     {
         StatefulFakeKeyboard keyboard = new();
         keyboard.Held.Add(Keys.LeftControl);
-        Assert.IsFalse(keyboard.CombinationDown(new KeyCombination(Keys.S, KeyModifiers.Ctrl)));
+        Assert.IsFalse(keyboard.CombinationDown(new KeyCombination(KeyModifiers.Ctrl, Keys.S)));
     }
 
     [TestMethod]
@@ -55,7 +55,7 @@ public class KeyboardExtensionsTests
         StatefulFakeKeyboard keyboard = new();
         keyboard.Held.Add(Keys.LeftControl);
         keyboard.Held.Add(Keys.S);
-        Assert.IsTrue(keyboard.CombinationDown(new KeyCombination(Keys.S, KeyModifiers.Ctrl)));
+        Assert.IsTrue(keyboard.CombinationDown(new KeyCombination(KeyModifiers.Ctrl, Keys.S)));
     }
 
     // Left/Right modifier symmetry
@@ -66,7 +66,7 @@ public class KeyboardExtensionsTests
         StatefulFakeKeyboard keyboard = new();
         keyboard.Held.Add(Keys.RightControl);
         keyboard.Held.Add(Keys.S);
-        Assert.IsTrue(keyboard.CombinationDown(new KeyCombination(Keys.S, KeyModifiers.Ctrl)));
+        Assert.IsTrue(keyboard.CombinationDown(new KeyCombination(KeyModifiers.Ctrl, Keys.S)));
     }
 
     [TestMethod]
@@ -75,7 +75,7 @@ public class KeyboardExtensionsTests
         StatefulFakeKeyboard keyboard = new();
         keyboard.Held.Add(Keys.RightShift);
         keyboard.Held.Add(Keys.A);
-        Assert.IsTrue(keyboard.CombinationDown(new KeyCombination(Keys.A, KeyModifiers.Shift)));
+        Assert.IsTrue(keyboard.CombinationDown(new KeyCombination(KeyModifiers.Shift, Keys.A)));
     }
 
     [TestMethod]
@@ -84,7 +84,7 @@ public class KeyboardExtensionsTests
         StatefulFakeKeyboard keyboard = new();
         keyboard.Held.Add(Keys.RightAlt);
         keyboard.Held.Add(Keys.F4);
-        Assert.IsTrue(keyboard.CombinationDown(new KeyCombination(Keys.F4, KeyModifiers.Alt)));
+        Assert.IsTrue(keyboard.CombinationDown(new KeyCombination(KeyModifiers.Alt, Keys.F4)));
     }
 
     // Missing modifier
@@ -94,7 +94,7 @@ public class KeyboardExtensionsTests
     {
         StatefulFakeKeyboard keyboard = new();
         keyboard.Held.Add(Keys.S);
-        Assert.IsFalse(keyboard.CombinationDown(new KeyCombination(Keys.S, KeyModifiers.Ctrl)));
+        Assert.IsFalse(keyboard.CombinationDown(new KeyCombination(KeyModifiers.Ctrl, Keys.S)));
     }
 
     [TestMethod]
@@ -103,7 +103,7 @@ public class KeyboardExtensionsTests
         StatefulFakeKeyboard keyboard = new();
         keyboard.Held.Add(Keys.LeftShift);
         keyboard.Held.Add(Keys.S);
-        Assert.IsFalse(keyboard.CombinationDown(new KeyCombination(Keys.S, KeyModifiers.Ctrl)));
+        Assert.IsFalse(keyboard.CombinationDown(new KeyCombination(KeyModifiers.Ctrl, Keys.S)));
     }
 
     [TestMethod]
@@ -112,10 +112,10 @@ public class KeyboardExtensionsTests
         StatefulFakeKeyboard keyboard = new();
         keyboard.Held.Add(Keys.LeftControl);
         keyboard.Held.Add(Keys.Z);
-        Assert.IsFalse(keyboard.CombinationDown(new KeyCombination(Keys.Z, KeyModifiers.Ctrl | KeyModifiers.Shift)));
+        Assert.IsFalse(keyboard.CombinationDown(new KeyCombination(KeyModifiers.Ctrl | KeyModifiers.Shift, Keys.Z)));
 
         keyboard.Held.Add(Keys.RightShift);
-        Assert.IsTrue(keyboard.CombinationDown(new KeyCombination(Keys.Z, KeyModifiers.Ctrl | KeyModifiers.Shift)));
+        Assert.IsTrue(keyboard.CombinationDown(new KeyCombination(KeyModifiers.Ctrl | KeyModifiers.Shift, Keys.Z)));
     }
 
     // CombinationPressed — edge semantics
@@ -126,7 +126,7 @@ public class KeyboardExtensionsTests
         StatefulFakeKeyboard keyboard = new();
         keyboard.Held.Add(Keys.LeftControl);
         keyboard.Held.Add(Keys.S);
-        Assert.IsFalse(keyboard.CombinationPressed(new KeyCombination(Keys.S, KeyModifiers.Ctrl)));
+        Assert.IsFalse(keyboard.CombinationPressed(new KeyCombination(KeyModifiers.Ctrl, Keys.S)));
     }
 
     [TestMethod]
@@ -136,7 +136,7 @@ public class KeyboardExtensionsTests
         keyboard.Held.Add(Keys.LeftControl);
         keyboard.Held.Add(Keys.S);
         keyboard.EdgePressed.Add(Keys.S);
-        Assert.IsTrue(keyboard.CombinationPressed(new KeyCombination(Keys.S, KeyModifiers.Ctrl)));
+        Assert.IsTrue(keyboard.CombinationPressed(new KeyCombination(KeyModifiers.Ctrl, Keys.S)));
     }
 
     [TestMethod]
@@ -144,7 +144,7 @@ public class KeyboardExtensionsTests
     {
         StatefulFakeKeyboard keyboard = new();
         keyboard.EdgePressed.Add(Keys.S);
-        Assert.IsFalse(keyboard.CombinationPressed(new KeyCombination(Keys.S, KeyModifiers.Ctrl)));
+        Assert.IsFalse(keyboard.CombinationPressed(new KeyCombination(KeyModifiers.Ctrl, Keys.S)));
     }
 
     [TestMethod]
@@ -155,6 +155,6 @@ public class KeyboardExtensionsTests
         keyboard.Held.Add(Keys.LeftControl); // held — NOT in EdgePressed
         keyboard.Held.Add(Keys.S);
         keyboard.EdgePressed.Add(Keys.S);
-        Assert.IsTrue(keyboard.CombinationPressed(new KeyCombination(Keys.S, KeyModifiers.Ctrl)));
+        Assert.IsTrue(keyboard.CombinationPressed(new KeyCombination(KeyModifiers.Ctrl, Keys.S)));
     }
 }

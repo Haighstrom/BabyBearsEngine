@@ -11,9 +11,12 @@ namespace BabyBearsEngine.Input;
 /// <remarks>
 /// The <see cref="Key"/> itself should be the non-modifier key in the shortcut. Putting a modifier
 /// key (e.g. <see cref="Keys.LeftControl"/>) in <see cref="Key"/> is legal but unusual — the
-/// intended pattern is <c>new KeyCombination(Keys.S, KeyModifiers.Ctrl)</c> for "Ctrl+S".
+/// intended pattern is <c>new KeyCombination(KeyModifiers.Ctrl, Keys.S)</c> for "Ctrl+S". Neither
+/// parameter has a default — a combination with no modifiers is written explicitly as
+/// <c>new KeyCombination(KeyModifiers.None, Keys.S)</c>, since "combination" implies both parts
+/// are always specified.
 /// </remarks>
-public readonly record struct KeyCombination(Keys Key, KeyModifiers Modifiers = KeyModifiers.None)
+public readonly record struct KeyCombination(KeyModifiers Modifiers, Keys Key)
 {
     /// <summary>
     /// Renders the combination as a human-readable shortcut string (e.g. <c>"Ctrl+Shift+S"</c>).
@@ -100,7 +103,7 @@ public readonly record struct KeyCombination(Keys Key, KeyModifiers Modifiers = 
             return false;
         }
 
-        combination = new KeyCombination(key, modifiers);
+        combination = new KeyCombination(modifiers, key);
         return true;
     }
 
