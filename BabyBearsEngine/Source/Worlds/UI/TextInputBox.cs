@@ -16,6 +16,7 @@ namespace BabyBearsEngine.Worlds.UI;
 /// The key map assumes a standard US QWERTY layout.</para>
 /// <para>Supported keys: printable characters (letters, digits, punctuation); Backspace; Delete;
 /// Left / Right / Home / End (with optional Shift for selection); Ctrl+A (select all);
+/// Ctrl+C / Ctrl+X / Ctrl+V (copy / cut / paste via the system clipboard);
 /// Enter (fires <see cref="Submitted"/>); Escape (blurs).</para>
 /// </remarks>
 public class TextInputBox : Entity
@@ -285,7 +286,6 @@ public class TextInputBox : Entity
     private void HandleKeyboardInput()
     {
         bool shift = Keyboard.KeyDown(Keys.LeftShift) || Keyboard.KeyDown(Keys.RightShift);
-        bool ctrl = Keyboard.KeyDown(Keys.LeftControl) || Keyboard.KeyDown(Keys.RightControl);
 
         if (Keyboard.KeyPressed(Keys.Escape))
         {
@@ -299,13 +299,28 @@ public class TextInputBox : Entity
             return;
         }
 
-        if (ctrl)
+        if (Keyboard.CombinationPressed(new KeyCombination(KeyModifiers.Ctrl, Keys.A)))
         {
-            if (Keyboard.KeyPressed(Keys.A))
-            {
-                SelectAll();
-                return;
-            }
+            SelectAll();
+            return;
+        }
+
+        if (Keyboard.CombinationPressed(new KeyCombination(KeyModifiers.Ctrl, Keys.C)))
+        {
+            Copy();
+            return;
+        }
+
+        if (Keyboard.CombinationPressed(new KeyCombination(KeyModifiers.Ctrl, Keys.X)))
+        {
+            Cut();
+            return;
+        }
+
+        if (Keyboard.CombinationPressed(new KeyCombination(KeyModifiers.Ctrl, Keys.V)))
+        {
+            Paste();
+            return;
         }
 
         if (!_readOnly)
@@ -422,6 +437,86 @@ public class TextInputBox : Entity
         _anchorIndex = 0;
         _cursorIndex = _text.Length;
         _blinkTimer = 0.0;
+        UpdateDisplay();
+    }
+
+    private void Copy()
+    {
+        if (!HasSelection)
+        {
+            return;
+        }
+
+        Clipboard.SetText(_text[SelectionStart..SelectionEnd]);
+    }
+
+    private void Cut()
+    {
+        if (_readOnly || !HasSelection)
+        {
+            return;
+        }
+
+        Clipboard.SetText(_text[SelectionStart..SelectionEnd]);
+        DeleteSelection();
+        _blinkTimer = 0.0;
+        UpdateDisplay();
+    }
+
+    private void Paste()
+    {
+        if (_readOnly)
+        {
+            return;
+        }
+
+        string clipboardText = Clipboard.GetText();
+        if (clipboardText.Length == 0)
+        {
+            return;
+        }
+
+        if (HasSelection)
+        {
+            DeleteSelection();
+        }
+
+        string old = _text;
+        bool inserted = false;
+
+        // Newlines are stripped unconditionally rather than left to IsCharAllowed, since this
+        // is a single-line control by construction (TextGraphic.Multiline = false) and typing
+        // can never produce one — paste is the only path a newline could enter through.
+        foreach (char c in clipboardText)
+        {
+            if (c == '\n' || c == '\r')
+            {
+                continue;
+            }
+
+            if (_maxLength > 0 && _text.Length >= _maxLength)
+            {
+                break;
+            }
+
+            if (!IsCharAllowed(c))
+            {
+                continue;
+            }
+
+            _text = _text.Insert(_cursorIndex, c.ToString());
+            _cursorIndex++;
+            inserted = true;
+        }
+
+        _anchorIndex = _cursorIndex;
+        _blinkTimer = 0.0;
+
+        if (inserted)
+        {
+            RaiseTextChanged(old);
+        }
+
         UpdateDisplay();
     }
 

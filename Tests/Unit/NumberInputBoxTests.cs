@@ -89,14 +89,24 @@ public class NumberInputBoxTests
         public bool AllKeysReleased(params Keys[] keys) => false;
     }
 
+    private sealed class FakeClipboard : IClipboard
+    {
+        public string Text { get; set; } = string.Empty;
+        public string GetText() => Text;
+        public void SetText(string text) => Text = text;
+    }
+
     private FakeKeyboard _kb = null!;
+    private FakeClipboard _clipboard = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _kb = new FakeKeyboard();
+        _clipboard = new FakeClipboard();
         EngineConfiguration.KeyboardService = _kb;
         EngineConfiguration.MouseService = new FakeMouse();
+        EngineConfiguration.ClipboardService = _clipboard;
     }
 
     [TestCleanup]
@@ -359,6 +369,51 @@ public class NumberInputBoxTests
 
         // Max is not clamped during typing
         Assert.AreEqual("999", box.Text);
+    }
+
+    // -------------------------------------------------------------------------
+    // Paste — filtered through IsCharAllowed just like keystrokes
+
+    [TestMethod]
+    public void Paste_NonNumericText_IsRejected()
+    {
+        NumberInputBox box = Make();
+        box.Focus();
+        _clipboard.Text = "abc";
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.V);
+
+        Update(box);
+
+        Assert.AreEqual(string.Empty, box.Text);
+    }
+
+    [TestMethod]
+    public void Paste_MixedDigitsAndLetters_KeepsOnlyDigits()
+    {
+        NumberInputBox box = Make();
+        box.Focus();
+        _clipboard.Text = "1a2b3";
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.V);
+
+        Update(box);
+
+        Assert.AreEqual("123", box.Text);
+    }
+
+    [TestMethod]
+    public void Paste_SecondDecimalPoint_IsRejected()
+    {
+        NumberInputBox box = Make(allowDecimals: true, initialText: "1.5");
+        GoToEnd(box);
+        _clipboard.Text = ".2";
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.V);
+
+        Update(box);
+
+        Assert.AreEqual("1.52", box.Text);
     }
 
     // -------------------------------------------------------------------------

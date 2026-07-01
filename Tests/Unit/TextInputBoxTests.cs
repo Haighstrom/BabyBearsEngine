@@ -91,14 +91,24 @@ public class TextInputBoxTests
         public bool AllKeysReleased(params Keys[] keys) => false;
     }
 
+    private sealed class FakeClipboard : IClipboard
+    {
+        public string Text { get; set; } = string.Empty;
+        public string GetText() => Text;
+        public void SetText(string text) => Text = text;
+    }
+
     private FakeKeyboard _kb = null!;
+    private FakeClipboard _clipboard = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _kb = new FakeKeyboard();
+        _clipboard = new FakeClipboard();
         EngineConfiguration.KeyboardService = _kb;
         EngineConfiguration.MouseService = new FakeMouse();
+        EngineConfiguration.ClipboardService = _clipboard;
     }
 
     [TestCleanup]
@@ -965,6 +975,192 @@ public class TextInputBoxTests
         Update(box);
 
         Assert.AreEqual(1, box.CursorIndex);
+    }
+
+    // -------------------------------------------------------------------------
+    // Copy / Cut / Paste
+
+    [TestMethod]
+    public void Update_CtrlC_WithSelection_CopiesToClipboard()
+    {
+        TextInputBox box = Make("hello");
+        box.Focus();
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.A);
+        Update(box);
+        _kb.Release();
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.C);
+
+        Update(box);
+
+        Assert.AreEqual("hello", _clipboard.Text);
+    }
+
+    [TestMethod]
+    public void Update_CtrlC_WithoutSelection_IsNoOp()
+    {
+        TextInputBox box = Make("hello");
+        box.Focus();
+        _clipboard.Text = "unchanged";
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.C);
+
+        Update(box);
+
+        Assert.AreEqual("unchanged", _clipboard.Text);
+    }
+
+    [TestMethod]
+    public void Update_CtrlX_WithSelection_CopiesAndDeletesSelection()
+    {
+        TextInputBox box = Make("hello");
+        box.Focus();
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.A);
+        Update(box);
+        _kb.Release();
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.X);
+
+        Update(box);
+
+        Assert.AreEqual("hello", _clipboard.Text);
+        Assert.AreEqual(string.Empty, box.Text);
+    }
+
+    [TestMethod]
+    public void Update_CtrlX_ReadOnly_IsBlocked()
+    {
+        TextInputBox box = Make("hello");
+        box.Focus();
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.A);
+        Update(box);
+        _kb.Release();
+        box.ReadOnly = true;
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.X);
+
+        Update(box);
+
+        Assert.AreEqual(string.Empty, _clipboard.Text);
+        Assert.AreEqual("hello", box.Text);
+    }
+
+    [TestMethod]
+    public void Update_CtrlV_InsertsClipboardTextAtCursor()
+    {
+        TextInputBox box = Make("ac");
+        box.Focus();
+        _kb.Press(Keys.Home);
+        Update(box);
+        _kb.Release();
+        _kb.Press(Keys.Right);
+        Update(box);
+        _kb.Release();
+        _clipboard.Text = "b";
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.V);
+
+        Update(box);
+
+        Assert.AreEqual("abc", box.Text);
+    }
+
+    [TestMethod]
+    public void Update_CtrlV_ReplacesSelection()
+    {
+        TextInputBox box = Make("hello");
+        box.Focus();
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.A);
+        Update(box);
+        _kb.Release();
+        _clipboard.Text = "hi";
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.V);
+
+        Update(box);
+
+        Assert.AreEqual("hi", box.Text);
+    }
+
+    [TestMethod]
+    public void Update_CtrlV_ReadOnly_IsBlocked()
+    {
+        TextInputBox box = Make("hello");
+        box.ReadOnly = true;
+        box.Focus();
+        _clipboard.Text = "xx";
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.V);
+
+        Update(box);
+
+        Assert.AreEqual("hello", box.Text);
+    }
+
+    [TestMethod]
+    public void Update_CtrlV_TruncatesToMaxLength()
+    {
+        TextInputBox box = Make("ab");
+        box.MaxLength = 4;
+        box.Focus();
+        _kb.Press(Keys.End);
+        Update(box);
+        _kb.Release();
+        _clipboard.Text = "cdef";
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.V);
+
+        Update(box);
+
+        Assert.AreEqual("abcd", box.Text);
+    }
+
+    [TestMethod]
+    public void Update_CtrlV_EmptyClipboard_IsNoOp()
+    {
+        TextInputBox box = Make("hello");
+        box.Focus();
+        _clipboard.Text = "";
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.V);
+
+        Update(box);
+
+        Assert.AreEqual("hello", box.Text);
+    }
+
+    [TestMethod]
+    public void Update_CtrlV_StripsNewlines()
+    {
+        TextInputBox box = Make("");
+        box.Focus();
+        _clipboard.Text = "a\nb\rc";
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.V);
+
+        Update(box);
+
+        Assert.AreEqual("abc", box.Text);
+    }
+
+    [TestMethod]
+    public void Update_CtrlV_FiresTextChanged()
+    {
+        TextInputBox box = Make();
+        box.Focus();
+        string? captured = null;
+        box.TextChanged += (_, e) => captured = e.NewText;
+        _clipboard.Text = "pasted";
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.V);
+
+        Update(box);
+
+        Assert.AreEqual("pasted", captured);
     }
 
     // -------------------------------------------------------------------------
