@@ -21,6 +21,7 @@ internal static class EngineConfiguration
     private static TextRenderer s_defaultTextRenderer = TextRenderer.FreeType;
 
     private static IAudio? s_audio = null;
+    private static IClipboard? s_clipboard = null;
     private static IEngineInfo? s_engineInfo = null;
     private static IGLLoadingContextFactory? s_glLoadingContextFactory = null;
     private static IGPUResourceDeletionService? s_gpuResourceDeletionService = null;
@@ -91,6 +92,12 @@ internal static class EngineConfiguration
     {
         get => s_audio ?? throw new InvalidOperationException(NotInitialisedMessage);
         set => s_audio = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    public static IClipboard ClipboardService
+    {
+        get => s_clipboard ?? throw new InvalidOperationException(NotInitialisedMessage);
+        set => s_clipboard = value ?? throw new ArgumentNullException(nameof(value));
     }
 
     public static IEngineInfo EngineInfo
@@ -188,6 +195,7 @@ internal static class EngineConfiguration
         IWindow window,
         IKeyboard keyboard,
         IMouse mouse,
+        IClipboard clipboard,
         IWorldSwitcher worldSwitcher,
         IEngineInfo engineInfo,
         IAudio audio,
@@ -199,6 +207,7 @@ internal static class EngineConfiguration
         ArgumentNullException.ThrowIfNull(window, nameof(window));
         ArgumentNullException.ThrowIfNull(keyboard, nameof(keyboard));
         ArgumentNullException.ThrowIfNull(mouse, nameof(mouse));
+        ArgumentNullException.ThrowIfNull(clipboard, nameof(clipboard));
         ArgumentNullException.ThrowIfNull(worldSwitcher, nameof(worldSwitcher));
         ArgumentNullException.ThrowIfNull(engineInfo, nameof(engineInfo));
         ArgumentNullException.ThrowIfNull(audio, nameof(audio));
@@ -206,6 +215,7 @@ internal static class EngineConfiguration
         if (s_window is not null
             || s_keyboard is not null
             || s_mouse is not null
+            || s_clipboard is not null
             || s_worldSwitcher is not null
             || s_engineInfo is not null
             || s_audio is not null
@@ -220,6 +230,7 @@ internal static class EngineConfiguration
         s_window = window;
         s_keyboard = keyboard;
         s_mouse = mouse;
+        s_clipboard = clipboard;
         s_worldSwitcher = worldSwitcher;
         s_engineInfo = engineInfo;
         s_audio = audio;
@@ -263,6 +274,7 @@ internal static class EngineConfiguration
         s_atlasGenerators.Clear();
         s_defaultTextRenderer = TextRenderer.FreeType;
         s_audio = null;
+        s_clipboard = null;
         s_engineInfo = null;
         s_glLoadingContextFactory = null;
         s_gpuResourceDeletionService = null;

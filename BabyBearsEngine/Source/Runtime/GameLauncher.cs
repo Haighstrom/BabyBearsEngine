@@ -102,6 +102,7 @@ public static class GameLauncher
                 window: new OpenTKWindowAdapter(engine, appSettings.WindowSettings.Cursor, appSettings.WindowSettings.Icon),
                 keyboard: new OpenTKKeyboardAdapter(engine),
                 mouse: new OpenTKMouseAdapter(engine),
+                clipboard: new OpenTKClipboardAdapter(engine),
                 worldSwitcher: engine,
                 engineInfo: engine.EngineInfo,
                 audio: audioService,
