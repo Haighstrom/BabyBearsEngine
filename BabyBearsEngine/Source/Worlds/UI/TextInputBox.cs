@@ -176,6 +176,13 @@ public class TextInputBox : Entity
     /// <summary>Current cursor position within <see cref="Text"/> (0..Text.Length).</summary>
     public int CursorIndex => _cursorIndex;
 
+    /// <summary>
+    /// Index of the first character currently rendered (earlier characters are scrolled off).
+    /// Exposed internally so unit tests can verify scroll position directly without a working
+    /// text graphic.
+    /// </summary>
+    internal int ScrollOffset => _scrollOffset;
+
     /// <summary>Start of the current selection (inclusive). Equal to <see cref="SelectionEnd"/> when there is no selection.</summary>
     public int SelectionStart => Math.Min(_cursorIndex, _anchorIndex);
 
@@ -511,6 +518,15 @@ public class TextInputBox : Entity
         _text = _text.Remove(start, end - start);
         _cursorIndex = start;
         _anchorIndex = start;
+
+        // Deleting a selection can leave _scrollOffset referring to a position that no longer
+        // makes sense for the shortened text (e.g. Ctrl+A then Delete/typed-over on a scrolled,
+        // overflowing box). EnsureScrollOffset's own correction only fires when the cursor is
+        // still less than _scrollOffset at the next UpdateDisplay call — but a caller that inserts
+        // new text right after this (TypeChar, Paste) advances the cursor first, so that check
+        // would compare against the post-insert position instead of catching it here.
+        _scrollOffset = Math.Min(_scrollOffset, _cursorIndex);
+
         RaiseTextChanged(old);
     }
 

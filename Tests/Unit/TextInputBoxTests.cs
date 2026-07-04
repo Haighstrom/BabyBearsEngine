@@ -873,6 +873,31 @@ public class TextInputBoxTests
         Assert.IsLessThan(box.SelectionEnd, box.SelectionStart);
     }
 
+    [TestMethod]
+    public void DeleteSelection_CtrlAThenType_OnScrolledBox_ResetsScrollOffsetToStart()
+    {
+        // Regression: selecting all of a long, scrolled string then typing a replacement
+        // character left the new character rendering off-screen. DeleteSelection cleared the
+        // text but left ScrollOffset stale; TypeChar's own cursor advance happened before the
+        // next EnsureScrollOffset call, so the "cursor is now before ScrollOffset" self-correction
+        // compared against the post-insert cursor position instead of catching the reset here.
+        TextInputBox box = MakeDraggable("abcdefghijklmnopqrstuvwxyz0123"); // 30 chars, forces scrolling
+        Assert.IsGreaterThan(0, box.ScrollOffset); // sanity: box starts out scrolled
+
+        box.Focus();
+        _kb.Hold(Keys.LeftControl);
+        _kb.Press(Keys.A);
+        Update(box); // Ctrl+A selects the whole (scrolled) string
+        _kb.Release();
+        _kb.Press(Keys.C);
+
+        Update(box); // types 'c' over the selection
+
+        Assert.AreEqual("c", box.Text);
+        Assert.AreEqual(0, box.ScrollOffset);
+        Assert.AreEqual(1, box.CursorIndex);
+    }
+
     // -------------------------------------------------------------------------
     // MaxLength
 
