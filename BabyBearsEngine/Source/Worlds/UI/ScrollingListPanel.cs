@@ -20,6 +20,13 @@ namespace BabyBearsEngine.Worlds.UI;
 /// hit rect at its true (scrolled) position, which lies outside the panel — clicks within the
 /// panel cannot reach it, but a click exactly where the scrolled-out item now lies on screen
 /// would still register. Use sparingly with very small panels near interactive UI.
+/// <para>
+/// The mouse wheel scrolls the list when the cursor is anywhere over the panel, not just over
+/// the scrollbar strip — see <c>scrollOnMouseWheel</c>. When the cursor is over the scrollbar
+/// strip itself, the scrollbar's own wheel handling takes over instead; the two never both
+/// react to the same wheel notch because <see cref="MouseSolver"/> only reports the top-most
+/// overlapping entity as moused-over.
+/// </para>
 /// </remarks>
 public class ScrollingListPanel : Entity
 {
@@ -32,9 +39,10 @@ public class ScrollingListPanel : Entity
     /// <param name="width">Width in pixels (includes the scrollbar).</param>
     /// <param name="height">Height in pixels (the visible viewport height).</param>
     /// <param name="theme">Visual styling.</param>
+    /// <param name="scrollOnMouseWheel">When true, scroll wheel movement anywhere over the panel's content area scrolls the list. Defaults to true.</param>
     /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
-    public ScrollingListPanel(float x, float y, float width, float height, ScrollingListPanelTheme theme, int layer = 0)
-        : base(x, y, width, height, layer: layer)
+    public ScrollingListPanel(float x, float y, float width, float height, ScrollingListPanelTheme theme, bool scrollOnMouseWheel = true, int layer = 0)
+        : base(x, y, width, height, clickable: scrollOnMouseWheel, layer: layer)
     {
         float paneWidth = width - theme.ScrollbarWidth;
 
@@ -49,14 +57,41 @@ public class ScrollingListPanel : Entity
         _scrollbar = new Scrollbar(paneWidth, 0f, theme.ScrollbarWidth, height, ScrollbarDirection.Vertical, theme.Scrollbar);
         _scrollbar.ScrollChanged += OnScrollChanged;
         Add(_scrollbar);
+
+        if (scrollOnMouseWheel)
+        {
+            InterceptsMouseScroll = true;
+        }
     }
 
     /// <param name="rect">Position and size relative to the parent container. Width includes the scrollbar; height is the visible viewport height.</param>
     /// <param name="theme">Visual styling.</param>
+    /// <param name="scrollOnMouseWheel">When true, scroll wheel movement anywhere over the panel's content area scrolls the list. Defaults to true.</param>
     /// <param name="layer">Initial render layer. Higher = further behind, lower = on top, 0 = default top. Must be ≥ 0.</param>
-    public ScrollingListPanel(Rect rect, ScrollingListPanelTheme theme, int layer = 0)
-        : this(rect.X, rect.Y, rect.W, rect.H, theme, layer)
+    public ScrollingListPanel(Rect rect, ScrollingListPanelTheme theme, bool scrollOnMouseWheel = true, int layer = 0)
+        : this(rect.X, rect.Y, rect.W, rect.H, theme, scrollOnMouseWheel, layer)
     {
+    }
+
+    // Internal test-only constructor — builds the panel without GL-backed graphics (no
+    // background colour, no themed scrollbar) so unit tests can drive mouse-wheel behaviour
+    // without a GL context.
+    internal ScrollingListPanel(float width, float height, float scrollbarWidth, bool scrollOnMouseWheel = true)
+        : base(0, 0, width, height, clickable: scrollOnMouseWheel)
+    {
+        float paneWidth = width - scrollbarWidth;
+
+        _contentPane = new ContentPane(0f, 0f, paneWidth, height);
+        Add(_contentPane);
+
+        _scrollbar = new Scrollbar(paneWidth, height, ScrollbarDirection.Vertical, scrollOnMouseWheel: true) { X = paneWidth };
+        _scrollbar.ScrollChanged += OnScrollChanged;
+        Add(_scrollbar);
+
+        if (scrollOnMouseWheel)
+        {
+            InterceptsMouseScroll = true;
+        }
     }
 
     /// <summary>
@@ -101,6 +136,13 @@ public class ScrollingListPanel : Entity
     /// </summary>
     internal static float CalculateScrollOffset(float amountFilled, float panelHeight, float contentHeight)
         => amountFilled * Math.Max(0f, contentHeight - panelHeight);
+
+    /// <inheritdoc/>
+    protected override void OnMouseScrolled(float delta)
+    {
+        base.OnMouseScrolled(delta);
+        _scrollbar.AmountFilled -= Math.Sign(delta) * _scrollbar.WheelScrollStep;
+    }
 
     private void OnScrollChanged(object? sender, ScrollChangedEventArgs e)
         => _contentPane.ScrollOffset = CalculateScrollOffset(e.NewValue, Height, _contentHeight);

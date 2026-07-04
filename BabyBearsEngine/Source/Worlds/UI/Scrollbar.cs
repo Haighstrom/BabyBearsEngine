@@ -67,6 +67,16 @@ public class Scrollbar : Entity
         _thumb = new Button(tx, ty, tw, th, theme.Thumb);
         Add(_thumb);
 
+        // The thumb is a clickable Button sitting on top of the track, so it — not the
+        // Scrollbar itself — is the top-most entity under the cursor while hovering it.
+        // Without its own wheel handling, MouseSolver would never report the Scrollbar as
+        // moused-over there and the wheel would silently do nothing over the thumb.
+        if (scrollOnMouseWheel)
+        {
+            _thumb.InterceptsMouseScroll = true;
+            _thumb.MouseScrolled += OnThumbMouseScrolled;
+        }
+
         DragController controller = new(
             grabArea: () =>
             {
@@ -126,6 +136,12 @@ public class Scrollbar : Entity
         (float tx, float ty, float tw, float th) = ComputeThumbRect(_amountFilled);
         _thumb = new Button(tx, ty, tw, th);
         Add(_thumb);
+
+        if (scrollOnMouseWheel)
+        {
+            _thumb.InterceptsMouseScroll = true;
+            _thumb.MouseScrolled += OnThumbMouseScrolled;
+        }
     }
 
     /// <summary>
@@ -232,6 +248,12 @@ public class Scrollbar : Entity
         base.OnMouseScrolled(delta);
         AmountFilled -= Math.Sign(delta) * WheelScrollStep;
     }
+
+    // The thumb Button sits on top of the track and claims mouse-over there instead of the
+    // Scrollbar itself (see the InterceptsMouseScroll wiring above) — this applies the same
+    // step so scrolling works identically whether the cursor is over the track or the thumb.
+    private void OnThumbMouseScrolled(object? sender, MouseScrolledEventArgs e)
+        => AmountFilled -= Math.Sign(e.Delta) * WheelScrollStep;
 
     private (float X, float Y, float W, float H) ComputeThumbRect(float amountFilled)
     {

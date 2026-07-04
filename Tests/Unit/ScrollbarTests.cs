@@ -354,6 +354,54 @@ public class ScrollbarTests
         Assert.AreEqual(0.5f, bar.AmountFilled);
     }
 
+    // Regression: the thumb is a clickable Button that sits on top of the track, so it — not
+    // the Scrollbar — is the top-most entity under the cursor while hovering it. Without its
+    // own wheel handling the wheel silently did nothing over the thumb.
+
+    [TestMethod]
+    public void ScrollWheel_OverThumb_Vertical_ChangesAmountFilled()
+    {
+        // Thumb at y=80..120 when amountFilled=0.5 (thumbProportion=0.2, height=200).
+        Scrollbar bar = MakeScrollable(amountFilled: 0.5f);
+        _mouse.ClientX = 5;
+        _mouse.ClientY = 100;
+        Frame(bar); // mouse enters (thumb is topmost), mouseIsOver = true
+        _mouse.WheelDelta = 1f;
+
+        Frame(bar);
+
+        Assert.AreEqual(0.4f, bar.AmountFilled, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void ScrollWheel_OverThumb_Horizontal_ChangesAmountFilled()
+    {
+        // Thumb at x=80..120 when amountFilled=0.5 (thumbProportion=0.2, width=200).
+        Scrollbar bar = Attach(new(200, 20, ScrollbarDirection.Horizontal, amountFilled: 0.5f, scrollOnMouseWheel: true));
+        _mouse.ClientX = 100;
+        _mouse.ClientY = 5;
+        Frame(bar);
+        _mouse.WheelDelta = -1f;
+
+        Frame(bar);
+
+        Assert.AreEqual(0.6f, bar.AmountFilled, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void ScrollOnMouseWheel_False_OverThumb_DoesNotScroll()
+    {
+        Scrollbar bar = Attach(new(20, 200, ScrollbarDirection.Vertical, amountFilled: 0.5f, scrollOnMouseWheel: false));
+        _mouse.ClientX = 5;
+        _mouse.ClientY = 100;
+        Frame(bar);
+        _mouse.WheelDelta = 1f;
+
+        Frame(bar);
+
+        Assert.AreEqual(0.5f, bar.AmountFilled);
+    }
+
     // -------------------------------------------------------------------------
     // Track-click scrolling
 
