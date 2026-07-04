@@ -130,6 +130,7 @@ public class TextInputBoxTests
     }
 
     private void Update(TextInputBox box) => box.Update(0.016);
+    private void Update(TextInputBox box, double elapsed) => box.Update(elapsed);
 
     // -------------------------------------------------------------------------
     // Initial state
@@ -1182,6 +1183,131 @@ public class TextInputBoxTests
     {
         internal TestInputBox() : base(0, 0, 200, 30) { }
         internal void FireClick() => OnLeftClicked();
+    }
+
+    // -------------------------------------------------------------------------
+    // Typematic key repeat (#294) — RepeatInitialDelay=0.5s, RepeatInterval=0.04s.
+
+    [TestMethod]
+    public void Update_HoldingCharacterKey_BeforeInitialDelay_DoesNotRepeat()
+    {
+        TextInputBox box = Make();
+        box.Focus();
+        _kb.Press(Keys.A);
+        Update(box, 0.016); // initial press types "a"
+        _kb.Release();
+        _kb.Hold(Keys.A);
+
+        Update(box, 0.4); // held for 0.4s total — under the 0.5s initial delay
+
+        Assert.AreEqual("a", box.Text);
+    }
+
+    [TestMethod]
+    public void Update_HoldingCharacterKey_PastInitialDelay_RepeatsCharacter()
+    {
+        TextInputBox box = Make();
+        box.Focus();
+        _kb.Press(Keys.A);
+        Update(box, 0.016);
+        _kb.Release();
+        _kb.Hold(Keys.A);
+        Update(box, 0.4);
+
+        Update(box, 0.2); // 0.6s total held — past the 0.5s initial delay
+
+        Assert.AreEqual("aa", box.Text);
+    }
+
+    [TestMethod]
+    public void Update_HoldingCharacterKey_AfterFirstRepeat_RepeatsAgainAtInterval()
+    {
+        TextInputBox box = Make();
+        box.Focus();
+        _kb.Press(Keys.A);
+        Update(box, 0.016);
+        _kb.Release();
+        _kb.Hold(Keys.A);
+        Update(box, 0.6); // first repeat fires here — "aa"
+
+        Update(box, 0.04); // one RepeatInterval later — third "a"
+
+        Assert.AreEqual("aaa", box.Text);
+    }
+
+    [TestMethod]
+    public void Update_ReleasingCharacterKey_StopsRepeat()
+    {
+        TextInputBox box = Make();
+        box.Focus();
+        _kb.Press(Keys.A);
+        Update(box, 0.016);
+        _kb.Release();
+        _kb.Hold(Keys.A);
+        Update(box, 0.4);
+        _kb.Release(); // key fully released before the initial delay elapses
+
+        Update(box, 0.2); // would have crossed the 0.5s threshold had the key still been held
+
+        Assert.AreEqual("a", box.Text);
+    }
+
+    [TestMethod]
+    public void Update_HoldingBackspace_PastInitialDelay_RepeatsDeletion()
+    {
+        TextInputBox box = Make("hello");
+        box.Focus();
+        _kb.Press(Keys.End);
+        Update(box);
+        _kb.Release();
+        _kb.Press(Keys.Backspace);
+        Update(box, 0.016); // initial press deletes "o" → "hell"
+        _kb.Release();
+        _kb.Hold(Keys.Backspace);
+
+        Update(box, 0.6); // past the initial delay → repeat deletes "l" → "hel"
+
+        Assert.AreEqual("hel", box.Text);
+    }
+
+    [TestMethod]
+    public void Update_HoldingLeft_PastInitialDelay_RepeatsCursorMovement()
+    {
+        TextInputBox box = Make("hello");
+        box.Focus();
+        _kb.Press(Keys.End);
+        Update(box);
+        _kb.Release();
+        _kb.Press(Keys.Left);
+        Update(box, 0.016); // initial press moves cursor to 4
+        _kb.Release();
+        _kb.Hold(Keys.Left);
+
+        Update(box, 0.6); // past the initial delay → repeat moves cursor to 3
+
+        Assert.AreEqual(3, box.CursorIndex);
+    }
+
+    [TestMethod]
+    public void Update_PressingDifferentKey_WhileHoldingFirst_SwitchesRepeatToNewKey()
+    {
+        // Matches physical-keyboard behaviour: the most recently pressed key is the one that
+        // repeats, even if an earlier key is technically still held down.
+        TextInputBox box = Make();
+        box.Focus();
+        _kb.Press(Keys.A);
+        Update(box, 0.016);
+        _kb.Release();
+        _kb.Hold(Keys.A);
+        Update(box, 0.4); // 0.4s held on A — not yet past the initial delay
+
+        _kb.Press(Keys.B); // switches the active repeat key to B
+        Update(box, 0.016);
+        _kb.Release();
+        _kb.Hold(Keys.B);
+        Update(box, 0.4); // 0.4s held on B — A's accumulated hold time must not carry over
+
+        Assert.AreEqual("ab", box.Text);
     }
 
     // -------------------------------------------------------------------------

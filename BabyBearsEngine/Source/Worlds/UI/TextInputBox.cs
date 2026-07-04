@@ -25,6 +25,14 @@ public class TextInputBox : Entity
     private const double CursorBlinkPeriod = 1.0;
     private const float CursorWidth = 2f;
 
+    // Typematic repeat: holding a repeatable key (navigation, Backspace/Delete, typed
+    // characters) waits RepeatInitialDelay before the first repeat, then re-fires every
+    // RepeatInterval — the standard "press once, pause, then repeat at a steady rate" OS
+    // text-field behaviour. Values are fixed rather than reading the OS's configured repeat
+    // delay/rate (see #294 for why: that needs an engine-level char/text-input event stream).
+    private const double RepeatInitialDelay = 0.5;
+    private const double RepeatInterval = 0.04;
+
     private static readonly Dictionary<Keys, (char Normal, char Shifted)> s_charMap = BuildCharMap();
 
     private readonly IGraphic? _backgroundGraphic;
@@ -40,6 +48,9 @@ public class TextInputBox : Entity
     private bool _hasFocus = false;
     private int _maxLength = 0;
     private bool _readOnly = false;
+    private Keys? _repeatKey = null;
+    private double _repeatTimer = 0.0;
+    private bool _repeatArmed = false;
 
     /// <param name="x">X position relative to the parent container.</param>
     /// <param name="y">Y position relative to the parent container.</param>
@@ -239,7 +250,7 @@ public class TextInputBox : Entity
 
         _blinkTimer += elapsed;
 
-        HandleKeyboardInput();
+        HandleKeyboardInput(elapsed);
         UpdateCursorBlink();
     }
 
@@ -283,7 +294,7 @@ public class TextInputBox : Entity
     /// </summary>
     protected virtual bool IsCharAllowed(char c) => true;
 
-    private void HandleKeyboardInput()
+    private void HandleKeyboardInput(double elapsed)
     {
         bool shift = Keyboard.KeyDown(Keys.LeftShift) || Keyboard.KeyDown(Keys.RightShift);
 
@@ -325,19 +336,19 @@ public class TextInputBox : Entity
 
         if (!_readOnly)
         {
-            if (Keyboard.KeyPressed(Keys.Backspace))
+            if (ConsumeKeyPress(Keys.Backspace, elapsed))
             {
                 HandleBackspace();
                 return;
             }
 
-            if (Keyboard.KeyPressed(Keys.Delete))
+            if (ConsumeKeyPress(Keys.Delete, elapsed))
             {
                 HandleDelete();
                 return;
             }
 
-            char? typed = GetTypedChar(shift);
+            char? typed = GetTypedChar(shift, elapsed);
             if (typed.HasValue && IsCharAllowed(typed.Value))
             {
                 TypeChar(typed.Value);
@@ -345,22 +356,65 @@ public class TextInputBox : Entity
             }
         }
 
-        if (Keyboard.KeyPressed(Keys.Left))
+        if (ConsumeKeyPress(Keys.Left, elapsed))
         {
             MoveLeft(shift);
         }
-        else if (Keyboard.KeyPressed(Keys.Right))
+        else if (ConsumeKeyPress(Keys.Right, elapsed))
         {
             MoveRight(shift);
         }
-        else if (Keyboard.KeyPressed(Keys.Home))
+        else if (ConsumeKeyPress(Keys.Home, elapsed))
         {
             MoveHome(shift);
         }
-        else if (Keyboard.KeyPressed(Keys.End))
+        else if (ConsumeKeyPress(Keys.End, elapsed))
         {
             MoveEnd(shift);
         }
+    }
+
+    /// <summary>
+    /// Returns true on the frame <paramref name="key"/> is first pressed, and again on every
+    /// typematic repeat once it has been held past <see cref="RepeatInitialDelay"/> — at a
+    /// steady <see cref="RepeatInterval"/> cadence thereafter. Only one key repeats at a time:
+    /// pressing a different repeatable key takes over as the active repeat key, matching how a
+    /// physical keyboard's repeat follows whichever key was pressed last.
+    /// </summary>
+    private bool ConsumeKeyPress(Keys key, double elapsed)
+    {
+        if (Keyboard.KeyPressed(key))
+        {
+            _repeatKey = key;
+            _repeatTimer = 0.0;
+            _repeatArmed = false;
+            return true;
+        }
+
+        if (_repeatKey != key)
+        {
+            return false;
+        }
+
+        if (!Keyboard.KeyDown(key))
+        {
+            _repeatKey = null;
+            return false;
+        }
+
+        _repeatTimer += elapsed;
+        double threshold = _repeatArmed ? RepeatInterval : RepeatInitialDelay;
+
+        if (_repeatTimer < threshold)
+        {
+            return false;
+        }
+
+        // Preserve the overshoot past the threshold rather than resetting to zero, so the
+        // repeat cadence doesn't drift when frame times don't divide it evenly.
+        _repeatTimer -= threshold;
+        _repeatArmed = true;
+        return true;
     }
 
     private void HandleBackspace()
@@ -712,11 +766,11 @@ public class TextInputBox : Entity
         _cursorGraphic.Visible = _blinkTimer % CursorBlinkPeriod < CursorBlinkPeriod / 2.0;
     }
 
-    private static char? GetTypedChar(bool shift)
+    private char? GetTypedChar(bool shift, double elapsed)
     {
         foreach (var (key, chars) in s_charMap)
         {
-            if (Keyboard.KeyPressed(key))
+            if (ConsumeKeyPress(key, elapsed))
             {
                 return shift ? chars.Shifted : chars.Normal;
             }
