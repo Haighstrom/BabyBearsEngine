@@ -288,6 +288,40 @@ public class RandomisationTests
         }
     }
 
+    [TestMethod]
+    public void RandomElement_IListSource_ReturnsElementFromList()
+    {
+        IList<string> list = new List<string> { "X", "Y", "Z" };
+
+        for (int i = 0; i < 50; i++)
+        {
+            string result = list.RandomElement();
+            Assert.Contains(result, list);
+        }
+    }
+
+    [TestMethod]
+    public void RandomElement_EnumerableSource_ReturnsElementFromSequence()
+    {
+        List<int> source = [1, 2, 3, 4, 5];
+        IEnumerable<int> lazySequence = source.Where(n => n > 2);
+
+        for (int i = 0; i < 50; i++)
+        {
+            int result = lazySequence.RandomElement();
+            Assert.IsGreaterThan(2, result);
+            Assert.Contains(result, source);
+        }
+    }
+
+    [TestMethod]
+    public void RandomElement_EmptyEnumerableSource_Throws()
+    {
+        IEnumerable<int> empty = Enumerable.Empty<int>();
+
+        Assert.ThrowsExactly<ArgumentException>(() => empty.RandomElement());
+    }
+
     // ─── Colour ───
 
     [TestMethod]

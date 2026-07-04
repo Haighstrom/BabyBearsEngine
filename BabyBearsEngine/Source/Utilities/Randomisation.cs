@@ -75,6 +75,14 @@ public static class Randomisation
     /// <summary>Returns a uniformly-selected element from <paramref name="list"/>.</summary>
     public static T RandomElement<T>(this IReadOnlyList<T> list) => Source.Choose(list);
 
+    /// <summary>
+    /// Returns a uniformly-selected element from <paramref name="items"/>. Fallback for sources not
+    /// statically typed as <see cref="IReadOnlyList{T}"/> (e.g. <see cref="IList{T}"/> variables or
+    /// LINQ results): indexable collections are sampled in O(1) without allocation; other sequences
+    /// are enumerated once into a buffer first.
+    /// </summary>
+    public static T RandomElement<T>(this IEnumerable<T> items) => Source.Choose(items);
+
     // ─── Distributions ───
 
     /// <summary>

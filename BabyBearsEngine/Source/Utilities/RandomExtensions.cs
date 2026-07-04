@@ -117,6 +117,33 @@ public static class RandomExtensions
         return items[random.Int(0, items.Count)];
     }
 
+    /// <summary>
+    /// Returns a uniformly-selected element from <paramref name="items"/>. Fallback for sources not
+    /// statically typed as <see cref="IReadOnlyList{T}"/> (e.g. <see cref="IList{T}"/> variables or
+    /// LINQ results): indexable collections are sampled in O(1) without allocation; other sequences
+    /// are enumerated once into a buffer first.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="items"/> is empty.</exception>
+    public static T Choose<T>(this IRandom random, IEnumerable<T> items)
+    {
+        if (items is IReadOnlyList<T> readOnlyList)
+        {
+            return random.Choose(readOnlyList);
+        }
+
+        if (items is IList<T> list)
+        {
+            if (list.Count == 0)
+            {
+                throw new ArgumentException("Cannot choose from an empty collection.", nameof(items));
+            }
+            return list[random.Int(0, list.Count)];
+        }
+
+        List<T> buffer = [.. items];
+        return random.Choose((IReadOnlyList<T>)buffer);
+    }
+
     /// <summary>Returns a uniformly-selected value of enum type <typeparamref name="T"/>.</summary>
     public static T Enum<T>(this IRandom random)
         where T : struct, Enum
