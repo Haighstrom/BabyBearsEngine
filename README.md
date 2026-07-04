@@ -141,7 +141,7 @@ play.MouseEntered += (_, _) => play.Text = "Let's go!";
 Add(play);
 ```
 
-Mouse events distinguish enter/exit, press, click, double-click, and a 0.5s hover dwell. By default only the top-most control under the cursor receives a click; set `ClickThrough = true` to forward to lower controls.
+Mouse events distinguish enter/exit, press, click, double-click, and a 0.5s hover dwell. By default only the top-most control under the cursor receives a click; set `play.ClickSettings.ClickThrough = true` to forward to lower controls.
 
 ### Input
 

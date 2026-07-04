@@ -172,4 +172,40 @@ public class EntityTests
 
         Assert.IsTrue(asInterface.Disabled);
     }
+
+    // ClickSettings
+
+    [TestMethod]
+    public void ClickSettings_NotClickable_Throws()
+    {
+        var e = new Entity(0, 0, 10, 10, clickable: false);
+
+        Assert.ThrowsExactly<InvalidOperationException>(() => _ = e.ClickSettings);
+    }
+
+    [TestMethod]
+    public void ClickSettings_Clickable_ReturnsSettings()
+    {
+        var e = new Entity(0, 0, 10, 10, clickable: true);
+
+        Assert.IsNotNull(e.ClickSettings);
+    }
+
+    [TestMethod]
+    public void ClickSettings_Clickable_SettingsRoundTripThroughInterface()
+    {
+        var e = new Entity(0, 0, 10, 10, clickable: true);
+
+        e.ClickSettings.ClickThrough = true;
+        e.ClickSettings.DoubleClickTriggersSingleClick = false;
+        e.ClickSettings.DoubleClickWindow = 0.25;
+        e.ClickSettings.HoverDelay = 0.1;
+        e.ClickSettings.InterceptsMouseScroll = true;
+
+        Assert.IsTrue(e.ClickSettings.ClickThrough);
+        Assert.IsFalse(e.ClickSettings.DoubleClickTriggersSingleClick);
+        Assert.AreEqual(0.25, e.ClickSettings.DoubleClickWindow);
+        Assert.AreEqual(0.1, e.ClickSettings.HoverDelay);
+        Assert.IsTrue(e.ClickSettings.InterceptsMouseScroll);
+    }
 }

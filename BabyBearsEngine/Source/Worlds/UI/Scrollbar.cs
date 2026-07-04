@@ -58,7 +58,7 @@ public class Scrollbar : Entity
 
         if (scrollOnMouseWheel)
         {
-            InterceptsMouseScroll = true;
+            ClickSettings.InterceptsMouseScroll = true;
         }
 
         Add(theme.TrackFactory(new Rect(0, 0, width, height)));
@@ -73,7 +73,7 @@ public class Scrollbar : Entity
         // moused-over there and the wheel would silently do nothing over the thumb.
         if (scrollOnMouseWheel)
         {
-            _thumb.InterceptsMouseScroll = true;
+            _thumb.ClickSettings.InterceptsMouseScroll = true;
             _thumb.MouseScrolled += OnThumbMouseScrolled;
         }
 
@@ -130,7 +130,7 @@ public class Scrollbar : Entity
 
         if (scrollOnMouseWheel)
         {
-            InterceptsMouseScroll = true;
+            ClickSettings.InterceptsMouseScroll = true;
         }
 
         (float tx, float ty, float tw, float th) = ComputeThumbRect(_amountFilled);
@@ -139,7 +139,7 @@ public class Scrollbar : Entity
 
         if (scrollOnMouseWheel)
         {
-            _thumb.InterceptsMouseScroll = true;
+            _thumb.ClickSettings.InterceptsMouseScroll = true;
             _thumb.MouseScrolled += OnThumbMouseScrolled;
         }
     }
@@ -183,7 +183,7 @@ public class Scrollbar : Entity
 
     /// <summary>
     /// How much <see cref="AmountFilled"/> changes per scroll wheel notch when
-    /// <see cref="Entity.InterceptsMouseScroll"/> is true. Defaults to 0.1 (10% of the track).
+    /// <see cref="IClickSettings.InterceptsMouseScroll"/> is true. Defaults to 0.1 (10% of the track).
     /// Scrolling up decreases <see cref="AmountFilled"/>; scrolling down increases it.
     /// </summary>
     /// <remarks>
@@ -191,7 +191,7 @@ public class Scrollbar : Entity
     /// scrollbars respond to vertical wheel input — this is by design, since most mice have only
     /// a vertical wheel and users expect either scrollbar under the cursor to react. There is no
     /// separate horizontal-wheel binding; a vertical wheel tick adjusts whichever scrollbar
-    /// claims the scroll event via <see cref="Entity.InterceptsMouseScroll"/>.
+    /// claims the scroll event via <see cref="IClickSettings.InterceptsMouseScroll"/>.
     /// </remarks>
     public float WheelScrollStep { get; set; } = 0.1f;
 

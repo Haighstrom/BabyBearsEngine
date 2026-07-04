@@ -92,10 +92,8 @@ internal class ClickDemoWorld : DemoWorld
         Add(MakeLabel(x, y + 28, SectionW, 20, "Click in the overlapping area:"));
 
         Button orange = new(x, y + 55, 190, 85, ButtonTheme.FromColour(new Colour(255, 150, 50)), "Orange");
-        Button blue = new(x + 130, y + 100, 190, 85, ButtonTheme.FromColour(new Colour(80, 120, 255)), "Blue")
-        {
-            ClickThrough = true,
-        };
+        Button blue = new(x + 130, y + 100, 190, 85, ButtonTheme.FromColour(new Colour(80, 120, 255)), "Blue");
+        blue.ClickSettings.ClickThrough = true;
 
         TextGraphic orangeCount = MakeLabel(x, y + 200, SectionW, 28, "Orange: 0 clicks", 15);
         TextGraphic blueCount = MakeLabel(x + 130, y + 200, SectionW - 130, 28, "Blue: 0 clicks", 15);

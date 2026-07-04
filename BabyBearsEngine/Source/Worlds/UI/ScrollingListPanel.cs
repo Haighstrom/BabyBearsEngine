@@ -60,7 +60,7 @@ public class ScrollingListPanel : Entity
 
         if (scrollOnMouseWheel)
         {
-            InterceptsMouseScroll = true;
+            ClickSettings.InterceptsMouseScroll = true;
         }
     }
 
@@ -90,7 +90,7 @@ public class ScrollingListPanel : Entity
 
         if (scrollOnMouseWheel)
         {
-            InterceptsMouseScroll = true;
+            ClickSettings.InterceptsMouseScroll = true;
         }
     }
 

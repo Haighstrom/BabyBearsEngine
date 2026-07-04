@@ -12,9 +12,9 @@ namespace BabyBearsEngine.Worlds;
 /// nine event subscriptions from controller-event → entity-method. These subscriptions are
 /// installed once at construction and are never unwired — the controller is private and
 /// inseparable from this entity for its whole lifetime: the two are constructed together, share
-/// a parent-child link, and are released to GC together. Don't reparent the controller, and
-/// don't read or store it externally — there's no supported path that would survive the entity.
-/// Removing the entity from its tree leaves the controller as a child of the (now-detached)
+/// a parent-child link, and are released to GC together. Don't reparent the controller. The only
+/// supported external view of it is <see cref="ClickSettings"/>, which exposes its settings but not
+/// the controller itself. Removing the entity from its tree leaves the controller as a child of the (now-detached)
 /// entity, so re-adding the entity re-introduces the controller and the subscriptions still
 /// point at the same entity methods.
 /// </remarks>
@@ -57,86 +57,11 @@ public class Entity : ContainerEntity, IMouseInteractable
     }
 
     /// <summary>
-    /// When true, mouse-over state propagates through this entity to overlapping clickable
-    /// entities beneath it rather than stopping here. Only meaningful when clickable.
+    /// This entity's mouse-interaction settings (click-through, double-click, hover delay, scroll
+    /// interception).
     /// </summary>
-    public bool ClickThrough
-    {
-        get => _clickController?.ClickThrough ?? false;
-        set
-        {
-            if (_clickController is not null)
-            {
-                _clickController.ClickThrough = value;
-            }
-        }
-    }
-
-    /// <summary>
-    /// When true, a double-click also fires <see cref="LeftClicked"/> for the second click
-    /// in addition to <see cref="LeftDoubleClicked"/>. Requires <c>clickable: true</c>.
-    /// </summary>
-    public bool DoubleClickTriggersSingleClick
-    {
-        get => _clickController?.DoubleClickTriggersSingleClick ?? true;
-        set
-        {
-            if (_clickController is not null)
-            {
-                _clickController.DoubleClickTriggersSingleClick = value;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Maximum time in seconds between two left-clicks for them to count as a double-click.
-    /// Default is 0.5 seconds. Requires <c>clickable: true</c>.
-    /// </summary>
-    public double DoubleClickWindow
-    {
-        get => _clickController?.DoubleClickWindow ?? 0.5;
-        set
-        {
-            if (_clickController is not null)
-            {
-                _clickController.DoubleClickWindow = value;
-            }
-        }
-    }
-
-    /// <summary>
-    /// When true and the mouse is over this entity, scroll wheel movement fires
-    /// <see cref="MouseScrolled"/> and sets <see cref="MouseSolver.WheelScrollConsumed"/>,
-    /// preventing world-level scroll handlers from also reacting to the wheel that frame.
-    /// Requires <c>clickable: true</c>.
-    /// </summary>
-    public bool InterceptsMouseScroll
-    {
-        get => _clickController?.InterceptsMouseScroll ?? false;
-        set
-        {
-            if (_clickController is not null)
-            {
-                _clickController.InterceptsMouseScroll = value;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Seconds the cursor must rest over this entity before <see cref="MouseHovered"/> fires.
-    /// Default is 0.5. Set to 0 to fire immediately on mouse enter. Requires <c>clickable: true</c>.
-    /// </summary>
-    public double HoverDelay
-    {
-        get => _clickController?.HoverDelay ?? throw new InvalidOperationException("HoverDelay requires clickable: true.");
-        set
-        {
-            if (_clickController is not null)
-            {
-                _clickController.HoverDelay = value;
-            }
-        }
-    }
+    /// <exception cref="InvalidOperationException">Thrown when this entity was not constructed with <c>clickable: true</c>.</exception>
+    public IClickSettings ClickSettings => _clickController ?? throw new InvalidOperationException("This entity hasn't been constructed with clickable: true, so it has no click settings.");
 
     /// <summary>
     /// True when this entity was constructed with <c>clickable: true</c> and therefore owns a
@@ -191,7 +116,7 @@ public class Entity : ContainerEntity, IMouseInteractable
     /// <summary>Raised when a left click completes on this entity (pressed and released while over it). Requires <c>clickable: true</c>.</summary>
     public event EventHandler? LeftClicked;
 
-    /// <summary>Raised when two left-clicks occur within <see cref="DoubleClickWindow"/> seconds of each other. Requires <c>clickable: true</c>.</summary>
+    /// <summary>Raised when two left-clicks occur within <see cref="IClickSettings.DoubleClickWindow"/> seconds of each other. Requires <c>clickable: true</c>.</summary>
     public event EventHandler? LeftDoubleClicked;
 
     /// <summary>Raised when the left mouse button is pressed while the cursor is over this entity. Requires <c>clickable: true</c>.</summary>
@@ -203,13 +128,13 @@ public class Entity : ContainerEntity, IMouseInteractable
     /// <summary>Raised when the cursor leaves this entity's bounds. Requires <c>clickable: true</c>.</summary>
     public event EventHandler? MouseExited;
 
-    /// <summary>Raised when the cursor has rested over this entity for <see cref="HoverDelay"/> seconds. Requires <c>clickable: true</c>.</summary>
+    /// <summary>Raised when the cursor has rested over this entity for <see cref="IClickSettings.HoverDelay"/> seconds. Requires <c>clickable: true</c>.</summary>
     public event EventHandler? MouseHovered;
 
     /// <summary>Raised when the cursor moves off this entity after a hover. Requires <c>clickable: true</c>.</summary>
     public event EventHandler? MouseHoverStopped;
 
-    /// <summary>Raised when the scroll wheel moves while the cursor is over this entity and <see cref="InterceptsMouseScroll"/> is true. Requires <c>clickable: true</c>.</summary>
+    /// <summary>Raised when the scroll wheel moves while the cursor is over this entity and <see cref="IClickSettings.InterceptsMouseScroll"/> is true. Requires <c>clickable: true</c>.</summary>
     public event EventHandler<MouseScrolledEventArgs>? MouseScrolled;
 
     /// <summary>Raised when a right click completes on this entity (pressed and released while over it). Requires <c>clickable: true</c>.</summary>

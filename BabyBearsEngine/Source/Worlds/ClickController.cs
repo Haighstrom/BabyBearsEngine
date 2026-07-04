@@ -19,7 +19,7 @@ namespace BabyBearsEngine.Worlds;
 /// </summary>
 /// <param name="target">The entity to hit-test each frame.</param>
 /// <param name="timeToTriggerHover">Seconds the mouse must remain over the region before <see cref="Hovered"/> is raised.</param>
-internal sealed class ClickController(IMouseInteractable target, double timeToTriggerHover = 0.5) : AddableBase, IUpdateable, IClickController
+internal sealed class ClickController(IMouseInteractable target, double timeToTriggerHover = 0.5) : AddableBase, IUpdateable, IClickController, IClickSettings
 {
     private enum ClickState
     {
