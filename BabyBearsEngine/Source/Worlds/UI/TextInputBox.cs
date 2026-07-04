@@ -718,6 +718,25 @@ public class TextInputBox : Entity
         return text.Length;
     }
 
+    /// <summary>
+    /// Clamps a selection highlight's raw (unclamped) start/end pixel positions to the content
+    /// area's bounds, returning the highlight's final X and width.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="EnsureScrollOffset"/> only ever keeps the cursor in view, not the other end of
+    /// the selection (the anchor) — e.g. Shift+Left (or a mouse drag) run past the left edge of
+    /// the visible window jumps <c>_scrollOffset</c> back to follow the cursor, leaving the
+    /// anchor positioned deep into the now-scrolled-off text to the right. Without clamping here,
+    /// that measures to a pixel position beyond the box's own width and the highlight pokes out
+    /// past the right edge.
+    /// </remarks>
+    internal static (float X, float Width) ClampSelectionBounds(float rawStartX, float rawEndX, float contentLeft, float contentRight)
+    {
+        float startX = Math.Clamp(rawStartX, contentLeft, contentRight);
+        float endX = Math.Clamp(rawEndX, contentLeft, contentRight);
+        return (startX, Math.Max(0f, endX - startX));
+    }
+
     private void MoveHome(bool shift)
     {
         _cursorIndex = 0;
@@ -772,13 +791,15 @@ public class TextInputBox : Entity
                 int visStart = Math.Max(SelectionStart, _scrollOffset);
                 int visEnd = SelectionEnd;
 
-                float selStartX = ContentPadding + _textGraphic.MeasureString(
+                float rawStartX = ContentPadding + _textGraphic.MeasureString(
                     _text.Substring(_scrollOffset, Math.Max(0, visStart - _scrollOffset))).X;
-                float selEndX = ContentPadding + _textGraphic.MeasureString(
+                float rawEndX = ContentPadding + _textGraphic.MeasureString(
                     _text.Substring(_scrollOffset, Math.Max(0, visEnd - _scrollOffset))).X;
 
+                (float selStartX, float selWidth) = ClampSelectionBounds(rawStartX, rawEndX, ContentPadding, Width - ContentPadding);
+
                 _selectionGraphic.X = selStartX;
-                _selectionGraphic.Width = Math.Max(0f, selEndX - selStartX);
+                _selectionGraphic.Width = selWidth;
                 _selectionGraphic.Visible = true;
             }
             else

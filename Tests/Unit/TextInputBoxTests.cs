@@ -1617,4 +1617,56 @@ public class TextInputBoxTests
 
         Assert.AreEqual(0, index);
     }
+
+    // -------------------------------------------------------------------------
+    // ClampSelectionBounds — selection highlight clamped to the content area (regression: the
+    // highlight poked out past the right edge when the selection's anchor sat in text that had
+    // since scrolled out of view, e.g. Shift+Left or a mouse drag run past the scrolled window).
+
+    [TestMethod]
+    public void ClampSelectionBounds_BothWithinBounds_ReturnsUnclamped()
+    {
+        (float x, float width) = TextInputBox.ClampSelectionBounds(rawStartX: 10f, rawEndX: 50f, contentLeft: 4f, contentRight: 196f);
+
+        Assert.AreEqual(10f, x);
+        Assert.AreEqual(40f, width);
+    }
+
+    [TestMethod]
+    public void ClampSelectionBounds_EndBeyondRightEdge_ClampsEndToContentRight()
+    {
+        // The scenario reported: selecting backwards from deep in a long, scrolled string —
+        // the anchor (rawEndX) measures far past the box's own width.
+        (float x, float width) = TextInputBox.ClampSelectionBounds(rawStartX: 10f, rawEndX: 500f, contentLeft: 4f, contentRight: 196f);
+
+        Assert.AreEqual(10f, x);
+        Assert.AreEqual(186f, width); // 196 - 10, not 500 - 10
+    }
+
+    [TestMethod]
+    public void ClampSelectionBounds_StartBeforeLeftEdge_ClampsStartToContentLeft()
+    {
+        (float x, float width) = TextInputBox.ClampSelectionBounds(rawStartX: -50f, rawEndX: 100f, contentLeft: 4f, contentRight: 196f);
+
+        Assert.AreEqual(4f, x);
+        Assert.AreEqual(96f, width); // 100 - 4
+    }
+
+    [TestMethod]
+    public void ClampSelectionBounds_BothBeyondRightEdge_ReturnsZeroWidth()
+    {
+        (float x, float width) = TextInputBox.ClampSelectionBounds(rawStartX: 300f, rawEndX: 500f, contentLeft: 4f, contentRight: 196f);
+
+        Assert.AreEqual(196f, x);
+        Assert.AreEqual(0f, width);
+    }
+
+    [TestMethod]
+    public void ClampSelectionBounds_BothBeforeLeftEdge_ReturnsZeroWidth()
+    {
+        (float x, float width) = TextInputBox.ClampSelectionBounds(rawStartX: -100f, rawEndX: -50f, contentLeft: 4f, contentRight: 196f);
+
+        Assert.AreEqual(4f, x);
+        Assert.AreEqual(0f, width);
+    }
 }
