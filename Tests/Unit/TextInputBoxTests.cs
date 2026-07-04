@@ -131,10 +131,18 @@ public class TextInputBoxTests
     // and drag-selection can be driven through real Update()/MouseSolver plumbing.
     private static TextInputBox MakeDraggable(string initialText = "")
     {
+        (TextInputBox box, _) = MakeDraggableWithGraphic(initialText);
+        return box;
+    }
+
+    // Same as MakeDraggable, but also returns the StubTextGraphic so tests can inspect what
+    // TextInputBox set on it directly (e.g. NumCharsToDraw), not just the box's own public state.
+    private static (TextInputBox Box, StubTextGraphic TextGraphic) MakeDraggableWithGraphic(string initialText = "")
+    {
         StubTextGraphic textGraphic = new() { MeasureWidthOverride = TenPixelsPerChar };
         TextInputBox box = new(0, 0, 200, 30, textGraphic) { Parent = new FakeContainer() };
         box.Text = initialText;
-        return box;
+        return (box, textGraphic);
     }
 
     private sealed class FakeContainer : IContainer
@@ -1693,5 +1701,61 @@ public class TextInputBoxTests
 
         Assert.AreEqual(4f, x);
         Assert.AreEqual(0f, width);
+    }
+
+    // -------------------------------------------------------------------------
+    // NumCharsToDraw bounded to what actually fits (regression: scrolling backward past the
+    // current scroll offset — e.g. Home/repeated Left, or a mouse-drag retreat past the left
+    // edge — snapped _scrollOffset down without checking whether the string's remaining tail
+    // still fit the box. TextGraphic's NumCharsToDraw defaults to unbounded, so it treated the
+    // entire remainder (all the way to Text.Length) as "should be visible" and warned about
+    // whatever tail overflowed — even though that overflow is the box's normal, expected state).
+
+    [TestMethod]
+    public void EnsureScrollOffset_CursorJumpsToStart_BoundsNumCharsToDrawToWhatFits()
+    {
+        (TextInputBox box, StubTextGraphic textGraphic) = MakeDraggableWithGraphic("abcdefghijklmnopqrstuvwxyz0123456789"); // 36 chars
+        box.Focus();
+        _kb.Press(Keys.End);
+        Update(box); // cursor -> 36, scrollOffset advances to ~17 to keep it visible
+        _kb.Release();
+
+        // Home snaps the cursor (and, via EnsureScrollOffset's first branch, _scrollOffset)
+        // straight to 0 — with no check that the remaining 36 characters (360px) fit the box's
+        // 192px content width.
+        _kb.Press(Keys.Home);
+        Update(box);
+        _kb.Release();
+
+        Assert.AreEqual(0, box.ScrollOffset);
+        Assert.AreEqual(19, textGraphic.NumCharsToDraw); // floor(192px / 10px per char)
+    }
+
+    [TestMethod]
+    public void ExtendSelectionToMouse_DragPastLeftEdge_BoundsNumCharsToDrawToWhatFits()
+    {
+        (TextInputBox box, StubTextGraphic textGraphic) = MakeDraggableWithGraphic("abcdefghijklmnopqrstuvwxyz0123456789"); // 36 chars
+        box.Focus();
+        _kb.Press(Keys.End);
+        Update(box); // cursor -> 36, scrollOffset advances to ~17 to keep it visible
+        _kb.Release();
+
+        // Press inside the visible text, then hold the drag past the left edge for enough
+        // frames to retreat _scrollOffset all the way back to 0.
+        _mouse.ClientX = 4;
+        Frame(box);
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+        Frame(box);
+        _mouse.LeftPressed = false;
+
+        _mouse.ClientX = 0;
+        for (int frame = 0; frame < 30; frame++) // far more than the ~17 scrollOffset needs
+        {
+            Frame(box);
+        }
+
+        Assert.AreEqual(0, box.ScrollOffset);
+        Assert.AreEqual(19, textGraphic.NumCharsToDraw);
     }
 }

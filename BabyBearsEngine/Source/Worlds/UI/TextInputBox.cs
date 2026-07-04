@@ -793,6 +793,15 @@ public class TextInputBox : Entity
 
         _textGraphic.Text = _text;
 
+        // EnsureScrollOffset only ever guarantees the cursor fits within the visible width — it
+        // says nothing about how much text remains after the cursor. TextGraphic's NumCharsToDraw
+        // defaults to unbounded, so without this it would treat the entire remainder of the
+        // string (all the way to _text.Length) as "should be visible" and flag a spurious
+        // truncation warning for whatever tail overflows the box — which is the expected, normal
+        // state of a scrolled box, not lost content. Bounding it to however many characters
+        // actually fit keeps the warning meaningful for genuine over-sized text.
+        _textGraphic.NumCharsToDraw = ComputeVisibleCharCount();
+
         // Cursor X — distance from left edge of the text area to the cursor
         float cursorX = ContentPadding + _textGraphic.MeasureString(
             _text.Substring(_scrollOffset, Math.Max(0, _cursorIndex - _scrollOffset))).X;
@@ -849,6 +858,35 @@ public class TextInputBox : Entity
             _scrollOffset++;
             cursorX = _textGraphic.MeasureString(_text.Substring(_scrollOffset, _cursorIndex - _scrollOffset)).X;
         }
+    }
+
+    // How many characters starting at _scrollOffset actually fit within the box's content
+    // width. Mirrors EnsureScrollOffset's incremental measuring, but counts forward from the
+    // scroll offset rather than back from the cursor, since the cursor may sit well before the
+    // end of a long string and isn't a reliable bound on how much trailing text still shows.
+    private int ComputeVisibleCharCount()
+    {
+        if (_textGraphic is null)
+        {
+            return 0;
+        }
+
+        float availableWidth = Width - 2f * ContentPadding;
+        int remaining = _text.Length - _scrollOffset;
+        int count = 0;
+
+        while (count < remaining)
+        {
+            float width = _textGraphic.MeasureString(_text.Substring(_scrollOffset, count + 1)).X;
+            if (width > availableWidth)
+            {
+                break;
+            }
+
+            count++;
+        }
+
+        return count;
     }
 
     private void UpdateCursorBlink()
