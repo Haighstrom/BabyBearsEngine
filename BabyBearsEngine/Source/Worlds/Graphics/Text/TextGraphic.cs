@@ -810,7 +810,17 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
                     }
                 }
 
-                charLeft += charAdvance;
+                // Characters before FirstCharToDraw are excluded from layout entirely, not just
+                // hidden — otherwise the first visible character would render at the pen position
+                // it would have occupied in the full, unfiltered string (e.g. far to the right for
+                // a long scrolled string), rather than at this line's own origin. Characters after
+                // the visible window still advance charLeft as before: nothing renders there, but
+                // decoration-span bookkeeping above still needs a consistent pen position.
+                if (globalCharIndex >= _firstCharToDraw)
+                {
+                    charLeft += charAdvance;
+                }
+
                 globalCharIndex++;
             }
 
