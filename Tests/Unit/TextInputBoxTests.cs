@@ -25,23 +25,23 @@ public class TextInputBoxTests
         public bool AllButtonsPressed(params MouseButton[] buttons) => false;
         public bool AllButtonsReleased(IEnumerable<MouseButton> buttons) => false;
         public bool AllButtonsReleased(params MouseButton[] buttons) => false;
-        public bool LeftDown => false;
-        public bool MiddleDown => false;
-        public bool RightDown => false;
-        public bool LeftUp => true;
-        public bool MiddleUp => true;
-        public bool RightUp => true;
-        public bool LeftPressed => false;
-        public bool MiddlePressed => false;
-        public bool RightPressed => false;
-        public bool LeftReleased => false;
-        public bool MiddleReleased => false;
-        public bool RightReleased => false;
-        public int ClientX => 0;
-        public int ClientY => 0;
-        public float WheelDelta => 0f;
-        public int XDelta => 0;
-        public int YDelta => 0;
+        public bool LeftDown { get; set; } = false;
+        public bool MiddleDown { get; set; } = false;
+        public bool RightDown { get; set; } = false;
+        public bool LeftUp { get; set; } = true;
+        public bool MiddleUp { get; set; } = true;
+        public bool RightUp { get; set; } = true;
+        public bool LeftPressed { get; set; } = false;
+        public bool MiddlePressed { get; set; } = false;
+        public bool RightPressed { get; set; } = false;
+        public bool LeftReleased { get; set; } = false;
+        public bool MiddleReleased { get; set; } = false;
+        public bool RightReleased { get; set; } = false;
+        public int ClientX { get; set; } = 0;
+        public int ClientY { get; set; } = 0;
+        public float WheelDelta { get; set; } = 0f;
+        public int XDelta { get; set; } = 0;
+        public int YDelta { get; set; } = 0;
     }
 
     // Fake keyboard where individual keys can be held or pressed per-call
@@ -99,24 +99,40 @@ public class TextInputBoxTests
     }
 
     private FakeKeyboard _kb = null!;
+    private FakeMouse _mouse = null!;
     private FakeClipboard _clipboard = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _kb = new FakeKeyboard();
+        _mouse = new FakeMouse();
         _clipboard = new FakeClipboard();
         EngineConfiguration.KeyboardService = _kb;
-        EngineConfiguration.MouseService = new FakeMouse();
+        EngineConfiguration.MouseService = _mouse;
         EngineConfiguration.ClipboardService = _clipboard;
     }
 
     [TestCleanup]
-    public void Cleanup() => EngineConfiguration.Reset();
+    public void Cleanup()
+    {
+        EngineConfiguration.Reset();
+        MouseSolver.Reset();
+    }
 
     private static TextInputBox Make(string initialText = "")
     {
         TextInputBox box = new(0, 0, 200, 30);
+        box.Text = initialText;
+        return box;
+    }
+
+    // Box wired with a working ITextGraphic (10px/char) and a root parent, so mouse hit-testing
+    // and drag-selection can be driven through real Update()/MouseSolver plumbing.
+    private static TextInputBox MakeDraggable(string initialText = "")
+    {
+        StubTextGraphic textGraphic = new() { MeasureWidthOverride = TenPixelsPerChar };
+        TextInputBox box = new(0, 0, 200, 30, textGraphic) { Parent = new FakeContainer() };
         box.Text = initialText;
         return box;
     }
@@ -131,6 +147,18 @@ public class TextInputBoxTests
 
     private void Update(TextInputBox box) => box.Update(0.016);
     private void Update(TextInputBox box, double elapsed) => box.Update(elapsed);
+
+    // Simulates one full frame: entity update (registers with MouseSolver) then MouseSolver.Update().
+    private static void Frame(TextInputBox box, double elapsed = 0.016)
+    {
+        box.Update(elapsed);
+        MouseSolver.Update();
+    }
+
+    // ContentPadding is 4, and the box is at X=0 with a FakeContainer root (identity coordinates),
+    // so the text area's left edge sits at screen X=4. With TenPixelsPerChar this places the mouse
+    // squarely within character index's slot.
+    private void SetMouseAtCharacterIndex(int index) => _mouse.ClientX = index * 10 + 4;
 
     // -------------------------------------------------------------------------
     // Initial state
@@ -1165,16 +1193,16 @@ public class TextInputBoxTests
     }
 
     // -------------------------------------------------------------------------
-    // OnLeftClicked → Focus
+    // OnLeftPressed → Focus (#290: focus and caret placement moved from release to press,
+    // so a drag-select can extend from the press point)
 
     [TestMethod]
-    public void OnLeftClicked_GainsFocus()
+    public void OnLeftPressed_GainsFocus()
     {
-        TextInputBox box = Make();
-        // Internal constructor exposes OnLeftClicked through the protected method
+        // Internal constructor exposes OnLeftPressed through the protected method
         TestInputBox test = new();
 
-        test.FireClick();
+        test.FirePress();
 
         Assert.IsTrue(test.HasFocus);
     }
@@ -1182,7 +1210,223 @@ public class TextInputBoxTests
     private sealed class TestInputBox : TextInputBox
     {
         internal TestInputBox() : base(0, 0, 200, 30) { }
-        internal void FireClick() => OnLeftClicked();
+        internal void FirePress() => OnLeftPressed();
+    }
+
+    // -------------------------------------------------------------------------
+    // Click-drag text selection (#290)
+
+    [TestMethod]
+    public void Drag_PressWithoutMove_LeavesNoSelection()
+    {
+        TextInputBox box = MakeDraggable("abcdefghij");
+        SetMouseAtCharacterIndex(3);
+        Frame(box); // mouse enters, mouseIsOver = true
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+
+        Frame(box); // OnLeftPressed fires: anchor = cursor = 3
+        _mouse.LeftPressed = false;
+        Frame(box); // held, no movement
+
+        _mouse.LeftDown = false;
+        _mouse.LeftReleased = true;
+        Frame(box); // release
+
+        Assert.IsFalse(box.HasSelection);
+        Assert.AreEqual(3, box.CursorIndex);
+    }
+
+    [TestMethod]
+    public void Drag_PressGrantsFocus()
+    {
+        TextInputBox box = MakeDraggable("abcdefghij");
+        SetMouseAtCharacterIndex(3);
+        Frame(box);
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+
+        Frame(box);
+
+        Assert.IsTrue(box.HasFocus);
+    }
+
+    [TestMethod]
+    public void Drag_Rightward_ExtendsSelectionForward()
+    {
+        TextInputBox box = MakeDraggable("abcdefghij");
+        SetMouseAtCharacterIndex(2);
+        Frame(box);
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+        Frame(box); // press anchors at index 2
+        _mouse.LeftPressed = false;
+
+        SetMouseAtCharacterIndex(7);
+        Frame(box); // drag to index 7
+
+        Assert.IsTrue(box.HasSelection);
+        Assert.AreEqual(2, box.SelectionStart);
+        Assert.AreEqual(7, box.SelectionEnd);
+        Assert.AreEqual(7, box.CursorIndex);
+    }
+
+    [TestMethod]
+    public void Drag_Leftward_ExtendsSelectionBackward()
+    {
+        TextInputBox box = MakeDraggable("abcdefghij");
+        SetMouseAtCharacterIndex(7);
+        Frame(box);
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+        Frame(box); // press anchors at index 7
+        _mouse.LeftPressed = false;
+
+        SetMouseAtCharacterIndex(2);
+        Frame(box); // drag to index 2
+
+        Assert.IsTrue(box.HasSelection);
+        Assert.AreEqual(2, box.SelectionStart);
+        Assert.AreEqual(7, box.SelectionEnd);
+        Assert.AreEqual(2, box.CursorIndex);
+    }
+
+    [TestMethod]
+    public void Drag_MultipleFramesWhileHeld_KeepsFollowingMouse()
+    {
+        TextInputBox box = MakeDraggable("abcdefghij");
+        SetMouseAtCharacterIndex(2);
+        Frame(box);
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+        Frame(box);
+        _mouse.LeftPressed = false;
+
+        SetMouseAtCharacterIndex(4);
+        Frame(box);
+        Assert.AreEqual(4, box.CursorIndex);
+
+        SetMouseAtCharacterIndex(8);
+        Frame(box);
+        Assert.AreEqual(8, box.CursorIndex);
+        Assert.AreEqual(2, box.SelectionStart);
+        Assert.AreEqual(8, box.SelectionEnd);
+    }
+
+    [TestMethod]
+    public void Drag_Release_StopsFollowingFurtherMouseMovement()
+    {
+        TextInputBox box = MakeDraggable("abcdefghij");
+        SetMouseAtCharacterIndex(2);
+        Frame(box);
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+        Frame(box);
+        _mouse.LeftPressed = false;
+
+        SetMouseAtCharacterIndex(5);
+        Frame(box); // selection now 2..5
+
+        _mouse.LeftDown = false;
+        _mouse.LeftReleased = true;
+        Frame(box); // release
+
+        _mouse.LeftReleased = false;
+        SetMouseAtCharacterIndex(9);
+        Frame(box); // mouse moves further, but the button is no longer held
+
+        Assert.AreEqual(5, box.CursorIndex);
+        Assert.AreEqual(5, box.SelectionEnd);
+    }
+
+    [TestMethod]
+    public void Drag_PressInsideExistingSelection_CollapsesToPlainCaret()
+    {
+        TextInputBox box = MakeDraggable("abcdefghij");
+        SetMouseAtCharacterIndex(2);
+        Frame(box);
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+        Frame(box);
+        _mouse.LeftPressed = false;
+        SetMouseAtCharacterIndex(7);
+        Frame(box); // selection 2..7
+        _mouse.LeftDown = false;
+        _mouse.LeftReleased = true;
+        Frame(box);
+        _mouse.LeftReleased = false;
+        Assert.IsTrue(box.HasSelection);
+
+        // A fresh press inside the existing selection starts a brand-new selection at the
+        // press point rather than extending or preserving the old one.
+        SetMouseAtCharacterIndex(4);
+        Frame(box);
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+        Frame(box);
+
+        Assert.IsFalse(box.HasSelection);
+        Assert.AreEqual(4, box.CursorIndex);
+    }
+
+    [TestMethod]
+    public void Drag_PastLeftEdge_RevealsAndSelectsEarlierText()
+    {
+        TextInputBox box = MakeDraggable("abcdefghijklmnopqrstuvwxyz0123"); // 30 chars — forces scrolling
+        box.Focus();
+        _kb.Press(Keys.End);
+        Update(box); // cursor -> end, scrollOffset advances to keep it visible
+        _kb.Release();
+        int cursorAtEnd = box.CursorIndex;
+
+        // Press at the very left edge of the now-scrolled visible text (the first visible char).
+        _mouse.ClientX = 4;
+        Frame(box);
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+        Frame(box);
+        _mouse.LeftPressed = false;
+        int anchorIndex = box.CursorIndex;
+        Assert.IsLessThan(cursorAtEnd, anchorIndex);
+
+        // Dragging past the left edge and holding there should reveal (and select) one more
+        // character further back every frame.
+        _mouse.ClientX = 0;
+        Frame(box);
+        int afterOneFrame = box.CursorIndex;
+        Assert.IsLessThan(anchorIndex, afterOneFrame);
+
+        Frame(box);
+        int afterTwoFrames = box.CursorIndex;
+        Assert.IsLessThan(afterOneFrame, afterTwoFrames);
+
+        Assert.AreEqual(anchorIndex, box.SelectionEnd);
+        Assert.AreEqual(afterTwoFrames, box.SelectionStart);
+    }
+
+    [TestMethod]
+    public void Drag_PastLeftEdge_HeldLongEnough_ClampsAtZeroWithoutThrowing()
+    {
+        TextInputBox box = MakeDraggable("abcdefghijklmnopqrstuvwxyz0123");
+        box.Focus();
+        _kb.Press(Keys.End);
+        Update(box);
+        _kb.Release();
+
+        _mouse.ClientX = 4;
+        Frame(box);
+        _mouse.LeftPressed = true;
+        _mouse.LeftDown = true;
+        Frame(box);
+        _mouse.LeftPressed = false;
+
+        _mouse.ClientX = 0;
+        for (int frame = 0; frame < 40; frame++) // far more than any possible scroll offset for 30 chars
+        {
+            Frame(box);
+        }
+
+        Assert.AreEqual(0, box.CursorIndex);
     }
 
     // -------------------------------------------------------------------------

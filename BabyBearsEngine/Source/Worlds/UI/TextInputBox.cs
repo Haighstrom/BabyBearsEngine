@@ -18,6 +18,10 @@ namespace BabyBearsEngine.Worlds.UI;
 /// Left / Right / Home / End (with optional Shift for selection); Ctrl+A (select all);
 /// Ctrl+C / Ctrl+X / Ctrl+V (copy / cut / paste via the system clipboard);
 /// Enter (fires <see cref="Submitted"/>); Escape (blurs).</para>
+/// <para>A left press places the caret and, while held, dragging the mouse extends the
+/// selection to follow it — the anchor stays fixed at the press point. Dragging past the
+/// visible left edge scrolls to reveal earlier text; dragging past the right edge is handled
+/// the same way cursor movement already scrolls into view.</para>
 /// </remarks>
 public class TextInputBox : Entity
 {
@@ -37,12 +41,13 @@ public class TextInputBox : Entity
 
     private readonly IGraphic? _backgroundGraphic;
     private readonly ColourGraphic? _selectionGraphic;
-    private readonly TextGraphic? _textGraphic;
+    private readonly ITextGraphic? _textGraphic;
     private readonly ColourGraphic? _cursorGraphic;
 
     private string _text = "";
     private int _cursorIndex = 0;
     private int _anchorIndex = 0;
+    private bool _isDragSelecting = false;
     private int _scrollOffset = 0;
     private double _blinkTimer = 0.0;
     private bool _hasFocus = false;
@@ -106,8 +111,17 @@ public class TextInputBox : Entity
     }
 
     internal TextInputBox(float x, float y, float width, float height)
-        : base(x, y, width, height, clickable: true) 
-    { 
+        : base(x, y, width, height, clickable: true)
+    {
+    }
+
+    // Test-only constructor wired with a working text graphic (see StubTextGraphic) so mouse
+    // hit-testing and drag-selection can be exercised without a GL-backed TextGraphic/theme.
+    internal TextInputBox(float x, float y, float width, float height, ITextGraphic textGraphic)
+        : base(x, y, width, height, clickable: true)
+    {
+        _textGraphic = textGraphic;
+        Add(_textGraphic);
     }
 
     /// <summary>
@@ -208,6 +222,7 @@ public class TextInputBox : Entity
 
         _hasFocus = false;
         _anchorIndex = _cursorIndex;
+        _isDragSelecting = false;
 
         _cursorGraphic?.Visible = false;
 
@@ -243,6 +258,18 @@ public class TextInputBox : Entity
     {
         base.Update(elapsed);
 
+        if (_isDragSelecting)
+        {
+            if (Mouse.LeftDown)
+            {
+                ExtendSelectionToMouse();
+            }
+            else
+            {
+                _isDragSelecting = false;
+            }
+        }
+
         if (!_hasFocus)
         {
             return;
@@ -255,11 +282,12 @@ public class TextInputBox : Entity
     }
 
     /// <inheritdoc/>
-    protected override void OnLeftClicked()
+    protected override void OnLeftPressed()
     {
-        base.OnLeftClicked();
+        base.OnLeftPressed();
         Focus();
         PlaceCursorAtMouse();
+        _isDragSelecting = _textGraphic is not null;
     }
 
     /// <inheritdoc/>
@@ -621,18 +649,48 @@ public class TextInputBox : Entity
             return;
         }
 
-        // PositionOnScreen and the visible text both live in window space, so the click's distance
-        // from the text area's left edge gives the local X to hit-test against character widths.
-        float textAreaLeft = PositionOnScreen.X + ContentPadding;
-        float localX = Mouse.ClientX - textAreaLeft;
-
-        int index = HitTestCursorIndex(_text, _scrollOffset, localX, measured => _textGraphic.MeasureString(measured).X);
+        int index = HitTestCursorIndex(_text, _scrollOffset, LocalMouseX, measured => _textGraphic.MeasureString(measured).X);
 
         _cursorIndex = index;
         _anchorIndex = index;
         _blinkTimer = 0.0;
         UpdateDisplay();
     }
+
+    // While a mouse-drag selection is in progress, follows the cursor to the mouse position each
+    // frame — unlike PlaceCursorAtMouse, only _cursorIndex moves; _anchorIndex stays fixed at the
+    // press point, growing or shrinking the selection as the mouse moves. Runs regardless of
+    // whether the mouse is still over the box, so dragging past the box's edge and releasing
+    // there still extends the selection correctly.
+    private void ExtendSelectionToMouse()
+    {
+        if (_textGraphic is null)
+        {
+            return;
+        }
+
+        float localX = LocalMouseX;
+
+        // HitTestCursorIndex can only return indices >= _scrollOffset, so a drag past the left
+        // edge needs to retreat the scroll offset itself before hit-testing — revealing one more
+        // character every frame for as long as the drag is held there. The right edge needs no
+        // equivalent handling: HitTestCursorIndex already searches all the way to text.Length
+        // regardless of the visible width, and UpdateDisplay's EnsureScrollOffset call advances
+        // _scrollOffset to catch up to whatever index that produces.
+        if (localX < 0f && _scrollOffset > 0)
+        {
+            _scrollOffset--;
+        }
+
+        _cursorIndex = HitTestCursorIndex(_text, _scrollOffset, localX, measured => _textGraphic.MeasureString(measured).X);
+        _blinkTimer = 0.0;
+        UpdateDisplay();
+    }
+
+    // PositionOnScreen and the visible text both live in window space, so the mouse's distance
+    // from the text area's left edge gives the local X to hit-test against character widths.
+    // Negative when the mouse is to the left of the text area.
+    private float LocalMouseX => Mouse.ClientX - (PositionOnScreen.X + ContentPadding);
 
     /// <summary>
     /// Returns the cursor index whose boundary is closest to <paramref name="localX"/> — the X offset
@@ -702,7 +760,7 @@ public class TextInputBox : Entity
 
         // Cursor X — distance from left edge of the text area to the cursor
         float cursorX = ContentPadding + _textGraphic.MeasureString(
-            _text.AsSpan(_scrollOffset, Math.Max(0, _cursorIndex - _scrollOffset))).X;
+            _text.Substring(_scrollOffset, Math.Max(0, _cursorIndex - _scrollOffset))).X;
 
         _cursorGraphic?.X = cursorX;
 
@@ -715,9 +773,9 @@ public class TextInputBox : Entity
                 int visEnd = SelectionEnd;
 
                 float selStartX = ContentPadding + _textGraphic.MeasureString(
-                    _text.AsSpan(_scrollOffset, Math.Max(0, visStart - _scrollOffset))).X;
+                    _text.Substring(_scrollOffset, Math.Max(0, visStart - _scrollOffset))).X;
                 float selEndX = ContentPadding + _textGraphic.MeasureString(
-                    _text.AsSpan(_scrollOffset, Math.Max(0, visEnd - _scrollOffset))).X;
+                    _text.Substring(_scrollOffset, Math.Max(0, visEnd - _scrollOffset))).X;
 
                 _selectionGraphic.X = selStartX;
                 _selectionGraphic.Width = Math.Max(0f, selEndX - selStartX);
@@ -747,12 +805,12 @@ public class TextInputBox : Entity
 
         float availableWidth = Width - 2f * ContentPadding;
 
-        float cursorX = _textGraphic.MeasureString(_text.AsSpan(_scrollOffset, _cursorIndex - _scrollOffset)).X;
+        float cursorX = _textGraphic.MeasureString(_text.Substring(_scrollOffset, _cursorIndex - _scrollOffset)).X;
 
         while (cursorX > availableWidth && _scrollOffset < _cursorIndex)
         {
             _scrollOffset++;
-            cursorX = _textGraphic.MeasureString(_text.AsSpan(_scrollOffset, _cursorIndex - _scrollOffset)).X;
+            cursorX = _textGraphic.MeasureString(_text.Substring(_scrollOffset, _cursorIndex - _scrollOffset)).X;
         }
     }
 

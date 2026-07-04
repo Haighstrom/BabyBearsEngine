@@ -36,7 +36,15 @@ internal sealed class StubTextGraphic : AddableBase, ITextGraphic
     public bool UseInlineTags { get; set; } = false;
     public bool Visible { get; set; } = true;
 
-    public Point MeasureString(string text) => new(0f, 0f);
+    /// <summary>
+    /// Optional width function for <see cref="MeasureString(string)"/>. Defaults to
+    /// <see langword="null"/>, which keeps the original always-zero-width behaviour for
+    /// callers that only need a working <see cref="ITextGraphic"/> to exist. Set this to get
+    /// realistic per-character measurements — e.g. for hit-testing math.
+    /// </summary>
+    public Func<string, float>? MeasureWidthOverride { get; set; } = null;
+
+    public Point MeasureString(string text) => new(MeasureWidthOverride?.Invoke(text) ?? 0f, 0f);
     public Point MeasureString() => new(0f, 0f);
     public void Render(ref Matrix3 projection, ref Matrix3 modelView) { }
     public void ScaleForCamera(ICamera camera) { }
