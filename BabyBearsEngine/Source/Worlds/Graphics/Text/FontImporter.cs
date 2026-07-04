@@ -210,7 +210,7 @@ public static class FontImporter
 
             if (!families.TryGetValue(family, out Dictionary<FontVariantClassification, string>? slots))
             {
-                slots = new Dictionary<FontVariantClassification, string>();
+                slots = [];
                 families[family] = slots;
             }
 
