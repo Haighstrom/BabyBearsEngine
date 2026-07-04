@@ -9,10 +9,14 @@ internal class ProgressBarDemoWorld : DemoWorld
     private const int WidgetLeft = 250;
     private const int Row1Y = 160;
     private const int Row2Y = 290;
+    private const int Row3Y = 410;
+    private const int Row4Y = 500;
     private const double FillRate = 0.4;
 
     private readonly ProgressBar _progressBar;
+    private readonly RadialProgressBar _radialPieBar;
     private bool _filling = false;
+    private bool _radialFilling = false;
 
     public override string Name => "Progress Bars";
 
@@ -33,6 +37,24 @@ internal class ProgressBarDemoWorld : DemoWorld
         TimedProgressBar timedBar = new(WidgetLeft, Row2Y + 10, 260, 30, ProgressBarTheme.Default, 3.0);
         timedBar.BarFilled += (_, _) => timedBar.Restart();
         Add(timedBar);
+
+        Add(MakeLabel(LabelLeft, Row3Y, 180, 80, "Radial pie:"));
+        _radialPieBar = new RadialProgressBar(WidgetLeft, Row3Y, 80, 80, RadialProgressBarTheme.Default);
+        Add(_radialPieBar);
+
+        Button radialFillButton = new(WidgetLeft + 100, Row3Y + 25, 120, 30,
+            ButtonTheme.FromColour(new Colour(160, 200, 255)), "Hold to fill");
+        radialFillButton.LeftPressed += (_, _) => _radialFilling = true;
+        radialFillButton.LeftClicked += (_, _) => _radialFilling = false;
+        radialFillButton.MouseExited += (_, _) => _radialFilling = false;
+        Add(radialFillButton);
+
+        Add(MakeLabel(LabelLeft, Row4Y, 180, 80, "Radial ring (timed 3 s):"));
+        RadialProgressBarTheme ringTheme = RadialProgressBarTheme.FromColours(
+            new Colour(60, 60, 60), new Colour(80, 200, 80), RadialFillStyle.Ring);
+        TimedRadialProgressBar timedRadialBar = new(WidgetLeft, Row4Y, 80, 80, ringTheme, 3.0);
+        timedRadialBar.Filled += (_, _) => timedRadialBar.Restart();
+        Add(timedRadialBar);
     }
 
     public override void Update(double elapsed)
@@ -46,6 +68,16 @@ internal class ProgressBarDemoWorld : DemoWorld
             if (_progressBar.AmountFilled >= 1.0f)
             {
                 _progressBar.AmountFilled = 0.0f;
+            }
+        }
+
+        if (_radialFilling)
+        {
+            _radialPieBar.AmountFilled += (float)(elapsed * FillRate);
+
+            if (_radialPieBar.AmountFilled >= 1.0f)
+            {
+                _radialPieBar.AmountFilled = 0.0f;
             }
         }
     }
