@@ -2,6 +2,7 @@ using System.Drawing;
 using OpenTK.Mathematics;
 
 using OpenTKCursorState = OpenTK.Windowing.Common.CursorState;
+using OpenTKFramebufferResizeEventArgs = OpenTK.Windowing.Common.FramebufferResizeEventArgs;
 using OpenTKResizeEventArgs = OpenTK.Windowing.Common.ResizeEventArgs;
 using OpenTKVSyncMode = OpenTK.Windowing.Common.VSyncMode;
 
@@ -29,6 +30,7 @@ internal sealed class OpenTKWindowAdapter : IWindow
         // If the window service is ever made swappable at runtime, give this adapter an IDisposable
         // that does `_engine.Resize -= OnEngineResize`, and dispose the old one on swap.
         _engine.Resize += OnEngineResize;
+        _engine.FramebufferResize += OnEngineFramebufferResize;
     }
 
     public WindowBorder Border
@@ -139,6 +141,8 @@ internal sealed class OpenTKWindowAdapter : IWindow
 
     public event Action<WindowResizeEventArgs>? Resize;
 
+    public event Action<WindowResizeEventArgs>? FramebufferResize;
+
     public void Centre() => _engine.CenterWindow();
 
     public void Close()
@@ -150,5 +154,10 @@ internal sealed class OpenTKWindowAdapter : IWindow
     private void OnEngineResize(OpenTKResizeEventArgs e)
     {
         Resize?.Invoke(new WindowResizeEventArgs(e.Width, e.Height));
+    }
+
+    private void OnEngineFramebufferResize(OpenTKFramebufferResizeEventArgs e)
+    {
+        FramebufferResize?.Invoke(new WindowResizeEventArgs(e.Width, e.Height));
     }
 }

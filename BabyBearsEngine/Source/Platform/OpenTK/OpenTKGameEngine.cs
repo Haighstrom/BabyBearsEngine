@@ -38,6 +38,16 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
         _world.Load();
     }
 
+    // The viewport must track the framebuffer's actual pixel resolution. Both resize events are
+    // synced to the current FramebufferSize (rather than trusting either event's own Width/Height)
+    // so there's no ordering dependency between them: on Windows/X11 the two events always carry
+    // identical values anyway, but on macOS/Wayland the framebuffer can change resolution (e.g.
+    // dragging the window to a display with a different DPI scale) independently of the client
+    // area's screen-coordinate size — reading FramebufferSize directly keeps the viewport correct
+    // regardless of which event fired or in what order, and also covers the initial viewport setup
+    // that historically relied on OnResize firing once at window creation.
+    private void SyncViewportToFramebuffer() => OpenGLHelper.SetViewport(0, 0, FramebufferSize.X, FramebufferSize.Y);
+
     protected override void OnClosing(CancelEventArgs e)
     {
         if (!CloseOnXButton && !_programmaticClose)
@@ -55,6 +65,13 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
         {
             _programmaticClose = false;
         }
+    }
+
+    protected override void OnFramebufferResize(FramebufferResizeEventArgs e)
+    {
+        base.OnFramebufferResize(e);
+
+        SyncViewportToFramebuffer();
     }
 
     protected override void OnLoad()
@@ -137,7 +154,7 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
     {
         base.OnResize(e);
 
-        OpenGLHelper.SetViewport(0, 0, e.Width, e.Height);
+        SyncViewportToFramebuffer();
     }
 
     protected override void OnUnload()

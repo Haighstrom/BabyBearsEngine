@@ -25,6 +25,7 @@ public class WindowFacadeTests
         public int Y { get; set; }
 
         public event Action<WindowResizeEventArgs>? Resize;
+        public event Action<WindowResizeEventArgs>? FramebufferResize;
 
         public bool CentreCalled { get; private set; }
         public bool CloseCalled { get; private set; }
@@ -33,6 +34,7 @@ public class WindowFacadeTests
         public void Close() => CloseCalled = true;
 
         public void RaiseResize(int width, int height) => Resize?.Invoke(new WindowResizeEventArgs(width, height));
+        public void RaiseFramebufferResize(int width, int height) => FramebufferResize?.Invoke(new WindowResizeEventArgs(width, height));
     }
 
     private FakeWindow _fake = null!;
@@ -220,6 +222,50 @@ public class WindowFacadeTests
         Window.Resize -= handler;
         _fake.RaiseResize(2, 2);
         Assert.AreEqual(1, callCount);
+    }
+
+    // FramebufferResize event subscription
+
+    [TestMethod]
+    public void FramebufferResize_SubscribingViaFacade_FiresFromService()
+    {
+        WindowResizeEventArgs? received = null;
+        Window.FramebufferResize += args => received = args;
+
+        _fake.RaiseFramebufferResize(1600, 1200);
+
+        Assert.IsNotNull(received);
+        Assert.AreEqual(1600, received.Width);
+        Assert.AreEqual(1200, received.Height);
+    }
+
+    [TestMethod]
+    public void FramebufferResize_UnsubscribingViaFacade_StopsReceivingEvents()
+    {
+        int callCount = 0;
+        Action<WindowResizeEventArgs> handler = _ => callCount++;
+        Window.FramebufferResize += handler;
+        _fake.RaiseFramebufferResize(1, 1);
+        Assert.AreEqual(1, callCount);
+
+        Window.FramebufferResize -= handler;
+        _fake.RaiseFramebufferResize(2, 2);
+        Assert.AreEqual(1, callCount);
+    }
+
+    [TestMethod]
+    public void FramebufferResize_IsIndependentOfResize()
+    {
+        // Regression: on platforms where the two diverge, firing one must not fire the other.
+        int resizeCount = 0;
+        int framebufferResizeCount = 0;
+        Window.Resize += _ => resizeCount++;
+        Window.FramebufferResize += _ => framebufferResizeCount++;
+
+        _fake.RaiseFramebufferResize(1920, 1080);
+
+        Assert.AreEqual(0, resizeCount);
+        Assert.AreEqual(1, framebufferResizeCount);
     }
 
     // Service substitution after install

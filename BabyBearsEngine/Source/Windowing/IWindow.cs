@@ -56,6 +56,17 @@ public interface IWindow
     /// <summary>Fires after the client area has been resized. The event payload carries the new width and height.</summary>
     event Action<WindowResizeEventArgs>? Resize;
 
+    /// <summary>
+    /// Fires after the framebuffer has been resized. On Windows and X11 this always fires
+    /// alongside <see cref="Resize"/> with identical values, since framebuffer pixels and
+    /// client-area pixels map 1:1 on those platforms. On platforms where a window's content
+    /// scale can change independently of its screen-coordinate size (macOS, Wayland) — e.g.
+    /// dragging the window to a display with a different DPI scale — this can fire without a
+    /// corresponding <see cref="Resize"/>. FBO-backed render targets and cameras that need to
+    /// track actual pixel resolution should rebuild against this event rather than <see cref="Resize"/>.
+    /// </summary>
+    event Action<WindowResizeEventArgs>? FramebufferResize;
+
     /// <summary>Centres the window on the current display.</summary>
     void Centre();
 

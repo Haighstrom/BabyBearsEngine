@@ -122,6 +122,7 @@ public class CameraMoveWhenMouseAtEdgeControllerTests
         public int X { get; set; } = 0;
         public int Y { get; set; } = 0;
         public event Action<WindowResizeEventArgs>? Resize;
+        public event Action<WindowResizeEventArgs>? FramebufferResize;
         public void Centre() { }
         public void Close() { }
     }

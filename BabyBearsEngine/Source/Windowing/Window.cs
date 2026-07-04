@@ -67,6 +67,13 @@ public static class Window
         remove => Implementation.Resize -= value;
     }
 
+    /// <inheritdoc cref="IWindow.FramebufferResize"/>
+    public static event Action<WindowResizeEventArgs> FramebufferResize
+    {
+        add => Implementation.FramebufferResize += value;
+        remove => Implementation.FramebufferResize -= value;
+    }
+
     /// <inheritdoc cref="IWindow.Centre"/>
     public static void Centre() => Implementation.Centre();
 
