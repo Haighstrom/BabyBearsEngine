@@ -13,12 +13,15 @@ public sealed class DefaultShaderProgram : ShaderProgramBase
     {
         _windowSizeLocation = GL.GetUniformLocation(Handle, "WindowSize");
 
-        SetWindowSize(Window.Width, Window.Height);
+        SetWindowSize(Canvas.Width, Canvas.Height);
 
         Window.Resize += OnWindowResize;
     }
 
-    private void OnWindowResize(WindowResizeEventArgs args) => SetWindowSize(args.Width, args.Height);
+    // The uniform must match the coordinate space geometry is drawn in — the canvas. With a
+    // fixed canvas this re-sets the same values (the canvas doesn't change with the window);
+    // without one, Canvas tracks the window and this behaves as before.
+    private void OnWindowResize(WindowResizeEventArgs args) => SetWindowSize(Canvas.Width, Canvas.Height);
 
     private void SetWindowSize(int width, int height)
     {

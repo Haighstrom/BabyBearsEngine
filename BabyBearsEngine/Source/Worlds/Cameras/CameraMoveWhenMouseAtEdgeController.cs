@@ -15,12 +15,14 @@ public class CameraMoveWhenMouseAtEdgeController(ICamera camera, float cameraMov
             camera.View.Y = Math.Max(camera.MinY, camera.View.Y - cameraMoveSpeed * (float)elapsed);
         }
 
-        if (Mouse.ClientX > Window.Width - windowEdgeDistance)
+        // Mouse.ClientX/Y are in canvas coordinates, so the edges must be measured against the
+        // canvas extent, not the window's pixel size (identical when no fixed canvas is set).
+        if (Mouse.ClientX > Canvas.Width - windowEdgeDistance)
         {
             camera.View.X = Math.Min(camera.MaxX - camera.View.ViewWidth, camera.View.X + cameraMoveSpeed * (float)elapsed);
         }
 
-        if (Mouse.ClientY > Window.Height - windowEdgeDistance)
+        if (Mouse.ClientY > Canvas.Height - windowEdgeDistance)
         {
             camera.View.Y = Math.Min(camera.MaxY - camera.View.ViewHeight, camera.View.Y + cameraMoveSpeed * (float)elapsed);
         }

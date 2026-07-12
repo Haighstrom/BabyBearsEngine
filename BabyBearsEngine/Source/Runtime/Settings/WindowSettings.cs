@@ -22,6 +22,22 @@ public record class WindowSettings()
     public WindowBorder Border { get; set; } = WindowBorder.Resizable;
 
     /// <summary>
+    /// The fixed logical canvas height (see <see cref="CanvasWidth"/>). Must be set together
+    /// with <see cref="CanvasWidth"/>. Defaults to null.
+    /// </summary>
+    public int? CanvasHeight { get; set; } = null;
+
+    /// <summary>
+    /// The fixed logical canvas width. When set (together with <see cref="CanvasHeight"/>),
+    /// worlds render in a canvas of this size stretched to fill the window, and mouse
+    /// coordinates are reported in the same canvas space — making the game window freely
+    /// resizable while all layout code keeps thinking in one design resolution (see
+    /// <see cref="Canvas"/>). When null (the default), rendering and mouse coordinates are in
+    /// window pixels and the scene does not scale with the window.
+    /// </summary>
+    public int? CanvasWidth { get; set; } = null;
+
+    /// <summary>
     /// Whether the window should be created centred on the screen on creation - ignores X,Y
     /// </summary>
     public bool Centre { get; set; } = true;

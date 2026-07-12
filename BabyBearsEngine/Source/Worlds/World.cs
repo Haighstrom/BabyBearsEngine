@@ -168,7 +168,10 @@ public class World : IWorld
         GL.ClearColor(BackgroundColour.R / 255f, BackgroundColour.G / 255f, BackgroundColour.B / 255f, BackgroundColour.A / 255f);
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
-        var projection = Matrix3.CreateOrtho(Window.Width, Window.Height);
+        // Canvas equals the window client size unless a fixed canvas resolution is configured,
+        // in which case the whole scene is rendered in canvas coordinates and stretched to the
+        // viewport (see Canvas).
+        var projection = Matrix3.CreateOrtho(Canvas.Width, Canvas.Height);
         var modelView = Matrix3.Identity;
 
         foreach (var graphic in _container.SnapshotRenderables())

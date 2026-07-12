@@ -270,6 +270,7 @@ internal static class EngineConfiguration
         // inside GameLauncher.Run's finally block (observed when closing the window).
         FontTextureCache.InvalidateCache();
 
+        Canvas.Reset();
         DefaultCameraMsaa = MsaaSamples.Disabled;
         s_atlasGenerators.Clear();
         s_defaultTextRenderer = TextRenderer.FreeType;

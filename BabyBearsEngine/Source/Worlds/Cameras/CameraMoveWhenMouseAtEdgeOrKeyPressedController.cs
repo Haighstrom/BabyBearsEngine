@@ -25,7 +25,9 @@ public class CameraMoveWhenMouseAtEdgeOrKeyPressedController(
         }
         else
         {
-            if (Mouse.ClientX > Window.Width - windowEdgeDistance || Keyboard.AnyKeyDown(rightKeys))
+            // Mouse.ClientX/Y are in canvas coordinates, so the edges must be measured against the
+            // canvas extent, not the window's pixel size (identical when no fixed canvas is set).
+            if (Mouse.ClientX > Canvas.Width - windowEdgeDistance || Keyboard.AnyKeyDown(rightKeys))
             {
                 camera.View.X = Math.Min(camera.MaxX - camera.View.ViewWidth, camera.View.X + cameraMoveSpeed * (float)elapsed);
             }
@@ -47,7 +49,7 @@ public class CameraMoveWhenMouseAtEdgeOrKeyPressedController(
                 camera.View.Y = Math.Max(camera.MinY, camera.View.Y - cameraMoveSpeed * (float)elapsed);
             }
 
-            if (Mouse.ClientY > Window.Height - windowEdgeDistance || Keyboard.AnyKeyDown(downKeys))
+            if (Mouse.ClientY > Canvas.Height - windowEdgeDistance || Keyboard.AnyKeyDown(downKeys))
             {
                 camera.View.Y = Math.Min(camera.MaxY - camera.View.ViewHeight, camera.View.Y + cameraMoveSpeed * (float)elapsed);
             }

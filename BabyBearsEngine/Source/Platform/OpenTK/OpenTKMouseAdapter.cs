@@ -48,15 +48,24 @@ internal sealed class OpenTKMouseAdapter(OpenTKGameEngine engine) : IMouse
     public bool MiddleReleased => ButtonReleased(MouseButton.Middle);
     public bool RightReleased => ButtonReleased(MouseButton.Right);
 
-    // OpenTK / GLFW report mouse position and delta in logical client coordinates, but the
-    // engine renders into the framebuffer and OnResize sets the GL viewport in framebuffer
-    // pixels. On HiDPI displays the framebuffer is larger than the client area (e.g. 2× on a
-    // typical retina display), so the unscaled mouse coords land below/right of where a UI
-    // element rendered at the same logical position actually sits. Scale into framebuffer
-    // space here so hit-testing matches what was drawn. On non-HiDPI displays
-    // FramebufferSize == ClientSize and the scale is identity.
-    private float ScaleX => engine.ClientSize.X > 0 ? (float)engine.FramebufferSize.X / engine.ClientSize.X : 1f;
-    private float ScaleY => engine.ClientSize.Y > 0 ? (float)engine.FramebufferSize.Y / engine.ClientSize.Y : 1f;
+    // OpenTK / GLFW report mouse position and delta in logical client coordinates, but
+    // hit-testing must happen in the same coordinate space things were drawn in:
+    //
+    // - With a fixed canvas configured (Canvas.HasFixedSize), worlds render in canvas
+    //   coordinates stretched over the whole window, so mouse coords scale by
+    //   canvas / client size.
+    // - Otherwise the engine renders into the framebuffer and OnResize sets the GL viewport in
+    //   framebuffer pixels. On HiDPI displays the framebuffer is larger than the client area
+    //   (e.g. 2× on a typical retina display), so the unscaled mouse coords land below/right of
+    //   where a UI element rendered at the same logical position actually sits. Scale into
+    //   framebuffer space so hit-testing matches what was drawn. On non-HiDPI displays
+    //   FramebufferSize == ClientSize and the scale is identity.
+    private float ScaleX => engine.ClientSize.X > 0
+        ? (Canvas.HasFixedSize ? (float)Canvas.Width : engine.FramebufferSize.X) / engine.ClientSize.X
+        : 1f;
+    private float ScaleY => engine.ClientSize.Y > 0
+        ? (Canvas.HasFixedSize ? (float)Canvas.Height : engine.FramebufferSize.Y) / engine.ClientSize.Y
+        : 1f;
 
     public int ClientX => (int)(_mouseState.X * ScaleX);
     public int ClientY => (int)(_mouseState.Y * ScaleY);

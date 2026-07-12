@@ -69,6 +69,8 @@ public static class GameLauncher
 
         EngineConfiguration.DefaultCameraMsaa = appSettings.DefaultCameraMsaa;
 
+        Canvas.Configure(appSettings.WindowSettings.CanvasWidth, appSettings.WindowSettings.CanvasHeight);
+
         // The default backend for fonts that don't pin one; Initialise registers both built-ins so
         // individual fonts can still opt into the other via FontDefinition.Renderer.
         EngineConfiguration.DefaultTextRenderer = appSettings.TextSettings.Renderer;
