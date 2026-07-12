@@ -181,12 +181,24 @@ public class ScrollingListPanel : Entity
         public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
         {
             var (wx, wy) = GetUnscrolledWindowPosition();
-            var (_, _, _, vpH) = OpenGLHelper.LastViewport;
+            var (_, _, vpW, vpH) = OpenGLHelper.LastViewport;
 
-            int scissorX = (int)wx;
-            int scissorY = vpH - (int)(wy + Height);
-            int scissorW = (int)Width;
-            int scissorH = (int)Height;
+            // wx/wy/Width/Height are in canvas coordinates but GL.Scissor works in viewport
+            // (framebuffer) pixels, so scale the box across. The factors are 1 when the canvas
+            // follows the window on a non-HiDPI display. Floor the near edges and ceil the far
+            // edges so the scaled box never clips a fractional pixel off the visible content.
+            float scaleX = Canvas.Width > 0 ? (float)vpW / Canvas.Width : 1f;
+            float scaleY = Canvas.Height > 0 ? (float)vpH / Canvas.Height : 1f;
+
+            int scissorLeft = (int)Math.Floor(wx * scaleX);
+            int scissorTop = (int)Math.Floor(wy * scaleY);
+            int scissorRight = (int)Math.Ceiling((wx + Width) * scaleX);
+            int scissorBottom = (int)Math.Ceiling((wy + Height) * scaleY);
+
+            int scissorX = scissorLeft;
+            int scissorY = vpH - scissorBottom;
+            int scissorW = scissorRight - scissorLeft;
+            int scissorH = scissorBottom - scissorTop;
 
             bool wasEnabled = GL.IsEnabled(EnableCap.ScissorTest);
             int[] prevScissor = new int[4];
