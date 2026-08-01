@@ -15,8 +15,8 @@ public sealed class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDi
 {
     private readonly LinePathShaderProgram _shader = Shaders.LinePath;
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
+    private readonly List<Point> _points;
     private Colour _colour;
-    private Point[] _points;
     private bool _verticesChanged = true;
     private bool _disposed = false;
 
@@ -65,9 +65,24 @@ public sealed class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDi
     /// <summary>True: <see cref="Thickness"/> is a constant screen-space pixel width, unaffected by scaling. False: thickness scales with the model-view transform.</summary>
     public bool ThicknessInPixels { get; set; }
 
+    /// <summary>
+    /// Appends a single point to the end of the path without touching the rest — cheaper than
+    /// <see cref="SetPoints"/> for a path built up incrementally (e.g. freehand drawing), since it
+    /// doesn't copy the existing points. The GL vertex buffer is still rebuilt and re-uploaded in
+    /// full on the next <see cref="Render"/>; see
+    /// <see href="https://github.com/Haighstrom/BabyBearsEngine/issues/295">#295</see> for making
+    /// that incremental too.
+    /// </summary>
+    public void AppendPoint(Point point)
+    {
+        _points.Add(point);
+        ExtendBounds(point);
+        _verticesChanged = true;
+    }
+
     private Vertex[] BuildVertices()
     {
-        int pointCount = _points.Length;
+        int pointCount = _points.Count;
         var colourTK = _colour.ToOpenTK();
 
         // GL_LINE_STRIP_ADJACENCY draws a segment per interior (vertex[i], vertex[i+1]) window
@@ -101,6 +116,19 @@ public sealed class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDi
         return vertices;
     }
 
+    private void ExtendBounds(Point point)
+    {
+        float minX = Math.Min(X, point.X);
+        float maxX = Math.Max(X + Width, point.X);
+        float minY = Math.Min(Y, point.Y);
+        float maxY = Math.Max(Y + Height, point.Y);
+
+        X = minX;
+        Y = minY;
+        Width = maxX - minX;
+        Height = maxY - minY;
+    }
+
     protected override void OnSizeChanged()
     {
         base.OnSizeChanged();
@@ -130,7 +158,7 @@ public sealed class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDi
         _shader.SetThickness(Thickness);
         _shader.SetThicknessInPixels(ThicknessInPixels);
 
-        GL.DrawArrays(PrimitiveType.LineStripAdjacency, 0, _points.Length + 2);
+        GL.DrawArrays(PrimitiveType.LineStripAdjacency, 0, _points.Count + 2);
     }
 
     /// <summary>Replaces the path's vertices wholesale. Must contain at least 2 points.</summary>
@@ -138,7 +166,8 @@ public sealed class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDi
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(points.Count, 2, nameof(points));
 
-        _points = [.. points];
+        _points.Clear();
+        _points.AddRange(points);
         UpdateBounds();
         _verticesChanged = true;
     }
@@ -150,7 +179,7 @@ public sealed class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDi
         float minY = _points[0].Y;
         float maxY = _points[0].Y;
 
-        for (int pointIndex = 1; pointIndex < _points.Length; pointIndex++)
+        for (int pointIndex = 1; pointIndex < _points.Count; pointIndex++)
         {
             minX = Math.Min(minX, _points[pointIndex].X);
             maxX = Math.Max(maxX, _points[pointIndex].X);

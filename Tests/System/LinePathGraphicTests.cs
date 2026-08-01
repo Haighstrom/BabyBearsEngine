@@ -104,6 +104,40 @@ public class LinePathGraphicTests
     }
 
     [TestMethod]
+    public void AppendPoint_AddsPointAndExtendsBounds()
+    {
+        LinePathGraphic? path = null;
+
+        RunOneFrame(w =>
+        {
+            path = new LinePathGraphic([new Point(0, 0), new Point(10, 10)], Colour.White, thickness: 2f);
+            w.Add(path);
+
+            path.AppendPoint(new Point(-5, 30));
+        });
+
+        Assert.AreEqual(3, path!.Points.Count);
+        Assert.AreEqual(new Point(-5, 30), path.Points[2]);
+        Assert.AreEqual(-5f, path.X);
+        Assert.AreEqual(0f, path.Y);
+        Assert.AreEqual(15f, path.Width);
+        Assert.AreEqual(30f, path.Height);
+    }
+
+    [TestMethod]
+    public void AppendPoint_ThenRender_DoesNotThrow()
+    {
+        RunOneFrame(w =>
+        {
+            LinePathGraphic path = new([new Point(0, 0), new Point(10, 10)], Colour.White, thickness: 2f);
+            w.Add(path);
+
+            path.AppendPoint(new Point(20, 0));
+            path.AppendPoint(new Point(30, 10));
+        });
+    }
+
+    [TestMethod]
     public void AddedToWorld_OpenPath_RendersWithoutThrowing()
     {
         RunOneFrame(w =>
