@@ -5,6 +5,7 @@ using BabyBearsEngine.Demos.Source.Demos.AudioDemo;
 using BabyBearsEngine.Demos.Source.Demos.BorderDemo;
 using BabyBearsEngine.Demos.Source.Demos.BearSpinner3000;
 using BabyBearsEngine.Demos.Source.Demos.CameraDemo;
+using BabyBearsEngine.Demos.Source.Demos.CanvasShowcase;
 using BabyBearsEngine.Demos.Source.Demos.ClickDemo;
 using BabyBearsEngine.Demos.Source.Demos.ClickTheBearDemo;
 using BabyBearsEngine.Demos.Source.Demos.CollisionDemo;
@@ -112,6 +113,7 @@ showcasesSubmenuFactory = () => new MenuWorld(
 [
     new("A* Pathfinding",    () => new AStarDemoWorld(getShowcasesSubmenu)),
     new("Bear Spinner 3000", () => new BearSpinnerWorld(getShowcasesSubmenu)),
+    new("Canvas",            () => new CanvasShowcaseWorld(getShowcasesSubmenu)),
     new("Click The Bear",    () => new ClickTheBearDemoWorld(getShowcasesSubmenu)),
     new("Noise Showcase",    () => new NoiseShowcaseWorld(getShowcasesSubmenu)),
     new("Rain Showcase",     () => new RainShowcaseWorld(getShowcasesSubmenu)),
