@@ -26,6 +26,9 @@ public static class Shaders
     /// <summary>Shared <see cref="GreyscaleShaderProgram"/> — maps each sampled colour to its luminance.</summary>
     public static GreyscaleShaderProgram Greyscale => GreyscaleShaderProgram.Instance;
 
+    /// <summary>Shared <see cref="LineShaderProgram"/> — expands a two-point line into a thick quad, used by <see cref="Graphics.LineGraphic"/>.</summary>
+    public static LineShaderProgram Line => LineShaderProgram.Instance;
+
     /// <summary>Shared <see cref="ParticleShaderProgram"/> — used by <see cref="Worlds.Particles.ParticleSystem"/> for untextured particles.</summary>
     public static ParticleShaderProgram Particle => ParticleShaderProgram.Instance;
 
@@ -68,6 +71,7 @@ public static class Shaders
     {
         _ = CoverageText;
         _ = Greyscale;
+        _ = Line;
         _ = Particle;
         _ = SdfText;
         _ = SolidColour;
