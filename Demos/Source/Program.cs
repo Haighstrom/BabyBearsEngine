@@ -11,6 +11,7 @@ using BabyBearsEngine.Demos.Source.Demos.CollisionDemo;
 using BabyBearsEngine.Demos.Source.Demos.IODemo;
 using BabyBearsEngine.Demos.Source.Demos.KeyboardDemo;
 using BabyBearsEngine.Demos.Source.Demos.LineDemo;
+using BabyBearsEngine.Demos.Source.Demos.LinePathDemo;
 using BabyBearsEngine.Demos.Source.Demos.LoadingScreenDemo;
 using BabyBearsEngine.Demos.Source.Demos.LocalisationDemo;
 using BabyBearsEngine.Demos.Source.Demos.MouseDemo;
@@ -93,6 +94,7 @@ graphicsSubmenuFactory = () => new MenuWorld(
     new("Animation", () => new AnimationDemoWorld(getGraphicsSubmenu)),
     new("Border",    () => new BorderDemoWorld(getGraphicsSubmenu)),
     new("Line",      () => new LineDemoWorld(getGraphicsSubmenu)),
+    new("Line Path", () => new LinePathDemoWorld(getGraphicsSubmenu)),
     new("MSAA",      () => new MsaaDemoWorld(getGraphicsSubmenu)),
     new("Panel",     () => new PanelDemoWorld(getGraphicsSubmenu)),
     new("Particles", () => new ParticleDemoWorld(getGraphicsSubmenu)),

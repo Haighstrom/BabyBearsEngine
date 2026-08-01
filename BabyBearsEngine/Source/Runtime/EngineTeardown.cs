@@ -22,6 +22,7 @@ internal static class EngineTeardown
         CoverageTextShaderProgram.ResetForNextRun();
         GreyscaleShaderProgram.ResetForNextRun();
         LineShaderProgram.ResetForNextRun();
+        LinePathShaderProgram.ResetForNextRun();
         ParticleShaderProgram.ResetForNextRun();
         SdfTextShaderProgram.ResetForNextRun();
         SolidColourShaderProgramMatrix.ResetForNextRun();
