@@ -20,6 +20,7 @@ using BabyBearsEngine.Demos.Source.Demos.MsaaDemo;
 using BabyBearsEngine.Demos.Source.Demos.NoiseShowcase;
 using BabyBearsEngine.Demos.Source.Demos.PanelDemo;
 using BabyBearsEngine.Demos.Source.Demos.ParticleDemo;
+using BabyBearsEngine.Demos.Source.Demos.PolygonDemo;
 using BabyBearsEngine.Demos.Source.Demos.RainShowcase;
 using BabyBearsEngine.Demos.Source.Demos.ShaderDemo;
 using BabyBearsEngine.Demos.Source.Demos.TextDemo;
@@ -99,6 +100,7 @@ graphicsSubmenuFactory = () => new MenuWorld(
     new("MSAA",      () => new MsaaDemoWorld(getGraphicsSubmenu)),
     new("Panel",     () => new PanelDemoWorld(getGraphicsSubmenu)),
     new("Particles", () => new ParticleDemoWorld(getGraphicsSubmenu)),
+    new("Polygon",   () => new PolygonDemoWorld(getGraphicsSubmenu)),
     new("Shader",    () => new ShaderDemoWorld(getGraphicsSubmenu)),
     new("Stencil",   () => new StencilDemoWorld(getGraphicsSubmenu)),
 ], backFactory: getMainMenu);
