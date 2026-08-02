@@ -22,6 +22,7 @@ internal class LineDemoWorld : DemoWorld
     private static readonly FontDefinition s_font = new("Times New Roman", 13);
     private static readonly FontDefinition s_titleFont = new("Times New Roman", 16);
 
+    private bool _dashed = false;
     private readonly LineGraphic[] _fanLines = new LineGraphic[s_fanPalette.Length];
     private int _paletteOffset = 0;
     private float _thickness = 6f;
@@ -76,6 +77,10 @@ internal class LineDemoWorld : DemoWorld
         Button cycleColour = new(560f, fanControlsY, 130f, 28f, ButtonTheme.FromColour(new Colour(80, 120, 200)), "Cycle Colour");
         cycleColour.LeftClicked += (_, _) => CyclePalette();
         Add(cycleColour);
+
+        Button toggleDashed = new(700f, fanControlsY, 100f, 28f, ButtonTheme.FromColour(new Colour(150, 100, 180)), "Dashed");
+        toggleDashed.LeftClicked += (_, _) => ToggleDashed();
+        Add(toggleDashed);
 
         // ThicknessInPixels comparison — same line data rendered inside two cameras at different
         // zoom levels. The pixel-thickness line stays a constant 6px; the world-thickness line
@@ -146,4 +151,14 @@ internal class LineDemoWorld : DemoWorld
     }
 
     private string FormatThickness() => $"{_thickness:0} px";
+
+    private void ToggleDashed()
+    {
+        _dashed = !_dashed;
+        foreach (LineGraphic line in _fanLines)
+        {
+            line.DashLength = 16f;
+            line.GapLength = _dashed ? 10f : 0f;
+        }
+    }
 }

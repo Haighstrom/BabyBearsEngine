@@ -7,6 +7,7 @@ public static class FragmentShaders
     public static FragmentShaderPath Blur { get; } = new(BasePath + "blur.frag");
     public static FragmentShaderPath CameraMSAA { get; } = new(BasePath + "camera_msaa.frag");
     public static FragmentShaderPath Darken { get; } = new(BasePath + "darken.frag");
+    public static FragmentShaderPath DashedLine { get; } = new(BasePath + "dashed_line.frag");
     public static FragmentShaderPath Default { get; } = new(BasePath + "default.frag");
     public static FragmentShaderPath Greyscale { get; } = new(BasePath + "greyscale.frag");
     public static FragmentShaderPath Invisibility { get; } = new(BasePath + "invisibility.frag");

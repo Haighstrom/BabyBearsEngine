@@ -73,6 +73,7 @@ public class LinePathGraphicTests
         Assert.AreEqual(3, path.Points.Count);
         Assert.AreEqual(Colour.Red, path.Colour);
         Assert.AreEqual(4f, path.Thickness);
+        Assert.AreEqual(0f, path.GapLength);
     }
 
     [TestMethod]
@@ -156,6 +157,54 @@ public class LinePathGraphicTests
         {
             Point p0 = new(0, 0);
             LinePathGraphic path = new([p0, new Point(40, 0), new Point(40, 40), new Point(0, 40), p0], Colour.Green, thickness: 3f);
+            w.Add(path);
+        });
+    }
+
+    [TestMethod]
+    public void AddedToWorld_Dashed_RendersWithoutThrowing()
+    {
+        RunOneFrame(w =>
+        {
+            LinePathGraphic path = new(
+                [new Point(0, 0), new Point(40, 0), new Point(40, 40), new Point(80, 40)],
+                Colour.Black, thickness: 3f)
+            {
+                DashLength = 8f,
+                GapLength = 4f,
+            };
+            w.Add(path);
+        });
+    }
+
+    [TestMethod]
+    public void AddedToWorld_DashedClosedLoop_RendersWithoutThrowing()
+    {
+        RunOneFrame(w =>
+        {
+            Point p0 = new(0, 0);
+            LinePathGraphic path = new([p0, new Point(40, 0), new Point(40, 40), new Point(0, 40), p0], Colour.Green, thickness: 3f)
+            {
+                DashLength = 6f,
+                GapLength = 6f,
+            };
+            w.Add(path);
+        });
+    }
+
+    [TestMethod]
+    public void AddedToWorld_DashedSharpZigzag_RendersWithoutThrowing()
+    {
+        RunOneFrame(w =>
+        {
+            // The turn at (100, 0) is sharp enough (~100 degrees past straight-back) to trigger
+            // smooth_lines.geom's miter-limit "close the gap" bevel branch, which needed its own
+            // TexCoord assignment for dashing to work there too.
+            LinePathGraphic path = new([new Point(0, 0), new Point(100, 0), new Point(5, 50)], Colour.Black, thickness: 6f)
+            {
+                DashLength = 8f,
+                GapLength = 4f,
+            };
             w.Add(path);
         });
     }

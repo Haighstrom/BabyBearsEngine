@@ -4,8 +4,8 @@ namespace BabyBearsEngine.OpenGL;
 
 /// <summary>
 /// Combines <see cref="VertexShaders.NoMatrixTransform"/> + <see cref="GeometryShaders.LineToQuad"/>
-/// + <see cref="FragmentShaders.SolidColour"/> to expand a two-vertex <c>GL_LINES</c> segment into
-/// a thick coloured quad. Used by <see cref="Worlds.Graphics.LineGraphic"/>.
+/// + <see cref="FragmentShaders.DashedLine"/> to expand a two-vertex <c>GL_LINES</c> segment into
+/// a thick coloured quad, optionally dashed. Used by <see cref="Worlds.Graphics.LineGraphic"/>.
 /// </summary>
 public sealed class LineShaderProgram : MatrixShaderProgramBase
 {
@@ -24,14 +24,39 @@ public sealed class LineShaderProgram : MatrixShaderProgramBase
         s_instance = new Lazy<LineShaderProgram>(() => new LineShaderProgram());
     }
 
+    private readonly int _dashLengthLocation;
+    private readonly int _gapLengthLocation;
     private readonly int _lineThicknessLocation;
     private readonly int _thicknessInPixelsLocation;
 
     private LineShaderProgram()
-        : base(VertexShaders.NoMatrixTransform, GeometryShaders.LineToQuad, FragmentShaders.SolidColour)
+        : base(VertexShaders.NoMatrixTransform, GeometryShaders.LineToQuad, FragmentShaders.DashedLine)
     {
         _lineThicknessLocation = GL.GetUniformLocation(Handle, "LineThickness");
         _thicknessInPixelsLocation = GL.GetUniformLocation(Handle, "ThicknessInPixels");
+        _dashLengthLocation = GL.GetUniformLocation(Handle, "DashLength");
+        _gapLengthLocation = GL.GetUniformLocation(Handle, "GapLength");
+
+        // GapLength 0 never discards (see dashed_line.frag), so a plain solid line is just the
+        // degenerate case of this pattern — set explicitly rather than relying on the GLSL
+        // source's own uniform initialiser.
+        Bind();
+        GL.Uniform1(_dashLengthLocation, 1f);
+        GL.Uniform1(_gapLengthLocation, 0f);
+    }
+
+    /// <summary>Dash length along the line, in the same units as <see cref="SetLineThickness"/>'s pixel/world-space choice. Irrelevant when <see cref="SetGapLength"/> is 0.</summary>
+    public void SetDashLength(float dashLength)
+    {
+        Bind();
+        GL.Uniform1(_dashLengthLocation, dashLength);
+    }
+
+    /// <summary>Gap length between dashes. 0 (the default) draws a plain solid line.</summary>
+    public void SetGapLength(float gapLength)
+    {
+        Bind();
+        GL.Uniform1(_gapLengthLocation, gapLength);
     }
 
     /// <summary>Full width of the line, in pixels (<see cref="ThicknessInPixels"/> true) or world units (false).</summary>

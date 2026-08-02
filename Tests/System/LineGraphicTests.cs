@@ -71,6 +71,7 @@ public class LineGraphicTests
         Assert.AreEqual(Colour.Red, line.Colour);
         Assert.AreEqual(4f, line.Thickness);
         Assert.IsTrue(line.ThicknessInPixels);
+        Assert.AreEqual(0f, line.GapLength);
     }
 
     [TestMethod]
@@ -113,6 +114,20 @@ public class LineGraphicTests
         RunOneFrame(w =>
         {
             LineGraphic line = new(new Point(0, 0), new Point(50, 50), Colour.Blue, thickness: 3f, thicknessInPixels: false, layer: 0);
+            w.Add(line);
+        });
+    }
+
+    [TestMethod]
+    public void AddedToWorld_Dashed_RendersWithoutThrowing()
+    {
+        RunOneFrame(w =>
+        {
+            LineGraphic line = new(new Point(0, 0), new Point(100, 0), Colour.Black, thickness: 3f)
+            {
+                DashLength = 8f,
+                GapLength = 4f,
+            };
             w.Add(line);
         });
     }

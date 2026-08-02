@@ -1,4 +1,7 @@
-// Used for UI borders - joins up points in neat bevelled lines. Lines adjacency in, triangle strip out. This variant does not calculate texture coords to speed up rendering a solid colour line. 
+// Used for UI borders - joins up points in neat bevelled lines. Lines adjacency in, triangle strip out.
+// Output_TexCoord forwards Input_TexCoord.x, the CPU-supplied cumulative distance travelled along
+// the path at each of the 4 adjacency points - used by dashed_line.frag's dash pattern; paired
+// with solid-fill fragment shaders it's simply unread.
 #version 150
 
 layout(lines_adjacency) in;
@@ -9,10 +12,20 @@ in ColourData
 	vec4 Colour;
 } Input_Colour[];
 
+in TexCoordData
+{
+	vec2 TexCoord;
+} Input_TexCoord[];
+
 out ColourData
 {
 	vec4 Colour;
 } Output_Colour;
+
+out TexCoordData
+{
+	vec2 TexCoord;
+} Output_TexCoord;
 
 uniform float MiterLimit = 0.75;	// 1.0: always miter, -1.0: never miter, 0.75: default
 uniform float Thickness;
@@ -111,6 +124,8 @@ void main()
 		// close the gap
 		if (dot(v0, n1) > 0)
 		{
+			Output_TexCoord.TexCoord = vec2(Input_TexCoord[1].TexCoord.x, 0);
+
 			if (ThicknessInPixels)
 			{
 				gl_Position = vec4((PMatrix * vec3(p1 + Thickness * n0, 1.0)).xy, 0, 1);
@@ -134,6 +149,8 @@ void main()
 		}
 		else
 		{
+			Output_TexCoord.TexCoord = vec2(Input_TexCoord[1].TexCoord.x, 0);
+
 			if(ThicknessInPixels)
 			{
 				gl_Position = vec4((PMatrix * vec3(p1 - Thickness * n1, 1.0)).xy, 0, 1);
@@ -163,13 +180,15 @@ void main()
 		length_b = Thickness;
 	}
 
-	// generate the triangle strip   
+	// generate the triangle strip
 	if(ThicknessInPixels)
-	{                
+	{
+		Output_TexCoord.TexCoord = vec2(Input_TexCoord[1].TexCoord.x, 0);
 		gl_Position = vec4((PMatrix * vec3(p1 + length_a * miter_a, 1.0)).xy, 0, 1);
 		EmitVertex();
 		gl_Position = vec4((PMatrix * vec3(p1 - length_a * miter_a, 1.0)).xy, 0, 1);
 		EmitVertex();
+		Output_TexCoord.TexCoord = vec2(Input_TexCoord[2].TexCoord.x, 0);
 		gl_Position = vec4((PMatrix * vec3(p2 + length_b * miter_b, 1.0)).xy, 0, 1);
 		EmitVertex();
 		gl_Position = vec4((PMatrix * vec3(p2 - length_b * miter_b, 1.0)).xy, 0, 1);
@@ -178,11 +197,13 @@ void main()
 		EndPrimitive();
 	}
 	else
-	{	
+	{
+		Output_TexCoord.TexCoord = vec2(Input_TexCoord[1].TexCoord.x, 0);
 		gl_Position = vec4((PMatrix * MVMatrix * vec3(p1 + length_a * miter_a, 1.0)).xy, 0, 1);
 		EmitVertex();
 		gl_Position = vec4((PMatrix * MVMatrix * vec3(p1 - length_a * miter_a, 1.0)).xy, 0, 1);
 		EmitVertex();
+		Output_TexCoord.TexCoord = vec2(Input_TexCoord[2].TexCoord.x, 0);
 		gl_Position = vec4((PMatrix * MVMatrix * vec3(p2 + length_b * miter_b, 1.0)).xy, 0, 1);
 		EmitVertex();
 		gl_Position = vec4((PMatrix * MVMatrix * vec3(p2 - length_b * miter_b, 1.0)).xy, 0, 1);

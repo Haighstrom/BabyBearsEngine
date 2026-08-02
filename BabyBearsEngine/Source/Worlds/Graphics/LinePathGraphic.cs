@@ -7,9 +7,11 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// <summary>
 /// A connected sequence of straight, coloured line segments through a list of points, mitered at
 /// each interior vertex. Pass the same point as both the first and last entry to close the path
-/// into a loop. Construction allocates GL resources (vertex buffer) — must be created on the
-/// engine thread after the GL context exists. Implements <see cref="IDisposable"/> to release
-/// those resources.
+/// into a loop. Optionally dashed via <see cref="DashLength"/>/<see cref="GapLength"/> — each
+/// vertex carries its cumulative distance from the path's start, fed to a dash-pattern test in
+/// the fragment shader; <see cref="GapLength"/> 0 (the default) is a plain solid path.
+/// Construction allocates GL resources (vertex buffer) — must be created on the engine thread
+/// after the GL context exists. Implements <see cref="IDisposable"/> to release those resources.
 /// </summary>
 public sealed class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDisposable
 {
@@ -56,6 +58,12 @@ public sealed class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDi
         }
     }
 
+    /// <summary>Dash length along the path. Irrelevant when <see cref="GapLength"/> is 0 (the default — a plain solid path).</summary>
+    public float DashLength { get; set; } = 1f;
+
+    /// <summary>Gap length between dashes. 0 (the default) draws a plain solid path.</summary>
+    public float GapLength { get; set; } = 0f;
+
     /// <summary>The path's current vertices, in the parent's local space.</summary>
     public IReadOnlyList<Point> Points => _points;
 
@@ -90,9 +98,19 @@ public sealed class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDi
         // adjacency context at each end.
         Vertex[] vertices = new Vertex[pointCount + 2];
 
+        // The geometry shader only ever sees a local 4-point window, so it can't know how far
+        // along the whole path a segment sits — that has to be computed here and carried through
+        // as a per-vertex attribute (piggybacking on the unused U texcoord slot) for the dash
+        // pattern in dashed_line.frag.
+        float cumulativeDistance = 0f;
         for (int pointIndex = 0; pointIndex < pointCount; pointIndex++)
         {
-            vertices[pointIndex + 1] = new Vertex(_points[pointIndex].X - X, _points[pointIndex].Y - Y, colourTK, 0, 0);
+            if (pointIndex > 0)
+            {
+                cumulativeDistance += (_points[pointIndex] - _points[pointIndex - 1]).Length;
+            }
+
+            vertices[pointIndex + 1] = new Vertex(_points[pointIndex].X - X, _points[pointIndex].Y - Y, colourTK, cumulativeDistance, 0);
         }
 
         if (_points[0] == _points[pointCount - 1])
@@ -157,6 +175,8 @@ public sealed class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDi
         _shader.SetModelViewMatrix(ref mv);
         _shader.SetThickness(Thickness);
         _shader.SetThicknessInPixels(ThicknessInPixels);
+        _shader.SetDashLength(DashLength);
+        _shader.SetGapLength(GapLength);
 
         GL.DrawArrays(PrimitiveType.LineStripAdjacency, 0, _points.Count + 2);
     }

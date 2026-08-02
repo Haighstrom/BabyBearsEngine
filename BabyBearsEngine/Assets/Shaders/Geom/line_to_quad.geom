@@ -1,6 +1,8 @@
 // Converts a line into a thick quad (triangle strip). Simpler than smooth_lines.geom - no
 // mitering, just an extruded rectangle of width LineThickness. ThicknessInPixels switches
-// between screen-space (post-MV) and world-space (pre-MV) thickness.
+// between screen-space (post-MV) and world-space (pre-MV) thickness. Output_TexCoord carries
+// distance travelled along the line (in TexCoord.x) rather than a texture coordinate, for
+// dashed_line.frag's dash pattern - paired with solid-fill fragment shaders it's simply unread.
 #version 150
 
 uniform mat3 MVMatrix;
@@ -45,43 +47,44 @@ void main()
 
 	vec2 v0 = normalize(p1 - p0);
 	vec2 n0 = vec2(-v0.y, v0.x) * 0.5;
+	float lineLength = length(p1 - p0);
 
 	Output_Colour.Colour = Input_Colour[0].Colour;
 
 	if (ThicknessInPixels)
 	{
 		gl_Position = vec4(PMatrix * vec3(p0 + n0 * LineThickness, 1), 1);
-		Output_TexCoord.TexCoord = p0 + n0 * LineThickness;
+		Output_TexCoord.TexCoord = vec2(0, 0);
 		EmitVertex();
 
 		gl_Position = vec4(PMatrix * vec3(p1 + n0 * LineThickness, 1), 1);
-		Output_TexCoord.TexCoord = p0 + n0 * LineThickness;
+		Output_TexCoord.TexCoord = vec2(lineLength, 0);
 		EmitVertex();
 
 		gl_Position = vec4(PMatrix * vec3(p0 - n0 * LineThickness, 1), 1);
-		Output_TexCoord.TexCoord = p0 - n0 * LineThickness;
+		Output_TexCoord.TexCoord = vec2(0, 0);
 		EmitVertex();
 
 		gl_Position = vec4(PMatrix * vec3(p1 - n0 * LineThickness, 1), 1);
-		Output_TexCoord.TexCoord = p1 - n0 * LineThickness;
+		Output_TexCoord.TexCoord = vec2(lineLength, 0);
 		EmitVertex();
 	}
 	else
 	{
 		gl_Position = vec4(PMatrix * MVMatrix * vec3(p0 + n0 * LineThickness, 1), 1);
-		Output_TexCoord.TexCoord = p0 + n0 * LineThickness;
+		Output_TexCoord.TexCoord = vec2(0, 0);
 		EmitVertex();
 
 		gl_Position = vec4(PMatrix * MVMatrix * vec3(p1 + n0 * LineThickness, 1), 1);
-		Output_TexCoord.TexCoord = p0 + n0 * LineThickness;
+		Output_TexCoord.TexCoord = vec2(lineLength, 0);
 		EmitVertex();
 
 		gl_Position = vec4(PMatrix * MVMatrix * vec3(p0 - n0 * LineThickness, 1), 1);
-		Output_TexCoord.TexCoord = p0 - n0 * LineThickness;
+		Output_TexCoord.TexCoord = vec2(0, 0);
 		EmitVertex();
 
 		gl_Position = vec4(PMatrix * MVMatrix * vec3(p1 - n0 * LineThickness, 1), 1);
-		Output_TexCoord.TexCoord = p1 - n0 * LineThickness;
+		Output_TexCoord.TexCoord = vec2(lineLength, 0);
 		EmitVertex();
 	}
 

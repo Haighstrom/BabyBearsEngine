@@ -6,9 +6,11 @@ namespace BabyBearsEngine.Worlds.Graphics;
 
 /// <summary>
 /// A straight, coloured line segment between two points, extruded to a given thickness by the
-/// geometry shader. Construction allocates GL resources (vertex buffer) — must be created on the
-/// engine thread after the GL context exists. Implements <see cref="IDisposable"/> to release
-/// those resources.
+/// geometry shader. Optionally dashed via <see cref="DashLength"/>/<see cref="GapLength"/> — a
+/// distance-along-the-line value is computed by the geometry shader and fed to a dash-pattern
+/// test in the fragment shader; <see cref="GapLength"/> 0 (the default) is a plain solid line.
+/// Construction allocates GL resources (vertex buffer) — must be created on the engine thread
+/// after the GL context exists. Implements <see cref="IDisposable"/> to release those resources.
 /// </summary>
 /// <param name="start">Line start point, in the parent's local space.</param>
 /// <param name="end">Line end point, in the parent's local space.</param>
@@ -38,6 +40,9 @@ public sealed class LineGraphic(Point start, Point end, Colour colour, float thi
         }
     }
 
+    /// <summary>Dash length along the line. Irrelevant when <see cref="GapLength"/> is 0 (the default — a plain solid line).</summary>
+    public float DashLength { get; set; } = 1f;
+
     /// <summary>Line end point, in the parent's local space. Moving this keeps <see cref="Start"/> fixed.</summary>
     public Point End
     {
@@ -48,6 +53,9 @@ public sealed class LineGraphic(Point start, Point end, Colour colour, float thi
             Height = value.Y - Y;
         }
     }
+
+    /// <summary>Gap length between dashes. 0 (the default) draws a plain solid line.</summary>
+    public float GapLength { get; set; } = 0f;
 
     /// <summary>Line start point, in the parent's local space. Moving this keeps <see cref="End"/> fixed.</summary>
     public Point Start
@@ -111,6 +119,8 @@ public sealed class LineGraphic(Point start, Point end, Colour colour, float thi
         _shader.SetModelViewMatrix(ref mv);
         _shader.SetLineThickness(Thickness);
         _shader.SetThicknessInPixels(ThicknessInPixels);
+        _shader.SetDashLength(DashLength);
+        _shader.SetGapLength(GapLength);
 
         GL.DrawArrays(PrimitiveType.Lines, 0, 2);
     }
