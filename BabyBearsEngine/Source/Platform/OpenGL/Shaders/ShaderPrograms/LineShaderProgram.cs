@@ -25,6 +25,7 @@ public sealed class LineShaderProgram : MatrixShaderProgramBase
     }
 
     private readonly int _dashLengthLocation;
+    private readonly int _dashOffsetLocation;
     private readonly int _gapLengthLocation;
     private readonly int _lineThicknessLocation;
     private readonly int _thicknessInPixelsLocation;
@@ -36,6 +37,7 @@ public sealed class LineShaderProgram : MatrixShaderProgramBase
         _thicknessInPixelsLocation = GL.GetUniformLocation(Handle, "ThicknessInPixels");
         _dashLengthLocation = GL.GetUniformLocation(Handle, "DashLength");
         _gapLengthLocation = GL.GetUniformLocation(Handle, "GapLength");
+        _dashOffsetLocation = GL.GetUniformLocation(Handle, "DashOffset");
 
         // GapLength 0 never discards (see dashed_line.frag), so a plain solid line is just the
         // degenerate case of this pattern — set explicitly rather than relying on the GLSL
@@ -43,6 +45,7 @@ public sealed class LineShaderProgram : MatrixShaderProgramBase
         Bind();
         GL.Uniform1(_dashLengthLocation, 1f);
         GL.Uniform1(_gapLengthLocation, 0f);
+        GL.Uniform1(_dashOffsetLocation, 0f);
     }
 
     /// <summary>Dash length along the line, in the same units as <see cref="SetLineThickness"/>'s pixel/world-space choice. Irrelevant when <see cref="SetGapLength"/> is 0.</summary>
@@ -50,6 +53,13 @@ public sealed class LineShaderProgram : MatrixShaderProgramBase
     {
         Bind();
         GL.Uniform1(_dashLengthLocation, dashLength);
+    }
+
+    /// <summary>Shifts the dash pattern along the line — animate this for a scrolling "marching ants" effect. Irrelevant when <see cref="SetGapLength"/> is 0.</summary>
+    public void SetDashOffset(float dashOffset)
+    {
+        Bind();
+        GL.Uniform1(_dashOffsetLocation, dashOffset);
     }
 
     /// <summary>Gap length between dashes. 0 (the default) draws a plain solid line.</summary>

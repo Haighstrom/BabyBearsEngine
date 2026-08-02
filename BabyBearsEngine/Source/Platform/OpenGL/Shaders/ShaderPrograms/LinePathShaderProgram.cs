@@ -26,6 +26,7 @@ public sealed class LinePathShaderProgram : MatrixShaderProgramBase
     }
 
     private readonly int _dashLengthLocation;
+    private readonly int _dashOffsetLocation;
     private readonly int _gapLengthLocation;
     private readonly int _thicknessInPixelsLocation;
     private readonly int _thicknessLocation;
@@ -37,18 +38,20 @@ public sealed class LinePathShaderProgram : MatrixShaderProgramBase
         _thicknessInPixelsLocation = GL.GetUniformLocation(Handle, "ThicknessInPixels");
         _dashLengthLocation = GL.GetUniformLocation(Handle, "DashLength");
         _gapLengthLocation = GL.GetUniformLocation(Handle, "GapLength");
+        _dashOffsetLocation = GL.GetUniformLocation(Handle, "DashOffset");
 
         // ShiftMode shifts the whole strip inward/outward around its vertices — only meaningful
         // for inset/outset border strips, which nothing currently uses this shader for, so it's
-        // pinned to 0 (centred on the given points). MiterLimit, DashLength and GapLength are set
-        // explicitly rather than relying on the GLSL source's own uniform initialisers — GapLength
-        // 0 never discards (see dashed_line.frag), so a plain solid path is just the degenerate
-        // case of this pattern.
+        // pinned to 0 (centred on the given points). MiterLimit, DashLength, GapLength and
+        // DashOffset are set explicitly rather than relying on the GLSL source's own uniform
+        // initialisers — GapLength 0 never discards (see dashed_line.frag), so a plain solid path
+        // is just the degenerate case of this pattern.
         Bind();
         GL.Uniform1(GL.GetUniformLocation(Handle, "ShiftMode"), 0);
         GL.Uniform1(GL.GetUniformLocation(Handle, "MiterLimit"), 0.75f);
         GL.Uniform1(_dashLengthLocation, 1f);
         GL.Uniform1(_gapLengthLocation, 0f);
+        GL.Uniform1(_dashOffsetLocation, 0f);
     }
 
     /// <summary>Dash length along the path, in the same units as <see cref="SetThickness"/>'s pixel/world-space choice. Irrelevant when <see cref="SetGapLength"/> is 0.</summary>
@@ -56,6 +59,13 @@ public sealed class LinePathShaderProgram : MatrixShaderProgramBase
     {
         Bind();
         GL.Uniform1(_dashLengthLocation, dashLength);
+    }
+
+    /// <summary>Shifts the dash pattern along the path — animate this for a scrolling "marching ants" effect. Irrelevant when <see cref="SetGapLength"/> is 0.</summary>
+    public void SetDashOffset(float dashOffset)
+    {
+        Bind();
+        GL.Uniform1(_dashOffsetLocation, dashOffset);
     }
 
     /// <summary>Gap length between dashes. 0 (the default) draws a plain solid path.</summary>

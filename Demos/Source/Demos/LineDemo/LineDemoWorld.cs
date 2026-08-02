@@ -22,11 +22,12 @@ internal class LineDemoWorld : DemoWorld
     private static readonly FontDefinition s_font = new("Times New Roman", 13);
     private static readonly FontDefinition s_titleFont = new("Times New Roman", 16);
 
-    private bool _dashed = false;
-    private readonly LineGraphic[] _fanLines = new LineGraphic[s_fanPalette.Length];
+    private int _dashState = 0; // 0 = off, 1 = static dashes, 2 = moving dashes
+    private readonly MovingDashedLineGraphic[] _fanLines = new MovingDashedLineGraphic[s_fanPalette.Length];
     private int _paletteOffset = 0;
     private float _thickness = 6f;
     private readonly TextGraphic _thicknessLabel;
+    private readonly Button _toggleDashedButton;
 
     public LineDemoWorld(Func<World> menuWorldFactory) : base(menuWorldFactory)
     {
@@ -46,7 +47,7 @@ internal class LineDemoWorld : DemoWorld
         for (int fanIndex = 0; fanIndex < _fanLines.Length; fanIndex++)
         {
             Point end = FanEndPoint(fanIndex);
-            LineGraphic line = new(FanCentre, end, s_fanPalette[fanIndex], _thickness);
+            MovingDashedLineGraphic line = new(FanCentre, end, s_fanPalette[fanIndex], _thickness, dashLength: 16f, gapLength: 0f, dashSpeed: 0f);
             _fanLines[fanIndex] = line;
             Add(line);
         }
@@ -78,9 +79,9 @@ internal class LineDemoWorld : DemoWorld
         cycleColour.LeftClicked += (_, _) => CyclePalette();
         Add(cycleColour);
 
-        Button toggleDashed = new(700f, fanControlsY, 100f, 28f, ButtonTheme.FromColour(new Colour(150, 100, 180)), "Dashed");
-        toggleDashed.LeftClicked += (_, _) => ToggleDashed();
-        Add(toggleDashed);
+        _toggleDashedButton = new Button(700f, fanControlsY, 100f, 28f, ButtonTheme.FromColour(new Colour(150, 100, 180)), FormatDashState());
+        _toggleDashedButton.LeftClicked += (_, _) => CycleDashState();
+        Add(_toggleDashedButton);
 
         // ThicknessInPixels comparison — same line data rendered inside two cameras at different
         // zoom levels. The pixel-thickness line stays a constant 6px; the world-thickness line
@@ -133,12 +134,24 @@ internal class LineDemoWorld : DemoWorld
     private void AdjustThickness(float delta)
     {
         _thickness = Math.Clamp(_thickness + delta, MinThickness, MaxThickness);
-        foreach (LineGraphic line in _fanLines)
+        foreach (MovingDashedLineGraphic line in _fanLines)
         {
             line.Thickness = _thickness;
         }
 
         _thicknessLabel.Text = FormatThickness();
+    }
+
+    private void CycleDashState()
+    {
+        _dashState = (_dashState + 1) % 3;
+        foreach (MovingDashedLineGraphic line in _fanLines)
+        {
+            line.GapLength = _dashState == 0 ? 0f : 10f;
+            line.DashSpeed = _dashState == 2 ? 40f : 0f;
+        }
+
+        _toggleDashedButton.Text = FormatDashState();
     }
 
     private void CyclePalette()
@@ -150,15 +163,12 @@ internal class LineDemoWorld : DemoWorld
         }
     }
 
-    private string FormatThickness() => $"{_thickness:0} px";
-
-    private void ToggleDashed()
+    private string FormatDashState() => _dashState switch
     {
-        _dashed = !_dashed;
-        foreach (LineGraphic line in _fanLines)
-        {
-            line.DashLength = 16f;
-            line.GapLength = _dashed ? 10f : 0f;
-        }
-    }
+        1 => "Dashed",
+        2 => "Moving",
+        _ => "Solid",
+    };
+
+    private string FormatThickness() => $"{_thickness:0} px";
 }

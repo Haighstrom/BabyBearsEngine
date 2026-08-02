@@ -15,11 +15,12 @@ internal class LinePathDemoWorld : DemoWorld
     private static readonly FontDefinition s_font = new("Times New Roman", 13);
     private static readonly FontDefinition s_titleFont = new("Times New Roman", 16);
 
-    private bool _dashed = false;
-    private readonly LinePathGraphic[] _paths = new LinePathGraphic[3];
+    private int _dashState = 0; // 0 = off, 1 = static dashes, 2 = moving dashes
     private int _paletteOffset = 0;
+    private readonly MovingDashedLinePathGraphic[] _paths = new MovingDashedLinePathGraphic[3];
     private float _thickness = 6f;
     private readonly TextGraphic _thicknessLabel;
+    private readonly Button _toggleDashedButton;
 
     public LinePathDemoWorld(Func<World> menuWorldFactory) : base(menuWorldFactory)
     {
@@ -38,10 +39,10 @@ internal class LinePathDemoWorld : DemoWorld
         AddCaption(300f, 130f, "Hexagon (first point == last -> closed loop)");
         AddCaption(560f, 130f, "Sine wave (25 points)");
 
-        _paths[0] = new LinePathGraphic(ZigzagPoints(), s_palette[0], _thickness);
-        _paths[1] = new LinePathGraphic(HexagonPoints(), s_palette[1], _thickness);
-        _paths[2] = new LinePathGraphic(WavePoints(), s_palette[2], _thickness);
-        foreach (LinePathGraphic path in _paths)
+        _paths[0] = new MovingDashedLinePathGraphic(ZigzagPoints(), s_palette[0], _thickness, dashLength: 16f, gapLength: 0f, dashSpeed: 0f);
+        _paths[1] = new MovingDashedLinePathGraphic(HexagonPoints(), s_palette[1], _thickness, dashLength: 16f, gapLength: 0f, dashSpeed: 0f);
+        _paths[2] = new MovingDashedLinePathGraphic(WavePoints(), s_palette[2], _thickness, dashLength: 16f, gapLength: 0f, dashSpeed: 0f);
+        foreach (MovingDashedLinePathGraphic path in _paths)
         {
             Add(path);
         }
@@ -73,9 +74,9 @@ internal class LinePathDemoWorld : DemoWorld
         cycleColour.LeftClicked += (_, _) => CyclePalette();
         Add(cycleColour);
 
-        Button toggleDashed = new(700f, controlsY, 90f, 28f, ButtonTheme.FromColour(new Colour(150, 100, 180)), "Dashed");
-        toggleDashed.LeftClicked += (_, _) => ToggleDashed();
-        Add(toggleDashed);
+        _toggleDashedButton = new Button(700f, controlsY, 90f, 28f, ButtonTheme.FromColour(new Colour(150, 100, 180)), FormatDashState());
+        _toggleDashedButton.LeftClicked += (_, _) => CycleDashState();
+        Add(_toggleDashedButton);
     }
 
     public override string Name => "Line Path";
@@ -134,12 +135,24 @@ internal class LinePathDemoWorld : DemoWorld
     private void AdjustThickness(float delta)
     {
         _thickness = Math.Clamp(_thickness + delta, MinThickness, MaxThickness);
-        foreach (LinePathGraphic path in _paths)
+        foreach (MovingDashedLinePathGraphic path in _paths)
         {
             path.Thickness = _thickness;
         }
 
         _thicknessLabel.Text = FormatThickness();
+    }
+
+    private void CycleDashState()
+    {
+        _dashState = (_dashState + 1) % 3;
+        foreach (MovingDashedLinePathGraphic path in _paths)
+        {
+            path.GapLength = _dashState == 0 ? 0f : 10f;
+            path.DashSpeed = _dashState == 2 ? 40f : 0f;
+        }
+
+        _toggleDashedButton.Text = FormatDashState();
     }
 
     private void CyclePalette()
@@ -151,15 +164,12 @@ internal class LinePathDemoWorld : DemoWorld
         }
     }
 
-    private string FormatThickness() => $"{_thickness:0} px";
-
-    private void ToggleDashed()
+    private string FormatDashState() => _dashState switch
     {
-        _dashed = !_dashed;
-        foreach (LinePathGraphic path in _paths)
-        {
-            path.DashLength = 16f;
-            path.GapLength = _dashed ? 10f : 0f;
-        }
-    }
+        1 => "Dashed",
+        2 => "Moving",
+        _ => "Solid",
+    };
+
+    private string FormatThickness() => $"{_thickness:0} px";
 }

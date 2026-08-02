@@ -9,8 +9,11 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// geometry shader. Optionally dashed via <see cref="DashLength"/>/<see cref="GapLength"/> — a
 /// distance-along-the-line value is computed by the geometry shader and fed to a dash-pattern
 /// test in the fragment shader; <see cref="GapLength"/> 0 (the default) is a plain solid line.
-/// Construction allocates GL resources (vertex buffer) — must be created on the engine thread
-/// after the GL context exists. Implements <see cref="IDisposable"/> to release those resources.
+/// <see cref="DashOffset"/> shifts the pattern along the line — animate it for a scrolling
+/// "marching ants" effect, or use <see cref="MovingDashedLineGraphic"/> to have that done
+/// automatically. Not sealed, so subclasses like that one can add ticking behaviour; construction
+/// allocates GL resources (vertex buffer) — must be created on the engine thread after the GL
+/// context exists. Implements <see cref="IDisposable"/> to release those resources.
 /// </summary>
 /// <param name="start">Line start point, in the parent's local space.</param>
 /// <param name="end">Line end point, in the parent's local space.</param>
@@ -18,7 +21,7 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// <param name="thickness">Full line width — in pixels if <paramref name="thicknessInPixels"/>, otherwise in local-space units.</param>
 /// <param name="thicknessInPixels">True: <paramref name="thickness"/> is a constant screen-space pixel width, unaffected by scaling. False: thickness scales with the model-view transform.</param>
 /// <param name="layer">Initial render layer. Higher = further behind, lower = on top. Default is <see cref="int.MaxValue"/> (drawn at the back). Must be ≥ 0.</param>
-public sealed class LineGraphic(Point start, Point end, Colour colour, float thickness, bool thicknessInPixels = true, int layer = int.MaxValue)
+public class LineGraphic(Point start, Point end, Colour colour, float thickness, bool thicknessInPixels = true, int layer = int.MaxValue)
     : GraphicBase(start.X, start.Y, end.X - start.X, end.Y - start.Y, layer), IGraphic, IColourGraphic, IDisposable
 {
     private readonly LineShaderProgram _shader = Shaders.Line;
@@ -42,6 +45,9 @@ public sealed class LineGraphic(Point start, Point end, Colour colour, float thi
 
     /// <summary>Dash length along the line. Irrelevant when <see cref="GapLength"/> is 0 (the default — a plain solid line).</summary>
     public float DashLength { get; set; } = 1f;
+
+    /// <summary>Shifts the dash pattern along the line. Irrelevant when <see cref="GapLength"/> is 0.</summary>
+    public float DashOffset { get; set; } = 0f;
 
     /// <summary>Line end point, in the parent's local space. Moving this keeps <see cref="Start"/> fixed.</summary>
     public Point End
@@ -121,11 +127,12 @@ public sealed class LineGraphic(Point start, Point end, Colour colour, float thi
         _shader.SetThicknessInPixels(ThicknessInPixels);
         _shader.SetDashLength(DashLength);
         _shader.SetGapLength(GapLength);
+        _shader.SetDashOffset(DashOffset);
 
         GL.DrawArrays(PrimitiveType.Lines, 0, 2);
     }
 
-    private void Dispose(bool disposing)
+    protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
         {

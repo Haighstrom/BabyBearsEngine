@@ -10,10 +10,13 @@ namespace BabyBearsEngine.Worlds.Graphics;
 /// into a loop. Optionally dashed via <see cref="DashLength"/>/<see cref="GapLength"/> — each
 /// vertex carries its cumulative distance from the path's start, fed to a dash-pattern test in
 /// the fragment shader; <see cref="GapLength"/> 0 (the default) is a plain solid path.
-/// Construction allocates GL resources (vertex buffer) — must be created on the engine thread
-/// after the GL context exists. Implements <see cref="IDisposable"/> to release those resources.
+/// <see cref="DashOffset"/> shifts the pattern along the path — animate it for a scrolling
+/// "marching ants" effect, or use <see cref="MovingDashedLinePathGraphic"/> to have that done
+/// automatically. Not sealed, so subclasses like that one can add ticking behaviour; construction
+/// allocates GL resources (vertex buffer) — must be created on the engine thread after the GL
+/// context exists. Implements <see cref="IDisposable"/> to release those resources.
 /// </summary>
-public sealed class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDisposable
+public class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDisposable
 {
     private readonly LinePathShaderProgram _shader = Shaders.LinePath;
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
@@ -60,6 +63,9 @@ public sealed class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDi
 
     /// <summary>Dash length along the path. Irrelevant when <see cref="GapLength"/> is 0 (the default — a plain solid path).</summary>
     public float DashLength { get; set; } = 1f;
+
+    /// <summary>Shifts the dash pattern along the path. Irrelevant when <see cref="GapLength"/> is 0.</summary>
+    public float DashOffset { get; set; } = 0f;
 
     /// <summary>Gap length between dashes. 0 (the default) draws a plain solid path.</summary>
     public float GapLength { get; set; } = 0f;
@@ -177,6 +183,7 @@ public sealed class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDi
         _shader.SetThicknessInPixels(ThicknessInPixels);
         _shader.SetDashLength(DashLength);
         _shader.SetGapLength(GapLength);
+        _shader.SetDashOffset(DashOffset);
 
         GL.DrawArrays(PrimitiveType.LineStripAdjacency, 0, _points.Count + 2);
     }
@@ -213,7 +220,7 @@ public sealed class LinePathGraphic : GraphicBase, IGraphic, IColourGraphic, IDi
         Height = maxY - minY;
     }
 
-    private void Dispose(bool disposing)
+    protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
         {
