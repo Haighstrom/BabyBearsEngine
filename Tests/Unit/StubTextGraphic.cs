@@ -20,6 +20,7 @@ internal sealed class StubTextGraphic : AddableBase, ITextGraphic
     public Colour Colour { get; set; } = Colour.Black;
     public float ExtraCharacterSpacing { get; set; } = 0f;
     public float ExtraLineSpacing { get; set; } = 0f;
+    public float ExtraParagraphLineSpacing { get; set; } = 0f;
     public float ExtraSpaceWidth { get; set; } = 0f;
     public int FirstCharToDraw { get; set; } = 0;
     public FontDefinition Font { get; set; } = new("Arial", 12);

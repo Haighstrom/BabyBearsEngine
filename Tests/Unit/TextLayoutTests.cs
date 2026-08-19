@@ -194,6 +194,83 @@ public class TextLayoutTests
         Assert.AreEqual("foo", lines[2].Content);
     }
 
+    // ComputeLines — FollowsManualBreak
+
+    [TestMethod]
+    public void ComputeLines_NoWrapNoNewline_FollowsManualBreakIsFalse()
+    {
+        FontAtlasMetrics fs = MakeMetrics("hello");
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("hello"), fs, 1000f, 1f, 0f, 0f);
+
+        Assert.IsFalse(lines[0].FollowsManualBreak);
+    }
+
+    [TestMethod]
+    public void ComputeLines_WordWrapOnly_NoLineFollowsManualBreak()
+    {
+        // Word-wrapped lines are not preceded by a manual '\n', so none should be flagged.
+        FontAtlasMetrics fs = MakeMetrics("foo bar baz");
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("foo bar baz"), fs, 35f, 1f, 0f, 0f);
+
+        Assert.HasCount(3, lines);
+        foreach (LineInfo line in lines)
+        {
+            Assert.IsFalse(line.FollowsManualBreak);
+        }
+    }
+
+    [TestMethod]
+    public void ComputeLines_ExplicitNewline_SecondLineFollowsManualBreak()
+    {
+        FontAtlasMetrics fs = MakeMetrics("hello\nworld");
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("hello\nworld"), fs, 1000f, 1f, 0f, 0f);
+
+        Assert.IsFalse(lines[0].FollowsManualBreak);
+        Assert.IsTrue(lines[1].FollowsManualBreak);
+    }
+
+    [TestMethod]
+    public void ComputeLines_ExplicitNewlineAtStart_SecondLineFollowsManualBreak()
+    {
+        FontAtlasMetrics fs = MakeMetrics("hello\n");
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("\nhello"), fs, 1000f, 1f, 0f, 0f);
+
+        Assert.IsFalse(lines[0].FollowsManualBreak);
+        Assert.IsTrue(lines[1].FollowsManualBreak);
+    }
+
+    [TestMethod]
+    public void ComputeLines_MultipleExplicitNewlines_EachLineAfterFirstFollowsManualBreak()
+    {
+        FontAtlasMetrics fs = MakeMetrics("abc\n");
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("a\nb\nc"), fs, 1000f, 1f, 0f, 0f);
+
+        Assert.IsFalse(lines[0].FollowsManualBreak);
+        Assert.IsTrue(lines[1].FollowsManualBreak);
+        Assert.IsTrue(lines[2].FollowsManualBreak);
+    }
+
+    [TestMethod]
+    public void ComputeLines_NewlineThenWrappedParagraph_OnlyFirstLineOfParagraphFollowsManualBreak()
+    {
+        // "hi" fits on one line unwrapped (no manual break), then "\nfoo bar baz" word-wraps into
+        // three lines — only the first of those three should carry the manual-break flag, not the
+        // wrap-produced ones that follow it.
+        FontAtlasMetrics fs = MakeMetrics("hi foo bar baz");
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars("hi\nfoo bar baz"), fs, 35f, 1f, 0f, 0f);
+
+        Assert.HasCount(4, lines);
+        Assert.AreEqual("hi", lines[0].Content);
+        Assert.AreEqual("foo", lines[1].Content);
+        Assert.AreEqual("bar", lines[2].Content);
+        Assert.AreEqual("baz", lines[3].Content);
+
+        Assert.IsFalse(lines[0].FollowsManualBreak);
+        Assert.IsTrue(lines[1].FollowsManualBreak);
+        Assert.IsFalse(lines[2].FollowsManualBreak);
+        Assert.IsFalse(lines[3].FollowsManualBreak);
+    }
+
     // ComputeLines — scale
 
     [TestMethod]

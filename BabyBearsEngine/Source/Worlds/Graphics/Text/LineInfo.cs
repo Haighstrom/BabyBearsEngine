@@ -1,6 +1,6 @@
 namespace BabyBearsEngine.Worlds.Graphics.Text;
 
-internal record LineInfo(StyledChar[] Chars, int StartIndex, int EndIndex)
+internal record LineInfo(StyledChar[] Chars, int StartIndex, int EndIndex, bool FollowsManualBreak = false)
 {
     internal string Content
     {

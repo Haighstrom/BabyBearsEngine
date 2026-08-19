@@ -12,13 +12,14 @@ internal static class TextLayout
     {
         List<LineInfo> lines = [];
         int segStart = 0;
+        bool segmentFollowsManualBreak = false;
 
         while (true)
         {
             int newlineIdx = FindNewline(chars, segStart);
             int segEnd = newlineIdx >= 0 ? newlineIdx : chars.Length;
 
-            WrapSegment(chars, segStart, segEnd, metrics, maxWidth, scaleX, extraSpaceWidth, extraCharSpacing, lines);
+            WrapSegment(chars, segStart, segEnd, metrics, maxWidth, scaleX, extraSpaceWidth, extraCharSpacing, segmentFollowsManualBreak, lines);
 
             if (newlineIdx < 0)
             {
@@ -26,6 +27,7 @@ internal static class TextLayout
             }
 
             segStart = newlineIdx + 1;
+            segmentFollowsManualBreak = true;
         }
 
         return lines;
@@ -98,11 +100,12 @@ internal static class TextLayout
         float scaleX,
         float extraSpaceWidth,
         float extraCharSpacing,
+        bool firstLineFollowsManualBreak,
         List<LineInfo> output)
     {
         if (segStart == segEnd)
         {
-            output.Add(new LineInfo([], segStart, segEnd));
+            output.Add(new LineInfo([], segStart, segEnd, firstLineFollowsManualBreak));
             return;
         }
 
@@ -136,7 +139,7 @@ internal static class TextLayout
 
             if (i == segEnd)
             {
-                output.Add(new LineInfo(chars[lineStart..segEnd], lineStart, segEnd));
+                output.Add(new LineInfo(chars[lineStart..segEnd], lineStart, segEnd, lineStart == segStart && firstLineFollowsManualBreak));
                 break;
             }
 
@@ -159,7 +162,7 @@ internal static class TextLayout
                 nextLineStart = i;
             }
 
-            output.Add(new LineInfo(chars[lineStart..breakAt], lineStart, breakAt));
+            output.Add(new LineInfo(chars[lineStart..breakAt], lineStart, breakAt, lineStart == segStart && firstLineFollowsManualBreak));
             lineStart = nextLineStart;
         }
     }

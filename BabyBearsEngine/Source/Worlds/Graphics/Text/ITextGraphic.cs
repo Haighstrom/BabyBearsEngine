@@ -17,6 +17,13 @@ public interface ITextGraphic : IRenderable, IRectAddable
     /// <summary>Additional vertical space inserted between lines when <see cref="Multiline"/> is true.</summary>
     float ExtraLineSpacing { get; set; }
 
+    /// <summary>
+    /// Additional vertical space inserted on top of <see cref="ExtraLineSpacing"/>, but only before a
+    /// line that starts immediately after a manual <c>'\n'</c> in <see cref="Text"/> — not before lines
+    /// produced by word-wrapping. Lets paragraph breaks stand apart from ordinary wrapped lines.
+    /// </summary>
+    float ExtraParagraphLineSpacing { get; set; }
+
     /// <summary>Additional width added to space characters beyond their natural glyph width.</summary>
     float ExtraSpaceWidth { get; set; }
 

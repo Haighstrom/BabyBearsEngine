@@ -64,6 +64,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     private bool _wasTruncated = false;
     private float _extraCharSpacing = 0f;
     private float _extraLineSpacing = 0f;
+    private float _extraParagraphLineSpacing = 0f;
     private float _extraSpaceWidth = 0f;
     private int _firstCharToDraw = 0;
 
@@ -162,6 +163,17 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         set
         {
             _extraLineSpacing = value;
+            _verticesChanged = true;
+        }
+    }
+
+    /// <inheritdoc/>
+    public float ExtraParagraphLineSpacing
+    {
+        get => _extraParagraphLineSpacing;
+        set
+        {
+            _extraParagraphLineSpacing = value;
             _verticesChanged = true;
         }
     }
@@ -371,6 +383,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         StyledChar[] chars = InlineTagParser.Parse(_textToDisplay, _useInlineTags);
         IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(chars, _metrics, Width, ScaleX, _extraSpaceWidth, _extraCharSpacing);
         float maxLineWidth = 0f;
+        int paragraphBreakCount = 0;
 
         foreach (LineInfo line in lines)
         {
@@ -379,9 +392,16 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
             {
                 maxLineWidth = lw;
             }
+
+            if (line.FollowsManualBreak)
+            {
+                paragraphBreakCount++;
+            }
         }
 
-        return new Point(maxLineWidth, lines.Count * (_metrics.HighestChar * ScaleY + _extraLineSpacing));
+        float totalHeight = lines.Count * (_metrics.HighestChar * ScaleY + _extraLineSpacing) + paragraphBreakCount * _extraParagraphLineSpacing;
+
+        return new Point(maxLineWidth, totalHeight);
     }
 
     protected override void OnSizeChanged()
@@ -614,7 +634,15 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         bool snapToPixelGrid = ShouldPixelSnap(_scaleX, _scaleY, _angle);
         float lineHeight = ScaleY * _metrics.HighestChar;
         IReadOnlyList<LineInfo> lines = GetLines();
-        float totalHeight = lines.Count * (lineHeight + _extraLineSpacing);
+        int paragraphBreakCount = 0;
+        foreach (LineInfo countedLine in lines)
+        {
+            if (countedLine.FollowsManualBreak)
+            {
+                paragraphBreakCount++;
+            }
+        }
+        float totalHeight = lines.Count * (lineHeight + _extraLineSpacing) + paragraphBreakCount * _extraParagraphLineSpacing;
 
         float lineTop = MathF.Round(VAlignment switch
         {
@@ -632,6 +660,13 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
 
         foreach (LineInfo line in lines)
         {
+            // A line starting right after a manual '\n' gets extra breathing room on top of
+            // ExtraLineSpacing; wrapped lines within the same paragraph do not.
+            if (line.FollowsManualBreak)
+            {
+                lineTop += _extraParagraphLineSpacing;
+            }
+
             // Lines beyond Height are cut off; flag truncation if visible chars remain.
             if (lineTop >= Height)
             {
