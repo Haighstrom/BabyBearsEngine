@@ -392,7 +392,7 @@ public sealed record Rect
     /// <param name="right">The amount to move the right side further to the right.</param>
     /// <param name="down">The amount to move the bottom side further down.</param>
     /// <returns>Returns a new expanded rectangle.</returns>
-    public Rect Grow(float left, float up, float right, float down) => new Rect(X - left, Y - up, W + left + right, H + up + down);
+    public Rect Grow(float left, float up, float right, float down) => new(X - left, Y - up, W + left + right, H + up + down);
 
     /// <summary>
     /// Check whether this rectangle intersects another one.

@@ -1,4 +1,4 @@
-using BabyBearsEngine.Geometry;
+﻿using BabyBearsEngine.Geometry;
 using BabyBearsEngine.OpenGL;
 using BabyBearsEngine.Platform.OpenGL.Rendering;
 
@@ -19,7 +19,7 @@ namespace BabyBearsEngine.Worlds.Graphics;
 public class Sprite(ISpriteTexture texture, float x, float y, float width, float height, int initialFrame = 0, int layer = int.MaxValue)
     : GraphicBase(x, y, width, height, layer), ISprite, IDisposable
 {
-    private readonly GraphicRenderer _renderer = new GraphicRenderer(texture);
+    private readonly GraphicRenderer _renderer = new(texture);
     private Colour _colour = Colour.White;
     private bool _verticesChanged = true;
     private bool _disposed = false;
