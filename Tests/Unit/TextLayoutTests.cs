@@ -410,4 +410,78 @@ public class TextLayoutTests
 
         Assert.AreEqual(43f, width, Delta);
     }
+
+    // ShouldApplyParagraphSpacing
+
+    private static bool[] ParagraphSpacingFlags(string text, float maxWidth, bool suppressOnConsecutiveBreaks)
+    {
+        FontAtlasMetrics fs = MakeMetrics(text.Replace("\n", ""));
+        IReadOnlyList<LineInfo> lines = TextLayout.ComputeLines(Chars(text), fs, maxWidth, 1f, 0f, 0f);
+
+        bool[] flags = new bool[lines.Count];
+        for (int i = 0; i < lines.Count; i++)
+        {
+            flags[i] = TextLayout.ShouldApplyParagraphSpacing(lines, i, suppressOnConsecutiveBreaks);
+        }
+
+        return flags;
+    }
+
+    [TestMethod]
+    public void ShouldApplyParagraphSpacing_NoManualBreak_False()
+    {
+        CollectionAssert.AreEqual(new[] { false }, ParagraphSpacingFlags("hello", 1000f, suppressOnConsecutiveBreaks: true));
+    }
+
+    [TestMethod]
+    public void ShouldApplyParagraphSpacing_SuppressOff_EveryManualBreakLineCounts()
+    {
+        // "A\n\nB" → "A"(no), ""(manual break), "B"(manual break): both flagged when not suppressing.
+        CollectionAssert.AreEqual(new[] { false, true, true }, ParagraphSpacingFlags("A\n\nB", 1000f, suppressOnConsecutiveBreaks: false));
+    }
+
+    [TestMethod]
+    public void ShouldApplyParagraphSpacing_SuppressOn_SingleBreakStillCounts()
+    {
+        CollectionAssert.AreEqual(new[] { false, true }, ParagraphSpacingFlags("A\nB", 1000f, suppressOnConsecutiveBreaks: true));
+    }
+
+    [TestMethod]
+    public void ShouldApplyParagraphSpacing_SuppressOn_DoubleBreakGetsNothing()
+    {
+        CollectionAssert.AreEqual(new[] { false, false, false }, ParagraphSpacingFlags("A\n\nB", 1000f, suppressOnConsecutiveBreaks: true));
+    }
+
+    [TestMethod]
+    public void ShouldApplyParagraphSpacing_SuppressOn_TripleBreakGetsNothing()
+    {
+        CollectionAssert.AreEqual(new[] { false, false, false, false }, ParagraphSpacingFlags("A\n\n\nB", 1000f, suppressOnConsecutiveBreaks: true));
+    }
+
+    [TestMethod]
+    public void ShouldApplyParagraphSpacing_SuppressOn_SeparateSingleBreaksEachCount()
+    {
+        // Two independent single '\n' breaks — each still gets the spacing.
+        CollectionAssert.AreEqual(new[] { false, true, true }, ParagraphSpacingFlags("A\nB\nC", 1000f, suppressOnConsecutiveBreaks: true));
+    }
+
+    [TestMethod]
+    public void ShouldApplyParagraphSpacing_SuppressOn_WrappedParagraphAfterSingleBreak_FirstWrappedLineCounts()
+    {
+        // "A\nfoo bar" with "foo bar" wrapping → "A", "foo"(manual break), "bar"(wrap).
+        CollectionAssert.AreEqual(new[] { false, true, false }, ParagraphSpacingFlags("A\nfoo bar", 35f, suppressOnConsecutiveBreaks: true));
+    }
+
+    [TestMethod]
+    public void ShouldApplyParagraphSpacing_SuppressOn_WrappedParagraphAfterDoubleBreak_NothingCounts()
+    {
+        // "A\n\nfoo bar" → "A", ""(blank), "foo"(after blank), "bar"(wrap).
+        CollectionAssert.AreEqual(new[] { false, false, false, false }, ParagraphSpacingFlags("A\n\nfoo bar", 35f, suppressOnConsecutiveBreaks: true));
+    }
+
+    [TestMethod]
+    public void ShouldApplyParagraphSpacing_SuppressOn_LeadingDoubleBreakGetsNothing()
+    {
+        CollectionAssert.AreEqual(new[] { false, false, false }, ParagraphSpacingFlags("\n\nA", 1000f, suppressOnConsecutiveBreaks: true));
+    }
 }

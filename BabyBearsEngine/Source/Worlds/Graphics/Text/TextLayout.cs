@@ -70,6 +70,32 @@ internal static class TextLayout
         return width;
     }
 
+    /// <summary>
+    /// Whether <c>ExtraParagraphLineSpacing</c> should be added before <paramref name="lines"/>[<paramref name="index"/>].
+    /// True for any line that <c>FollowsManualBreak</c> — except, when <paramref name="suppressOnConsecutiveBreaks"/>
+    /// is set, a line that is part of a run of two or more consecutive <c>'\n'</c> (an empty line, or the
+    /// content line straight after one). Such runs already separate paragraphs by a full blank line, so
+    /// the extra gap would only overshoot.
+    /// </summary>
+    public static bool ShouldApplyParagraphSpacing(IReadOnlyList<LineInfo> lines, int index, bool suppressOnConsecutiveBreaks)
+    {
+        LineInfo line = lines[index];
+
+        if (!line.FollowsManualBreak)
+        {
+            return false;
+        }
+
+        if (!suppressOnConsecutiveBreaks)
+        {
+            return true;
+        }
+
+        bool lineIsEmpty = line.Chars.Length == 0;
+        bool previousLineIsEmpty = index == 0 || lines[index - 1].Chars.Length == 0;
+        return !lineIsEmpty && !previousLineIsEmpty;
+    }
+
     private static int FindNewline(StyledChar[] chars, int from)
     {
         for (int i = from; i < chars.Length; i++)

@@ -24,6 +24,14 @@ public interface ITextGraphic : IRenderable, IRectAddable
     /// </summary>
     float ExtraParagraphLineSpacing { get; set; }
 
+    /// <summary>
+    /// When true (the default), <see cref="ExtraParagraphLineSpacing"/> is added only for a solitary
+    /// <c>'\n'</c>. A run of two or more consecutive <c>'\n'</c> gets none — the blank line(s) the run
+    /// already produces are separation enough, so the extra gap would overshoot. Set false to add it for
+    /// every manual break, stacking on runs.
+    /// </summary>
+    bool SuppressExtraParagraphLineSpacingOnConsecutiveBreaks { get; set; }
+
     /// <summary>Additional width added to space characters beyond their natural glyph width.</summary>
     float ExtraSpaceWidth { get; set; }
 

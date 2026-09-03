@@ -67,6 +67,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     private float _extraParagraphLineSpacing = 0f;
     private float _extraSpaceWidth = 0f;
     private int _firstCharToDraw = 0;
+    private bool _suppressExtraParagraphLineSpacingOnConsecutiveBreaks = true;
 
     /// <param name="fontDef">Font to render with. Resolved through the font atlas cache.</param>
     /// <param name="textToDisplay">The text string to render.</param>
@@ -174,6 +175,17 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         set
         {
             _extraParagraphLineSpacing = value;
+            _verticesChanged = true;
+        }
+    }
+
+    /// <inheritdoc/>
+    public bool SuppressExtraParagraphLineSpacingOnConsecutiveBreaks
+    {
+        get => _suppressExtraParagraphLineSpacingOnConsecutiveBreaks;
+        set
+        {
+            _suppressExtraParagraphLineSpacingOnConsecutiveBreaks = value;
             _verticesChanged = true;
         }
     }
@@ -385,15 +397,15 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         float maxLineWidth = 0f;
         int paragraphBreakCount = 0;
 
-        foreach (LineInfo line in lines)
+        for (int lineIndex = 0; lineIndex < lines.Count; lineIndex++)
         {
-            float lw = TextLayout.MeasureLine(line.Chars, _metrics, ScaleX, _extraSpaceWidth, _extraCharSpacing);
+            float lw = TextLayout.MeasureLine(lines[lineIndex].Chars, _metrics, ScaleX, _extraSpaceWidth, _extraCharSpacing);
             if (lw > maxLineWidth)
             {
                 maxLineWidth = lw;
             }
 
-            if (line.FollowsManualBreak)
+            if (TextLayout.ShouldApplyParagraphSpacing(lines, lineIndex, _suppressExtraParagraphLineSpacingOnConsecutiveBreaks))
             {
                 paragraphBreakCount++;
             }
@@ -635,9 +647,9 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         float lineHeight = ScaleY * _metrics.HighestChar;
         IReadOnlyList<LineInfo> lines = GetLines();
         int paragraphBreakCount = 0;
-        foreach (LineInfo countedLine in lines)
+        for (int lineIndex = 0; lineIndex < lines.Count; lineIndex++)
         {
-            if (countedLine.FollowsManualBreak)
+            if (TextLayout.ShouldApplyParagraphSpacing(lines, lineIndex, _suppressExtraParagraphLineSpacingOnConsecutiveBreaks))
             {
                 paragraphBreakCount++;
             }
@@ -658,11 +670,15 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
 
         bool truncated = false;
 
-        foreach (LineInfo line in lines)
+        for (int lineIndex = 0; lineIndex < lines.Count; lineIndex++)
         {
+            LineInfo line = lines[lineIndex];
+
             // A line starting right after a manual '\n' gets extra breathing room on top of
-            // ExtraLineSpacing; wrapped lines within the same paragraph do not.
-            if (line.FollowsManualBreak)
+            // ExtraLineSpacing; wrapped lines within the same paragraph do not. When
+            // SuppressExtraParagraphLineSpacingOnConsecutiveBreaks is set, a run of 2+ '\n' skips
+            // it — the blank line the run produces is separation enough.
+            if (TextLayout.ShouldApplyParagraphSpacing(lines, lineIndex, _suppressExtraParagraphLineSpacingOnConsecutiveBreaks))
             {
                 lineTop += _extraParagraphLineSpacing;
             }
