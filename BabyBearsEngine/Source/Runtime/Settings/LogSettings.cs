@@ -21,6 +21,7 @@ public record class LogSettings()
         FileLevels = LogLevel.None,
         ErrorFileLevels = LogLevel.None,
         FilePath = null,
+        LogArchivePath = null,
         ErrorFilePath = null,
         ErrorArchivePath = null,
     };
@@ -96,6 +97,21 @@ public record class LogSettings()
     /// Defaults to "log.log" in the current working directory.
     /// </summary>
     public string? FilePath { get; init; } = "log.log";
+
+    /// <summary>
+    /// Path for the main log archive. Only used when <see cref="FileMode"/> is
+    /// <see cref="LogFileMode.OverwriteExisting"/> — at startup, the previous run's
+    /// <see cref="FilePath"/> is prepended here (newest run first) before being overwritten, the
+    /// same way <see cref="ErrorArchivePath"/> preserves <see cref="ErrorFilePath"/>. Set to null to
+    /// disable archiving (the previous run's log is simply discarded). Defaults to "log_archive.log".
+    /// </summary>
+    public string? LogArchivePath { get; init; } = "log_archive.log";
+
+    /// <summary>
+    /// Maximum number of past runs retained in <see cref="LogArchivePath"/>. Defaults to 50.
+    /// Ignored when <see cref="LogArchivePath"/> is null.
+    /// </summary>
+    public int LogArchiveMaxRuns { get; init; } = 50;
 
     /// <summary>
     /// Which metadata fields are prefixed onto each log message. Applies to all sinks.

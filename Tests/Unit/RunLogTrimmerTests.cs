@@ -6,19 +6,19 @@ using BabyBearsEngine.Diagnostics;
 namespace BabyBearsEngine.Tests.Unit;
 
 [TestClass]
-public class ErrorFileTrimmerTests
+public class RunLogTrimmerTests
 {
     private string _tempDir = null!;
-    private string _errorsPath = null!;
+    private string _sourcePath = null!;
     private string _archivePath = null!;
 
     [TestInitialize]
     public void Setup()
     {
-        _tempDir = Path.Combine(Path.GetTempPath(), "bbe_errortrimmer_tests_" + Guid.NewGuid().ToString("N"));
+        _tempDir = Path.Combine(Path.GetTempPath(), "bbe_runlogtrimmer_tests_" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_tempDir);
-        _errorsPath = Path.Combine(_tempDir, "errors.log");
-        _archivePath = Path.Combine(_tempDir, "error_archive.log");
+        _sourcePath = Path.Combine(_tempDir, "log.log");
+        _archivePath = Path.Combine(_tempDir, "log_archive.log");
     }
 
     [TestCleanup]
@@ -34,13 +34,13 @@ public class ErrorFileTrimmerTests
         }
     }
 
-    private string ReadErrors() => File.ReadAllText(_errorsPath);
+    private string ReadSource() => File.ReadAllText(_sourcePath);
     private string ReadArchive() => File.ReadAllText(_archivePath);
 
     private static string MakeRun(int runNumber)
     {
         StringBuilder sb = new();
-        sb.AppendLine($"====== {ErrorFileTrimmer.RunStartMarker} ======");
+        sb.AppendLine($"====== {RunLogTrimmer.RunStartMarker} ======");
         sb.AppendLine($" Run Started: 2024-01-01 00:00:{runNumber:D2}");
         sb.AppendLine($"[Fatal] Crash in run {runNumber:D3}");
         return sb.ToString();
@@ -60,27 +60,27 @@ public class ErrorFileTrimmerTests
     // ─── No-op cases ───
 
     [TestMethod]
-    public void ArchivePreviousRun_ErrorsFileDoesNotExist_DoesNothing()
+    public void ArchivePreviousRun_SourceFileDoesNotExist_DoesNothing()
     {
-        ErrorFileTrimmer.ArchivePreviousRun(_errorsPath, _archivePath, maxArchiveRuns: 50);
+        RunLogTrimmer.ArchivePreviousRun(_sourcePath, _archivePath, maxArchiveRuns: 50);
 
-        Assert.IsFalse(File.Exists(_errorsPath));
+        Assert.IsFalse(File.Exists(_sourcePath));
         Assert.IsFalse(File.Exists(_archivePath));
     }
 
     [TestMethod]
-    public void ArchivePreviousRun_ErrorsFileHasNoRunMarker_DeletesFileWithoutArchiving()
+    public void ArchivePreviousRun_SourceFileHasNoRunMarker_DeletesFileWithoutArchiving()
     {
-        File.WriteAllText(_errorsPath, "some content without the marker");
+        File.WriteAllText(_sourcePath, "some content without the marker");
 
-        ErrorFileTrimmer.ArchivePreviousRun(_errorsPath, _archivePath, maxArchiveRuns: 50);
+        RunLogTrimmer.ArchivePreviousRun(_sourcePath, _archivePath, maxArchiveRuns: 50);
 
-        Assert.IsFalse(File.Exists(_errorsPath));
+        Assert.IsFalse(File.Exists(_sourcePath));
         Assert.IsFalse(File.Exists(_archivePath));
     }
 
     [TestMethod]
-    public void ArchivePreviousRun_ErrorsFileHasNoRunMarker_LogsWarningBeforeDiscarding()
+    public void ArchivePreviousRun_SourceFileHasNoRunMarker_LogsWarningBeforeDiscarding()
     {
         var originalOut = Console.Out;
         var captured = new StringWriter();
@@ -95,13 +95,13 @@ public class ErrorFileTrimmerTests
 
         try
         {
-            File.WriteAllText(_errorsPath, "some content without the marker");
+            File.WriteAllText(_sourcePath, "some content without the marker");
 
-            ErrorFileTrimmer.ArchivePreviousRun(_errorsPath, _archivePath, maxArchiveRuns: 50);
+            RunLogTrimmer.ArchivePreviousRun(_sourcePath, _archivePath, maxArchiveRuns: 50);
 
             string output = captured.ToString();
             Assert.Contains("[Warning]", output);
-            Assert.Contains(_errorsPath, output);
+            Assert.Contains(_sourcePath, output);
         }
         finally
         {
@@ -112,37 +112,37 @@ public class ErrorFileTrimmerTests
     }
 
     [TestMethod]
-    public void ArchivePreviousRun_NullArchivePath_DeletesErrorsFileWithoutArchiving()
+    public void ArchivePreviousRun_NullArchivePath_DeletesSourceFileWithoutArchiving()
     {
-        File.WriteAllText(_errorsPath, MakeRun(1));
+        File.WriteAllText(_sourcePath, MakeRun(1));
 
-        ErrorFileTrimmer.ArchivePreviousRun(_errorsPath, archivePath: null, maxArchiveRuns: 50);
+        RunLogTrimmer.ArchivePreviousRun(_sourcePath, archivePath: null, maxArchiveRuns: 50);
 
-        Assert.IsFalse(File.Exists(_errorsPath));
+        Assert.IsFalse(File.Exists(_sourcePath));
         Assert.IsFalse(File.Exists(_archivePath));
     }
 
     // ─── Archive creation ───
 
     [TestMethod]
-    public void ArchivePreviousRun_ErrorsFileHasRun_ArchiveDoesNotExist_CreatesArchiveWithRun()
+    public void ArchivePreviousRun_SourceFileHasRun_ArchiveDoesNotExist_CreatesArchiveWithRun()
     {
-        File.WriteAllText(_errorsPath, MakeRun(1));
+        File.WriteAllText(_sourcePath, MakeRun(1));
 
-        ErrorFileTrimmer.ArchivePreviousRun(_errorsPath, _archivePath, maxArchiveRuns: 50);
+        RunLogTrimmer.ArchivePreviousRun(_sourcePath, _archivePath, maxArchiveRuns: 50);
 
         Assert.IsTrue(File.Exists(_archivePath));
         Assert.Contains("Crash in run 001", ReadArchive());
     }
 
     [TestMethod]
-    public void ArchivePreviousRun_ErrorsFileHasRun_DeletesErrorsFile()
+    public void ArchivePreviousRun_SourceFileHasRun_DeletesSourceFile()
     {
-        File.WriteAllText(_errorsPath, MakeRun(1));
+        File.WriteAllText(_sourcePath, MakeRun(1));
 
-        ErrorFileTrimmer.ArchivePreviousRun(_errorsPath, _archivePath, maxArchiveRuns: 50);
+        RunLogTrimmer.ArchivePreviousRun(_sourcePath, _archivePath, maxArchiveRuns: 50);
 
-        Assert.IsFalse(File.Exists(_errorsPath));
+        Assert.IsFalse(File.Exists(_sourcePath));
     }
 
     // ─── Prepend order ───
@@ -150,10 +150,10 @@ public class ErrorFileTrimmerTests
     [TestMethod]
     public void ArchivePreviousRun_ArchiveExists_NewRunPrependedBeforeOldContent()
     {
-        File.WriteAllText(_errorsPath, MakeRun(2));
+        File.WriteAllText(_sourcePath, MakeRun(2));
         File.WriteAllText(_archivePath, MakeRun(1));
 
-        ErrorFileTrimmer.ArchivePreviousRun(_errorsPath, _archivePath, maxArchiveRuns: 50);
+        RunLogTrimmer.ArchivePreviousRun(_sourcePath, _archivePath, maxArchiveRuns: 50);
 
         string archive = ReadArchive();
         int run2Position = archive.IndexOf("Crash in run 002", StringComparison.Ordinal);
@@ -164,10 +164,10 @@ public class ErrorFileTrimmerTests
     [TestMethod]
     public void ArchivePreviousRun_ArchiveExists_BothRunsPresent()
     {
-        File.WriteAllText(_errorsPath, MakeRun(2));
+        File.WriteAllText(_sourcePath, MakeRun(2));
         File.WriteAllText(_archivePath, MakeRun(1));
 
-        ErrorFileTrimmer.ArchivePreviousRun(_errorsPath, _archivePath, maxArchiveRuns: 50);
+        RunLogTrimmer.ArchivePreviousRun(_sourcePath, _archivePath, maxArchiveRuns: 50);
 
         string archive = ReadArchive();
         Assert.Contains("Crash in run 001", archive);
@@ -179,23 +179,23 @@ public class ErrorFileTrimmerTests
     [TestMethod]
     public void ArchivePreviousRun_ArchiveBelowMaxRuns_NotTrimmed()
     {
-        File.WriteAllText(_errorsPath, MakeRun(6));
+        File.WriteAllText(_sourcePath, MakeRun(6));
         File.WriteAllText(_archivePath, MakeArchive(runCount: 5));
 
-        ErrorFileTrimmer.ArchivePreviousRun(_errorsPath, _archivePath, maxArchiveRuns: 10);
+        RunLogTrimmer.ArchivePreviousRun(_sourcePath, _archivePath, maxArchiveRuns: 10);
 
-        Assert.AreEqual(6, CountOccurrences(ReadArchive(), ErrorFileTrimmer.RunStartMarker));
+        Assert.AreEqual(6, CountOccurrences(ReadArchive(), RunLogTrimmer.RunStartMarker));
     }
 
     [TestMethod]
     public void ArchivePreviousRun_ArchiveExceedsMaxRuns_TrimsToMaxRuns()
     {
-        File.WriteAllText(_errorsPath, MakeRun(11));
+        File.WriteAllText(_sourcePath, MakeRun(11));
         File.WriteAllText(_archivePath, MakeArchive(runCount: 10));
 
-        ErrorFileTrimmer.ArchivePreviousRun(_errorsPath, _archivePath, maxArchiveRuns: 10);
+        RunLogTrimmer.ArchivePreviousRun(_sourcePath, _archivePath, maxArchiveRuns: 10);
 
-        Assert.AreEqual(10, CountOccurrences(ReadArchive(), ErrorFileTrimmer.RunStartMarker));
+        Assert.AreEqual(10, CountOccurrences(ReadArchive(), RunLogTrimmer.RunStartMarker));
     }
 
     [TestMethod]
@@ -206,10 +206,10 @@ public class ErrorFileTrimmerTests
 
         for (int run = 1; run <= totalRuns; run++)
         {
-            File.WriteAllText(_errorsPath, MakeRun(run));
-            ErrorFileTrimmer.ArchivePreviousRun(_errorsPath, _archivePath, maxArchiveRuns: maxRuns);
+            File.WriteAllText(_sourcePath, MakeRun(run));
+            RunLogTrimmer.ArchivePreviousRun(_sourcePath, _archivePath, maxArchiveRuns: maxRuns);
 
-            int count = CountOccurrences(ReadArchive(), ErrorFileTrimmer.RunStartMarker);
+            int count = CountOccurrences(ReadArchive(), RunLogTrimmer.RunStartMarker);
             Assert.IsLessThanOrEqualTo(maxRuns, count, $"After run {run}, archive has {count} markers (max {maxRuns})");
         }
     }
@@ -217,12 +217,12 @@ public class ErrorFileTrimmerTests
     [TestMethod]
     public void ArchivePreviousRun_ArchiveExceedsMaxRuns_OldestRunRemoved()
     {
-        // Archive has runs 10..1 (newest first); errors.log has run 11.
+        // Archive has runs 10..1 (newest first); log.log has run 11.
         // Combined = [11, 10, ..., 1] = 11 runs; trimmed to 10 = [11, 10, ..., 2]. Run 1 dropped.
-        File.WriteAllText(_errorsPath, MakeRun(11));
+        File.WriteAllText(_sourcePath, MakeRun(11));
         File.WriteAllText(_archivePath, MakeArchive(runCount: 10));
 
-        ErrorFileTrimmer.ArchivePreviousRun(_errorsPath, _archivePath, maxArchiveRuns: 10);
+        RunLogTrimmer.ArchivePreviousRun(_sourcePath, _archivePath, maxArchiveRuns: 10);
 
         string archive = ReadArchive();
         Assert.Contains("Crash in run 011", archive);

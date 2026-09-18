@@ -41,7 +41,7 @@ internal static class LoggerFactory
             return null;
         }
 
-        ErrorFileTrimmer.ArchivePreviousRun(
+        RunLogTrimmer.ArchivePreviousRun(
             logSettings.ErrorFilePath,
             logSettings.ErrorArchivePath,
             logSettings.ErrorArchiveMaxRuns);
@@ -56,7 +56,7 @@ internal static class LoggerFactory
             return null;
         }
 
-        string? resolvedPath = ResolveFilePath(logSettings.FilePath, logSettings.FileMode, logSettings.NewFilePerRunMaxFiles);
+        string? resolvedPath = ResolveFilePath(logSettings);
         // No preamble — the banner is written by Logger.Initialise via a normal write so it
         // reaches both console and file sinks. The error file still uses a preamble for laziness.
         return resolvedPath is null ? null : new FileSink(resolvedPath);
@@ -91,30 +91,29 @@ internal static class LoggerFactory
              + $"{sep}{nl}";
     }
 
-    private static string? ResolveFilePath(string basePath, LogFileMode mode, int newFilePerRunMaxFiles)
+    private static string? ResolveFilePath(LogSettings logSettings)
     {
-        switch (mode)
+        string basePath = logSettings.FilePath!;
+
+        switch (logSettings.FileMode)
         {
             case LogFileMode.AppendToExisting:
                 return basePath;
 
             case LogFileMode.OverwriteExisting:
-                if (File.Exists(basePath))
-                {
-                    File.Delete(basePath);
-                }
+                RunLogTrimmer.ArchivePreviousRun(basePath, logSettings.LogArchivePath, logSettings.LogArchiveMaxRuns);
                 return basePath;
 
             case LogFileMode.NewFilePerRun:
                 string dir = Path.GetDirectoryName(basePath) ?? string.Empty;
                 string name = Path.GetFileNameWithoutExtension(basePath);
                 string ext = Path.GetExtension(basePath);
-                TrimOldRunFiles(dir, name, ext, newFilePerRunMaxFiles);
+                TrimOldRunFiles(dir, name, ext, logSettings.NewFilePerRunMaxFiles);
                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
                 return Path.Combine(dir, $"{name}_{timestamp}{ext}");
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(mode));
+                throw new ArgumentOutOfRangeException(nameof(logSettings.FileMode));
         }
     }
 
