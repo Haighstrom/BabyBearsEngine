@@ -58,6 +58,8 @@ public class AudioFacadeTests
         public ISfxClip LoadSfx(string path) { Calls.Add(("LoadSfx", path)); return new FakeSfxClip(); }
         public void PlayMusic(IMusicClip clip) => Calls.Add(("PlayMusicClip", clip));
         public void PlayMusic(IReadOnlyList<IMusicClip> playlist) => Calls.Add(("PlayMusicList", playlist));
+        public void PlayMusic(IMusicClip clip, TimeSpan fadeDuration) => Calls.Add(("PlayMusicClipFaded", (clip, fadeDuration)));
+        public void PlayMusic(IReadOnlyList<IMusicClip> playlist, TimeSpan fadeDuration) => Calls.Add(("PlayMusicListFaded", (playlist, fadeDuration)));
         public void PlaySfx(ISfxClip clip) => Calls.Add(("PlaySfx", clip));
         public void PlaySfx(ISfxClip clip, float volumeOverride) => Calls.Add(("PlaySfxWithVolume", (clip, volumeOverride)));
         public void Pause() => Calls.Add(("Pause", null));
@@ -159,6 +161,21 @@ public class AudioFacadeTests
         var b = new FakeMusicClip();
         Audio.PlayMusic(a, b);
         Assert.AreEqual("PlayMusicList", _fake.Calls.Single().Method);
+    }
+
+    [TestMethod]
+    public void PlayMusic_SingleClipWithFade_RoutesToFadedClipOverload()
+    {
+        FakeMusicClip clip = new();
+        Audio.PlayMusic(clip, TimeSpan.FromSeconds(0.6));
+        Assert.AreEqual("PlayMusicClipFaded", _fake.Calls.Single().Method);
+    }
+
+    [TestMethod]
+    public void PlayMusic_ListWithFade_RoutesToFadedListOverload()
+    {
+        Audio.PlayMusic(new List<IMusicClip> { new FakeMusicClip() }, TimeSpan.FromSeconds(0.6));
+        Assert.AreEqual("PlayMusicListFaded", _fake.Calls.Single().Method);
     }
 
     [TestMethod]

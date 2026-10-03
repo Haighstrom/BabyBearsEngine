@@ -23,6 +23,15 @@ namespace BabyBearsEngine.Platform.OpenAL;
 internal sealed class OpenALAudioService : IAudio
 {
     private static readonly TimeSpan s_pollInterval = TimeSpan.FromMilliseconds(50);
+    // While a music fade is running the poll thread ticks faster so the gain steps stay smooth.
+    private static readonly TimeSpan s_fadePollInterval = TimeSpan.FromMilliseconds(15);
+
+    private enum MusicFadePhase
+    {
+        Idle,
+        FadingOut,
+        FadingIn,
+    }
 
     private readonly Lock _channelLock = new();
     private readonly Lock _volumeLock = new();
@@ -42,6 +51,14 @@ internal sealed class OpenALAudioService : IAudio
     private float _masterVolume;
     private float _musicVolume;
     private float _sfxVolume;
+    // Music fade state, all guarded by _volumeLock. _fadeLevel multiplies the music gain (1 = no fade).
+    private readonly System.Diagnostics.Stopwatch _fadeClock = new();
+    private double _fadeInSeconds = 0.0;
+    private float _fadeLevel = 1f;
+    private double _fadeOutSeconds = 0.0;
+    private MusicFadePhase _fadePhase = MusicFadePhase.Idle;
+    private double _lastFadeSeconds = 0.0;
+    private IReadOnlyList<IMusicClip>? _pendingFadePlaylist = null;
     private AudioState _musicState = AudioState.Stopped;
     private bool _paused = false;
     // Two flags rather than one: _disposing is set immediately under the lock so the poll
@@ -248,6 +265,7 @@ internal sealed class OpenALAudioService : IAudio
     public void PlayMusic(IMusicClip clip)
     {
         ArgumentNullException.ThrowIfNull(clip);
+        CancelMusicFade();
         _playlist.SetTracks(clip);
         _playlist.Play();
     }
@@ -255,8 +273,58 @@ internal sealed class OpenALAudioService : IAudio
     public void PlayMusic(IReadOnlyList<IMusicClip> playlist)
     {
         ArgumentNullException.ThrowIfNull(playlist);
+        CancelMusicFade();
         _playlist.SetTracks(playlist);
         _playlist.Play();
+    }
+
+    public void PlayMusic(IMusicClip clip, TimeSpan fadeDuration)
+    {
+        ArgumentNullException.ThrowIfNull(clip);
+        PlayMusic([clip], fadeDuration);
+    }
+
+    public void PlayMusic(IReadOnlyList<IMusicClip> playlist, TimeSpan fadeDuration)
+    {
+        ArgumentNullException.ThrowIfNull(playlist);
+
+        if (!_initialised || fadeDuration <= TimeSpan.Zero)
+        {
+            PlayMusic(playlist);
+            return;
+        }
+
+        double halfSeconds = fadeDuration.TotalSeconds / 2.0;
+        bool nothingPlaying;
+        lock (_channelLock)
+        {
+            nothingPlaying = _musicState == AudioState.Stopped;
+        }
+
+        lock (_volumeLock)
+        {
+            _fadeOutSeconds = halfSeconds;
+            _fadeInSeconds = halfSeconds;
+            _pendingFadePlaylist = playlist;
+            _lastFadeSeconds = _fadeClock.Elapsed.TotalSeconds;
+            _fadeClock.Start();
+
+            if (nothingPlaying)
+            {
+                // Nothing to fade out: start silent and let the poll thread fade it in.
+                _fadeLevel = 0f;
+                _fadePhase = MusicFadePhase.FadingIn;
+            }
+            else
+            {
+                _fadePhase = MusicFadePhase.FadingOut;
+            }
+        }
+
+        if (nothingPlaying)
+        {
+            SwapToPendingFadePlaylist();
+        }
     }
 
     public void PlaySfx(ISfxClip clip)
@@ -325,6 +393,8 @@ internal sealed class OpenALAudioService : IAudio
         {
             return;
         }
+
+        CancelMusicFade();
 
         lock (_channelLock)
         {
@@ -564,7 +634,93 @@ internal sealed class OpenALAudioService : IAudio
     {
         lock (_volumeLock)
         {
-            return _masterVolume * _musicVolume;
+            return _masterVolume * _musicVolume * _fadeLevel;
+        }
+    }
+
+    // Abandons any fade in progress and restores full gain; used by every non-fading music call.
+    private void CancelMusicFade()
+    {
+        bool wasFading;
+        lock (_volumeLock)
+        {
+            wasFading = _fadePhase != MusicFadePhase.Idle || _fadeLevel < 1f;
+            _fadePhase = MusicFadePhase.Idle;
+            _pendingFadePlaylist = null;
+            _fadeLevel = 1f;
+        }
+
+        if (wasFading)
+        {
+            ApplyVolumes();
+        }
+    }
+
+    // Starts the playlist queued by a faded PlayMusic call, at whatever gain the fade level currently gives.
+    private void SwapToPendingFadePlaylist()
+    {
+        IReadOnlyList<IMusicClip>? playlist;
+        lock (_volumeLock)
+        {
+            playlist = _pendingFadePlaylist;
+            _pendingFadePlaylist = null;
+        }
+
+        if (playlist is null)
+        {
+            return;
+        }
+
+        ApplyVolumes();
+        _playlist.SetTracks(playlist);
+        _playlist.Play();
+    }
+
+    // Advances a running fade by the time since the last tick; called from the poll thread.
+    private void StepMusicFade()
+    {
+        bool swap = false;
+        lock (_volumeLock)
+        {
+            if (_fadePhase == MusicFadePhase.Idle)
+            {
+                return;
+            }
+
+            double now = _fadeClock.Elapsed.TotalSeconds;
+            double elapsed = now - _lastFadeSeconds;
+            _lastFadeSeconds = now;
+
+            if (_fadePhase == MusicFadePhase.FadingOut)
+            {
+                _fadeLevel -= (float)(elapsed / _fadeOutSeconds);
+
+                if (_fadeLevel <= 0f)
+                {
+                    _fadeLevel = 0f;
+                    _fadePhase = MusicFadePhase.FadingIn;
+                    swap = true;
+                }
+            }
+            else
+            {
+                _fadeLevel += (float)(elapsed / _fadeInSeconds);
+
+                if (_fadeLevel >= 1f)
+                {
+                    _fadeLevel = 1f;
+                    _fadePhase = MusicFadePhase.Idle;
+                }
+            }
+        }
+
+        if (swap)
+        {
+            SwapToPendingFadePlaylist();
+        }
+        else
+        {
+            ApplyVolumes();
         }
     }
 
@@ -595,6 +751,7 @@ internal sealed class OpenALAudioService : IAudio
         {
             try
             {
+                StepMusicFade();
                 CheckMusicChannelForAdvancement();
             }
             catch (Exception ex)
@@ -604,7 +761,12 @@ internal sealed class OpenALAudioService : IAudio
 
             try
             {
-                Thread.Sleep(s_pollInterval);
+                bool fading;
+                lock (_volumeLock)
+                {
+                    fading = _fadePhase != MusicFadePhase.Idle;
+                }
+                Thread.Sleep(fading ? s_fadePollInterval : s_pollInterval);
             }
             catch (ThreadInterruptedException)
             {

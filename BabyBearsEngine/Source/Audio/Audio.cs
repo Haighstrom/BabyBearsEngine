@@ -73,6 +73,12 @@ public static class Audio
     /// <inheritdoc cref="IAudio.PlayMusic(IReadOnlyList{IMusicClip})"/>
     public static void PlayMusic(IReadOnlyList<IMusicClip> playlist) => Implementation.PlayMusic(playlist);
 
+    /// <inheritdoc cref="IAudio.PlayMusic(IMusicClip, TimeSpan)"/>
+    public static void PlayMusic(IMusicClip clip, TimeSpan fadeDuration) => Implementation.PlayMusic(clip, fadeDuration);
+
+    /// <inheritdoc cref="IAudio.PlayMusic(IReadOnlyList{IMusicClip}, TimeSpan)"/>
+    public static void PlayMusic(IReadOnlyList<IMusicClip> playlist, TimeSpan fadeDuration) => Implementation.PlayMusic(playlist, fadeDuration);
+
     /// <inheritdoc cref="IAudio.PlaySfx(ISfxClip)"/>
     public static void PlaySfx(ISfxClip clip) => Implementation.PlaySfx(clip);
 

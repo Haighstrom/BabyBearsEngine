@@ -68,6 +68,22 @@ public interface IAudio : IDisposable
     void PlayMusic(IReadOnlyList<IMusicClip> playlist);
 
     /// <summary>
+    /// Like <see cref="PlayMusic(IMusicClip)"/>, but switches smoothly: any music already playing fades out over
+    /// the first half of <paramref name="fadeDuration"/>, then <paramref name="clip"/> starts and fades in over
+    /// the second half. If nothing is playing it simply fades in over the second half. A zero or negative duration
+    /// switches immediately. A later call (including a plain <c>PlayMusic</c> or <see cref="StopMusic"/>)
+    /// cancels any fade still in progress. The fade scales the music gain on top of <see cref="MusicVolume"/>.
+    /// </summary>
+    void PlayMusic(IMusicClip clip, TimeSpan fadeDuration);
+
+    /// <summary>
+    /// Like <see cref="PlayMusic(IReadOnlyList{IMusicClip})"/>, but with the same fade-out / fade-in switch as
+    /// <see cref="PlayMusic(IMusicClip, TimeSpan)"/>. Fading applies only to the switch itself, not to the
+    /// advance from one playlist track to the next.
+    /// </summary>
+    void PlayMusic(IReadOnlyList<IMusicClip> playlist, TimeSpan fadeDuration);
+
+    /// <summary>
     /// Plays <paramref name="clip"/> on the first free SFX channel. If all channels are busy the
     /// clip is dropped (a warning is logged).
     /// </summary>
