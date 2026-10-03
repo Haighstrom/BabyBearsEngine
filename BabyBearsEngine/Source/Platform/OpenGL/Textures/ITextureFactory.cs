@@ -69,4 +69,14 @@ public interface ITextureFactory
     /// <param name="linearFilter">True for bilinear filtering (smooth); false for nearest-neighbour (sharp). Defaults to true — SDF reconstruction relies on bilinear sampling between texels.</param>
     /// <exception cref="ArgumentException">If <paramref name="r8Data"/>'s length is not exactly <c>width * height</c>.</exception>
     ITexture CreateR8Texture(byte[] r8Data, int width, int height, bool linearFilter = true);
+
+    /// <summary>
+    /// Creates an RGBA8 texture of a fixed size, initially fully transparent, whose pixels can be
+    /// replaced via <see cref="IUpdatableTexture.UpdatePixels"/>.
+    /// </summary>
+    /// <param name="width">Texture width in pixels. Must be positive.</param>
+    /// <param name="height">Texture height in pixels. Must be positive.</param>
+    /// <param name="linearFilter">True for bilinear filtering (smooth); false for nearest-neighbour. Defaults to true.</param>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="width"/> or <paramref name="height"/> is not positive.</exception>
+    IUpdatableTexture CreateUpdatableTexture(int width, int height, bool linearFilter = true);
 }

@@ -119,6 +119,15 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
     }
 
     /// <inheritdoc />
+    public IUpdatableTexture CreateUpdatableTexture(int width, int height, bool linearFilter = true)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
+
+        return new UpdatableTexture(UploadRgbaPremultiplied(new byte[width * height * 4], width, height, linearFilter));
+    }
+
+    /// <inheritdoc />
     public ITexture CreateTexture(Colour[,] pixels, bool linearFilter = true)
     {
         int width = pixels.GetLength(0);
@@ -161,7 +170,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
         return UploadRgbaPremultiplied(data, width, height, linearFilter);
     }
 
-    private static ITexture UploadRgbaPremultiplied(byte[] data, int width, int height, bool linearFilter)
+    private static Texture UploadRgbaPremultiplied(byte[] data, int width, int height, bool linearFilter)
     {
         GLThread.Ensure();
         int handle = GL.GenTexture();

@@ -45,4 +45,11 @@ public static class Textures
     /// </summary>
     public static ITexture CreateR8Texture(byte[] r8Data, int width, int height, bool linearFilter = true) =>
         Implementation.CreateR8Texture(r8Data, width, height, linearFilter);
+
+    /// <summary>
+    /// Creates a fixed-size, initially transparent RGBA8 texture whose pixels can be replaced every
+    /// frame via <see cref="IUpdatableTexture.UpdatePixels"/>.
+    /// </summary>
+    public static IUpdatableTexture CreateUpdatable(int width, int height, bool linearFilter = true) =>
+        Implementation.CreateUpdatableTexture(width, height, linearFilter);
 }
