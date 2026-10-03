@@ -73,11 +73,17 @@ public static class Audio
     /// <inheritdoc cref="IAudio.PlayMusic(IReadOnlyList{IMusicClip})"/>
     public static void PlayMusic(IReadOnlyList<IMusicClip> playlist) => Implementation.PlayMusic(playlist);
 
-    /// <inheritdoc cref="IAudio.PlayMusic(IMusicClip, TimeSpan)"/>
-    public static void PlayMusic(IMusicClip clip, TimeSpan fadeDuration) => Implementation.PlayMusic(clip, fadeDuration);
+    /// <inheritdoc cref="IAudio.PlayMusic(IMusicClip, TimeSpan, TimeSpan)"/>
+    public static void PlayMusic(IMusicClip clip, TimeSpan fadeOut, TimeSpan fadeIn) => Implementation.PlayMusic(clip, fadeOut, fadeIn);
 
-    /// <inheritdoc cref="IAudio.PlayMusic(IReadOnlyList{IMusicClip}, TimeSpan)"/>
-    public static void PlayMusic(IReadOnlyList<IMusicClip> playlist, TimeSpan fadeDuration) => Implementation.PlayMusic(playlist, fadeDuration);
+    /// <inheritdoc cref="IAudio.PlayMusic(IReadOnlyList{IMusicClip}, TimeSpan, TimeSpan)"/>
+    public static void PlayMusic(IReadOnlyList<IMusicClip> playlist, TimeSpan fadeOut, TimeSpan fadeIn) => Implementation.PlayMusic(playlist, fadeOut, fadeIn);
+
+    /// <inheritdoc cref="IAudio.StopMusic(TimeSpan)"/>
+    public static void StopMusic(TimeSpan fadeDuration) => Implementation.StopMusic(fadeDuration);
+
+    /// <inheritdoc cref="IAudio.FadeInMusic(IReadOnlyList{IMusicClip}, TimeSpan)"/>
+    public static void FadeInMusic(IReadOnlyList<IMusicClip> playlist, TimeSpan duration) => Implementation.FadeInMusic(playlist, duration);
 
     /// <inheritdoc cref="IAudio.PlaySfx(ISfxClip)"/>
     public static void PlaySfx(ISfxClip clip) => Implementation.PlaySfx(clip);

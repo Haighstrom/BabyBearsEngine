@@ -58,8 +58,10 @@ public class AudioFacadeTests
         public ISfxClip LoadSfx(string path) { Calls.Add(("LoadSfx", path)); return new FakeSfxClip(); }
         public void PlayMusic(IMusicClip clip) => Calls.Add(("PlayMusicClip", clip));
         public void PlayMusic(IReadOnlyList<IMusicClip> playlist) => Calls.Add(("PlayMusicList", playlist));
-        public void PlayMusic(IMusicClip clip, TimeSpan fadeDuration) => Calls.Add(("PlayMusicClipFaded", (clip, fadeDuration)));
-        public void PlayMusic(IReadOnlyList<IMusicClip> playlist, TimeSpan fadeDuration) => Calls.Add(("PlayMusicListFaded", (playlist, fadeDuration)));
+        public void PlayMusic(IMusicClip clip, TimeSpan fadeOut, TimeSpan fadeIn) => Calls.Add(("PlayMusicClipFaded", (clip, fadeOut, fadeIn)));
+        public void PlayMusic(IReadOnlyList<IMusicClip> playlist, TimeSpan fadeOut, TimeSpan fadeIn) => Calls.Add(("PlayMusicListFaded", (playlist, fadeOut, fadeIn)));
+        public void StopMusic(TimeSpan fadeDuration) => Calls.Add(("StopMusicFaded", fadeDuration));
+        public void FadeInMusic(IReadOnlyList<IMusicClip> playlist, TimeSpan duration) => Calls.Add(("FadeInMusic", (playlist, duration)));
         public void PlaySfx(ISfxClip clip) => Calls.Add(("PlaySfx", clip));
         public void PlaySfx(ISfxClip clip, float volumeOverride) => Calls.Add(("PlaySfxWithVolume", (clip, volumeOverride)));
         public void Pause() => Calls.Add(("Pause", null));
@@ -167,15 +169,29 @@ public class AudioFacadeTests
     public void PlayMusic_SingleClipWithFade_RoutesToFadedClipOverload()
     {
         FakeMusicClip clip = new();
-        Audio.PlayMusic(clip, TimeSpan.FromSeconds(0.6));
+        Audio.PlayMusic(clip, TimeSpan.FromSeconds(0.3), TimeSpan.Zero);
         Assert.AreEqual("PlayMusicClipFaded", _fake.Calls.Single().Method);
     }
 
     [TestMethod]
     public void PlayMusic_ListWithFade_RoutesToFadedListOverload()
     {
-        Audio.PlayMusic(new List<IMusicClip> { new FakeMusicClip() }, TimeSpan.FromSeconds(0.6));
+        Audio.PlayMusic(new List<IMusicClip> { new FakeMusicClip() }, TimeSpan.Zero, TimeSpan.FromSeconds(0.3));
         Assert.AreEqual("PlayMusicListFaded", _fake.Calls.Single().Method);
+    }
+
+    [TestMethod]
+    public void StopMusic_WithFade_RoutesToFadedOverload()
+    {
+        Audio.StopMusic(TimeSpan.FromSeconds(0.4));
+        Assert.AreEqual("StopMusicFaded", _fake.Calls.Single().Method);
+    }
+
+    [TestMethod]
+    public void FadeInMusic_RoutesToService()
+    {
+        Audio.FadeInMusic(new List<IMusicClip> { new FakeMusicClip() }, TimeSpan.FromSeconds(0.6));
+        Assert.AreEqual("FadeInMusic", _fake.Calls.Single().Method);
     }
 
     [TestMethod]

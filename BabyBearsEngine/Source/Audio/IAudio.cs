@@ -69,19 +69,35 @@ public interface IAudio : IDisposable
 
     /// <summary>
     /// Like <see cref="PlayMusic(IMusicClip)"/>, but switches smoothly: any music already playing fades out over
-    /// the first half of <paramref name="fadeDuration"/>, then <paramref name="clip"/> starts and fades in over
-    /// the second half. If nothing is playing it simply fades in over the second half. A zero or negative duration
-    /// switches immediately. A later call (including a plain <c>PlayMusic</c> or <see cref="StopMusic"/>)
-    /// cancels any fade still in progress. The fade scales the music gain on top of <see cref="MusicVolume"/>.
+    /// <paramref name="fadeOut"/>, then <paramref name="clip"/> starts and fades in over <paramref name="fadeIn"/>.
+    /// Either duration may be zero (or negative) to skip that fade, so a fade-out followed by an instant start,
+    /// or an instant cut followed by a fade-in, are both one call. If nothing is playing there is no fade-out.
+    /// A later call (including a plain <c>PlayMusic</c> or <see cref="StopMusic"/>) cancels any fade still in
+    /// progress. The fade scales the music gain on top of <see cref="MusicVolume"/>.
     /// </summary>
-    void PlayMusic(IMusicClip clip, TimeSpan fadeDuration);
+    void PlayMusic(IMusicClip clip, TimeSpan fadeOut, TimeSpan fadeIn);
 
     /// <summary>
     /// Like <see cref="PlayMusic(IReadOnlyList{IMusicClip})"/>, but with the same fade-out / fade-in switch as
-    /// <see cref="PlayMusic(IMusicClip, TimeSpan)"/>. Fading applies only to the switch itself, not to the
-    /// advance from one playlist track to the next.
+    /// <see cref="PlayMusic(IMusicClip, TimeSpan, TimeSpan)"/>. Fading applies only to the switch itself, not to
+    /// the advance from one playlist track to the next.
     /// </summary>
-    void PlayMusic(IReadOnlyList<IMusicClip> playlist, TimeSpan fadeDuration);
+    void PlayMusic(IReadOnlyList<IMusicClip> playlist, TimeSpan fadeOut, TimeSpan fadeIn);
+
+    /// <summary>
+    /// Fades the music gain from its current level to silence over <paramref name="fadeDuration"/>, then stops the
+    /// music. Does nothing if no music is playing; a zero or negative duration just stops it. When the fade
+    /// completes <see cref="MusicStateChanged"/> fires with <see cref="AudioState.Stopped"/> (on the audio thread),
+    /// which is the point to start something else; <see cref="FadeInMusic"/> can then fade that in.
+    /// </summary>
+    void StopMusic(TimeSpan fadeDuration);
+
+    /// <summary>
+    /// Starts <paramref name="playlist"/> silent and fades it in over <paramref name="duration"/>. Any music still
+    /// playing is replaced immediately, so normally call this after <see cref="StopMusic(TimeSpan)"/> has finished.
+    /// A zero or negative duration starts it at full gain.
+    /// </summary>
+    void FadeInMusic(IReadOnlyList<IMusicClip> playlist, TimeSpan duration);
 
     /// <summary>
     /// Plays <paramref name="clip"/> on the first free SFX channel. If all channels are busy the
