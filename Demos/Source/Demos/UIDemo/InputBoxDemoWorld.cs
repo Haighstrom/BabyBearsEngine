@@ -5,7 +5,8 @@ using BabyBearsEngine.Worlds.Graphics.Text;
 namespace BabyBearsEngine.Demos.Source.Demos.UIDemo;
 
 /// <summary>
-/// Demonstrates TextInputBox (free text) and NumberInputBox (digits / decimals / negatives).
+/// Demonstrates TextInputBox (free text), NumberInputBox (digits / decimals / negatives) and
+/// PatternInputBox (auto-inserted separators, e.g. K7Q-2X9).
 /// Click a field to focus it. Press Escape or click another field to blur.
 /// Press Enter to confirm and update the display panel.
 /// </summary>
@@ -23,7 +24,8 @@ internal class InputBoxDemoWorld : DemoWorld
     private const int Row2Y = 200;
     private const int Row3Y = 270;
     private const int Row4Y = 340;
-    private const int ResultY = 430;
+    private const int Row5Y = 410;
+    private const int ResultY = 480;
 
     private readonly List<TextInputBox> _allBoxes = [];
     private readonly TextGraphic _resultLabel;
@@ -65,11 +67,18 @@ internal class InputBoxDemoWorld : DemoWorld
                                       allowDecimals: true, allowNegative: true);
         RegisterBox(scoreBox);
 
+        // --- Pattern: letters/digits laid into ###-###, separator inserted automatically
+        Add(MakeLabel(LabelX, Row5Y, "Code:"));
+        PatternInputBox codeBox = new(BoxX, Row5Y, BoxW, BoxH, theme, "###-###",
+                                      isCharAllowed: char.IsLetterOrDigit, forceUpperCase: true);
+        RegisterBox(codeBox);
+
         // Wire up Enter → update result panel for each box
-        nameBox.Submitted += (_, _) => UpdateResult(nameBox, ageBox, heightBox, scoreBox);
-        ageBox.Submitted  += (_, _) => UpdateResult(nameBox, ageBox, heightBox, scoreBox);
-        heightBox.Submitted += (_, _) => UpdateResult(nameBox, ageBox, heightBox, scoreBox);
-        scoreBox.Submitted  += (_, _) => UpdateResult(nameBox, ageBox, heightBox, scoreBox);
+        nameBox.Submitted += (_, _) => UpdateResult(nameBox, ageBox, heightBox, scoreBox, codeBox);
+        ageBox.Submitted  += (_, _) => UpdateResult(nameBox, ageBox, heightBox, scoreBox, codeBox);
+        heightBox.Submitted += (_, _) => UpdateResult(nameBox, ageBox, heightBox, scoreBox, codeBox);
+        scoreBox.Submitted  += (_, _) => UpdateResult(nameBox, ageBox, heightBox, scoreBox, codeBox);
+        codeBox.Submitted   += (_, _) => UpdateResult(nameBox, ageBox, heightBox, scoreBox, codeBox);
 
         // Result display
         Add(new ColourGraphic(new Colour(240, 245, 240), BoxX, ResultY, BoxW, 80));
@@ -102,13 +111,13 @@ internal class InputBoxDemoWorld : DemoWorld
     }
 
     private void UpdateResult(TextInputBox name, NumberInputBox age,
-                               NumberInputBox height, NumberInputBox score)
+                               NumberInputBox height, NumberInputBox score, PatternInputBox code)
     {
         string ageStr    = age.Value.HasValue    ? age.Value.Value.ToString("0")    : "?";
         string heightStr = height.Value.HasValue ? height.Value.Value.ToString("0.00") : "?";
         string scoreStr  = score.Value.HasValue  ? score.Value.Value.ToString("0.00")  : "?";
 
-        _resultLabel.Text = $"Name: {name.Text}  Age: {ageStr}  Height: {heightStr} m  Score: {scoreStr}";
+        _resultLabel.Text = $"Name: {name.Text}  Age: {ageStr}  Height: {heightStr} m  Score: {scoreStr}  Code: {code.Text} (raw {code.RawText})";
         _resultLabel.Colour = Colour.Black;
     }
 

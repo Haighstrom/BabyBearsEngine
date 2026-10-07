@@ -329,6 +329,13 @@ public class TextInputBox : Entity
     /// </summary>
     protected virtual bool IsCharAllowed(char c) => true;
 
+    /// <summary>
+    /// Called after every keyboard edit (typing, deletion, paste) and before <see cref="TextChanged"/>
+    /// fires. Override to reformat the edited text (e.g. auto-inserting separators); return the text
+    /// to keep and set <paramref name="cursorIndex"/> to where the caret should sit in it.
+    /// </summary>
+    protected virtual string FormatEditedText(string text, ref int cursorIndex) => text;
+
     private void HandleKeyboardInput(double elapsed)
     {
         bool shift = Keyboard.KeyDown(Keys.LeftShift) || Keyboard.KeyDown(Keys.RightShift);
@@ -779,6 +786,19 @@ public class TextInputBox : Entity
 
     private void RaiseTextChanged(string old)
     {
+        int cursorIndex = _cursorIndex;
+        string formatted = FormatEditedText(_text, ref cursorIndex);
+        bool changedByFormat = formatted != _text;
+        _text = formatted;
+        _cursorIndex = cursorIndex;
+        _anchorIndex = cursorIndex;
+
+        // A reformat that undoes the edit (e.g. deleting an auto-inserted separator) is not a change.
+        if (changedByFormat && _text == old)
+        {
+            return;
+        }
+
         TextChanged?.Invoke(this, new TextChangedEventArgs(old, _text));
     }
 
