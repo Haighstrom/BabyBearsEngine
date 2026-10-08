@@ -135,6 +135,25 @@ public class ScrollingListPanel : Entity
     public void AddItem(IAddable item) => _contentPane.Add(item);
 
     /// <summary>
+    /// Scrolls the list by the smallest amount that brings the span from <paramref name="itemY"/>
+    /// to <paramref name="itemY"/> + <paramref name="itemHeight"/> (in content coordinates, the
+    /// same space items are positioned in) fully into view. Does nothing if it is already fully
+    /// visible. Call after <see cref="ContentHeight"/> is set, since the scroll range comes from it.
+    /// </summary>
+    public void EnsureVisible(float itemY, float itemHeight)
+    {
+        float maxScrollOffset = Math.Max(0f, _contentHeight - Height);
+
+        if (maxScrollOffset <= 0f)
+        {
+            return;
+        }
+
+        float targetOffset = CalculateOffsetToShow(itemY, itemHeight, _contentPane.ScrollOffset, Height, _contentHeight);
+        _scrollbar.AmountFilled = targetOffset / maxScrollOffset;
+    }
+
+    /// <summary>
     /// Current pixel scroll offset of the content pane. Exposed internally so unit tests can
     /// drive the scroll position directly without simulating scrollbar input.
     /// </summary>
@@ -157,6 +176,29 @@ public class ScrollingListPanel : Entity
     /// </summary>
     internal static float CalculateScrollOffset(float amountFilled, float panelHeight, float contentHeight)
         => amountFilled * Math.Max(0f, contentHeight - panelHeight);
+
+    /// <summary>
+    /// Returns the pixel scroll offset, nearest to the current one, at which the span from
+    /// <paramref name="itemY"/> to <paramref name="itemY"/> + <paramref name="itemHeight"/> is
+    /// fully inside the panel, clamped to the scroll range. An item taller than the panel is
+    /// aligned to its top. Exposed internally so unit tests can verify the calculation.
+    /// </summary>
+    internal static float CalculateOffsetToShow(float itemY, float itemHeight, float currentOffset, float panelHeight, float contentHeight)
+    {
+        float maxScrollOffset = Math.Max(0f, contentHeight - panelHeight);
+        float targetOffset = currentOffset;
+
+        if (itemY < currentOffset || itemHeight > panelHeight)
+        {
+            targetOffset = itemY;
+        }
+        else if (itemY + itemHeight > currentOffset + panelHeight)
+        {
+            targetOffset = itemY + itemHeight - panelHeight;
+        }
+
+        return Math.Clamp(targetOffset, 0f, maxScrollOffset);
+    }
 
     /// <summary>
     /// Returns the scrollbar wheel step (a fraction of the scroll range) equivalent to the given

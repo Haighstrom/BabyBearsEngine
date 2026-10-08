@@ -343,6 +343,93 @@ public class ScrollingListPanelTests
         Assert.AreEqual(ScrollStepUnit.Pixels, step.Unit);
     }
 
+    // -------------------------------------------------------------------------
+    // EnsureVisible — MakeScrollable's panel shows 200px of 400px content.
+
+    [TestMethod]
+    public void EnsureVisible_ItemBelowView_ScrollsUntilItsBottomIsVisible()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+
+        panel.EnsureVisible(itemY: 250f, itemHeight: 50f);
+
+        Assert.AreEqual(100f, panel.ScrollOffset, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void EnsureVisible_ItemAboveView_ScrollsUntilItsTopIsVisible()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+        panel.EnsureVisible(itemY: 350f, itemHeight: 50f);
+
+        panel.EnsureVisible(itemY: 120f, itemHeight: 50f);
+
+        Assert.AreEqual(120f, panel.ScrollOffset, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void EnsureVisible_ItemAlreadyVisible_DoesNotScroll()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+
+        panel.EnsureVisible(itemY: 100f, itemHeight: 50f);
+
+        Assert.AreEqual(0f, panel.ScrollOffset);
+    }
+
+    [TestMethod]
+    public void EnsureVisible_ContentFitsPanel_DoesNotScroll()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+        panel.ContentHeight = 150f;
+
+        panel.EnsureVisible(itemY: 100f, itemHeight: 50f);
+
+        Assert.AreEqual(0f, panel.ScrollOffset);
+    }
+
+    // CalculateOffsetToShow
+
+    [TestMethod]
+    public void CalculateOffsetToShow_ItemBelowView_AlignsItsBottomToThePanelBottom()
+    {
+        float result = ScrollingListPanel.CalculateOffsetToShow(itemY: 500f, itemHeight: 60f, currentOffset: 0f, panelHeight: 300f, contentHeight: 1000f);
+
+        Assert.AreEqual(260f, result);
+    }
+
+    [TestMethod]
+    public void CalculateOffsetToShow_ItemAboveView_AlignsItsTopToThePanelTop()
+    {
+        float result = ScrollingListPanel.CalculateOffsetToShow(itemY: 100f, itemHeight: 60f, currentOffset: 400f, panelHeight: 300f, contentHeight: 1000f);
+
+        Assert.AreEqual(100f, result);
+    }
+
+    [TestMethod]
+    public void CalculateOffsetToShow_ItemInsideView_KeepsTheCurrentOffset()
+    {
+        float result = ScrollingListPanel.CalculateOffsetToShow(itemY: 450f, itemHeight: 60f, currentOffset: 400f, panelHeight: 300f, contentHeight: 1000f);
+
+        Assert.AreEqual(400f, result);
+    }
+
+    [TestMethod]
+    public void CalculateOffsetToShow_ItemTallerThanPanel_AlignsItsTopToThePanelTop()
+    {
+        float result = ScrollingListPanel.CalculateOffsetToShow(itemY: 200f, itemHeight: 500f, currentOffset: 0f, panelHeight: 300f, contentHeight: 1000f);
+
+        Assert.AreEqual(200f, result);
+    }
+
+    [TestMethod]
+    public void CalculateOffsetToShow_ItemPastTheEndOfContent_ClampsToTheMaxOffset()
+    {
+        float result = ScrollingListPanel.CalculateOffsetToShow(itemY: 980f, itemHeight: 60f, currentOffset: 0f, panelHeight: 300f, contentHeight: 1000f);
+
+        Assert.AreEqual(700f, result);
+    }
+
     // CalculateThumbProportion
 
     [TestMethod]
