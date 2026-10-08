@@ -175,6 +175,174 @@ public class ScrollingListPanelTests
         Assert.AreEqual(0f, panel.ScrollOffset);
     }
 
+    // -------------------------------------------------------------------------
+    // WheelScrollStep in pixels — a fixed distance per notch
+
+    [TestMethod]
+    public void Wheel_WithPixelStep_ScrollsThatManyPixels()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+        panel.WheelScrollStep = ScrollStep.Pixels(50f);
+        _mouse.ClientX = 100;
+        _mouse.ClientY = 100;
+        Frame(panel);
+        _mouse.WheelDelta = -1f;
+
+        Frame(panel);
+
+        Assert.AreEqual(50f, panel.ScrollOffset, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void Wheel_WithPixelStep_OverScrollbarStrip_ScrollsThatManyPixels()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+        panel.WheelScrollStep = ScrollStep.Pixels(50f);
+        _mouse.ClientX = 210;
+        _mouse.ClientY = 100;
+        Frame(panel);
+        _mouse.WheelDelta = -1f;
+
+        Frame(panel);
+
+        Assert.AreEqual(50f, panel.ScrollOffset, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void Wheel_WithPixelStep_ScrollsSameDistanceAfterContentGrows()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+        panel.WheelScrollStep = ScrollStep.Pixels(50f);
+        panel.ContentHeight = 4000f;
+        _mouse.ClientX = 100;
+        _mouse.ClientY = 100;
+        Frame(panel);
+        _mouse.WheelDelta = -1f;
+
+        Frame(panel);
+
+        Assert.AreEqual(50f, panel.ScrollOffset, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void Wheel_FractionStepSetAfterPixelStep_ReplacesIt()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+        panel.WheelScrollStep = ScrollStep.Pixels(50f);
+        panel.WheelScrollStep = ScrollStep.Fraction(0.1f);
+        _mouse.ClientX = 100;
+        _mouse.ClientY = 100;
+        Frame(panel);
+        _mouse.WheelDelta = -1f;
+
+        Frame(panel);
+
+        Assert.AreEqual(20f, panel.ScrollOffset, delta: 0.001f);
+    }
+
+    // -------------------------------------------------------------------------
+    // WheelScrollStep as a fraction — the proportional step per notch
+
+    [TestMethod]
+    public void WheelScrollStep_DefaultsToTenPercent()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+
+        Assert.AreEqual(ScrollStep.Fraction(0.1f), panel.WheelScrollStep);
+    }
+
+    [TestMethod]
+    public void Wheel_WithWheelScrollStep_ScrollsThatFractionOfTheRange()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+        panel.WheelScrollStep = ScrollStep.Fraction(0.25f);
+        _mouse.ClientX = 100;
+        _mouse.ClientY = 100;
+        Frame(panel);
+        _mouse.WheelDelta = -1f;
+
+        Frame(panel);
+
+        Assert.AreEqual(50f, panel.ScrollOffset, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void Wheel_WithWheelScrollStep_OverScrollbarStrip_ScrollsThatFractionOfTheRange()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+        panel.WheelScrollStep = ScrollStep.Fraction(0.25f);
+        _mouse.ClientX = 210;
+        _mouse.ClientY = 100;
+        Frame(panel);
+        _mouse.WheelDelta = -1f;
+
+        Frame(panel);
+
+        Assert.AreEqual(50f, panel.ScrollOffset, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void Wheel_PixelStepSetAfterFractionStep_ReplacesIt()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+        panel.WheelScrollStep = ScrollStep.Fraction(0.25f);
+        panel.WheelScrollStep = ScrollStep.Pixels(30f);
+        _mouse.ClientX = 100;
+        _mouse.ClientY = 100;
+        Frame(panel);
+        _mouse.WheelDelta = -1f;
+
+        Frame(panel);
+
+        Assert.AreEqual(30f, panel.ScrollOffset, delta: 0.001f);
+    }
+
+    // CalculateWheelScrollStep
+
+    [TestMethod]
+    public void CalculateWheelScrollStep_FractionStep_ReturnsItsAmount()
+    {
+        float result = ScrollingListPanel.CalculateWheelScrollStep(ScrollStep.Fraction(0.25f), panelHeight: 300f, contentHeight: 600f);
+
+        Assert.AreEqual(0.25f, result);
+    }
+
+    [TestMethod]
+    public void CalculateWheelScrollStep_PixelStep_ReturnsFractionOfScrollRange()
+    {
+        float result = ScrollingListPanel.CalculateWheelScrollStep(ScrollStep.Pixels(30f), panelHeight: 300f, contentHeight: 600f);
+
+        Assert.AreEqual(0.1f, result, delta: 0.0001f);
+    }
+
+    [TestMethod]
+    public void CalculateWheelScrollStep_PixelStep_ContentFitsPanel_ReturnsZero()
+    {
+        float result = ScrollingListPanel.CalculateWheelScrollStep(ScrollStep.Pixels(30f), panelHeight: 300f, contentHeight: 300f);
+
+        Assert.AreEqual(0f, result);
+    }
+
+    // ScrollStep
+
+    [TestMethod]
+    public void ScrollStep_Fraction_CarriesAmountAndUnit()
+    {
+        ScrollStep step = ScrollStep.Fraction(0.2f);
+
+        Assert.AreEqual(0.2f, step.Amount);
+        Assert.AreEqual(ScrollStepUnit.Fraction, step.Unit);
+    }
+
+    [TestMethod]
+    public void ScrollStep_Pixels_CarriesAmountAndUnit()
+    {
+        ScrollStep step = ScrollStep.Pixels(92f);
+
+        Assert.AreEqual(92f, step.Amount);
+        Assert.AreEqual(ScrollStepUnit.Pixels, step.Unit);
+    }
+
     // CalculateThumbProportion
 
     [TestMethod]

@@ -33,6 +33,8 @@ public class ScrollingListPanel : Entity
     private readonly ContentPane _contentPane;
     private float _contentHeight = 0f;
     private readonly Scrollbar _scrollbar;
+    // Starts as the scrollbar's own default, so the default lives in one place.
+    private ScrollStep _wheelScrollStep;
 
     /// <param name="x">X position relative to the parent container.</param>
     /// <param name="y">Y position relative to the parent container.</param>
@@ -55,6 +57,7 @@ public class ScrollingListPanel : Entity
         Add(_contentPane);
 
         _scrollbar = new Scrollbar(paneWidth, 0f, theme.ScrollbarWidth, height, ScrollbarDirection.Vertical, theme.Scrollbar);
+        _wheelScrollStep = ScrollStep.Fraction(_scrollbar.WheelScrollStep);
         _scrollbar.ScrollChanged += OnScrollChanged;
         Add(_scrollbar);
 
@@ -85,6 +88,7 @@ public class ScrollingListPanel : Entity
         Add(_contentPane);
 
         _scrollbar = new Scrollbar(paneWidth, height, ScrollbarDirection.Vertical, scrollOnMouseWheel: true) { X = paneWidth };
+        _wheelScrollStep = ScrollStep.Fraction(_scrollbar.WheelScrollStep);
         _scrollbar.ScrollChanged += OnScrollChanged;
         Add(_scrollbar);
 
@@ -106,6 +110,23 @@ public class ScrollingListPanel : Entity
         set
         {
             _contentHeight = value;
+            UpdateScrollbar();
+        }
+    }
+
+    /// <summary>
+    /// How far one scroll wheel notch moves the list, wherever the cursor is over the panel
+    /// (content area or scrollbar strip). Defaults to a <see cref="ScrollStep.Fraction"/> of the
+    /// scrollbar's own <see cref="Scrollbar.WheelScrollStep"/> (0.1), which moves further per
+    /// notch the longer the content is; use <see cref="ScrollStep.Pixels"/> for a list whose
+    /// length varies so a notch always moves the same distance.
+    /// </summary>
+    public ScrollStep WheelScrollStep
+    {
+        get => _wheelScrollStep;
+        set
+        {
+            _wheelScrollStep = value;
             UpdateScrollbar();
         }
     }
@@ -137,6 +158,24 @@ public class ScrollingListPanel : Entity
     internal static float CalculateScrollOffset(float amountFilled, float panelHeight, float contentHeight)
         => amountFilled * Math.Max(0f, contentHeight - panelHeight);
 
+    /// <summary>
+    /// Returns the scrollbar wheel step (a fraction of the scroll range) equivalent to the given
+    /// step for a given panel and content height. A pixel step is zero when the content doesn't
+    /// overflow the panel, since there is nothing to scroll. Exposed internally so unit tests can
+    /// verify the calculation.
+    /// </summary>
+    internal static float CalculateWheelScrollStep(ScrollStep step, float panelHeight, float contentHeight)
+    {
+        if (step.Unit == ScrollStepUnit.Fraction)
+        {
+            return step.Amount;
+        }
+
+        float maxScrollOffset = contentHeight - panelHeight;
+
+        return maxScrollOffset > 0f ? step.Amount / maxScrollOffset : 0f;
+    }
+
     /// <inheritdoc/>
     protected override void OnMouseScrolled(float delta)
     {
@@ -148,7 +187,10 @@ public class ScrollingListPanel : Entity
         => _contentPane.ScrollOffset = CalculateScrollOffset(e.NewValue, Height, _contentHeight);
 
     private void UpdateScrollbar()
-        => _scrollbar.ThumbProportion = CalculateThumbProportion(Height, _contentHeight);
+    {
+        _scrollbar.ThumbProportion = CalculateThumbProportion(Height, _contentHeight);
+        _scrollbar.WheelScrollStep = CalculateWheelScrollStep(_wheelScrollStep, Height, _contentHeight);
+    }
 
     // Internal (not private) so unit tests can construct it directly without needing the
     // OpenGL-backed Scrollbar that ScrollingListPanel's full constructor sets up.
