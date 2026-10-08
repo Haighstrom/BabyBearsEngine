@@ -271,6 +271,7 @@ internal static class EngineConfiguration
         FontTextureCache.InvalidateCache();
 
         Canvas.Reset();
+        TextRenderScale.Reset();
         DefaultCameraMsaa = MsaaSamples.Disabled;
         s_atlasGenerators.Clear();
         s_defaultTextRenderer = TextRenderer.FreeType;

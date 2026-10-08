@@ -24,6 +24,12 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     private const string ItalicSuffix = "_i";
     private const string BoldItalicSuffix = "_bi";
 
+    private const int RegularSlot = 0;
+    private const int BoldSlot = 1;
+    private const int ItalicSlot = 2;
+    private const int BoldItalicSlot = 3;
+    private const int SlotCount = 4;
+
     private readonly SolidColourShaderProgramMatrix _decorationShader = Shaders.SolidColour;
     private readonly VertexDataBuffer<Vertex> _vertexDataBuffer = new();
     private readonly VertexDataBuffer<Vertex> _boldVertexDataBuffer = new();
@@ -49,6 +55,11 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     private bool _warnedMissingItalic = false;
     private bool _warnedMissingBoldItalic = false;
     private bool _disposedValue;
+    // Per-slot (regular, bold, italic, bold italic) atlases rasterised at the on-screen pixel size, used instead
+    // of the layout atlases above when the canvas is stretched to the window. Layout always uses the canvas-size
+    // metrics, so wrapping and measuring never depend on the window size.
+    private readonly FontAtlas?[] _renderAtlases = new FontAtlas?[SlotCount];
+    private int _renderScaleVersion = -1;
     private FontDefinition _fontDef;
     private string _textToDisplay;
     private Colour _colour;
@@ -582,7 +593,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
     /// registered, falls through to <see cref="BoldFont"/>, then <see cref="ItalicFont"/>, then the
     /// base font, logging a one-shot warning whenever the slot for the requested style is missing.
     /// </summary>
-    private (FontAtlasMetrics Metrics, List<Vertex> Output) SelectAtlasForStyle(
+    private (FontAtlasMetrics Metrics, List<Vertex> Output, int Slot) SelectAtlasForStyle(
         InlineTagStyle style,
         List<Vertex> regular,
         List<Vertex> bold,
@@ -593,7 +604,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         {
             if (_boldItalicMetrics is not null)
             {
-                return (_boldItalicMetrics, boldItalic);
+                return (_boldItalicMetrics, boldItalic, BoldItalicSlot);
             }
 
             if (!_warnedMissingBoldItalic)
@@ -607,7 +618,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         {
             if (_boldMetrics is not null)
             {
-                return (_boldMetrics, bold);
+                return (_boldMetrics, bold, BoldSlot);
             }
 
             if (!_warnedMissingBold)
@@ -621,7 +632,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         {
             if (_italicMetrics is not null)
             {
-                return (_italicMetrics, italic);
+                return (_italicMetrics, italic, ItalicSlot);
             }
 
             if (!_warnedMissingItalic)
@@ -631,7 +642,42 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
             }
         }
 
-        return (_metrics, regular);
+        return (_metrics, regular, RegularSlot);
+    }
+
+    /// <summary>The font definition behind a style slot, or null when that slot has no font.</summary>
+    private FontDefinition? FontDefinitionForSlot(int slot) => slot switch
+    {
+        BoldSlot => _boldFontDef,
+        ItalicSlot => _italicFontDef,
+        BoldItalicSlot => _boldItalicFontDef,
+        _ => _fontDef,
+    };
+
+    /// <summary>
+    /// The atlas for a slot rasterised at the on-screen pixel size, or null when the canvas-size atlas should
+    /// be used instead. Only the FreeType backend authors glyphs at the requested pixel size; the others keep
+    /// their existing scaling behaviour.
+    /// </summary>
+    private FontAtlas? GetRenderAtlas(int slot)
+    {
+        FontAtlas? atlas = _renderAtlases[slot];
+
+        if (atlas is not null)
+        {
+            return atlas;
+        }
+
+        FontDefinition? definition = FontDefinitionForSlot(slot);
+
+        if (definition is null || (definition.Renderer ?? EngineConfiguration.DefaultTextRenderer) != TextRenderer.FreeType)
+        {
+            return null;
+        }
+
+        atlas = FontTextureCache.GetOrCreateScaled(definition, TextRenderScale.AtlasScale);
+        _renderAtlases[slot] = atlas;
+        return atlas;
     }
 
     private void SetVertices()
@@ -644,6 +690,12 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
 
         var glColour = Colour.ToOpenTK();
         bool snapToPixelGrid = ShouldPixelSnap(_scaleX, _scaleY, _angle);
+        // Glyphs drawn 1:1 into a stretched canvas are taken from atlases rasterised at the on-screen size and
+        // snapped to the framebuffer's pixel grid rather than the canvas's.
+        bool useRenderAtlases = snapToPixelGrid && TextRenderScale.IsActive;
+        float renderScaleX = TextRenderScale.X;
+        float renderScaleY = TextRenderScale.Y;
+        Array.Clear(_renderAtlases);
         float lineHeight = ScaleY * _metrics.HighestChar;
         IReadOnlyList<LineInfo> lines = GetLines();
         int paragraphBreakCount = 0;
@@ -719,12 +771,17 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
             foreach (StyledChar sc in line.Chars)
             {
                 char c = sc.Char;
-                (FontAtlasMetrics charMetrics, List<Vertex> charVertexOutput) = SelectAtlasForStyle(sc.Style, vertices, boldVertices, italicVertices, boldItalicVertices);
-                var atlasUV = charMetrics.GetCharPositionNormalised(c);
-                var renderBox = charMetrics.GetCharPosition(c);
-                var bearing = charMetrics.GetCharBearing(c);
-                float renderWidth = renderBox.Size.X * ScaleX;
-                float renderHeight = renderBox.Size.Y * ScaleY;
+                (FontAtlasMetrics charMetrics, List<Vertex> charVertexOutput, int slot) = SelectAtlasForStyle(sc.Style, vertices, boldVertices, italicVertices, boldItalicVertices);
+                FontAtlas? renderAtlas = useRenderAtlases ? GetRenderAtlas(slot) : null;
+                FontAtlasMetrics glyphMetrics = renderAtlas?.Metrics ?? charMetrics;
+                // A render atlas glyph is already at on-screen size, so one bitmap pixel is 1/scale canvas units.
+                float glyphScaleX = renderAtlas is null ? ScaleX : 1f / renderScaleX;
+                float glyphScaleY = renderAtlas is null ? ScaleY : 1f / renderScaleY;
+                var atlasUV = glyphMetrics.GetCharPositionNormalised(c);
+                var renderBox = glyphMetrics.GetCharPosition(c);
+                var bearing = glyphMetrics.GetCharBearing(c);
+                float renderWidth = renderBox.Size.X * glyphScaleX;
+                float renderHeight = renderBox.Size.Y * glyphScaleY;
                 float charAdvance = charMetrics.GetCharAdvance(c) * ScaleX + (c == ' ' ? _extraSpaceWidth : _extraCharSpacing);
 
                 if (globalCharIndex >= _firstCharToDraw && globalCharIndex < visibleEnd)
@@ -746,13 +803,18 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
                     // box (and may overlap neighbouring glyphs) rather than being clipped to the cell —
                     // overlap is harmless because the shader resolves the glow to zero alpha beyond ~1px
                     // of the edge. The pen still advances by the font advance, kept separate below.
-                    float quadLeft   = charLeft + bearing.X * ScaleX;
-                    float quadTop    = lineTop + bearing.Y * ScaleY;
+                    float quadLeft   = charLeft + bearing.X * glyphScaleX;
+                    float quadTop    = lineTop + bearing.Y * glyphScaleY;
 
                     // At native, unrotated scale, snap the quad's top-left to whole pixels so the
                     // glyph lands exactly on the grid. Width/height are already whole pixels here, so
                     // the right/bottom edges follow without rounding (which would risk a ±1px width).
-                    if (snapToPixelGrid)
+                    if (renderAtlas is not null)
+                    {
+                        quadLeft = MathF.Round(quadLeft * renderScaleX) / renderScaleX;
+                        quadTop = MathF.Round(quadTop * renderScaleY) / renderScaleY;
+                    }
+                    else if (snapToPixelGrid)
                     {
                         quadLeft = MathF.Round(quadLeft);
                         quadTop = MathF.Round(quadTop);
@@ -967,6 +1029,14 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
 
     public override void Render(ref Matrix3 projection, ref Matrix3 modelView)
     {
+        TextRenderScale.Refresh();
+
+        if (_renderScaleVersion != TextRenderScale.Version)
+        {
+            _renderScaleVersion = TextRenderScale.Version;
+            _verticesChanged = true;
+        }
+
         if (_verticesChanged)
         {
             SetVertices();
@@ -984,14 +1054,19 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         {
             mv = Matrix3.RotateAroundPoint(ref mv, _angle, Width / 2, Height / 2);
         }
+        else if (TextRenderScale.IsActive && _renderAtlases.Any(atlas => atlas is not null))
+        {
+            mv = SnapOriginToFramebufferPixels(ref mv);
+        }
 
         if (Vertices.Length > 0)
         {
-            _shader.Bind();
+            IMatrixShaderProgram shader = _renderAtlases[RegularSlot]?.Shader ?? _shader;
+            shader.Bind();
             _vertexDataBuffer.Bind();
-            _texture.Bind();
-            _shader.SetProjectionMatrix(ref projection);
-            _shader.SetModelViewMatrix(ref mv);
+            (_renderAtlases[RegularSlot]?.Texture ?? _texture).Bind();
+            shader.SetProjectionMatrix(ref projection);
+            shader.SetModelViewMatrix(ref mv);
             GL.DrawArrays(PrimitiveType.Triangles, 0, Vertices.Length);
         }
 
@@ -999,7 +1074,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         {
             _boldShader.Bind();
             _boldVertexDataBuffer.Bind();
-            _boldTexture.Bind();
+            (_renderAtlases[BoldSlot]?.Texture ?? _boldTexture).Bind();
             _boldShader.SetProjectionMatrix(ref projection);
             _boldShader.SetModelViewMatrix(ref mv);
             GL.DrawArrays(PrimitiveType.Triangles, 0, BoldVertices.Length);
@@ -1009,7 +1084,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         {
             _italicShader.Bind();
             _italicVertexDataBuffer.Bind();
-            _italicTexture.Bind();
+            (_renderAtlases[ItalicSlot]?.Texture ?? _italicTexture).Bind();
             _italicShader.SetProjectionMatrix(ref projection);
             _italicShader.SetModelViewMatrix(ref mv);
             GL.DrawArrays(PrimitiveType.Triangles, 0, ItalicVertices.Length);
@@ -1019,7 +1094,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         {
             _boldItalicShader.Bind();
             _boldItalicVertexDataBuffer.Bind();
-            _boldItalicTexture.Bind();
+            (_renderAtlases[BoldItalicSlot]?.Texture ?? _boldItalicTexture).Bind();
             _boldItalicShader.SetProjectionMatrix(ref projection);
             _boldItalicShader.SetModelViewMatrix(ref mv);
             GL.DrawArrays(PrimitiveType.Triangles, 0, BoldItalicVertices.Length);
@@ -1033,6 +1108,28 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
             _decorationShader.SetModelViewMatrix(ref mv);
             GL.DrawArrays(PrimitiveType.Triangles, 0, DecorationVertices.Length);
         }
+    }
+
+    /// <summary>
+    /// Nudges the graphic's origin onto a whole framebuffer pixel so glyphs rasterised for the on-screen size
+    /// are sampled 1:1. Only valid for a pure translation (no parent scale or rotation); otherwise it is left alone.
+    /// </summary>
+    private static Matrix3 SnapOriginToFramebufferPixels(ref Matrix3 modelView)
+    {
+        float[] values = modelView.Values;
+
+        if (values[0] != 1f || values[4] != 1f || values[1] != 0f || values[3] != 0f)
+        {
+            return modelView;
+        }
+
+        // The projection is a translation-free scale to the framebuffer, so canvas units map to
+        // framebuffer pixels by the render scale.
+        float offsetX = values[6] * TextRenderScale.X;
+        float offsetY = values[7] * TextRenderScale.Y;
+        float nudgeX = (MathF.Round(offsetX) - offsetX) / TextRenderScale.X;
+        float nudgeY = (MathF.Round(offsetY) - offsetY) / TextRenderScale.Y;
+        return Matrix3.Translate(ref modelView, nudgeX, nudgeY);
     }
 
     private void Dispose(bool disposing)
