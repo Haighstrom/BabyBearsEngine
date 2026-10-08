@@ -30,6 +30,7 @@ internal static class OpenTkMappings
         GLFWProvider.CheckForMainThread = settings.CheckForMainThread;
         return new NativeWindowSettings
         {
+            AutoIconify = settings.AutoIconify,
             ClientSize = (settings.Width, settings.Height),
             Title = settings.Title,
             WindowBorder = settings.Border.ToOpenTK(),

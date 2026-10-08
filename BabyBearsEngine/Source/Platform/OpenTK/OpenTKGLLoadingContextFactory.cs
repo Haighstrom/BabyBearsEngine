@@ -21,6 +21,8 @@ internal sealed class OpenTKGLLoadingContextFactory(GameWindow mainWindow) : IGL
         var settings = new NativeWindowSettings
         {
             StartVisible = false,
+            // Otherwise the constructor focuses this hidden window, stealing focus from the main one (a fullscreen main window then auto-iconifies).
+            StartFocused = false,
             ClientSize = new Vector2i(1, 1),
             SharedContext = mainWindow.Context,
             API = mainWindow.API,

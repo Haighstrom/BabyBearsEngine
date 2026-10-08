@@ -17,6 +17,12 @@ public record class WindowSettings()
     public static WindowSettings Default => new();
 
     /// <summary>
+    /// Whether a <see cref="WindowState.Fullscreen"/> window minimises when it loses focus (e.g. on
+    /// Alt-Tab or a click on another monitor). Defaults to true.
+    /// </summary>
+    public bool AutoIconify { get; set; } = true;
+
+    /// <summary>
     /// Type of border for the window. Defaults to a sizing border.
     /// </summary>
     public WindowBorder Border { get; set; } = WindowBorder.Resizable;
