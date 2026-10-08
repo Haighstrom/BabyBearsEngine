@@ -1,6 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL4;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+﻿using BabyBearsEngine.Platform.ImageLoading;
+using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
 
@@ -282,7 +281,6 @@ internal static class OpenGLHelper
         GL.GetTexImage(TextureTarget.Texture2D, 0, PixelFormat.Rgba, PixelType.UnsignedByte, pixels);
         GL.PixelStore(PixelStoreParameter.PackAlignment, 4);
 
-        using var image = Image.LoadPixelData<Rgba32>(pixels, t.Width, t.Height);
-        image.SaveAsPng(filePath);
+        ImageSaver.SaveAsPng(new Rgba8ImageData(t.Width, t.Height, pixels), filePath);
     }
 }

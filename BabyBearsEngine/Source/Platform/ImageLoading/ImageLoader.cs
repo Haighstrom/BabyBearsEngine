@@ -1,4 +1,5 @@
-using SixLabors.ImageSharp.PixelFormats;
+using System.IO;
+using StbImageSharp;
 
 namespace BabyBearsEngine.Platform.ImageLoading;
 
@@ -6,14 +7,9 @@ public static class ImageLoader
 {
     public static Rgba8ImageData LoadAsRgba8(string filePath)
     {
-        using var image = SixLabors.ImageSharp.Image.Load<Rgba32>(filePath);
+        using FileStream stream = File.OpenRead(filePath);
+        ImageResult image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
 
-        int width = image.Width;
-        int height = image.Height;
-
-        byte[] pixelBytes = new byte[width * height * 4];
-        image.CopyPixelDataTo(pixelBytes);
-
-        return new Rgba8ImageData(width, height, pixelBytes);
+        return new Rgba8ImageData(image.Width, image.Height, image.Data);
     }
 }
