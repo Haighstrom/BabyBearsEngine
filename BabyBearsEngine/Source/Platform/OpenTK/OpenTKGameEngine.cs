@@ -48,6 +48,17 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
     // that historically relied on OnResize firing once at window creation.
     private void SyncViewportToFramebuffer() => OpenGLHelper.SetViewport(0, 0, FramebufferSize.X, FramebufferSize.Y);
 
+    // Some drivers leave a GL error flagged by window/context creation, before any engine call. GL errors stick until
+    // read, so left alone the first end-of-frame check would blame the first frame and throw.
+    private static void DiscardWindowCreationErrors()
+    {
+        ErrorCode error;
+        while ((error = GL.GetError()) != ErrorCode.NoError)
+        {
+            Logger.Warning($"GL error {error} was already flagged when the engine loaded (raised while the window and context were created); ignoring it.");
+        }
+    }
+
     protected override void OnClosing(CancelEventArgs e)
     {
         if (!CloseOnXButton && !_programmaticClose)
@@ -81,6 +92,10 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
         if (appSettings.DiagnosticsSettings.TraceGLErrors)
         {
             GLErrorTracer.Enable();
+        }
+        else
+        {
+            DiscardWindowCreationErrors();
         }
 
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
