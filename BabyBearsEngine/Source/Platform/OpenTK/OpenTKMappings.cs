@@ -1,5 +1,6 @@
 ﻿using BabyBearsEngine.Input;
 using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;
 
@@ -25,10 +26,10 @@ internal static class OpenTkMappings
         UpdateFrequency = settings.TargetFramesPerSecond,
     };
 
-    public static NativeWindowSettings ToOpenTK(this WindowSettings settings)
+    public static NativeWindowSettings ToOpenTK(this WindowSettings settings, bool debugContext = false)
     {
         GLFWProvider.CheckForMainThread = settings.CheckForMainThread;
-        return new NativeWindowSettings
+        NativeWindowSettings nativeSettings = new()
         {
             AutoIconify = settings.AutoIconify,
             ClientSize = (settings.Width, settings.Height),
@@ -44,6 +45,13 @@ internal static class OpenTkMappings
             Vsync = settings.VSync ? OpenTKVSyncMode.On : OpenTKVSyncMode.Off,
             StartVisible = false,
         };
+
+        if (debugContext)
+        {
+            nativeSettings.Flags |= ContextFlags.Debug;
+        }
+
+        return nativeSettings;
     }
 
     public static OpenTKCursorState ToCursorState(this WindowSettings settings)

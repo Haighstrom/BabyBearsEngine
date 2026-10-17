@@ -16,6 +16,13 @@ public sealed record DiagnosticsSettings()
     public bool CaptureFrames { get; init; } = false;
 
     /// <summary>
+    /// When true, the engine requests a debug GL context and logs every GL error with the code that raised it
+    /// (driver debug output, plus per-frame-stage checks) instead of throwing on the first one. Adds a small
+    /// per-frame cost — for tracking down driver-specific GL errors. Defaults to false.
+    /// </summary>
+    public bool TraceGLErrors { get; init; } = false;
+
+    /// <summary>
     /// Emits a log warning for each diagnostic flag enabled in a Release build of the engine. Intended
     /// to be called once at startup so a misconfigured production build surfaces the mistake visibly,
     /// without blocking deliberate uses (benchmarks, debug menus that ship enabled, etc.). No-op in
@@ -24,6 +31,11 @@ public sealed record DiagnosticsSettings()
     public void WarnIfEnabledInRelease()
     {
 #if !DEBUG
+        if (TraceGLErrors)
+        {
+            Diagnostics.Logger.Warning("DiagnosticsSettings.TraceGLErrors is enabled in a Release build. GL errors are logged instead of thrown.");
+        }
+
         if (CaptureFrames)
         {
             Diagnostics.Logger.Warning("DiagnosticsSettings.CaptureFrames is enabled in a Release build. This significantly increases per-frame cost and should not be shipped to end users.");

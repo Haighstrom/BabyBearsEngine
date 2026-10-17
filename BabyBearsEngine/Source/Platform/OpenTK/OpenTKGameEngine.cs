@@ -11,7 +11,7 @@ using OpenTK.Graphics.OpenGL4;
 namespace BabyBearsEngine;
 
 internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
-    : GameWindow(appSettings.GameLoopSettings.ToOpenTK(), appSettings.WindowSettings.ToOpenTK()), IWorldSwitcher, IGameEngine
+    : GameWindow(appSettings.GameLoopSettings.ToOpenTK(), appSettings.WindowSettings.ToOpenTK(appSettings.DiagnosticsSettings.TraceGLErrors)), IWorldSwitcher, IGameEngine
 {
     private readonly EngineInfo _engineInfo = new();
     private Func<IWorld>? _pendingWorldFactory;
@@ -78,6 +78,11 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
     {
         base.OnLoad();
 
+        if (appSettings.DiagnosticsSettings.TraceGLErrors)
+        {
+            GLErrorTracer.Enable();
+        }
+
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         GL.Enable(EnableCap.Blend);
         GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
@@ -97,6 +102,7 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
         // shaders compile so a refusal produces a clean diagnostic rather than a shader-compile
         // crash or a black screen.
         GpuCapabilities.PopulateFromGL();
+        GLErrorTracer.Check("GPU capability query");
         EngineDiagnostics.LogStartupContext(appSettings.LogSettings);
 
         Version grantedVersion = GpuCapabilities.Current.OpenGLVersion;
@@ -110,6 +116,7 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
         GpuCapabilities.EnforceEngineMinimum(grantedVersion, GpuCapabilities.EngineMinimumOpenGL);
 
         _world.Load(); //does nothing currently - world is swapped
+        GLErrorTracer.Check("engine load");
 
         EngineDiagnostics.LogInitialisationComplete();
 
@@ -130,11 +137,15 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
 
         _engineInfo.Tick(args.Time);
 
+        GLErrorTracer.Check("start of frame");
+
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
         _world.Draw();
+        GLErrorTracer.Check("world draw");
 
         GPUResourceDeletion.ProcessDeletes();
+        GLErrorTracer.Check("GPU resource deletion");
 
         ErrorCode glError = GL.GetError();
         if (glError != ErrorCode.NoError)
