@@ -160,7 +160,7 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
 
         _world.Draw();
         GLErrorTracer.Check("world draw");
-        GLErrorTracer.ProbeFramebuffer("window", FramebufferSize.X, FramebufferSize.Y);
+        GLErrorTracer.ProbeWindow(FramebufferSize.X, FramebufferSize.Y);
 
         GPUResourceDeletion.ProcessDeletes();
         GLErrorTracer.Check("GPU resource deletion");

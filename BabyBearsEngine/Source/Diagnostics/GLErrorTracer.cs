@@ -1,6 +1,8 @@
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using BabyBearsEngine.OpenGL;
+using BabyBearsEngine.Platform.ImageLoading;
 using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.Diagnostics;
@@ -14,27 +16,30 @@ namespace BabyBearsEngine.Diagnostics;
 /// </summary>
 internal static class GLErrorTracer
 {
-    private const int MaxProbedFrames = 8;
     private const int MaxRecordedTextures = 4;
-    private const int ProbeFrameInterval = 180;
-    private const int ProbeGridColumns = 8;
-    private const int ProbeGridRows = 6;
+    private const int ProbeGridColumns = 16;
+    private const int ProbeGridRows = 9;
 
+    // Seconds after tracing starts at which the frame is probed; wall-clock so slow machines still get every probe.
+    private static readonly double[] s_probeTimes = [3, 8, 15, 25];
+    private static readonly Stopwatch s_clock = new();
     private static readonly HashSet<string> s_logged = [];
     private static readonly List<RecordedTexture> s_recordedTextures = [];
     private static DebugProc? s_callback;
     private static int s_frameNumber = 0;
+    private static int s_nextProbeIndex = 0;
+    private static bool s_probeThisFrame = false;
 
     private readonly record struct RecordedTexture(int Handle, int Width, int Height, string Source);
 
     public static bool Enabled { get; private set; } = false;
 
-    private static bool IsProbeFrame => s_frameNumber % ProbeFrameInterval == 0 && s_frameNumber / ProbeFrameInterval <= MaxProbedFrames;
 
     /// <summary>Turns tracing on for the current context and logs any errors already pending; call as soon as the context is live.</summary>
     public static void Enable()
     {
         Enabled = true;
+        s_clock.Start();
         Check("window and context creation");
         Logger.Information("GL error tracing is on: " + TryHookDebugOutput());
         Check("enabling debug output");
@@ -52,9 +57,17 @@ internal static class GLErrorTracer
     /// <summary>Counts a rendered frame, so probes can be spaced out; call once at the start of each frame.</summary>
     public static void NextFrame()
     {
-        if (Enabled)
+        if (!Enabled)
         {
-            s_frameNumber++;
+            return;
+        }
+
+        s_frameNumber++;
+        s_probeThisFrame = s_nextProbeIndex < s_probeTimes.Length && s_clock.Elapsed.TotalSeconds >= s_probeTimes[s_nextProbeIndex];
+
+        if (s_probeThisFrame)
+        {
+            s_nextProbeIndex++;
         }
     }
 
@@ -149,17 +162,22 @@ internal static class GLErrorTracer
         Check("texture probe");
     }
 
-    /// <summary>On probe frames, samples a grid of pixels from the bound framebuffer and logs how many are non-zero; no-op otherwise.</summary>
+    /// <summary>On probe frames, samples a grid of pixels from the bound framebuffer and logs their colour statistics; no-op otherwise.</summary>
     public static void ProbeFramebuffer(string label, int width, int height)
     {
-        if (!Enabled || !IsProbeFrame || width <= 0 || height <= 0)
+        if (!Enabled || !s_probeThisFrame || width <= 0 || height <= 0)
         {
             return;
         }
 
+        int nonBlack = 0;
+        int transparent = 0;
+        int maxChannel = 0;
+        long redTotal = 0;
+        long greenTotal = 0;
+        long blueTotal = 0;
+        string firstNonBlack = "none";
         byte[] pixel = new byte[4];
-        int nonZero = 0;
-        string first = "none";
         GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
 
         for (int row = 0; row < ProbeGridRows; row++)
@@ -170,21 +188,70 @@ internal static class GLErrorTracer
                 int y = (int)((row + 0.5) / ProbeGridRows * height);
                 GL.ReadPixels(x, y, 1, 1, PixelFormat.Rgba, PixelType.UnsignedByte, pixel);
 
-                if ((pixel[0] | pixel[1] | pixel[2] | pixel[3]) != 0)
+                redTotal += pixel[0];
+                greenTotal += pixel[1];
+                blueTotal += pixel[2];
+                maxChannel = Math.Max(maxChannel, Math.Max(pixel[0], Math.Max(pixel[1], pixel[2])));
+
+                if (pixel[3] == 0)
                 {
-                    if (nonZero == 0)
+                    transparent++;
+                }
+
+                if ((pixel[0] | pixel[1] | pixel[2]) != 0)
+                {
+                    if (nonBlack == 0)
                     {
-                        first = $"({x},{y}) rgba {pixel[0]},{pixel[1]},{pixel[2]},{pixel[3]}";
+                        firstNonBlack = $"({x},{y}) rgba {pixel[0]},{pixel[1]},{pixel[2]},{pixel[3]}";
                     }
 
-                    nonZero++;
+                    nonBlack++;
                 }
             }
         }
 
         GL.PixelStore(PixelStoreParameter.PackAlignment, 4);
-        Logger.Information($"Frame probe (frame {s_frameNumber}): {label} {width}x{height} has {nonZero} of {ProbeGridColumns * ProbeGridRows} sample points non-zero; first {first}.");
+        int samples = ProbeGridColumns * ProbeGridRows;
+        Logger.Information($"Frame probe (frame {s_frameNumber}, {s_clock.Elapsed.TotalSeconds:F1}s): {label} {width}x{height}: {nonBlack} of {samples} samples have colour, {transparent} fully transparent, brightest channel {maxChannel}, mean rgb {redTotal / samples},{greenTotal / samples},{blueTotal / samples}; first coloured sample {firstNonBlack}.");
         Check($"frame probe of {label}");
+    }
+
+    /// <summary>On probe frames, probes the window's back buffer and saves it as gl-probe-N.png beside the exe; call after drawing, before the buffer swap.</summary>
+    public static void ProbeWindow(int width, int height)
+    {
+        if (!Enabled || !s_probeThisFrame || width <= 0 || height <= 0)
+        {
+            return;
+        }
+
+        GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
+        GL.ReadBuffer(ReadBufferMode.Back);
+        ProbeFramebuffer("window", width, height);
+
+        try
+        {
+            byte[] raw = new byte[width * height * 4];
+            GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
+            GL.ReadPixels(0, 0, width, height, PixelFormat.Rgba, PixelType.UnsignedByte, raw);
+            GL.PixelStore(PixelStoreParameter.PackAlignment, 4);
+
+            byte[] flipped = new byte[raw.Length];
+            int rowBytes = width * 4;
+            for (int row = 0; row < height; row++)
+            {
+                Array.Copy(raw, (height - 1 - row) * rowBytes, flipped, row * rowBytes, rowBytes);
+            }
+
+            string path = Path.Combine(AppContext.BaseDirectory, $"gl-probe-{s_nextProbeIndex}.png");
+            ImageSaver.SaveAsPng(new Rgba8ImageData(width, height, flipped), path);
+            Logger.Information($"Saved what the window is drawing to {path}.");
+        }
+        catch (Exception exception)
+        {
+            Logger.Warning($"Could not save the window probe image: {exception.Message}");
+        }
+
+        Check("window probe capture");
     }
 
     private static bool ClaimOnce(string key)
