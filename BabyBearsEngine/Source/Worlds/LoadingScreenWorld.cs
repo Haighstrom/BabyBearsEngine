@@ -117,6 +117,7 @@ public abstract class LoadingScreenWorld : World
                 glCtx.MakeCurrentOnThisThread();
 
                 LoadAssets();
+                BabyBearsEngine.Diagnostics.GLErrorTracer.Check("background asset loading");
 
                 // Insert a fence at the end of the worker's command stream. The main thread
                 // will wait on this fence before flipping IsLoadComplete — without that wait
@@ -200,6 +201,7 @@ public abstract class LoadingScreenWorld : World
         // bind-only variant: the same context's viewport tracking must stay intact so that
         // viewport-dependent code (e.g. ScrollingListPanel scissor calc) keeps working.
         OpenGLHelper.ResetBindCache();
+        BabyBearsEngine.Diagnostics.GLErrorTracer.ProbeRecordedTextures();
 
         DisposeWorkerGLContext();
 

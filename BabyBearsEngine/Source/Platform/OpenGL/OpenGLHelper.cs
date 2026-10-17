@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Platform.ImageLoading;
+﻿using BabyBearsEngine.Diagnostics;
+using BabyBearsEngine.Platform.ImageLoading;
 using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
@@ -136,6 +137,7 @@ internal static class OpenGLHelper
         GL.CompileShader(handle);
 
         GL.GetShader(handle, ShaderParameter.CompileStatus, out int success);
+        GLErrorTracer.LogShaderInfo($"Shader compile ({shaderType})", GL.GetShaderInfoLog(handle));
         if (success == 0)
         {
             string infoLog = GL.GetShaderInfoLog(handle);
@@ -169,6 +171,7 @@ internal static class OpenGLHelper
             shadersAttached = true;
             GL.LinkProgram(programHandle);
             GL.GetProgram(programHandle, GetProgramParameterName.LinkStatus, out int linkStatus);
+            GLErrorTracer.LogShaderInfo("Shader link", GL.GetProgramInfoLog(programHandle));
 
             if (linkStatus == 0)
             {

@@ -13,6 +13,8 @@ namespace BabyBearsEngine;
 internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
     : GameWindow(appSettings.GameLoopSettings.ToOpenTK(), appSettings.WindowSettings.ToOpenTK(appSettings.DiagnosticsSettings.TraceGLErrors)), IWorldSwitcher, IGameEngine
 {
+    // Starts as soon as the base window exists, so errors raised during window and context creation are caught too.
+    private readonly bool _glTracing = StartGLTracing(appSettings.DiagnosticsSettings);
     private readonly EngineInfo _engineInfo = new();
     private Func<IWorld>? _pendingWorldFactory;
     internal bool _programmaticClose;
@@ -50,6 +52,17 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
 
     // Some drivers leave a GL error flagged by window/context creation, before any engine call. GL errors stick until
     // read, so left alone the first end-of-frame check would blame the first frame and throw.
+    private static bool StartGLTracing(DiagnosticsSettings diagnosticsSettings)
+    {
+        if (!diagnosticsSettings.TraceGLErrors)
+        {
+            return false;
+        }
+
+        GLErrorTracer.Enable();
+        return true;
+    }
+
     private static void DiscardWindowCreationErrors()
     {
         ErrorCode error;
@@ -89,9 +102,9 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
     {
         base.OnLoad();
 
-        if (appSettings.DiagnosticsSettings.TraceGLErrors)
+        if (_glTracing)
         {
-            GLErrorTracer.Enable();
+            GLErrorTracer.Check("start of engine load");
         }
         else
         {
@@ -152,12 +165,14 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
 
         _engineInfo.Tick(args.Time);
 
+        GLErrorTracer.NextFrame();
         GLErrorTracer.Check("start of frame");
 
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
         _world.Draw();
         GLErrorTracer.Check("world draw");
+        GLErrorTracer.ProbeFramebuffer("window", FramebufferSize.X, FramebufferSize.Y);
 
         GPUResourceDeletion.ProcessDeletes();
         GLErrorTracer.Check("GPU resource deletion");

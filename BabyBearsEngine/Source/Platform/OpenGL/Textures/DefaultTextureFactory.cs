@@ -1,4 +1,5 @@
-﻿using BabyBearsEngine.Platform.ImageLoading;
+﻿using BabyBearsEngine.Diagnostics;
+using BabyBearsEngine.Platform.ImageLoading;
 using OpenTK.Graphics.OpenGL4;
 
 namespace BabyBearsEngine.OpenGL;
@@ -32,6 +33,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
         }
 
+        GLErrorTracer.RecordTexture(handle, padded.Width, padded.Height, filePath);
         Texture texture = new(handle, padded.Width, padded.Height);
         return new SpriteTexture(texture, columns, rows, SpritePadding);
     }
@@ -60,6 +62,7 @@ internal sealed class DefaultTextureFactory() : ITextureFactory
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
         }
 
+        GLErrorTracer.RecordTexture(handle, imageData.Width, imageData.Height, filePath);
         return new Texture(handle, imageData.Width, imageData.Height);
     }
 

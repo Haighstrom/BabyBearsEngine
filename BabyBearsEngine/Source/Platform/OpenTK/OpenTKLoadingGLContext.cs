@@ -18,6 +18,7 @@ internal sealed class OpenTKLoadingGLContext(NativeWindow window) : ILoadingGLCo
     {
         window.Context.MakeCurrent();
         GLThread.Register();
+        Diagnostics.GLErrorTracer.HookCurrentContext();
     }
 
     public void ReleaseFromWorkerThread()

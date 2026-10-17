@@ -1,3 +1,4 @@
+using BabyBearsEngine.Diagnostics;
 using BabyBearsEngine.OpenGL;
 using OpenTK.Graphics.OpenGL4;
 
@@ -28,6 +29,7 @@ public sealed class FBO : IDisposable
         OpenGLHelper.BindFBO(Handle);
         GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, Texture.Handle, 0);
         AssertFramebufferComplete(Handle);
+        GLErrorTracer.Note($"FBO {Handle} created at {width}x{height} and complete.");
         OpenGLHelper.UnbindFBO();
     }
 

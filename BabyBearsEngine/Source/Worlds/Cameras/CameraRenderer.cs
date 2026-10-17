@@ -85,6 +85,8 @@ internal sealed class CameraRenderer : IDisposable
             ResolveMSAA(ref fboOrtho, ref identity);
         }
 
+        GLErrorTracer.ProbeFramebuffer("camera render target", (int)_lastWidth, (int)_lastHeight);
+
         CompositeOntoOutputFBO(camera, ref projection, ref modelView, prevVP, previousFBO);
     }
 
