@@ -36,6 +36,7 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
         _world.Unload();
         _world = pending();
         _world.Load();
+        GLErrorTracer.Note($"World changed to {_world.GetType().Name}.");
     }
 
     // The viewport must track the framebuffer's actual pixel resolution. Both resize events are
@@ -160,6 +161,7 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
 
         _world.Draw();
         GLErrorTracer.Check("world draw");
+        GLShaderIsolationTest.Draw();
         GLErrorTracer.ProbeWindow(FramebufferSize.X, FramebufferSize.Y);
 
         GPUResourceDeletion.ProcessDeletes();
