@@ -53,6 +53,23 @@ internal static class OpenGLHelper
         s_lastActiveTextureUnit = TextureUnit.Texture0;
     }
 
+    /// <summary>
+    /// Unbinds everything the cache tracks and resets the cache, so the cache and the driver agree
+    /// at the start of a frame. Guards against cached binds that no longer match the real GL state.
+    /// </summary>
+    public static void ResyncState()
+    {
+        GL.ActiveTexture(TextureUnit.Texture0);
+        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GL.UseProgram(0);
+        GL.BindVertexArray(0);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        ResetBindCache();
+        LastBoundFBO = 0;
+    }
+
     public static void BindFBO(int fboHandle)
     {
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, fboHandle);

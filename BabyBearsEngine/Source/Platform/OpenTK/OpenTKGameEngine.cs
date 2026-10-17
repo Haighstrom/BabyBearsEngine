@@ -90,7 +90,7 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
     {
         base.OnLoad();
 
-        // OpenTK loads its GL bindings only just before OnLoad, so this is the earliest GL calls work.
+        // The window and its GL bindings exist by now; the tracer can start.
         if (appSettings.DiagnosticsSettings.TraceGLErrors)
         {
             GLErrorTracer.Enable();
@@ -153,6 +153,9 @@ internal sealed class OpenTKGameEngine(ApplicationSettings appSettings)
         }
 
         _engineInfo.Tick(args.Time);
+
+        // Some drivers (an Intel HD on Windows 10) drew only flat colour when the bind cache was trusted across frames.
+        OpenGLHelper.ResyncState();
 
         GLErrorTracer.NextFrame();
         GLErrorTracer.Check("start of frame");
