@@ -96,7 +96,7 @@ public record class WindowSettings()
     /// higher GLSL versions and will throw <see cref="OpenGL.ShaderRequiresGLVersionException"/>
     /// at compile time on GPUs that fall short.
     /// </summary>
-    public (int major, int minor) OpenGLVersion { get; set; } = (4, 5);
+    public (int major, int minor) OpenGLVersion { get; set; } = (3, 3);
 
     /// <summary>
     /// Specifies whether VSync should be used. Vsync delays render frames until the monitor refreshes. It will avoid screen tearing, but will cause render frames to delay.

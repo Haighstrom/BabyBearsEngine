@@ -1,6 +1,6 @@
 # BabyBearsEngine
 
-A 2D game engine for .NET, built on [OpenTK](https://github.com/opentk/opentk) and OpenGL 4.5.
+A 2D game engine for .NET, built on [OpenTK](https://github.com/opentk/opentk) and OpenGL 3.3.
 
 BabyBearsEngine gives you a `World` to fill with entities, a render loop driven by the GPU, a built-in UI toolkit (buttons, scrollbars, dropdowns, tabbed panels, input boxes…), text rendering with inline-tag styling, sprites and animations, tweening, pathfinding, mouse/keyboard input, logging, and JSON/XML serialisation — all from a single package, with no extra plumbing.
 
@@ -13,7 +13,7 @@ BabyBearsEngine gives you a `World` to fill with entities, a render loop driven 
 ### Requirements
 
 - .NET 10 SDK
-- A GPU capable of OpenGL 4.5 (the requested context version is configurable via [`WindowSettings.OpenGLVersion`](BabyBearsEngine/Source/Runtime/Settings/WindowSettings.cs))
+- A GPU capable of OpenGL 3.3 (the requested context version is configurable via [`WindowSettings.OpenGLVersion`](BabyBearsEngine/Source/Runtime/Settings/WindowSettings.cs))
 
 ### Hello, Bear
 
@@ -89,7 +89,7 @@ Anything you `Add()` to the world is automatically wired into the update and ren
 
 ### Graphics
 
-Sprites, animations, coloured rectangles, bordered rectangles, points, stencil-masked graphics, and text — all rendered via OpenGL 4.5 with optional MSAA per camera.
+Sprites, animations, coloured rectangles, bordered rectangles, points, stencil-masked graphics, and text — all rendered via OpenGL 3.3 with optional MSAA per camera.
 
 ```csharp
 // A static texture
