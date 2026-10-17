@@ -9,7 +9,7 @@
     <Description>A 2D game engine built on OpenTK.</Description>
     <Authors>Simon Haigh</Authors>
     <Copyright>Copyright © Simon Haigh 2026</Copyright>
-    <Version>0.8.14</Version>
+    <Version>0.8.15</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -31,7 +31,6 @@
     <PackageReference Include="Concentus.OggFile" Version="1.0.7" />
     <PackageReference Include="CUETools.Codecs.FLAKE-Reloaded" Version="1.0.1" />
     <PackageReference Include="FreeTypeSharp" Version="3.1.0" />
-    <PackageReference Include="MSTest.TestFramework" Version="4.5.1" />
     <PackageReference Include="NLayer" Version="3.0.0" />
     <PackageReference Include="NVorbis" Version="0.10.5" />
     <PackageReference Include="OpenTK" Version="4.9.4" />
