@@ -1,4 +1,5 @@
 using System.IO;
+using BabyBearsEngine.IO;
 using System.Text;
 using OpenTK.Audio.OpenAL;
 
@@ -29,12 +30,12 @@ internal static class WavDecoder
     /// </summary>
     public static DecodedAudio Decode(string path)
     {
-        if (!File.Exists(path))
+        if (!AssetStore.Reader.Exists(path))
         {
             throw new FileNotFoundException("WAV file not found.", path);
         }
 
-        using FileStream stream = File.OpenRead(path);
+        using Stream stream = AssetStore.Reader.OpenRead(path);
         using BinaryReader reader = new(stream);
 
         ReadRiffHeader(reader);

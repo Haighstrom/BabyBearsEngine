@@ -18,7 +18,7 @@ internal static class TrueTypeFontFileResolver
     {
         foreach (string candidate in CandidatePaths(fontName))
         {
-            if (Files.FileExists(candidate))
+            if (AssetStore.Reader.Exists(candidate))
             {
                 return candidate;
             }

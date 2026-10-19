@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Runtime.InteropServices;
+using BabyBearsEngine.IO;
 using BabyBearsEngine.OpenGL;
 using OpenTK.Mathematics;
 using StbTrueTypeSharp;
@@ -55,7 +56,7 @@ internal sealed class SdfFontAtlasGenerator : IFontAtlasGenerator
     internal (byte[] Pixels, int Width, int Height, FontAtlasMetrics Metrics) RasteriseAtlas(FontDefinition fontDef)
     {
         string fontPath = TrueTypeFontFileResolver.Resolve(fontDef.FontName);
-        byte[] fontData = File.ReadAllBytes(fontPath);
+        byte[] fontData = AssetStore.ReadAllBytes(fontPath);
         StbTrueType.stbtt_fontinfo font = StbTrueType.CreateFont(fontData, 0)
             ?? throw new InvalidOperationException($"Failed to load font '{fontDef.FontName}' from '{fontPath}'.");
 

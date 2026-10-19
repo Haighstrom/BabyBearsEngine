@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using BabyBearsEngine.IO;
 using Concentus;
 using Concentus.Oggfile;
 using OpenTK.Audio.OpenAL;
@@ -26,7 +27,7 @@ internal static class OpusDecoder
     /// </summary>
     public static DecodedAudio Decode(string path)
     {
-        if (!File.Exists(path))
+        if (!AssetStore.Reader.Exists(path))
         {
             throw new FileNotFoundException("Opus file not found.", path);
         }
@@ -36,10 +37,10 @@ internal static class OpusDecoder
 
         IOpusDecoder decoder = OpusCodecFactory.CreateDecoder(OpusOutputSampleRate, channels);
 
-        using FileStream fileStream = File.OpenRead(path);
+        using Stream fileStream = AssetStore.Reader.OpenRead(path);
         OpusOggReadStream reader = new(decoder, fileStream);
 
-        // The reader exposes TotalTime only when seekable, which a FileStream is. Use it for the
+        // The reader exposes TotalTime only when seekable, which a file or memory stream is. Use it for the
         // initial duration hint; we recompute against the actual decoded sample count at the end so
         // games can rely on Duration matching the bytes that were uploaded.
         TimeSpan reportedDuration = reader.TotalTime;
@@ -87,9 +88,9 @@ internal static class OpusDecoder
         const int peekBytes = 4096;
         byte[] head = new byte[peekBytes];
         int read;
-        using (FileStream stream = File.OpenRead(path))
+        using (Stream stream = AssetStore.Reader.OpenRead(path))
         {
-            read = stream.Read(head, 0, peekBytes);
+            read = stream.ReadAtLeast(head, peekBytes, throwOnEndOfStream: false);
         }
 
         return ExtractOpusHeadChannels(head.AsSpan(0, read), path);

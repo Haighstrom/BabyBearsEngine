@@ -1,4 +1,5 @@
 using System.IO;
+using BabyBearsEngine.IO;
 using NVorbis;
 using OpenTK.Audio.OpenAL;
 
@@ -21,12 +22,12 @@ internal static class OggDecoder
     /// </summary>
     public static DecodedAudio Decode(string path)
     {
-        if (!File.Exists(path))
+        if (!AssetStore.Reader.Exists(path))
         {
             throw new FileNotFoundException("Ogg Vorbis file not found.", path);
         }
 
-        using VorbisReader reader = new(path);
+        using VorbisReader reader = new(AssetStore.Reader.OpenRead(path), closeOnDispose: true);
 
         int channels = reader.Channels;
         int sampleRate = reader.SampleRate;

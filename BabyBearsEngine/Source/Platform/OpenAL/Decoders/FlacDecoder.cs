@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using BabyBearsEngine.IO;
 using CUETools.Codecs.FLAKE;
 using OpenTK.Audio.OpenAL;
 
@@ -20,12 +21,13 @@ internal static class FlacDecoder
     /// </summary>
     public static DecodedAudio Decode(string path)
     {
-        if (!File.Exists(path))
+        if (!AssetStore.Reader.Exists(path))
         {
             throw new FileNotFoundException("FLAC file not found.", path);
         }
 
-        FlakeReader reader = new(path, null);
+        using Stream stream = AssetStore.Reader.OpenRead(path);
+        FlakeReader reader = new(path, stream);
         try
         {
             return DecodeWith(reader, path);

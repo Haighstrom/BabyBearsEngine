@@ -577,7 +577,7 @@ public sealed class TextGraphic : GraphicBase, IGraphic, ITextGraphic, IDisposab
         string candidateName = baseFont.FontName + suffix;
         string candidatePath = DefaultFontFolder + candidateName + ".ttf";
 
-        if (!Files.FileExists(candidatePath))
+        if (!AssetStore.Reader.Exists(candidatePath))
         {
             return null;
         }

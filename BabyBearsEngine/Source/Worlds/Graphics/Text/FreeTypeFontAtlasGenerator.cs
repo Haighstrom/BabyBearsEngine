@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Runtime.InteropServices;
+using BabyBearsEngine.IO;
 using BabyBearsEngine.OpenGL;
 using FreeTypeSharp;
 using OpenTK.Mathematics;
@@ -45,7 +46,7 @@ internal sealed class FreeTypeFontAtlasGenerator : IFontAtlasGenerator
     internal (byte[] Pixels, int Width, int Height, FontAtlasMetrics Metrics) RasteriseAtlas(FontDefinition fontDef)
     {
         string fontPath = TrueTypeFontFileResolver.Resolve(fontDef.FontName);
-        byte[] fontData = File.ReadAllBytes(fontPath);
+        byte[] fontData = AssetStore.ReadAllBytes(fontPath);
 
         string charsToLoad = fontDef.CharactersToLoad;
         int charCount = charsToLoad.Length;

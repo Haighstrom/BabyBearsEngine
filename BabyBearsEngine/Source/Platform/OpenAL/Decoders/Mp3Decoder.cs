@@ -1,4 +1,5 @@
 using System.IO;
+using BabyBearsEngine.IO;
 using NLayer;
 using OpenTK.Audio.OpenAL;
 
@@ -19,12 +20,13 @@ internal static class Mp3Decoder
     /// </summary>
     public static DecodedAudio Decode(string path)
     {
-        if (!File.Exists(path))
+        if (!AssetStore.Reader.Exists(path))
         {
             throw new FileNotFoundException("MP3 file not found.", path);
         }
 
-        using MpegFile mpeg = new(path);
+        using Stream stream = AssetStore.Reader.OpenRead(path);
+        using MpegFile mpeg = new(stream);
 
         int channels = mpeg.Channels;
         int sampleRate = mpeg.SampleRate;
