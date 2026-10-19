@@ -1,0 +1,14 @@
+namespace BabyBearsEngine.IO;
+
+/// <summary>Static access point for the <see cref="IAssetReader"/> the engine loads assets through.</summary>
+public static class AssetStore
+{
+    private static IAssetReader s_reader = new FileAssetReader();
+
+    /// <summary>The reader used to open assets. Set at startup, before any asset loads; defaults to plain files on disk.</summary>
+    public static IAssetReader Reader
+    {
+        get => s_reader;
+        set => s_reader = value ?? throw new ArgumentNullException(nameof(value));
+    }
+}
