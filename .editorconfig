@@ -1,5 +1,8 @@
 # EditorConfig is awesome: https://EditorConfig.org
 
+# Master copy: the BvB-Toolkit repo holds the canonical version; sync.ps1 copies it to
+# ~/.claude and into project solution roots. Edit it in the repo, then re-run sync.ps1.
+
 # Top-most EditorConfig file
 root = true
 
@@ -244,3 +247,6 @@ dotnet_diagnostic.CA1812.severity = warning
 dotnet_diagnostic.CA1823.severity = warning
 dotnet_diagnostic.C6259.severity = warning
 dotnet_diagnostic.IDE0130.severity = warning
+
+# Read-only interface types (IReadOnlyDictionary, IReadOnlyList) and base return types state intent; the concrete-type speedup is negligible here
+dotnet_diagnostic.CA1859.severity = none
