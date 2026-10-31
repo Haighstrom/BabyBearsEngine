@@ -388,6 +388,59 @@ public class ScrollingListPanelTests
         Assert.AreEqual(0f, panel.ScrollOffset);
     }
 
+    // -------------------------------------------------------------------------
+    // ContentHeight changes keep the scroll offset inside the new range.
+
+    [TestMethod]
+    public void ContentHeight_ShrinksToFitPanel_ResetsScrollToTop()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+        panel.EnsureVisible(itemY: 350f, itemHeight: 50f);
+
+        panel.ContentHeight = 150f;
+
+        Assert.AreEqual(0f, panel.ScrollOffset);
+    }
+
+    [TestMethod]
+    public void ContentHeight_ShrinksWhileScrolledToBottom_KeepsTheNewEndAtTheBottom()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+        panel.EnsureVisible(itemY: 350f, itemHeight: 50f);
+
+        panel.ContentHeight = 300f;
+
+        Assert.AreEqual(100f, panel.ScrollOffset, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void ContentHeight_Grows_KeepsThePixelOffset()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+        panel.EnsureVisible(itemY: 250f, itemHeight: 50f);
+
+        panel.ContentHeight = 800f;
+
+        Assert.AreEqual(100f, panel.ScrollOffset, delta: 0.001f);
+    }
+
+    [TestMethod]
+    public void ContentHeight_Grows_WheelScrollsOnFromTheKeptOffset()
+    {
+        ScrollingListPanel panel = MakeScrollable();
+        panel.WheelScrollStep = ScrollStep.Pixels(50f);
+        panel.EnsureVisible(itemY: 250f, itemHeight: 50f);
+        panel.ContentHeight = 800f;
+        _mouse.ClientX = 100;
+        _mouse.ClientY = 100;
+        Frame(panel);
+        _mouse.WheelDelta = -1f;
+
+        Frame(panel);
+
+        Assert.AreEqual(150f, panel.ScrollOffset, delta: 0.001f);
+    }
+
     // CalculateOffsetToShow
 
     [TestMethod]

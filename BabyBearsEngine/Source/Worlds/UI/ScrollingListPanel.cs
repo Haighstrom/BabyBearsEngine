@@ -232,6 +232,12 @@ public class ScrollingListPanel : Entity
     {
         _scrollbar.ThumbProportion = CalculateThumbProportion(Height, _contentHeight);
         _scrollbar.WheelScrollStep = CalculateWheelScrollStep(_wheelScrollStep, Height, _contentHeight);
+
+        // Keep the pixel offset across content changes, clamped to the new range, so a shrinking
+        // list can't leave the view scrolled past its end with no way back.
+        float maxScrollOffset = Math.Max(0f, _contentHeight - Height);
+        _contentPane.ScrollOffset = Math.Clamp(_contentPane.ScrollOffset, 0f, maxScrollOffset);
+        _scrollbar.AmountFilled = maxScrollOffset > 0f ? _contentPane.ScrollOffset / maxScrollOffset : 0f;
     }
 
     // Internal (not private) so unit tests can construct it directly without needing the
