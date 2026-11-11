@@ -27,6 +27,22 @@ internal static class LoggerFactory
             Banner: banner);
     }
 
+    /// <summary>
+    /// The banner's description of the game: the entry assembly's name and, when it declares one, its version, such as
+    /// "BirdOffensive v1.0.4", so a log sent in from a player says which build wrote it. "unknown" when there is no entry assembly.
+    /// </summary>
+    internal static string DescribeGame(Assembly? entryAssembly)
+    {
+        if (entryAssembly is null)
+        {
+            return "unknown";
+        }
+
+        string name = entryAssembly.GetName().Name ?? "unknown";
+        string? version = VersionOf(entryAssembly);
+        return version is null ? name : $"{name} v{version}";
+    }
+
     private static ConsoleSink? BuildConsoleSink(LogSettings logSettings, ConsoleSettings consoleSettings)
     {
         return logSettings.ConsoleLevels == LogLevel.None
@@ -64,13 +80,8 @@ internal static class LoggerFactory
 
     private static string BuildRunBanner()
     {
-        // InformationalVersion can include a SourceLink suffix like "0.1.0+commitHash"; strip it.
-        string version = (typeof(LoggerFactory).Assembly
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-            ?? typeof(LoggerFactory).Assembly.GetName().Version?.ToString()
-            ?? "unknown")
-            .Split('+')[0];
-        string game = Assembly.GetEntryAssembly()?.GetName().Name ?? "unknown";
+        string version = VersionOf(typeof(LoggerFactory).Assembly) ?? "unknown";
+        string game = DescribeGame(Assembly.GetEntryAssembly());
 
         const int width = 70;
         string sep = new('=', width);
@@ -116,6 +127,12 @@ internal static class LoggerFactory
                 throw new ArgumentOutOfRangeException(nameof(logSettings.FileMode));
         }
     }
+
+    // InformationalVersion can include a SourceLink suffix like "0.1.0+commitHash"; strip it.
+    private static string? VersionOf(Assembly assembly) =>
+        (assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            ?? assembly.GetName().Version?.ToString())
+        ?.Split('+')[0];
 
     /// <summary>
     /// Deletes oldest <c>{name}_*{ext}</c> files in <paramref name="dir"/> so that, after the

@@ -1,4 +1,5 @@
 using System.IO;
+using System.Reflection;
 using BabyBearsEngine.Diagnostics;
 
 namespace BabyBearsEngine.Tests.Unit;
@@ -29,6 +30,31 @@ public class LoggerFactoryTests
         string path = Path.Combine(_tempDir, name);
         File.WriteAllText(path, "log content");
         return path;
+    }
+
+    // DescribeGame — the run banner's "Game:" line.
+
+    [TestMethod]
+    public void DescribeGame_NoEntryAssembly_ReturnsUnknown()
+    {
+        Assert.AreEqual("unknown", LoggerFactory.DescribeGame(null));
+    }
+
+    [TestMethod]
+    public void DescribeGame_AssemblyWithVersion_ReturnsNameAndVersion()
+    {
+        Assembly assembly = typeof(LoggerFactoryTests).Assembly;
+        string expectedVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0];
+
+        Assert.AreEqual($"BabyBearsEngine.Tests.Unit v{expectedVersion}", LoggerFactory.DescribeGame(assembly));
+    }
+
+    [TestMethod]
+    public void DescribeGame_AssemblyWithVersion_DropsSourceLinkSuffix()
+    {
+        string description = LoggerFactory.DescribeGame(typeof(LoggerFactoryTests).Assembly);
+
+        Assert.DoesNotContain("+", description);
     }
 
     // TrimOldRunFiles — pure file enumeration / deletion, no Logger setup needed.
